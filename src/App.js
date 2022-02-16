@@ -1,14 +1,11 @@
-import { BrowserRouter as Router } from "react-router-dom";
+import styles from "./styles/globalStyles.module.scss";
 import OndcRoutes from "./router";
 
 function App() {
   return (
-    <Router>
-      <div className="py-2">header</div>
-      <div>
-        <OndcRoutes />
-      </div>
-    </Router>
+    <div className={styles.background}>
+      <OndcRoutes />
+    </div>
   );
 }
 

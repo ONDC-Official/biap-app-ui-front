@@ -1,0 +1,7 @@
+@import "../assets/scss/variables.scss";
+
+.background {
+  min-height: 100vh;
+  height: 100%;
+  background-color: $backgroundColor;
+}
