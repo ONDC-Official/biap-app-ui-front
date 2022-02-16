@@ -1,0 +1,10 @@
+@import "../../assets/scss/variables.scss";
+
+.auth_card_background {
+  height: 100%;
+  width: 100%;
+  background-color: $white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.16);
+}

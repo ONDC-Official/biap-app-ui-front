@@ -1,7 +1,12 @@
-import React from 'react'
+import React from "react";
+import AuthActionCard from "../auth-action-card/authActionCard";
 
 export default function SignUp() {
   return (
-    <div>hello from sign up</div>
-  )
+    <AuthActionCard>
+      <div className="py-2">
+        <input type="text" />
+      </div>
+    </AuthActionCard>
+  );
 }
