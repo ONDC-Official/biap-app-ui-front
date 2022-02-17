@@ -1,5 +1,6 @@
 import styles from "./styles/globalStyles.module.scss";
 import OndcRoutes from "./router";
+import "./api/firebase-init";
 
 function App() {
   return (

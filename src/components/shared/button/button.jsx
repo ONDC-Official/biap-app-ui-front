@@ -14,6 +14,7 @@ export default function Button(props) {
         setButtonStyle(getButtonStyle(props.button_hover_type))
       }
       onMouseOut={() => setButtonStyle(getButtonStyle(props.button_type))}
+      {...props}
     >
       <p
         className={styles.button_text}

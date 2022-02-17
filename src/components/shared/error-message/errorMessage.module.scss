@@ -1,0 +1,8 @@
+@import "../../../assets/scss/variables.scss";
+
+.error_message_text {
+  font-size: $font-12;
+  text-align: left;
+  margin: 0;
+  color: $error;
+}
