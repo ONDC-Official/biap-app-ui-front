@@ -1,0 +1,42 @@
+@import "../../../assets/scss/variables.scss";
+
+.dropdown_link {
+  font-size: $font-16;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-align: left;
+  color: $primaryColor;
+}
+
+.dropdown_link_wrapper:hover {
+  background-color: rgba($accentColor, $alpha: 0.15);
+
+  .dropdown_link {
+    font-weight: 500;
+    color: $accentColor;
+  }
+  .svgClass {
+    fill: $accentColor;
+  }
+}
+
+.dropdown_link_wrapper {
+  padding: 15px 10px;
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.dropdown_link_wrapper > div {
+  padding: 0 10px;
+}
+
+.svgClass {
+  fill: $primaryColor;
+}
+
+.img_wrapper {
+  width: 40px;
+}

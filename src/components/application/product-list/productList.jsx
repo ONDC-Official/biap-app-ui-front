@@ -1,7 +1,10 @@
-import React from 'react'
+import React from "react";
+import Navbar from "../../shared/navbar/navbar";
 
 export default function ProductList() {
   return (
-    <div>hello from ProductList</div>
-  )
+    <>
+      <Navbar />
+    </>
+  );
 }

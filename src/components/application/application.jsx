@@ -1,8 +1,11 @@
 import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 import PrivateRoute from "../../privateRoutes";
+import Cart from "./cart/cart";
 import Checkout from "./checkout/checkout";
+import Orders from "./orders/orders";
 import ProductList from "./product-list/productList";
+import Profile from "./profile/profile";
 
 export default function Application() {
   return (
@@ -17,6 +20,15 @@ export default function Application() {
       </PrivateRoute>
       <PrivateRoute path={"/application/checkout"}>
         <Checkout />
+      </PrivateRoute>
+      <PrivateRoute path={"/application/cart"}>
+        <Cart />
+      </PrivateRoute>
+      <PrivateRoute path={"/application/orders"}>
+        <Orders />
+      </PrivateRoute>
+      <PrivateRoute path={"/application/profile"}>
+        <Profile />
       </PrivateRoute>
     </Switch>
   );
