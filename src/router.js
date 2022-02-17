@@ -6,7 +6,6 @@ import {
   Redirect,
 } from "react-router-dom";
 import Application from "./components/application/application";
-import ProductList from "./components/application/product-list/productList";
 import Login from "./components/auth/login/login";
 import SignUp from "./components/auth/sign-up/signUp";
 import PageNotFound from "./components/page-not-found/pageNotFound";

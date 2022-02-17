@@ -23,7 +23,12 @@ export default function SignUp() {
   const history = useHistory();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const [loading, setLoading] = useState(false);
+  const [signUpUsingGoogleloading, setSignUpUsingGoogleLoading] =
+    useState(false);
+  const [
+    signUpUsingEmailAndPasswordloading,
+    setSignUpUsingEmailAndPasswordLoading,
+  ] = useState(false);
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
@@ -62,6 +67,7 @@ export default function SignUp() {
     if (!allCheckPassed) {
       return;
     }
+    setSignUpUsingEmailAndPasswordLoading(true);
     createUserWithEmailAndPassword(auth, email, password)
       .then((result) => {
         handleRedirect(result.user);
@@ -75,11 +81,11 @@ export default function SignUp() {
           type: toast_types.error,
           message: errorMessage,
         }));
-        setLoading(false);
-      });
+      })
+      .finally(() => setSignUpUsingEmailAndPasswordLoading(false));
   }
-  function handleLoginWithGoogle() {
-    setLoading(true);
+  function handleSignUpWithGoogle() {
+    setSignUpUsingGoogleLoading(true);
     signInWithPopup(auth, provider)
       .then((result) => {
         handleRedirect(result.user);
@@ -92,8 +98,8 @@ export default function SignUp() {
           type: toast_types.error,
           message: errorMessage,
         }));
-        setLoading(false);
-      });
+      })
+      .finally(() => setSignUpUsingGoogleLoading(false));
   }
   function handleRedirect(user) {
     const { displayName, email, photoURL, accessToken } = user;
@@ -109,7 +115,6 @@ export default function SignUp() {
         expires: cookie_expiry_time,
       }
     );
-    setLoading(false);
     history.push("/application");
   }
   const signUpForm = (
@@ -166,6 +171,10 @@ export default function SignUp() {
       )}
       <div className="py-3 text-center">
         <Button
+          isLoading={signUpUsingEmailAndPasswordloading}
+          disabled={
+            signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
+          }
           button_type={buttonTypes.primary}
           button_hover_type={buttonTypes.primary_hover}
           button_text="Sign up"
@@ -175,10 +184,14 @@ export default function SignUp() {
       <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
       <div className="py-3 text-center">
         <Button
+          isLoading={signUpUsingGoogleloading}
+          disabled={
+            signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
+          }
           button_type={buttonTypes.primary}
           button_hover_type={buttonTypes.primary_hover}
           button_text="Sign up with google"
-          onClick={handleLoginWithGoogle}
+          onClick={handleSignUpWithGoogle}
         />
       </div>
     </div>

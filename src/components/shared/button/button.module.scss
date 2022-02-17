@@ -15,3 +15,12 @@
   font-weight: $medium;
   text-align: center;
 }
+
+.btn_back:disabled {
+  max-width: 300px;
+  min-width: 150px;
+  height: 40px;
+  opacity: 0.7;
+  cursor: no-drop;
+  background-color: $secondaryColor;
+}
