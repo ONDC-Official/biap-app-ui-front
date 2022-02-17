@@ -28,7 +28,7 @@ export default function Button(props) {
       {...buttonProps}
       {...props}
     >
-      {props.isLoading ? (
+      {props.isloading === 1 ? (
         loading
       ) : (
         <p

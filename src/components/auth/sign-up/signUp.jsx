@@ -171,7 +171,7 @@ export default function SignUp() {
       )}
       <div className="py-3 text-center">
         <Button
-          isLoading={signUpUsingEmailAndPasswordloading}
+          isloading={signUpUsingEmailAndPasswordloading ? 1 : 0}
           disabled={
             signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
           }
@@ -184,7 +184,7 @@ export default function SignUp() {
       <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
       <div className="py-3 text-center">
         <Button
-          isLoading={signUpUsingGoogleloading}
+          isloading={signUpUsingGoogleloading ? 1 : 0}
           disabled={
             signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
           }

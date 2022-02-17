@@ -171,7 +171,7 @@ export default function Login() {
       )}
       <div className="py-3 text-center">
         <Button
-          isLoading={signInUsingEmailAndPasswordloading}
+          isloading={signInUsingEmailAndPasswordloading ? 1 : 0}
           disabled={
             signInUsingGoogleloading || signInUsingEmailAndPasswordloading
           }
@@ -184,7 +184,7 @@ export default function Login() {
       <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
       <div className="py-3 text-center">
         <Button
-          isLoading={signInUsingGoogleloading}
+          isloading={signInUsingGoogleloading ? 1 : 0}
           disabled={
             signInUsingGoogleloading || signInUsingEmailAndPasswordloading
           }
