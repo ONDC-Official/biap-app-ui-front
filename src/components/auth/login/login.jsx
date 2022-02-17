@@ -14,6 +14,8 @@ import Input from "../../shared/input/input";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Toast from "../../shared/toast/toast";
 import { toast_types } from "../../../utils/toast";
+import Cookies from "js-cookie";
+import { getErrorMessage } from "../../../utils/mapFirebaseError";
 
 export default function Login() {
   const auth = getAuth();
@@ -65,7 +67,8 @@ export default function Login() {
         handleRedirect(result.user);
       })
       .catch((error) => {
-        const errorMessage = error.message;
+        const errorCode = error.code;
+        const errorMessage = getErrorMessage(errorCode);
         setToast((toast) => ({
           ...toast,
           toggle: true,
@@ -94,11 +97,18 @@ export default function Login() {
   }
   function handleRedirect(user) {
     const { displayName, email, photoURL, accessToken } = user;
-    localStorage.setItem(
+    const cookie_expiry_time = new Date();
+    cookie_expiry_time.setTime(cookie_expiry_time.getTime() + 3600 * 1000); // expires in 1 hour
+    Cookies.set("token", accessToken, {
+      expires: cookie_expiry_time,
+    });
+    Cookies.set(
       "user",
-      JSON.stringify({ name: displayName, email, photoURL })
+      JSON.stringify({ name: displayName, email, photoURL }),
+      {
+        expires: cookie_expiry_time,
+      }
     );
-    localStorage.setItem("token", accessToken);
     setLoading(false);
     history.push("/application");
   }

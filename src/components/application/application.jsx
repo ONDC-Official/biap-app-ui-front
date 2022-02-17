@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
+import PrivateRoute from "../../privateRoutes";
 import Checkout from "./checkout/checkout";
 import ProductList from "./product-list/productList";
 
@@ -11,8 +12,12 @@ export default function Application() {
         exact
         component={() => <Redirect to={"/application/products"} />}
       />
-      <Route path={"/application/products"} component={ProductList} />
-      <Route path={"/application/checkout"} component={Checkout} />
+      <PrivateRoute path={"/application/products"}>
+        <ProductList />
+      </PrivateRoute>
+      <PrivateRoute path={"/application/checkout"}>
+        <Checkout />
+      </PrivateRoute>
     </Switch>
   );
 }
