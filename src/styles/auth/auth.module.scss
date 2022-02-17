@@ -13,3 +13,40 @@
   width: 70%;
   margin: 0 auto;
 }
+
+.illustration_header {
+  font-size: $font-20;
+  font-family: $firaSans;
+  text-align: center;
+  color: $primaryColor;
+  margin: 10px;
+}
+
+.illustration_body {
+  font-size: $font-14;
+  width: 80%;
+  text-align: center;
+  margin: 0 auto;
+  color: $secondaryColor;
+}
+
+.navigation_link_label {
+  font-size: $font-12;
+  text-align: center;
+  color: $secondaryColor;
+  margin: 0;
+}
+
+.navigation_link {
+  font-size: $font-16;
+  font-weight: $medium;
+  text-align: center;
+  color: $secondaryColor;
+  margin: 0;
+  text-decoration: none;
+}
+
+.navigation_link:hover {
+  color: $accentColor;
+  text-decoration: underline;
+}
