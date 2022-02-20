@@ -1,0 +1,21 @@
+@import "../../assets/scss/variables.scss";
+
+.playground_height {
+  height: calc(100vh - 60px);
+}
+
+.illustration_header {
+  font-size: $font-20;
+  font-family: $firaSans;
+  text-align: center;
+  color: $primaryColor;
+  margin: 10px;
+}
+
+.illustration_body {
+  font-size: $font-14;
+  width: 80%;
+  text-align: center;
+  margin: 0 auto;
+  color: $secondaryColor;
+}

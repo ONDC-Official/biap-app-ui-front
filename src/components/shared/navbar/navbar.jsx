@@ -45,7 +45,12 @@ export default function Navbar() {
     <div className={`${styles.navbar_back}`}>
       <div className="container h-100">
         <div className="d-flex align-items-center h-100">
-          <img src={logo} alt="logo" style={{ height: "40px" }} />
+          <img
+            src={logo}
+            alt="logo"
+            style={{ height: "40px", cursor: "pointer" }}
+            onClick={() => history.push("/application")}
+          />
           <div className="ms-auto">
             <Dropdown
               header={<MoreOptionsSvg />}
@@ -65,6 +70,7 @@ export default function Navbar() {
                 }
               }}
               options={more_options_dropdown_options}
+              show_icons={true}
             />
           </div>
         </div>

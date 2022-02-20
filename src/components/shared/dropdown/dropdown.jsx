@@ -1,7 +1,15 @@
 import React from "react";
 import Styles from "./dropdown.module.scss";
 
-function Dropdown({ id, header, body, body_classes, options, click }) {
+function Dropdown({
+  id,
+  header,
+  body,
+  body_classes,
+  options,
+  click,
+  show_icons = false,
+}) {
   return (
     <div className="dropdown">
       <div
@@ -34,16 +42,18 @@ function Dropdown({ id, header, body, body_classes, options, click }) {
                 click(option.value);
               }}
             >
-              <div
-                className={`${Styles.img_wrapper} d-flex align-items-center justify-content-center`}
-              >
-                {
-                  <option.img.type
-                    {...option.img.props}
-                    classes={Styles.svgClass}
-                  />
-                }
-              </div>
+              {show_icons && (
+                <div
+                  className={`${Styles.img_wrapper} d-flex align-items-center justify-content-center`}
+                >
+                  {
+                    <option.img.type
+                      {...option.img.props}
+                      classes={Styles.svgClass}
+                    />
+                  }
+                </div>
+              )}
               <div>
                 <p className={`mb-0 ${Styles.dropdown_link}`}>{option.value}</p>
               </div>

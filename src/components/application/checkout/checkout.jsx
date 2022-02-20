@@ -1,7 +1,11 @@
-import React from 'react'
+import React, { Fragment } from "react";
+import Navbar from "../../shared/navbar/navbar";
 
 export default function Checkout() {
   return (
-    <div>hello from Checkout</div>
-  )
+    <Fragment>
+      <Navbar />
+      <p>hello from checkout</p>
+    </Fragment>
+  );
 }

@@ -1,5 +1,11 @@
-import React from "react";
+import React, { Fragment } from "react";
+import Navbar from "../../shared/navbar/navbar";
 
 export default function Profile() {
-  return <div>Hello from Profile</div>;
+  return (
+    <Fragment>
+      <Navbar />
+      <p>hello from profile</p>
+    </Fragment>
+  );
 }

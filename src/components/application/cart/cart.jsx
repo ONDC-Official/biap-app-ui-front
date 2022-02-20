@@ -1,5 +1,11 @@
-import React from "react";
+import React, { Fragment } from "react";
+import Navbar from "../../shared/navbar/navbar";
 
 export default function Cart() {
-  return <div>hello from Cart</div>;
+  return (
+    <Fragment>
+      <Navbar />
+      <p>hello from cart</p>
+    </Fragment>
+  );
 }
