@@ -114,7 +114,7 @@ export default function SearchProductModal({ onClose, onSearch }) {
 
   // on change when input is change for location
   function onChange(event) {
-    const searched_location = event.target.value.trim();
+    const searched_location = event.target.value;
     setToggleLocationListCard(true);
     setSearchedLocation({
       ...searchedLocation,
@@ -128,8 +128,8 @@ export default function SearchProductModal({ onClose, onSearch }) {
     debounce(() => {
       // this check required so that when the input is cleared
       // we do not need to call the search location api
-      if (searched_location) {
-        getAllLocations(searched_location);
+      if (searched_location.trim()) {
+        getAllLocations(searched_location.trim());
         return;
       }
       setLocations([]);

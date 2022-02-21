@@ -175,35 +175,39 @@ export default function ProductList() {
             <div className={`py-2 ${styles.product_list_wrapper}`}>
               <div className="container">
                 <div className="row">
-                  {products?.map((product, index) => {
-                    return (
-                      <Fragment key={`${product.bpp_id}-id-${index}`}>
-                        {product?.bpp_providers.map(
-                          ({ id, descriptor, items, locations }) => {
-                            return (
-                              <Fragment>
-                                {items.map((item) => {
-                                  return (
-                                    <div
-                                      key={item.id}
-                                      className="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3"
-                                    >
-                                      <ProductCard
-                                        product={item}
-                                        bpp_id={product.bpp_id}
-                                        location_id={locations[0].id}
-                                        bpp_provider_id={id}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </Fragment>
-                            );
-                          }
-                        )}
-                      </Fragment>
-                    );
-                  })}
+                  {products?.map(
+                    ({ bpp_id, bpp_descriptor, bpp_providers }, index) => {
+                      return (
+                        <Fragment key={`${bpp_id}-id-${index}`}>
+                          {bpp_providers.map(
+                            ({ id, items, locations, descriptor }) => {
+                              return (
+                                <Fragment>
+                                  {items.map((item) => {
+                                    return (
+                                      <div
+                                        key={item.id}
+                                        className="col-lg-4 col-md-6 col-sm-6 p-3"
+                                      >
+                                        <ProductCard
+                                          product={item}
+                                          bpp_descriptor={bpp_descriptor}
+                                          bpp_provider_descriptor={descriptor}
+                                          bpp_id={bpp_id}
+                                          location_id={locations[0].id}
+                                          bpp_provider_id={id}
+                                        />
+                                      </div>
+                                    );
+                                  })}
+                                </Fragment>
+                              );
+                            }
+                          )}
+                        </Fragment>
+                      );
+                    }
+                  )}
                 </div>
               </div>
             </div>
