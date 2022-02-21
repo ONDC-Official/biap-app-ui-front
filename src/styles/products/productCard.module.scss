@@ -9,8 +9,8 @@
 }
 
 .product_img_container {
-  height: 100px;
-  width: 100px;
+  height: 110px;
+  width: 110px;
 }
 
 .product_img {
@@ -38,6 +38,13 @@
 }
 
 .ordered_from {
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
   font-size: $font-12;
   color: $primaryColor;
   margin: 0;
@@ -72,4 +79,59 @@
   background-color: $accentColor;
   color: $white;
   transition: all 0.3s;
+}
+
+.quantity_count_wrapper {
+  width: 120px;
+  height: 40px;
+  background-color: $accentColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.quantity_count_wrapper > div {
+  width: 40px;
+  height: 40px;
+}
+
+.subtract_svg_color,
+.add_svg_color {
+  fill: $white;
+}
+
+.subtract_svg_wrapper {
+  border-top-left-radius: 36px;
+  border-bottom-left-radius: 36px;
+  cursor: pointer;
+}
+
+.subtract_svg_wrapper:hover {
+  background-color: rgba($white, $alpha: 0.75);
+  transition: all 0.3s;
+  .subtract_svg_color {
+    fill: $accentColor;
+  }
+}
+
+.add_svg_wrapper {
+  border-top-right-radius: 36px;
+  border-bottom-right-radius: 36px;
+  cursor: pointer;
+}
+
+.add_svg_wrapper:hover {
+  background-color: rgba($white, $alpha: 0.75);
+  transition: all 0.3s;
+  .add_svg_color {
+    fill: $accentColor;
+  }
+}
+
+.quantity_count {
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $white;
+  text-align: center;
+  margin: 0;
 }
