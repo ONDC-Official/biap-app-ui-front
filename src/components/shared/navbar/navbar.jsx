@@ -42,9 +42,19 @@ export default function Navbar() {
       value: dropdown_links.LOGOUT,
     },
   ];
+
+  function deleteAllCookies() {
+    const cookies = document.cookie.split(";");
+    cookies.map((cookie) => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+      Cookies.remove(name.trim());
+      return;
+    });
+  }
+
   async function handleLogout() {
-    Cookies.remove("token");
-    Cookies.remove("user");
+    deleteAllCookies();
     history.replace("/");
   }
   return (
