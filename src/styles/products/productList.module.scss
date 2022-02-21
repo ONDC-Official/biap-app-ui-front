@@ -19,3 +19,27 @@
   margin: 0 auto;
   color: $secondaryColor;
 }
+
+.searched_history_banner {
+  height: 10%;
+  background-color: $white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searched_history_text {
+  margin: 0;
+  font-size: $font-14;
+  color: $primaryColor;
+  text-align: center;
+}
+.semibold {
+  font-weight: $medium;
+  color: $secondaryColor;
+}
+
+.product_list_wrapper {
+  height: 90%;
+  overflow: auto;
+}

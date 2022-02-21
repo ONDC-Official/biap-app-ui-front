@@ -2,9 +2,14 @@ import React, { Fragment, useState } from "react";
 import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import search_empty_illustration from "../../../assets/images/search_prod_illustration.png";
+import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
 import { buttonTypes } from "../../../utils/button";
 import SearchProductModal from "../search-product-modal/searchProductModal";
+import { getCall } from "../../../api/axios";
+import { ONDC_COLORS } from "../../shared/colors";
+import Loading from "../../shared/loading/loading";
+import ProductCard from "./product-card/productCard";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
@@ -15,6 +20,50 @@ export default function ProductList() {
   });
   const [searchedProduct, setSearchedProduct] = useState();
   const [toggleSearchProductModal, setToggleSearchProductModal] = useState();
+  const [searchProductLoading, setSearchProductLoading] = useState(false);
+
+  // on search Api
+  async function onSearchPolling(message_id) {
+    try {
+      const data = await getCall(
+        `/client/v1/on_search?messageId=${message_id}`
+      );
+      const filteredProducts = data?.message?.catalogs.map((catalog) => {
+        if (catalog?.bpp_providers) {
+          return { ...catalog };
+        } else {
+          return { ...catalog, bpp_providers: [] };
+        }
+      });
+      setProducts(filteredProducts);
+      setSearchProductLoading(false);
+    } catch (err) {
+      console.log(err);
+      setSearchProductLoading(false);
+    }
+  }
+
+  function callApiMultipleTimes(message_id) {
+    let counter = 6;
+    let timer = setInterval(async () => {
+      if (counter <= 0) {
+        clearInterval(timer);
+        return;
+      }
+      await onSearchPolling(message_id).finally(() => {
+        counter -= 1;
+      });
+    }, 2000);
+  }
+
+  const loadingSpin = (
+    <div
+      className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
+    >
+      <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+    </div>
+  );
+
   const search_empty_state = (
     <div
       className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
@@ -44,26 +93,124 @@ export default function ProductList() {
       </div>
     </div>
   );
+
+  const no_prodcut_found_empty_state = (
+    <div
+      className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
+    >
+      <div className="text-center">
+        <div className="py-2">
+          <img
+            src={no_result_empty_illustration}
+            alt="empty_search"
+            style={{ height: "130px" }}
+          />
+        </div>
+        <div className="py-2">
+          <p className={styles.illustration_header}>Your search is empty</p>
+          <p className={styles.illustration_body}>
+            No Products found with the given name try searching for something
+            else by clicking the button
+          </p>
+        </div>
+        <div className="py-3">
+          <Button
+            button_type={buttonTypes.primary}
+            button_hover_type={buttonTypes.primary_hover}
+            button_text="Search"
+            onClick={() => setToggleSearchProductModal(true)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <Fragment>
       <Navbar />
       {toggleSearchProductModal && (
         <SearchProductModal
           onClose={() => setToggleSearchProductModal(false)}
-          onSearch={({ search }) => {
+          onSearch={({ search, location, message_id }) => {
             setSearchedProduct(search?.value);
             setToggleSearchProductModal(false);
-          }}
-          searchedLocation={searchedLocation}
-          setSearchedLocation={(value) => {
-            setSearchedLocation(value);
+            setSearchedLocation(location);
+            // call On Search api
+            setSearchProductLoading(true);
+            callApiMultipleTimes(message_id);
           }}
         />
       )}
-      {!searchedProduct || !searchedLocation ? (
+      {searchProductLoading ? (
+        loadingSpin
+      ) : !searchedProduct || !searchedLocation ? (
         search_empty_state
       ) : (
-        <div className={styles.playground_height}></div>
+        <div className={styles.playground_height}>
+          {/* change search banner html  */}
+          <div className={styles.searched_history_banner}>
+            <div className="px-2">
+              <p className={styles.searched_history_text}>
+                Searching
+                <span className={`px-2 ${styles.semibold}`}>
+                  {searchedProduct}
+                </span>
+                in
+                <span className={`px-2 ${styles.semibold}`}>
+                  {searchedLocation.name}
+                </span>
+              </p>
+            </div>
+            <div className="px-2">
+              <Button
+                button_type={buttonTypes.primary}
+                button_hover_type={buttonTypes.primary_hover}
+                button_text="Change"
+                onClick={() => setToggleSearchProductModal(true)}
+              />
+            </div>
+          </div>
+          {/* list of product view  */}
+          {products.length > 0 ? (
+            <div className={`py-2 ${styles.product_list_wrapper}`}>
+              <div className="container">
+                <div className="row">
+                  {products?.map((product, index) => {
+                    return (
+                      <Fragment key={`${product.bpp_id}-id-${index}`}>
+                        {product?.bpp_providers.map(
+                          ({ id, descriptor, items, locations }) => {
+                            return (
+                              <Fragment>
+                                {items.map((item) => {
+                                  return (
+                                    <div
+                                      key={item.id}
+                                      className="col-xl-3 col-lg-4 col-md-6 col-sm-6 p-3"
+                                    >
+                                      <ProductCard
+                                        product={item}
+                                        bpp_id={product.bpp_id}
+                                        location_id={locations[0].id}
+                                        bpp_provider_id={id}
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </Fragment>
+                            );
+                          }
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            no_prodcut_found_empty_state
+          )}
+        </div>
       )}
     </Fragment>
   );

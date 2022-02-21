@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { search_types } from "../../../constants/searchTypes";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
@@ -11,13 +11,15 @@ import Loading from "../../shared/loading/loading";
 import CrossIcon from "../../shared/svg/cross-icon";
 import DropdonwSvg from "../../shared/svg/dropdonw";
 import { debounce } from "../../../utils/search";
+import { postCall } from "../../../api/axios";
+import Cookies from "js-cookie";
 
-export default function SearchProductModal({
-  onClose,
-  onSearch,
-  searchedLocation,
-  setSearchedLocation,
-}) {
+export default function SearchProductModal({ onClose, onSearch }) {
+  const [searchedLocation, setSearchedLocation] = useState({
+    name: "",
+    lat: "",
+    lng: "",
+  });
   const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
   const [search, setSearch] = useState({
     type: search_types.PRODUCT,
@@ -27,9 +29,19 @@ export default function SearchProductModal({
     location_error: "",
     search_error: "",
   });
-  const [loading, setLoading] = useState(false);
+  const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
+  const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
   const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+
+  useEffect(() => {
+    return () => {
+      setSearchLocationLoading(false);
+      setSearchProductLoading(false);
+    };
+  }, []);
+
+  // get all the suggested location api
   async function getAllLocations(query) {
     try {
       const { data } = await axios.get(
@@ -44,10 +56,11 @@ export default function SearchProductModal({
     } catch (err) {
       console.log(err);
     } finally {
-      setLoading(false);
+      setSearchLocationLoading(false);
     }
   }
 
+  // get the lat and long of a place
   async function getPlaceFromPlaceId(location) {
     try {
       const { data } = await axios.get(
@@ -65,6 +78,41 @@ export default function SearchProductModal({
     }
   }
 
+  async function searchProduct() {
+    const allCheckPassed = [checkLocation(), checkSearch()].every(Boolean);
+    if (!allCheckPassed) {
+      return;
+    }
+    setSearchProductLoading(true);
+    try {
+      const { context } = await postCall("/client/v1/search", {
+        context: {},
+        message: {
+          criteria: {
+            search_string: search.value,
+            delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+          },
+        },
+      });
+      // stroing transaction_id in cookie;
+      const cookie_expiry_time = new Date();
+      cookie_expiry_time.setTime(cookie_expiry_time.getTime() + 3600 * 1000); // expires in 1 hour
+      Cookies.set("transaction_id", context.transaction_id, {
+        expires: cookie_expiry_time,
+      });
+      onSearch({
+        search,
+        location: searchedLocation,
+        message_id: context.message_id,
+      });
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setSearchProductLoading(false);
+    }
+  }
+
+  // on change when input is change for location
   function onChange(event) {
     const searched_location = event.target.value.trim();
     setToggleLocationListCard(true);
@@ -76,20 +124,22 @@ export default function SearchProductModal({
       ...inlineError,
       location_error: "",
     }));
-    setLoading(true);
+    setSearchLocationLoading(true);
     debounce(() => {
       // this check required so that when the input is cleared
-      // we do not need to call the search driver api
+      // we do not need to call the search location api
       if (searched_location) {
         getAllLocations(searched_location);
         return;
       }
       setLocations([]);
-      setLoading(false);
+      setSearchLocationLoading(false);
     }, 800)();
   }
+
+  // use this function to validate the location value
   function checkLocation() {
-    if (!searchedLocation) {
+    if (!searchedLocation.name) {
       setInlineError((error) => ({
         ...error,
         location_error: "Location cannot be empty",
@@ -98,6 +148,8 @@ export default function SearchProductModal({
     }
     return true;
   }
+
+  // use this function to validate the search value
   function checkSearch() {
     if (!search?.value) {
       setInlineError((error) => ({
@@ -154,12 +206,11 @@ export default function SearchProductModal({
                 autoComplete="off"
                 value={searchedLocation.name}
                 onChange={(event) => onChange(event)}
-                className={
-                  inlineError.location_error ? styles.error : styles.formControl
-                }
+                onBlur={checkLocation}
+                className={styles.formControl}
               />
               <div className="px-3">
-                {searchedLocation ? (
+                {searchedLocation.name !== "" ? (
                   <CrossIcon
                     width="20"
                     height="20"
@@ -175,32 +226,41 @@ export default function SearchProductModal({
             {inlineError.location_error && (
               <ErrorMessage>{inlineError.location_error}</ErrorMessage>
             )}
-            {toggleLocationListCard && (
+            {toggleLocationListCard && searchedLocation.name !== "" && (
               <div className={styles.location_list_wrapper}>
-                {loading
-                  ? loadingSpin
-                  : // loop thorugh location here }
-                    locations.map((location) => {
-                      return (
-                        <div
-                          className={styles.dropdown_link_wrapper}
-                          key={location.place_id}
-                          onClick={() => {
-                            getPlaceFromPlaceId(location);
-                          }}
+                {searchedLocationLoading ? (
+                  loadingSpin
+                ) : // loop thorugh location here }
+                locations.length > 0 ? (
+                  locations.map((location) => {
+                    return (
+                      <div
+                        className={styles.dropdown_link_wrapper}
+                        key={location.place_id}
+                        onClick={() => {
+                          getPlaceFromPlaceId(location);
+                        }}
+                      >
+                        <p className={styles.dropdown_link}>{location.name}</p>
+                        <p
+                          className={styles.location_description}
+                          style={{ color: ONDC_COLORS.SECONDARYCOLOR }}
                         >
-                          <p className={styles.dropdown_link}>
-                            {location.name}
-                          </p>
-                          <p
-                            className={styles.location_description}
-                            style={{ color: ONDC_COLORS.SECONDARYCOLOR }}
-                          >
-                            {location.description}
-                          </p>
-                        </div>
-                      );
-                    })}
+                          {location.description}
+                        </p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div
+                    style={{ height: "100px" }}
+                    className="d-flex align-items-center justify-content-center"
+                  >
+                    <p className={styles.empty_state_text}>
+                      No Location found <br /> Please double check your search
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -246,6 +306,7 @@ export default function SearchProductModal({
                   placeholder={`Search ${search.type}`}
                   autoComplete="off"
                   value={search.value}
+                  onBlur={checkSearch}
                   onChange={(event) => {
                     const searchValue = event.target.value.trim();
                     setSearch((search) => ({
@@ -257,11 +318,7 @@ export default function SearchProductModal({
                       search_error: "",
                     }));
                   }}
-                  className={
-                    inlineError.location_error
-                      ? styles.error
-                      : styles.formControl
-                  }
+                  className={styles.formControl}
                 />
               </div>
             </div>
@@ -271,12 +328,16 @@ export default function SearchProductModal({
           </div>
           <div className="py-3 text-center">
             <Button
-              // isloading={signInUsingEmailAndPasswordloading ? 1 : 0}
-              disabled={!searchedLocation || !search?.value}
+              isloading={searchProductLoading ? 1 : 0}
+              disabled={
+                !searchedLocation.name || !search?.value || searchProductLoading
+              }
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Search"
-              onClick={() => onSearch({ search, location: searchedLocation })}
+              onClick={() => {
+                searchProduct();
+              }}
             />
           </div>
         </div>
