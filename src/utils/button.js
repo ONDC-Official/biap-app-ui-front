@@ -37,13 +37,29 @@ export function getButtonStyle(type) {
 
     case buttonTypes.secondary:
       return {
-        backgroundColor: `rgba(${ONDC_COLORS.PLACEHOLDERTEXT}, 0.15)`,
-        border: `1px solid ${ONDC_COLORS.PLACEHOLDERTEXT}`,
+        backgroundColor: ONDC_COLORS.WHITE,
+        border: `1px solid ${ONDC_COLORS.SECONDARYCOLOR}`,
         transition: "all 0.3s",
         buttonTextColor: ONDC_COLORS.SECONDARYCOLOR,
       };
 
+    case buttonTypes.secondary_hover:
+      return {
+        backgroundColor: ONDC_COLORS.SECONDARYCOLOR,
+        border: 0,
+        transition: "all 0.3s",
+        buttonTextColor: ONDC_COLORS.WHITE,
+      };
+
     case buttonTypes.success:
+      return {
+        backgroundColor: ONDC_COLORS.WHITE,
+        border: `1px solid ${ONDC_COLORS.SUCCESS}`,
+        transition: "all 0.3s",
+        buttonTextColor: ONDC_COLORS.SUCCESS,
+      };
+
+    case buttonTypes.success_hover:
       return {
         backgroundColor: ONDC_COLORS.SUCCESS,
         border: 0,
@@ -53,17 +69,26 @@ export function getButtonStyle(type) {
 
     case buttonTypes.danger:
       return {
+        backgroundColor: ONDC_COLORS.WHITE,
+        border: `1px solid ${ONDC_COLORS.ERROR}`,
+        transition: "all 0.3s",
+        buttonTextColor: ONDC_COLORS.ERROR,
+      };
+
+    case buttonTypes.danger_hover:
+      return {
         backgroundColor: ONDC_COLORS.ERROR,
         border: 0,
         transition: "all 0.3s",
         buttonTextColor: ONDC_COLORS.WHITE,
       };
+
     default:
       return {
-        backgroundColor: ONDC_COLORS.ACCENTCOLOR,
-        border: 0,
+        backgroundColor: ONDC_COLORS.WHITE,
+        border: `1px solid ${ONDC_COLORS.ACCENTCOLOR}`,
         transition: "all 0.3s",
-        buttonTextColor: ONDC_COLORS.WHITE,
+        buttonTextColor: ONDC_COLORS.ACCENTCOLOR,
       };
   }
 }

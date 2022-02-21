@@ -135,3 +135,15 @@
   text-align: center;
   margin: 0;
 }
+
+.remove_product_text {
+  font-size: $font-12;
+  color: $error;
+  cursor: pointer;
+  padding: 0 5px;
+  margin: 0;
+}
+
+.remove_product_text:hover {
+  font-weight: $medium;
+}

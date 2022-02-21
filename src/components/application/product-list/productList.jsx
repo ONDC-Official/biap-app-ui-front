@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useContext, useState } from "react";
 import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import search_empty_illustration from "../../../assets/images/search_prod_illustration.png";
@@ -10,8 +10,11 @@ import { getCall } from "../../../api/axios";
 import { ONDC_COLORS } from "../../shared/colors";
 import Loading from "../../shared/loading/loading";
 import ProductCard from "./product-card/productCard";
+import { CartContext } from "../../../context/cartContext";
+import OrderSummary from "./order-summary/orderSummary";
 
 export default function ProductList() {
+  const { cartItems } = useContext(CartContext);
   const [products, setProducts] = useState([]);
   const [searchedLocation, setSearchedLocation] = useState({
     name: "",
@@ -172,48 +175,52 @@ export default function ProductList() {
           </div>
           {/* list of product view  */}
           {products.length > 0 ? (
-            <div className={`py-2 ${styles.product_list_wrapper}`}>
+            <div
+              className={`py-2 ${
+                cartItems.length > 0
+                  ? styles.product_list_with_summary_wrapper
+                  : styles.product_list_without_summary_wrapper
+              }`}
+            >
               <div className="container">
                 <div className="row">
-                  {products?.map(
-                    ({ bpp_id, bpp_descriptor, bpp_providers }, index) => {
-                      return (
-                        <Fragment key={`${bpp_id}-id-${index}`}>
-                          {bpp_providers.map(
-                            ({ id, items, locations, descriptor }) => {
-                              return (
-                                <Fragment>
-                                  {items.map((item) => {
-                                    return (
-                                      <div
-                                        key={item.id}
-                                        className="col-lg-4 col-md-6 col-sm-6 p-3"
-                                      >
-                                        <ProductCard
-                                          product={item}
-                                          bpp_descriptor={bpp_descriptor}
-                                          bpp_provider_descriptor={descriptor}
-                                          bpp_id={bpp_id}
-                                          location_id={locations[0].id}
-                                          bpp_provider_id={id}
-                                        />
-                                      </div>
-                                    );
-                                  })}
-                                </Fragment>
-                              );
-                            }
-                          )}
-                        </Fragment>
-                      );
-                    }
-                  )}
+                  {products?.map(({ bpp_id, bpp_providers }, index) => {
+                    return (
+                      <Fragment key={`${bpp_id}-id-${index}`}>
+                        {bpp_providers.map(
+                          ({ id, items, locations, descriptor }) => {
+                            return (
+                              <Fragment>
+                                {items.map((item) => {
+                                  return (
+                                    <div
+                                      key={item.id}
+                                      className="col-lg-4 col-md-6 col-sm-6 p-2"
+                                    >
+                                      <ProductCard
+                                        product={item}
+                                        bpp_provider_descriptor={descriptor}
+                                        bpp_id={bpp_id}
+                                        location_id={locations[0].id}
+                                        bpp_provider_id={id}
+                                      />
+                                    </div>
+                                  );
+                                })}
+                              </Fragment>
+                            );
+                          }
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           ) : (
             no_prodcut_found_empty_state
           )}
+          {cartItems.length > 0 && <OrderSummary />}
         </div>
       )}
     </Fragment>

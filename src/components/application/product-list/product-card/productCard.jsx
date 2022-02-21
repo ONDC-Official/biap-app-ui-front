@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import styles from "../../../../styles/products/productCard.module.scss";
 import no_image_found from "../../../../assets/images/no_image_found.png";
 import IndianRupee from "../../../shared/svg/indian-rupee";
@@ -12,17 +12,25 @@ export default function ProductCard(props) {
     bpp_id,
     location_id,
     bpp_provider_id,
-    bpp_descriptor,
     bpp_provider_descriptor,
   } = props;
   const { id, descriptor, price } = product;
   const { cartItems, onAddProduct, onAddQuantity, onReduceQuantity } =
     useContext(CartContext);
-  console.log(cartItems);
   const { name: provider_name } = bpp_provider_descriptor;
   const { name: product_name, images } = descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
   const [toggleAddToCart, setToggleAddToCart] = useState();
+  useEffect(() => {
+    const isProductPresent = cartItems.find(({ product }) => product.id === id);
+    if (isProductPresent) {
+      setToggleAddToCart(true);
+      setQuantityCount(isProductPresent.quantity.count);
+    } else {
+      setToggleAddToCart(false);
+      setQuantityCount(0);
+    }
+  }, [cartItems, id]);
   return (
     <div
       className={`${styles.product_card_background} d-flex align-items-start`}
@@ -95,6 +103,7 @@ export default function ProductCard(props) {
                     bpp_id,
                     provider: {
                       id: bpp_provider_id,
+                      name: provider_name,
                       locations: [location_id],
                     },
                     product: {

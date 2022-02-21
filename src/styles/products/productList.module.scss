@@ -39,7 +39,12 @@
   color: $secondaryColor;
 }
 
-.product_list_wrapper {
+.product_list_without_summary_wrapper {
   height: 90%;
+  overflow: auto;
+}
+
+.product_list_with_summary_wrapper {
+  height: 80%;
   overflow: auto;
 }
