@@ -94,17 +94,22 @@ export default function SearchProductModal({ onClose, onSearch }) {
           },
         },
       });
+      // generating context for search
+      const search_context = {
+        search,
+        location: searchedLocation,
+        message_id: context.message_id,
+      };
       // stroing transaction_id in cookie;
       const cookie_expiry_time = new Date();
       cookie_expiry_time.setTime(cookie_expiry_time.getTime() + 3600 * 1000); // expires in 1 hour
       Cookies.set("transaction_id", context.transaction_id, {
         expires: cookie_expiry_time,
       });
-      onSearch({
-        search,
-        location: searchedLocation,
-        message_id: context.message_id,
+      Cookies.set("search_context", JSON.stringify(search_context), {
+        expires: cookie_expiry_time,
       });
+      onSearch(search_context);
     } catch (err) {
       console.log(err);
     } finally {

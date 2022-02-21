@@ -21,8 +21,8 @@ export default function CartItems(props) {
             <p className={cartItemStyles.label}>Cart</p>
             <div className="ms-auto">
               <CrossIcon
-                width="15"
-                height="15"
+                width="25"
+                height="25"
                 style={{ cursor: "pointer" }}
                 color={ONDC_COLORS.SECONDARYCOLOR}
                 onClick={onClose}

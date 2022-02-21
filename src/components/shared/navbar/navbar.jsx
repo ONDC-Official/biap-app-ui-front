@@ -9,16 +9,22 @@ import User from "../svg/user";
 import Cart from "../svg/cart";
 import { useHistory } from "react-router-dom";
 import Cookies from "js-cookie";
+import ProductList from "../svg/productList";
 
 export default function Navbar() {
   const history = useHistory();
   const dropdown_links = {
+    PRODUCTS: "Products",
     CART: "Cart",
     ORDERS: "Orders",
     PROFILE: "Profile",
     LOGOUT: "Logout",
   };
   const more_options_dropdown_options = [
+    {
+      img: <ProductList />,
+      value: dropdown_links.PRODUCTS,
+    },
     {
       img: <Cart />,
       value: dropdown_links.CART,
@@ -56,6 +62,9 @@ export default function Navbar() {
               header={<MoreOptionsSvg />}
               body_classes="dropdown-menu-right"
               click={(value) => {
+                if (value === dropdown_links.PRODUCTS) {
+                  return history.push("/application/");
+                }
                 if (value === dropdown_links.CART) {
                   return history.push("/application/cart");
                 }

@@ -1,4 +1,10 @@
-import React, { Fragment, useContext, useState } from "react";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import search_empty_illustration from "../../../assets/images/search_prod_illustration.png";
@@ -12,9 +18,11 @@ import Loading from "../../shared/loading/loading";
 import ProductCard from "./product-card/productCard";
 import { CartContext } from "../../../context/cartContext";
 import OrderSummary from "./order-summary/orderSummary";
+import Cookies from "js-cookie";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
+  const search_context = JSON.parse(Cookies.get("search_context") || "{}");
   const [products, setProducts] = useState([]);
   const [searchedLocation, setSearchedLocation] = useState({
     name: "",
@@ -24,6 +32,18 @@ export default function ProductList() {
   const [searchedProduct, setSearchedProduct] = useState();
   const [toggleSearchProductModal, setToggleSearchProductModal] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
+  const search_polling_timer = useRef(0);
+  useEffect(() => {
+    if (Object.keys(search_context).length > 0) {
+      setSearchedProduct(search_context?.search?.value);
+      setSearchedLocation(search_context?.location);
+      callApiMultipleTimes(search_context?.message_id);
+    }
+    return () => {
+      clearInterval(search_polling_timer.current);
+    };
+    // eslint-disable-next-line
+  }, []);
 
   // on search Api
   async function onSearchPolling(message_id) {
@@ -47,10 +67,11 @@ export default function ProductList() {
   }
 
   function callApiMultipleTimes(message_id) {
+    setSearchProductLoading(true);
     let counter = 6;
-    let timer = setInterval(async () => {
+    search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
-        clearInterval(timer);
+        clearInterval(search_polling_timer.current);
         return;
       }
       await onSearchPolling(message_id).finally(() => {
@@ -139,7 +160,6 @@ export default function ProductList() {
             setToggleSearchProductModal(false);
             setSearchedLocation(location);
             // call On Search api
-            setSearchProductLoading(true);
             callApiMultipleTimes(message_id);
           }}
         />
@@ -169,7 +189,10 @@ export default function ProductList() {
                 button_type={buttonTypes.primary}
                 button_hover_type={buttonTypes.primary_hover}
                 button_text="Change"
-                onClick={() => setToggleSearchProductModal(true)}
+                onClick={() => {
+                  clearInterval(search_polling_timer.current);
+                  setToggleSearchProductModal(true);
+                }}
               />
             </div>
           </div>

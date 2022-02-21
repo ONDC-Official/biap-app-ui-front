@@ -1,5 +1,4 @@
 import React from "react";
-import { ONDC_COLORS } from "../colors";
 
 export default function Add(props) {
   const { width = "20", height = "20", classes } = props;
