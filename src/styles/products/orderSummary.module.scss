@@ -3,17 +3,9 @@
 .order_summary_background {
   height: 10%;
   background-color: $white;
-  box-shadow: -10px 0 0 0 rgba($primaryColor, 0.15);
-}
-
-.focused_background_color {
-  background-color: rgba($accentColor, 0.15);
-  transition: background-color 0.3s;
-}
-
-.non_focused_background_color {
-  background-color: $white;
-  transition: background-color 0.3s;
+  box-shadow: 0 0 10px 0 rgba($primaryColor, 0.15);
+  position: relative;
+  z-index: 1;
 }
 
 .collapse_button_wrapper {

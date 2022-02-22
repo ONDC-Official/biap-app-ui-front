@@ -2,17 +2,12 @@ import React, { useContext } from "react";
 import { CartContext } from "../../../../../context/cartContext";
 import CrossIcon from "../../../../shared/svg/cross-icon";
 import cartItemStyles from "../../../../../styles/products/cartItemsOrderSummary.module.scss";
-import styles from "../../../../../styles/products/productCard.module.scss";
-import no_image_found from "../../../../../assets/images/no_image_found.png";
 import { ONDC_COLORS } from "../../../../shared/colors";
-import IndianRupee from "../../../../shared/svg/indian-rupee";
-import Subtract from "../../../../shared/svg/subtract";
-import Add from "../../../../shared/svg/add";
+import ProductCard from "../../product-card/productCard";
 
 export default function CartItems(props) {
   const { onClose } = props;
-  const { cartItems, onAddQuantity, onReduceQuantity, onRemoveProduct } =
-    useContext(CartContext);
+  const { cartItems, onRemoveProduct } = useContext(CartContext);
   return (
     <div className={cartItemStyles.cart_items_order_summary_wrapper}>
       <div className="container">
@@ -30,15 +25,11 @@ export default function CartItems(props) {
             </div>
           </div>
         </div>
-        <div className={`row ${cartItemStyles.items_wrapper}`}>
-          {cartItems.map((item) => {
-            const { product, id, quantity, provider } = item;
+        <div className={`row pb-3 ${cartItemStyles.items_wrapper}`}>
+          {cartItems.map(({ product, id, bpp_id, provider }) => {
             return (
               <div className="col-lg-4 col-md-6 col-sm-6 p-2" key={id}>
-                <div
-                  className={`${cartItemStyles.product_card} d-flex align-items-start`}
-                  style={{ position: "relative" }}
-                >
+                <div style={{ position: "relative" }}>
                   <div
                     style={{
                       position: "absolute",
@@ -54,86 +45,13 @@ export default function CartItems(props) {
                       color={ONDC_COLORS.SECONDARYCOLOR}
                     />
                   </div>
-                  <div className="px-2">
-                    {/* PRODUCT IMAGE  */}
-                    <div className={styles.product_img_container}>
-                      <img
-                        src={product.descriptor.images[0] ?? no_image_found}
-                        alt={product.descriptor.name}
-                        className={styles.product_img}
-                        onError={(event) => {
-                          event.target.onerror = null;
-                          event.target.src = no_image_found;
-                        }}
-                      />
-                    </div>
-                    {/* REMOVE PRODUCT  */}
-                    {/* <p
-                      className={styles.remove_product_text}
-                      onClick={() => onRemoveProduct(id)}
-                    >
-                      remove
-                    </p> */}
-                  </div>
-                  <div className="px-2 flex-grow-1">
-                    {/* PRODUCT DESCRIPTION  */}
-                    <div
-                      className={styles.product_name_and_description_wrapper}
-                    >
-                      <p
-                        className={styles.product_name}
-                        title={product.descriptor.name}
-                      >
-                        {product.descriptor.name}
-                      </p>
-                      <p className={styles.ordered_from}>
-                        Ordering from{" "}
-                        <span className={styles.bold}>{provider.name}</span>
-                      </p>
-                    </div>
-                    <div className="d-flex align-items-center">
-                      <div className="d-flex align-items-center">
-                        <div className="pe-2">
-                          <IndianRupee width="10" height="14" />
-                        </div>
-                        <p className={styles.product_price}>
-                          {product.price.value}
-                        </p>
-                      </div>
-                      <div className="ms-auto">
-                        <div className={styles.quantity_count_wrapper}>
-                          <div
-                            className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
-                            onClick={() => {
-                              onReduceQuantity(id);
-                            }}
-                          >
-                            <Subtract
-                              width="13"
-                              classes={styles.subtract_svg_color}
-                            />
-                          </div>
-                          <div className="d-flex align-items-center justify-content-center">
-                            <p className={styles.quantity_count}>
-                              {quantity.count}
-                            </p>
-                          </div>
-                          <div
-                            className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
-                            onClick={() => {
-                              onAddQuantity(id);
-                            }}
-                          >
-                            <Add
-                              width="13"
-                              height="13"
-                              classes={styles.add_svg_color}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ProductCard
+                    product={product}
+                    bpp_id={bpp_id}
+                    location_id={provider?.locations[0]}
+                    bpp_provider_id={provider?.id}
+                    bpp_provider_descriptor={{ name: provider?.name }}
+                  />
                 </div>
               </div>
             );

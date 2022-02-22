@@ -5,7 +5,10 @@
   bottom: 62px;
   left: 0;
   right: 0;
-  background-color: $white;
+  background-color: $backgroundColor;
+  box-shadow: -10px 0 20px 0 rgba(0, 0, 0, 0.15);
+  z-index: 0;
+  animation: slide 0.5s ease forwards;
 }
 
 .label {
@@ -23,8 +26,18 @@
 .product_card {
   width: 100%;
   padding: 15px;
-  background-color: $backgroundColor;
+  background-color: $white;
+  box-shadow: 0 0 5px 0 rgba($primaryColor, 0.15);
   border-radius: 8px;
+}
+
+@keyframes slide {
+  from {
+    bottom: -300px;
+  }
+  to {
+    bottom: 62px;
+  }
 }
 
 @media screen and (max-width: 600px) {
