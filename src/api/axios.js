@@ -2,9 +2,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
-const token = Cookies.get("token");
-
 export function getCall(url) {
+  const token = Cookies.get("token");
   return new Promise(async (resolve, reject) => {
     try {
       const response = await axios.get(url, {
@@ -18,6 +17,7 @@ export function getCall(url) {
 }
 
 export function postCall(url, params) {
+  const token = Cookies.get("token");
   return new Promise(async (resolve, reject) => {
     try {
       const response = await axios.post(url, params, {

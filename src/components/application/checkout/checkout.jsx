@@ -10,21 +10,21 @@ import Navbar from "../../shared/navbar/navbar";
 import { CartContext } from "../../../context/cartContext";
 import styles from "../../../styles/cart/cartView.module.scss";
 import { buttonTypes } from "../../../utils/button";
-import { getSubTotal } from "../../../utils/getSubTotal";
 import Button from "../../shared/button/button";
 import { ONDC_COLORS } from "../../shared/colors";
-import IndianRupee from "../../shared/svg/indian-rupee";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Cookies from "js-cookie";
 import { getCall, postCall } from "../../../api/axios";
 import { constructQouteObject } from "../../../utils/constructRequestObject";
 import Loading from "../../shared/loading/loading";
+import PriceDetailsCard from "./price-details-card/priceDetailsCard";
 
 export default function Checkout() {
   const { cartItems } = useContext(CartContext);
   const transaction_id = Cookies.get("transaction_id");
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
+  const [productsQuote, setProductsQoute] = useState();
   const quote_polling_timer = useRef(0);
   useEffect(() => {
     // use this function to get the quote of the items
@@ -43,7 +43,18 @@ export default function Checkout() {
             },
           }))
         );
-        const array_of_ids = data.map((d) => d.context.message_id);
+        const array_of_ids = data.map((d) => {
+          if (d.error) {
+            return {
+              error_reason: d.error.message,
+              message_id: d.context.message_id,
+            };
+          }
+          return {
+            error_reason: "",
+            message_id: d.context.message_id,
+          };
+        });
         callApiMultipleTimes(array_of_ids);
       } catch (err) {
         console.log(err);
@@ -61,15 +72,29 @@ export default function Checkout() {
     return () => {
       clearInterval(quote_polling_timer.current);
     };
+    // eslint-disable-next-line
   }, [cartItems, transaction_id]);
 
   // on get quote Api
-  async function onGetQuote(message_ids) {
+  async function onGetQuote(array_of_ids) {
     try {
       const data = await getCall(
-        `/client/v2/on_get_quote?messageIds=${message_ids}`
+        `/client/v2/on_get_quote?messageIds=${array_of_ids
+          .filter((txn) => txn.error_reason === "")
+          .map((txn) => txn.message_id)}`
       );
-      console.log(data);
+      const quotes = data.map((item) => {
+        const { message } = item;
+        const breakup = message?.quote?.quote?.breakup;
+        const provided_by = message?.quote?.provider?.descriptor?.name;
+        const product = breakup.map((break_up_item) => ({
+          title: break_up_item.title,
+          price: break_up_item?.price?.value,
+          provided_by,
+        }));
+        return product;
+      });
+      setProductsQoute(quotes.flat());
     } catch (err) {
       console.log(err);
       setGetQuoteLoading(false);
@@ -156,34 +181,7 @@ export default function Checkout() {
                 <div className="container-fluid p-0">
                   <div className="row">
                     <div className="col-12 p-2">
-                      <div className={styles.price_summary_card}>
-                        <div className={styles.card_header}>
-                          <p className={styles.card_header_title}>
-                            Price Details
-                          </p>
-                        </div>
-                        <div className={styles.card_body}>
-                          <div className="py-2 d-flex align-items-center">
-                            <div className="pe-2">
-                              <p className={styles.card_body_text}>
-                                Items in cart({cartItems.length})
-                              </p>
-                            </div>
-                            <div className="ms-auto d-flex align-items-center">
-                              <div className="px-1">
-                                <IndianRupee
-                                  width="8"
-                                  height="13"
-                                  color={ONDC_COLORS.PRIMARYCOLOR}
-                                />
-                              </div>
-                              <p className={styles.sub_total_text}>
-                                {getSubTotal(cartItems)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <PriceDetailsCard productsQuote={productsQuote} />
                     </div>
                   </div>
                 </div>
