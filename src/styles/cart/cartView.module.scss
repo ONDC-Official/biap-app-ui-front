@@ -15,7 +15,24 @@
 .card_header {
   padding: 20px 25px;
   background-color: $white;
-  border: 1px solid rgba($secondaryColor, 0.15);
+  border-bottom: 1px solid rgba($secondaryColor, 0.15);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  .card_header_title {
+    font-family: $firaSans;
+    font-size: $font-18;
+    font-weight: $medium;
+    text-align: left;
+    color: $primaryColor;
+    margin: 0;
+  }
+}
+
+.step_completed_card_header {
+  padding: 20px 25px;
+  background-color: rgba($success, 0.15);
+  border: 1px solid $success;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 
@@ -31,7 +48,7 @@
 
 .card_body {
   padding: 20px 25px;
-  border: 1px solid rgba($secondaryColor, 0.15);
+  border-bottom: 1px solid rgba($secondaryColor, 0.15);
 
   .card_body_text {
     font-size: $font-14;

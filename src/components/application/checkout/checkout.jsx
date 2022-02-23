@@ -21,6 +21,10 @@ import PriceDetailsCard from "./price-details-card/priceDetailsCard";
 import AddressDetailsCard from "./address-details/addressDetailsCard";
 import OrderConfirmationCard from "./order-confirmation/orderConfirmationCard";
 import PaymentConfirmationCard from "./payment-method/paymentConfirmationCard";
+import {
+  checkout_steps,
+  get_current_step,
+} from "../../../constants/checkout-steps";
 
 export default function Checkout() {
   const { cartItems } = useContext(CartContext);
@@ -28,6 +32,9 @@ export default function Checkout() {
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
   const [productsQuote, setProductsQoute] = useState();
+  const [currentActiveStep, setCurrentActiveStep] = useState(
+    get_current_step(checkout_steps.SELECT_ADDRESS)
+  );
   const quote_polling_timer = useRef(0);
   useEffect(() => {
     // use this function to get the quote of the items
@@ -177,13 +184,28 @@ export default function Checkout() {
                 <div className="container-fluid p-0">
                   <div className="row">
                     <div className="col-12 pb-3">
-                      <AddressDetailsCard />
+                      <AddressDetailsCard
+                        currentActiveStep={currentActiveStep}
+                        setCurrentActiveStep={(value) =>
+                          setCurrentActiveStep(value)
+                        }
+                      />
                     </div>
                     <div className="col-12 pb-3">
-                      <OrderConfirmationCard />
+                      <OrderConfirmationCard
+                        currentActiveStep={currentActiveStep}
+                        setCurrentActiveStep={(value) =>
+                          setCurrentActiveStep(value)
+                        }
+                      />
                     </div>
                     <div className="col-12 pb-3">
-                      <PaymentConfirmationCard />
+                      <PaymentConfirmationCard
+                        currentActiveStep={currentActiveStep}
+                        setCurrentActiveStep={(value) =>
+                          setCurrentActiveStep(value)
+                        }
+                      />
                     </div>
                   </div>
                 </div>
