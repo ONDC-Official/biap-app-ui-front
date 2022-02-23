@@ -18,6 +18,9 @@ import { getCall, postCall } from "../../../api/axios";
 import { constructQouteObject } from "../../../utils/constructRequestObject";
 import Loading from "../../shared/loading/loading";
 import PriceDetailsCard from "./price-details-card/priceDetailsCard";
+import AddressDetailsCard from "./address-details/addressDetailsCard";
+import OrderConfirmationCard from "./order-confirmation/orderConfirmationCard";
+import PaymentConfirmationCard from "./payment-method/paymentConfirmationCard";
 
 export default function Checkout() {
   const { cartItems } = useContext(CartContext);
@@ -173,14 +176,22 @@ export default function Checkout() {
               <div className="col-lg-8">
                 <div className="container-fluid p-0">
                   <div className="row">
-                    <div className="col-12">i am shipping addresss</div>
+                    <div className="col-12 pb-3">
+                      <AddressDetailsCard />
+                    </div>
+                    <div className="col-12 pb-3">
+                      <OrderConfirmationCard />
+                    </div>
+                    <div className="col-12 pb-3">
+                      <PaymentConfirmationCard />
+                    </div>
                   </div>
                 </div>
               </div>
               <div className="col-lg-4">
                 <div className="container-fluid p-0">
                   <div className="row">
-                    <div className="col-12 p-2">
+                    <div className="col-12">
                       <PriceDetailsCard productsQuote={productsQuote} />
                     </div>
                   </div>
