@@ -86,7 +86,7 @@ export default function OrderSummary() {
                 <Button
                   button_type={buttonTypes.primary}
                   button_hover_type={buttonTypes.primary_hover}
-                  button_text="View Cart"
+                  button_text="Checkout"
                   onClick={() => history.push("/application/checkout")}
                 />
               </div>
