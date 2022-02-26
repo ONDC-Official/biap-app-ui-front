@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext } from "react";
 import { buttonTypes } from "../../../../utils/button";
 import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
@@ -8,10 +8,13 @@ import {
 } from "../../../../constants/checkout-steps";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Checkmark from "../../../shared/svg/checkmark";
+import { AddressContext } from "../../../../context/addressContext";
 
 export default function OrderConfirmationCard(props) {
   const { currentActiveStep, setCurrentActiveStep } = props;
+  const { deliveryAddress, billingAddress } = useContext(AddressContext);
 
+  console.log(deliveryAddress, billingAddress);
   // function to check whether step is completed or not
   function isStepCompleted() {
     if (currentActiveStep.current_active_step_number > 2) {

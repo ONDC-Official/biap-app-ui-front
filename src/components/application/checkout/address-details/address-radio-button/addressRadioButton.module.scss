@@ -1,0 +1,42 @@
+@import "../../../../../assets/scss/variables.scss";
+
+.radio_button_wrapper {
+  border: 0;
+  background-color: transparent;
+  display: flex;
+  align-items: flex-start;
+}
+
+.radio_button_wrapper:hover {
+  background-color: rgba($accentColor, $alpha: 0.15);
+  transition: background-color 0.3s;
+  border-radius: 10px;
+}
+
+.radio_button_background {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: $white;
+  border: 1px solid $accentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 0;
+}
+
+.active {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: $accentColor;
+  border: 0;
+}
+
+.non_active {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: $white;
+  border: 0;
+}

@@ -45,7 +45,7 @@ export default function SearchProductModal({ onClose, onSearch }) {
   async function getAllLocations(query) {
     try {
       const { data } = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${query}&key=${API_KEY}`
+        `${process.env.REACT_APP_BASE_URL}maps/api/place/autocomplete/json?input=${query}&key=${API_KEY}`
       );
       const formattedLocations = data.predictions.map((location) => ({
         place_id: location.place_id,
@@ -64,7 +64,7 @@ export default function SearchProductModal({ onClose, onSearch }) {
   async function getPlaceFromPlaceId(location) {
     try {
       const { data } = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${location.place_id}&key=${API_KEY}`
+        `${process.env.REACT_APP_BASE_URL}maps/api/place/details/json?place_id=${location.place_id}&key=${API_KEY}`
       );
       setSearchedLocation({
         ...searchedLocation,

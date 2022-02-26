@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import { buttonTypes } from "../../../../utils/button";
 import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
@@ -8,9 +8,28 @@ import {
   get_current_step,
 } from "../../../../constants/checkout-steps";
 import Checkmark from "../../../shared/svg/checkmark";
+import Loading from "../../../shared/loading/loading";
+import AddressRadioButton from "./address-radio-button/addressRadioButton";
+import { getCall } from "../../../../api/axios";
+import { AddressContext } from "../../../../context/addressContext";
+import DeliveryAddress from "./delivery-address/deliveryAddress";
+import BillingAddress from "./billing-address/billingAddress";
 
 export default function AddressDetailsCard(props) {
   const { currentActiveStep, setCurrentActiveStep } = props;
+  const [deliveryAddresses, setDeliveryAddresses] = useState([]);
+  const [billingAddresses, setBillingAddresses] = useState([]);
+  const {
+    deliveryAddress,
+    setDeliveryAddress,
+    billingAddress,
+    setBillingAddress,
+  } = useContext(AddressContext);
+  const [error, setError] = useState();
+  const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
+    useState();
+  const [fetchBillingAddressLoading, setFetchBillingAddressLoading] =
+    useState();
 
   // function to check whether step is completed or not
   function isStepCompleted() {
@@ -37,6 +56,57 @@ export default function AddressDetailsCard(props) {
     }
     return false;
   }
+
+  useEffect(() => {
+    // use this function to fetch existing address of the user
+    async function fetchDeliveryAddress() {
+      setFetchDeliveryAddressLoading(true);
+      try {
+        const data = await getCall("/client/v1/delivery_address");
+        setDeliveryAddresses(data);
+      } catch (err) {
+        if (err.response.data.length > 0) {
+          setDeliveryAddresses([]);
+          return;
+        }
+        setError("Something went wrong!");
+      } finally {
+        setFetchDeliveryAddressLoading(false);
+      }
+    }
+
+    fetchDeliveryAddress();
+  }, []);
+
+  useEffect(() => {
+    // use this function to fetch existing address of the user
+    async function fetchBillingAddress() {
+      setFetchBillingAddressLoading(true);
+      try {
+        const data = await getCall("/client/v1/billing_details");
+        setBillingAddresses(data);
+      } catch (err) {
+        if (err.response.data.length > 0) {
+          setBillingAddresses([]);
+          return;
+        }
+        setError("Something went wrong!");
+      } finally {
+        setFetchBillingAddressLoading(false);
+      }
+    }
+
+    fetchBillingAddress();
+  }, []);
+
+  const in_card_loading = (
+    <div
+      className="d-flex align-items-center justify-content-center"
+      style={{ height: "100px" }}
+    >
+      <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+    </div>
+  );
 
   return (
     <div className={styles.price_summary_card}>
@@ -83,11 +153,17 @@ export default function AddressDetailsCard(props) {
       {isCurrentStep() && (
         <Fragment>
           <div className={styles.card_body}>
-            {/* delivery address list card */}
-            delivery address card
+            {fetchDeliveryAddressLoading ? (
+              in_card_loading
+            ) : (
+              <DeliveryAddress deliveryAddresses={deliveryAddresses} />
+            )}
             <hr style={{ background: ONDC_COLORS.SECONDARYCOLOR }} />
-            {/* billing address list card */}
-            delBillingivery address card
+            {fetchBillingAddressLoading ? (
+              in_card_loading
+            ) : (
+              <BillingAddress billingAddresses={billingAddresses} />
+            )}
           </div>
           <div
             className={`${styles.card_footer} d-flex align-items-center justify-content-center`}

@@ -1,7 +1,14 @@
 import axios from "axios";
 import Cookies from "js-cookie";
+import { deleteAllCookies } from "../utils/deleteCookies";
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
+
+function unAuthorizedResponse() {
+  deleteAllCookies();
+  window.location.pathname = "/";
+}
+
 export function getCall(url) {
   const token = Cookies.get("token");
   return new Promise(async (resolve, reject) => {
@@ -11,6 +18,8 @@ export function getCall(url) {
       });
       return resolve(response.data);
     } catch (err) {
+      const { status } = err.response;
+      if (status === 401) return unAuthorizedResponse();
       return reject(err);
     }
   });
@@ -25,6 +34,8 @@ export function postCall(url, params) {
       });
       return resolve(response.data);
     } catch (err) {
+      const { status } = err.response;
+      if (status === 401) return unAuthorizedResponse();
       return reject(err);
     }
   });

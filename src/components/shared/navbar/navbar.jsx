@@ -8,8 +8,8 @@ import Orders from "../svg/orders";
 import User from "../svg/user";
 import Cart from "../svg/cart";
 import { useHistory } from "react-router-dom";
-import Cookies from "js-cookie";
 import ProductList from "../svg/productList";
+import { deleteAllCookies } from "../../../utils/deleteCookies";
 
 export default function Navbar() {
   const history = useHistory();
@@ -42,16 +42,6 @@ export default function Navbar() {
       value: dropdown_links.LOGOUT,
     },
   ];
-
-  function deleteAllCookies() {
-    const cookies = document.cookie.split(";");
-    cookies.map((cookie) => {
-      const eqPos = cookie.indexOf("=");
-      const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
-      Cookies.remove(name.trim());
-      return;
-    });
-  }
 
   async function handleLogout() {
     deleteAllCookies();

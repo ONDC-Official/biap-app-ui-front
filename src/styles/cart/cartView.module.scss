@@ -131,3 +131,72 @@
     font-weight: $medium;
   }
 }
+
+.address_wrapper {
+  max-height: 200px;
+  overflow: auto;
+}
+
+.address_type_label {
+  font-size: $font-18;
+  font-weight: $medium;
+  color: $primaryColor;
+  margin: 0;
+}
+
+.address_name_and_phone {
+  font-size: $font-16;
+  font-weight: $medium;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
+}
+
+.address_line_1 {
+  font-size: $font-14;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
+}
+
+.address_line_2 {
+  font-size: $font-14;
+  text-align: left;
+  color: $secondaryColor;
+  margin: 0;
+}
+
+.add_address_wrapper {
+  width: 180px;
+  padding: 10px 15px;
+  background-color: transparent;
+  border-radius: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add_address_wrapper:hover {
+  background-color: $accentColor;
+  transition: all 0.3s;
+  .add_address_text {
+    color: $white;
+  }
+
+  .add_svg_color {
+    fill: $white;
+  }
+}
+
+.add_address_text {
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $accentColor;
+  margin: 0;
+}
+
+.add_svg_color {
+  fill: $accentColor;
+  // margin-bottom: 5px;
+}

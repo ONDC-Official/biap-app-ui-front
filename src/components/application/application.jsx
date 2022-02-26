@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
+import { AddressContextProvider } from "../../context/addressContext";
 import { CartContextProvider } from "../../context/cartContext";
 import PrivateRoute from "../../privateRoutes";
 import Cart from "./cart/cart";
@@ -20,9 +21,11 @@ export default function Application() {
         <PrivateRoute path={"/application/products"}>
           <ProductList />
         </PrivateRoute>
-        <PrivateRoute path={"/application/checkout"}>
-          <Checkout />
-        </PrivateRoute>
+        <AddressContextProvider>
+          <PrivateRoute path={"/application/checkout"}>
+            <Checkout />
+          </PrivateRoute>
+        </AddressContextProvider>
         <PrivateRoute path={"/application/cart"}>
           <Cart />
         </PrivateRoute>
