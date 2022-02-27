@@ -9,23 +9,23 @@ import {
 } from "../../../../constants/checkout-steps";
 import Checkmark from "../../../shared/svg/checkmark";
 import Loading from "../../../shared/loading/loading";
-import AddressRadioButton from "./address-radio-button/addressRadioButton";
 import { getCall } from "../../../../api/axios";
 import { AddressContext } from "../../../../context/addressContext";
 import DeliveryAddress from "./delivery-address/deliveryAddress";
 import BillingAddress from "./billing-address/billingAddress";
+import { toast_types } from "../../../../utils/toast";
+import Toast from "../../../shared/toast/toast";
 
 export default function AddressDetailsCard(props) {
   const { currentActiveStep, setCurrentActiveStep } = props;
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
-  const {
-    deliveryAddress,
-    setDeliveryAddress,
-    billingAddress,
-    setBillingAddress,
-  } = useContext(AddressContext);
-  const [error, setError] = useState();
+  const { deliveryAddress, billingAddress } = useContext(AddressContext);
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
+  });
   const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
     useState();
   const [fetchBillingAddressLoading, setFetchBillingAddressLoading] =
@@ -69,7 +69,12 @@ export default function AddressDetailsCard(props) {
           setDeliveryAddresses([]);
           return;
         }
-        setError("Something went wrong!");
+        setToast((toast) => ({
+          ...toast,
+          toggle: true,
+          type: toast_types.error,
+          message: "Something went wrong!",
+        }));
       } finally {
         setFetchDeliveryAddressLoading(false);
       }
@@ -90,7 +95,12 @@ export default function AddressDetailsCard(props) {
           setBillingAddresses([]);
           return;
         }
-        setError("Something went wrong!");
+        setToast((toast) => ({
+          ...toast,
+          toggle: true,
+          type: toast_types.error,
+          message: "Something went wrong!",
+        }));
       } finally {
         setFetchBillingAddressLoading(false);
       }
@@ -110,6 +120,18 @@ export default function AddressDetailsCard(props) {
 
   return (
     <div className={styles.price_summary_card}>
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
       <div
         className={`${
           isStepCompleted()
@@ -156,19 +178,26 @@ export default function AddressDetailsCard(props) {
             {fetchDeliveryAddressLoading ? (
               in_card_loading
             ) : (
-              <DeliveryAddress deliveryAddresses={deliveryAddresses} />
+              <DeliveryAddress
+                deliveryAddresses={deliveryAddresses}
+                setDeliveryAddresses={(value) => setDeliveryAddresses(value)}
+              />
             )}
             <hr style={{ background: ONDC_COLORS.SECONDARYCOLOR }} />
             {fetchBillingAddressLoading ? (
               in_card_loading
             ) : (
-              <BillingAddress billingAddresses={billingAddresses} />
+              <BillingAddress
+                billingAddresses={billingAddresses}
+                setBillingAddresses={(value) => setBillingAddresses(value)}
+              />
             )}
           </div>
           <div
             className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
           >
             <Button
+              disabled={!deliveryAddress || !billingAddress}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Proceed"

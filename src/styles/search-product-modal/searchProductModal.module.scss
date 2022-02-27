@@ -25,13 +25,43 @@
   animation: slide 0.5s ease forwards;
 }
 
-.modal_header {
-  font-size: $font-20;
-  font-weight: $medium;
-  font-family: $firaSans;
-  color: $primaryColor;
-  margin: 0;
-  text-align: left;
+.card_header {
+  padding: 20px 25px;
+  background-color: $white;
+  border-bottom: 1px solid rgba($secondaryColor, 0.15);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  .card_header_title {
+    font-family: $firaSans;
+    font-size: $font-18;
+    font-weight: $medium;
+    text-align: left;
+    color: $primaryColor;
+    margin: 0;
+  }
+}
+
+.card_body {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba($secondaryColor, 0.15);
+
+  .card_body_text {
+    font-size: $font-14;
+    text-align: left;
+    color: $secondaryColor;
+    margin: 0;
+  }
+}
+
+.card_footer {
+  padding: 20px 25px;
+  .card_body_text {
+    font-size: $font-14;
+    text-align: left;
+    color: $secondaryColor;
+    margin: 0;
+  }
 }
 
 .modal_input_wrappper {
@@ -175,6 +205,13 @@
   color: $white;
   margin: 0;
 }
+
+.address_form_wrapper {
+  max-height: 300px;
+  overflow: auto;
+  max-width: 500px;
+}
+
 @keyframes fade {
   from {
     opacity: 0;

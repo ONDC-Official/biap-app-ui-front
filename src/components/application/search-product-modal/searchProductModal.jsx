@@ -186,8 +186,8 @@ export default function SearchProductModal({ onClose, onSearch }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.popup_card}>
-        <div className="p-4 d-flex align-items-center">
-          <p className={styles.modal_header}>Search Product</p>
+        <div className={`${styles.card_header} d-flex align-items-center`}>
+          <p className={styles.card_header_title}>Search Product</p>
           <div className="ms-auto">
             <CrossIcon
               width="20"
@@ -198,8 +198,8 @@ export default function SearchProductModal({ onClose, onSearch }) {
             />
           </div>
         </div>
-        <div className="p-4">
-          <div className="pb-4" style={{ position: "relative" }}>
+        <div className={styles.card_body}>
+          <div className="py-3" style={{ position: "relative" }}>
             <div
               className={`${styles.modal_input_wrappper} d-flex align-items-center`}
             >
@@ -269,7 +269,7 @@ export default function SearchProductModal({ onClose, onSearch }) {
               </div>
             )}
           </div>
-          <div className="pb-4">
+          <div className="py-3">
             <div
               className={`${styles.modal_input_wrappper} d-flex align-items-center`}
             >
@@ -331,20 +331,22 @@ export default function SearchProductModal({ onClose, onSearch }) {
               <ErrorMessage>{inlineError.search_error}</ErrorMessage>
             )}
           </div>
-          <div className="py-3 text-center">
-            <Button
-              isloading={searchProductLoading ? 1 : 0}
-              disabled={
-                !searchedLocation.name || !search?.value || searchProductLoading
-              }
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Search"
-              onClick={() => {
-                searchProduct();
-              }}
-            />
-          </div>
+        </div>
+        <div
+          className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
+        >
+          <Button
+            isloading={searchProductLoading ? 1 : 0}
+            disabled={
+              !searchedLocation.name || !search?.value || searchProductLoading
+            }
+            button_type={buttonTypes.primary}
+            button_hover_type={buttonTypes.primary_hover}
+            button_text="Search"
+            onClick={() => {
+              searchProduct();
+            }}
+          />
         </div>
       </div>
     </div>
