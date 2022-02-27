@@ -14,10 +14,10 @@ export default function BillingAddress(props) {
   return (
     <Fragment>
       {/* billing address list card */}
-      <p className={styles.address_type_label}>Billing Address</p>
+      <p className={`${styles.address_type_label} py-2`}>Billing Address</p>
       {/* delivery address list card */}
       {deliveryAddress && (
-        <div className="container-fluid py-2">
+        <div className="container-fluid pt-2">
           <div className="row">
             <div className="col-12">
               <AddressRadioButton
@@ -35,7 +35,7 @@ export default function BillingAddress(props) {
         </div>
       )}
       {billingAddresses.length > 0 && (
-        <div className={`${styles.address_wrapper} container-fluid py-2`}>
+        <div className={`${styles.address_wrapper} container-fluid`}>
           <div className="row">
             {billingAddresses.map((billing_address) => {
               const { id, name, address } = billing_address;

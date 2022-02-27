@@ -13,10 +13,10 @@ export default function DeliveryAddress(props) {
   return (
     <Fragment>
       {/* delivery address list card */}
-      <p className={styles.address_type_label}>Delivery Address</p>
+      <p className={`${styles.address_type_label} py-2`}>Delivery Address</p>
       {/* delivery address list card */}
       {deliveryAddresses.length > 0 && (
-        <div className={`${styles.address_wrapper} container-fluid py-2`}>
+        <div className={`${styles.address_wrapper} container-fluid pt-2`}>
           <div className="row">
             {deliveryAddresses.map((delivery_address) => {
               const { id, descriptor, address } = delivery_address;

@@ -85,7 +85,17 @@ export default function AddAddressModal(props) {
   }
 
   // use this function to check the disability of the button
-  function checkFormvalidation() {}
+  function checkFormvalidation() {
+    return (
+      address?.name === "" ||
+      address?.street === "" ||
+      address?.city === "" ||
+      address?.state === "" ||
+      address?.pinCode === "" ||
+      address?.landmark === "" ||
+      address?.building === ""
+    );
+  }
 
   return (
     <div className={styles.overlay}>
@@ -231,7 +241,7 @@ export default function AddAddressModal(props) {
         >
           <Button
             isloading={addAddressLoading ? 1 : 0}
-            disabled={addAddressLoading}
+            disabled={addAddressLoading || checkFormvalidation()}
             button_type={buttonTypes.primary}
             button_hover_type={buttonTypes.primary_hover}
             button_text="Add Address"
