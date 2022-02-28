@@ -99,7 +99,7 @@ export default function Checkout() {
         const provided_by = message?.quote?.provider?.descriptor?.name;
         const product = breakup.map((break_up_item) => ({
           title: break_up_item.title,
-          price: break_up_item?.price?.value,
+          price: message?.quote?.quote?.price?.value,
           provided_by,
         }));
         return product;
@@ -202,9 +202,7 @@ export default function Checkout() {
                     <div className="col-12 pb-3">
                       <PaymentConfirmationCard
                         currentActiveStep={currentActiveStep}
-                        setCurrentActiveStep={(value) =>
-                          setCurrentActiveStep(value)
-                        }
+                        productsQuote={productsQuote}
                       />
                     </div>
                   </div>

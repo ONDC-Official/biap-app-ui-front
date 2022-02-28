@@ -21,11 +21,6 @@ export default function Application() {
         <PrivateRoute path={"/application/products"}>
           <ProductList />
         </PrivateRoute>
-        <AddressContextProvider>
-          <PrivateRoute path={"/application/checkout"}>
-            <Checkout />
-          </PrivateRoute>
-        </AddressContextProvider>
         <PrivateRoute path={"/application/cart"}>
           <Cart />
         </PrivateRoute>
@@ -35,6 +30,11 @@ export default function Application() {
         <PrivateRoute path={"/application/profile"}>
           <Profile />
         </PrivateRoute>
+        <AddressContextProvider>
+          <PrivateRoute path={"/application/checkout"}>
+            <Checkout />
+          </PrivateRoute>
+        </AddressContextProvider>
       </Switch>
     </CartContextProvider>
   );
