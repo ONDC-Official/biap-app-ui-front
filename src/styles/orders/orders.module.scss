@@ -1,0 +1,117 @@
+@import "../../assets/scss/variables.scss";
+
+.playground_height {
+  height: calc(100vh - 60px);
+  overflow: auto;
+}
+
+.illustration_header {
+  font-size: $font-20;
+  font-family: $firaSans;
+  text-align: center;
+  color: $primaryColor;
+  margin: 10px;
+}
+
+.illustration_body {
+  font-size: $font-14;
+  width: 80%;
+  text-align: center;
+  margin: 0 auto;
+  color: $secondaryColor;
+}
+
+.orders_card {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba($primaryColor, 0.15);
+  background-color: $white;
+}
+
+.card_header {
+  padding: 20px 25px;
+  background-color: $white;
+  border-bottom: 1px solid rgba($secondaryColor, 0.15);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  .card_header_title {
+    font-family: $firaSans;
+    font-size: $font-18;
+    font-weight: $medium;
+    text-align: left;
+    color: $primaryColor;
+    margin: 0;
+  }
+}
+
+.card_body {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba($secondaryColor, 0.15);
+
+  .card_body_text {
+    font-size: $font-14;
+    text-align: left;
+    color: $secondaryColor;
+    margin: 0;
+  }
+}
+
+.card_footer {
+  padding: 20px 25px;
+  .card_body_text {
+    font-size: $font-14;
+    text-align: left;
+    color: $secondaryColor;
+    margin: 0;
+  }
+}
+
+.product_name {
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $primaryColor;
+  margin: 0;
+}
+
+.address_type_label {
+  font-size: $font-14;
+  color: $secondaryColor;
+  margin: 0;
+}
+
+.address_name_and_phone {
+  font-size: $font-16;
+  font-weight: $medium;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
+}
+
+.address_line_1 {
+  font-size: $font-14;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
+}
+
+.address_line_2 {
+  font-size: $font-14;
+  text-align: left;
+  color: $secondaryColor;
+  margin: 0;
+}
+
+.product_price {
+  font-size: $font-16;
+  font-weight: $medium;
+  color: $secondaryColor;
+  margin: 0;
+}

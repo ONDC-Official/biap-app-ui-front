@@ -21,7 +21,7 @@ export default function DeliveryAddress(props) {
             {deliveryAddresses.map((delivery_address) => {
               const { id, descriptor, address } = delivery_address;
               return (
-                <div className="col-6" key={id}>
+                <div className="col-lg-6" key={id}>
                   <AddressRadioButton
                     key={id}
                     checked={deliveryAddress?.id === id}

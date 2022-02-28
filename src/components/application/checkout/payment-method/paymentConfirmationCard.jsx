@@ -19,7 +19,7 @@ export default function PaymentConfirmationCard(props) {
   const history = useHistory();
   const transaction_id = Cookies.get("transaction_id");
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, setCartItems } = useContext(CartContext);
   const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
   const [onConfirmed, setOnConfirmed] = useState([]);
   const [toast, setToast] = useState({
@@ -119,6 +119,7 @@ export default function PaymentConfirmationCard(props) {
           // remove transaction_id, search_context from cookies
           Cookies.remove("transaction_id");
           Cookies.remove("search_context");
+          setCartItems([]);
           history.push("/application/orders");
         } else {
           setToast((toast) => ({

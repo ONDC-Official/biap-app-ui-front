@@ -40,7 +40,7 @@ export default function BillingAddress(props) {
             {billingAddresses.map((billing_address) => {
               const { id, name, address } = billing_address;
               return (
-                <div className="col-6" key={id}>
+                <div className="col-lg-6" key={id}>
                   <AddressRadioButton
                     key={id}
                     checked={billingAddress?.id === id}

@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import styles from "../../../styles/cart/cartView.module.scss";
+import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
@@ -8,6 +8,7 @@ import { useHistory } from "react-router-dom";
 import { getCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
+import OrderCard from "./order-card/orderCard";
 
 export default function Orders() {
   const history = useHistory();
@@ -18,8 +19,23 @@ export default function Orders() {
       setFetchOrderLoading(true);
       try {
         const data = await getCall("/client/v1/orders");
-        console.log(data);
-        setOrders(data);
+        const formated_orders = data.map((order) => {
+          const { quote, state, id, transaction_id, fulfillment } = order;
+          return {
+            product: {
+              name: quote?.breakup[0].title,
+              price: quote?.price?.value,
+            },
+            address: {
+              name: fulfillment?.customer?.person?.name,
+              location: fulfillment?.end?.location?.address,
+            },
+            status: state,
+            order_id: id,
+            transaction_id: transaction_id,
+          };
+        });
+        setOrders(formated_orders);
         setFetchOrderLoading(false);
       } catch (err) {
         console.log(err);
@@ -78,7 +94,28 @@ export default function Orders() {
         empty_orders_state
       ) : (
         <div className={styles.playground_height}>
-          list of orders will come here
+          <div className="container">
+            <div className="row py-2">
+              {orders.map(
+                ({ product, address, status, order_id, transaction_id }) => {
+                  return (
+                    <div
+                      className="col-lg-4 col-md-6 col-sm-12 py-2"
+                      key={`order_id_${order_id}`}
+                    >
+                      <OrderCard
+                        product={product}
+                        address={address}
+                        status={status}
+                        transaction_id={transaction_id}
+                        order_id={order_id}
+                      />
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          </div>
         </div>
       )}
     </Fragment>
