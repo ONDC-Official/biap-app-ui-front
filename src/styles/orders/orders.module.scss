@@ -5,6 +5,15 @@
   overflow: auto;
 }
 
+.cart_label {
+  font-family: $firaSans;
+  font-size: $font-20;
+  font-weight: $medium;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
+}
+
 .illustration_header {
   font-size: $font-20;
   font-family: $firaSans;
@@ -114,4 +123,26 @@
   font-weight: $medium;
   color: $secondaryColor;
   margin: 0;
+}
+
+.status_indicator {
+  margin: 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.status_value {
+  font-size: $font-14;
+  font-weight: $medium;
+  margin: 0;
+  padding: 5px 0 0;
+}
+
+.status_bar {
+  width: 60px;
+  height: 5px;
+  border-radius: 10px;
+  position: relative;
+  top: 8px;
 }

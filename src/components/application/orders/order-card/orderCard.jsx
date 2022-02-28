@@ -1,4 +1,5 @@
 import React from "react";
+import { getOrderStatus } from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
 import { buttonTypes } from "../../../../utils/button";
 import Button from "../../../shared/button/button";
@@ -7,7 +8,7 @@ import IndianRupee from "../../../shared/svg/indian-rupee";
 
 export default function OrderCard(props) {
   const { product, address, order_id, status, transaction_id } = props;
-  console.log(status);
+  const current_order_status = getOrderStatus(status);
   return (
     <div className={styles.orders_card}>
       {/* card header */}
@@ -37,8 +38,7 @@ export default function OrderCard(props) {
             {address?.location?.street
               ? address.location.street
               : address?.location?.door}
-            , {address?.location?.city}
-            {address?.location?.state}
+            , {address?.location?.city}, {address?.location?.state}
           </p>
           <p className={styles.address_line_2}>
             {address?.location?.area_code}
@@ -46,6 +46,105 @@ export default function OrderCard(props) {
         </div>
         <hr style={{ background: ONDC_COLORS.SECONDARYCOLOR }} />
         <p className={styles.address_type_label}>Status:</p>
+        <div className="pt-3 d-flex align-items-start justify-content-center">
+          {/* ORDERED */}
+          <div className="px-1">
+            <div className="text-center">
+              <div
+                className={styles.status_indicator}
+                style={{
+                  backgroundColor:
+                    current_order_status.step_value >= 1
+                      ? ONDC_COLORS.SUCCESS
+                      : ONDC_COLORS.BACKGROUNDCOLOR,
+                }}
+              ></div>
+              <p
+                className={styles.status_value}
+                style={{
+                  color:
+                    current_order_status.step_value >= 1
+                      ? ONDC_COLORS.SUCCESS
+                      : ONDC_COLORS.PRIMARYCOLOR,
+                }}
+              >
+                Ordered
+              </p>
+            </div>
+          </div>
+          <div className="px-1">
+            <div
+              className={styles.status_bar}
+              style={{
+                backgroundColor:
+                  current_order_status.step_value > 1
+                    ? ONDC_COLORS.SUCCESS
+                    : ONDC_COLORS.BACKGROUNDCOLOR,
+              }}
+            ></div>
+          </div>
+          {/* SHIPPED */}
+          <div className="px-1">
+            <div className="text-center">
+              <div
+                className={styles.status_indicator}
+                style={{
+                  backgroundColor:
+                    current_order_status.step_value >= 2
+                      ? ONDC_COLORS.SUCCESS
+                      : ONDC_COLORS.BACKGROUNDCOLOR,
+                }}
+              ></div>
+              <p
+                className={styles.status_value}
+                style={{
+                  color:
+                    current_order_status.step_value >= 2
+                      ? ONDC_COLORS.SUCCESS
+                      : ONDC_COLORS.PRIMARYCOLOR,
+                }}
+              >
+                Shipped
+              </p>
+            </div>
+          </div>
+          <div className="px-1">
+            <div
+              className={styles.status_bar}
+              style={{
+                backgroundColor:
+                  current_order_status.step_value > 2
+                    ? ONDC_COLORS.SUCCESS
+                    : ONDC_COLORS.BACKGROUNDCOLOR,
+              }}
+            ></div>
+          </div>
+          {/* DELIVERED */}
+          <div className="px-1">
+            <div className="text-center">
+              <div
+                className={styles.status_indicator}
+                style={{
+                  backgroundColor:
+                    current_order_status.step_value >= 3
+                      ? ONDC_COLORS.SUCCESS
+                      : ONDC_COLORS.BACKGROUNDCOLOR,
+                }}
+              ></div>
+              <p
+                className={styles.status_value}
+                style={{
+                  color:
+                    current_order_status.step_value >= 3
+                      ? ONDC_COLORS.SUCCESS
+                      : ONDC_COLORS.PRIMARYCOLOR,
+                }}
+              >
+                Delivered
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
       <div className={styles.card_footer}>
         <div className="d-flex align-items-center justify-content-center flex-wrap">

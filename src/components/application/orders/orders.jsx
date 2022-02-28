@@ -95,6 +95,11 @@ export default function Orders() {
       ) : (
         <div className={styles.playground_height}>
           <div className="container">
+            <div className="row py-3">
+              <div className="col-12">
+                <p className={styles.cart_label}>Orders</p>
+              </div>
+            </div>
             <div className="row py-2">
               {orders.map(
                 ({ product, address, status, order_id, transaction_id }) => {
