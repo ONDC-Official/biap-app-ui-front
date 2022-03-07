@@ -25,7 +25,17 @@ export default function DeliveryAddress(props) {
                   <AddressRadioButton
                     key={id}
                     checked={deliveryAddress?.id === id}
-                    onClick={() => setDeliveryAddress(delivery_address)}
+                    onClick={() =>
+                      setDeliveryAddress(() => ({
+                        id,
+                        name: descriptor?.name || "",
+                        email: descriptor?.email || "",
+                        phone: descriptor?.phone || "",
+                        location: {
+                          address: address,
+                        },
+                      }))
+                    }
                   >
                     <div className="px-3">
                       <p className={styles.address_name_and_phone}>

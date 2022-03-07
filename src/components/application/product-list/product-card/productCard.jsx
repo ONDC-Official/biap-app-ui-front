@@ -103,7 +103,6 @@ export default function ProductCard(props) {
                     bpp_id,
                     provider: {
                       id: bpp_provider_id,
-                      name: provider_name,
                       locations: [location_id],
                     },
                     product: {
@@ -113,6 +112,7 @@ export default function ProductCard(props) {
                         ...product.price,
                         value: Math.round(price.value),
                       },
+                      provider_name,
                     },
                   });
                 }}

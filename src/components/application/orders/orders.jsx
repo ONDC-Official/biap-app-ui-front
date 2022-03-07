@@ -20,7 +20,8 @@ export default function Orders() {
       try {
         const data = await getCall("/client/v1/orders");
         const formated_orders = data.map((order) => {
-          const { quote, state, id, transaction_id, fulfillment } = order;
+          const { quote, state, id, transaction_id, fulfillment, billing } =
+            order;
           return {
             product: {
               name: quote?.breakup[0].title,
@@ -33,9 +34,20 @@ export default function Orders() {
             status: state,
             order_id: id,
             transaction_id: transaction_id,
+            created_at: billing?.created_at,
           };
         });
         setOrders(formated_orders);
+        // setOrders(
+        //   formated_orders.sort((a, b) =>
+        //     a.created_at > b.created_at
+        //       ? 1
+        //       : b.created_at > a.created_at
+        //       ? -1
+        //       : 0
+        //   )
+        // );
+
         setFetchOrderLoading(false);
       } catch (err) {
         console.log(err);
@@ -102,7 +114,14 @@ export default function Orders() {
             </div>
             <div className="row py-2">
               {orders.map(
-                ({ product, address, status, order_id, transaction_id }) => {
+                ({
+                  product,
+                  address,
+                  status,
+                  order_id,
+                  transaction_id,
+                  created_at,
+                }) => {
                   return (
                     <div
                       className="col-lg-4 col-md-6 col-sm-12 py-2"
@@ -114,6 +133,7 @@ export default function Orders() {
                         status={status}
                         transaction_id={transaction_id}
                         order_id={order_id}
+                        created_at={created_at}
                       />
                     </div>
                   );

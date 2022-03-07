@@ -1,4 +1,10 @@
-import React, { Fragment, useContext, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { buttonTypes } from "../../../../utils/button";
 import styles from "../../../../styles/cart/cartView.module.scss";
 // import cartItemStyles from "../../../../styles/products/cartItemsOrderSummary.module.scss";
@@ -25,13 +31,19 @@ export default function OrderConfirmationCard(props) {
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
   const { cartItems, onRemoveProduct } = useContext(CartContext);
   const [initializeOrderLoading, setInitializeOrderLoading] = useState(false);
-  const [onInitialized, setOnInitialized] = useState([]);
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
     message: "",
   });
   const initialize_polling_timer = useRef(0);
+  const onInitialized = useRef();
+
+  useEffect(() => {
+    return () => {
+      clearInterval(initialize_polling_timer.current);
+    };
+  }, []);
 
   async function initializeOrder(items) {
     try {
@@ -51,12 +63,10 @@ export default function OrderConfirmationCard(props) {
             },
             delivery_info: {
               type: "HOME-DELIVERY",
-              name: deliveryAddress?.descriptor?.name,
-              email: "",
-              phone: "",
-              location: {
-                address: deliveryAddress?.address,
-              },
+              name: deliveryAddress?.name,
+              email: deliveryAddress?.email,
+              phone: deliveryAddress?.phone,
+              location: deliveryAddress?.location,
             },
           },
         }))
@@ -88,7 +98,7 @@ export default function OrderConfirmationCard(props) {
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
-      setOnInitialized(data);
+      onInitialized.current = data;
     } catch (err) {
       console.log(err);
       setInitializeOrderLoading(false);
@@ -101,7 +111,7 @@ export default function OrderConfirmationCard(props) {
     initialize_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setInitializeOrderLoading(false);
-        const allOrderInitialized = onInitialized.every(
+        const allOrderInitialized = onInitialized.current.every(
           (data) => data?.message?.order
         );
         if (allOrderInitialized) {

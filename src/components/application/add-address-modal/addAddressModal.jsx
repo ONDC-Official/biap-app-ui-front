@@ -13,6 +13,8 @@ export default function AddAddressModal(props) {
   const [addAddressLoading, setAddAddressLoading] = useState(false);
   const [address, setAddress] = useState({
     name: "",
+    email: "",
+    phone: "",
     area_code: "",
     city: "",
     door: "",
@@ -21,6 +23,8 @@ export default function AddAddressModal(props) {
   });
   const [error, setError] = useState({
     name_error: "",
+    email_error: "",
+    phone_error: "",
     area_code_error: "",
     city_name_error: "",
     door_error: "",
@@ -34,10 +38,6 @@ export default function AddAddressModal(props) {
     try {
       const data = await postCall("/client/v1/billing_details", {
         name: address.name,
-        // organization: {
-        //   name: "amazon.com",
-        //   cred: "amazon pay",
-        // },
         address: {
           area_code: address.area_code,
           building: address.door,
@@ -47,8 +47,8 @@ export default function AddAddressModal(props) {
           state: address.state,
           street: address.street,
         },
-        email: "shrey@gmail.com",
-        phone: "12345678910",
+        email: address.email,
+        phone: address.phone,
       });
       onAddAddress(data);
     } catch (err) {
@@ -65,6 +65,8 @@ export default function AddAddressModal(props) {
       const data = await postCall("/client/v1/delivery_address", {
         descriptor: {
           name: address.name,
+          email: address.email,
+          phone: address.phone,
         },
         address: {
           area_code: address.area_code,
@@ -132,6 +134,44 @@ export default function AddAddressModal(props) {
                       setError((error) => ({
                         ...error,
                         name_error: "",
+                      }));
+                    }}
+                  />
+                </div>
+                <div className="col-md-6 col-sm-12">
+                  <Input
+                    type="text"
+                    placeholder="Enter Email"
+                    id="email"
+                    label_name="Email"
+                    onChange={(event) => {
+                      const name = event.target.value;
+                      setAddress((address) => ({
+                        ...address,
+                        email: name.trim(),
+                      }));
+                      setError((error) => ({
+                        ...error,
+                        email_error: "",
+                      }));
+                    }}
+                  />
+                </div>
+                <div className="col-md-6 col-sm-12">
+                  <Input
+                    type="number"
+                    placeholder="Enter Phone"
+                    id="phone"
+                    label_name="Phone Number"
+                    onChange={(event) => {
+                      const name = event.target.value;
+                      setAddress((address) => ({
+                        ...address,
+                        phone: name.trim(),
+                      }));
+                      setError((error) => ({
+                        ...error,
+                        phone_error: "",
                       }));
                     }}
                   />

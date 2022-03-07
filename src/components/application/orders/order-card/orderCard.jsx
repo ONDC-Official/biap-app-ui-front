@@ -1,4 +1,5 @@
 import React from "react";
+import moment from "moment";
 import { getOrderStatus } from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
 import { buttonTypes } from "../../../../utils/button";
@@ -7,15 +8,27 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import IndianRupee from "../../../shared/svg/indian-rupee";
 
 export default function OrderCard(props) {
-  const { product, address, order_id, status, transaction_id } = props;
+  const { product, address, order_id, status, transaction_id, created_at } =
+    props;
   const current_order_status = getOrderStatus(status);
   return (
     <div className={styles.orders_card}>
       {/* card header */}
       <div className={`${styles.card_header} d-flex align-items-center`}>
-        <p className={`${styles.product_name} ${styles.card_header_title}`}>
-          {product?.name}
-        </p>
+        <div>
+          <p
+            className={`${styles.product_name} ${styles.card_header_title} pe-3`}
+            title={product?.name}
+          >
+            {product?.name}
+          </p>
+          <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
+            Ordered on
+            <span style={{ fontWeight: "500", padding: "0 5px" }}>
+              {moment(created_at).format("MMMM Do, YYYY")}
+            </span>
+          </p>
+        </div>
         <div className="ms-auto">
           <div className="d-flex align-items-center">
             <div className="pe-2">

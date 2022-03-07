@@ -93,18 +93,20 @@ export default function Checkout() {
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
+      let total_payable = 0;
       const quotes = data.map((item) => {
         const { message } = item;
+        total_payable += Number(message?.quote?.quote?.price?.value);
         const breakup = message?.quote?.quote?.breakup;
         const provided_by = message?.quote?.provider?.descriptor?.name;
         const product = breakup.map((break_up_item) => ({
-          title: break_up_item.title,
-          price: message?.quote?.quote?.price?.value,
+          title: break_up_item?.title,
+          price: Math.round(break_up_item?.price?.value),
           provided_by,
         }));
         return product;
       });
-      setProductsQoute(quotes.flat());
+      setProductsQoute({ products: quotes.flat(), total_payable });
     } catch (err) {
       console.log(err);
       setGetQuoteLoading(false);
@@ -202,7 +204,6 @@ export default function Checkout() {
                     <div className="col-12 pb-3">
                       <PaymentConfirmationCard
                         currentActiveStep={currentActiveStep}
-                        productsQuote={productsQuote}
                       />
                     </div>
                   </div>

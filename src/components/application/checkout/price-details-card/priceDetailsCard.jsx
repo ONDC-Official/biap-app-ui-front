@@ -20,7 +20,7 @@ export default function PriceDetailsCard(props) {
         <p className={styles.card_header_title}>Price Details</p>
       </div>
       <div className={styles.card_body}>
-        {productsQuote.map((quote, index) => {
+        {productsQuote.products.map((quote, index) => {
           return (
             <div
               className="py-2 d-flex align-items-center"
@@ -59,9 +59,7 @@ export default function PriceDetailsCard(props) {
               color={ONDC_COLORS.PRIMARYCOLOR}
             />
           </div>
-          <p className={styles.sub_total_text}>
-            {getTotalPayable(productsQuote)}
-          </p>
+          <p className={styles.sub_total_text}>{productsQuote.total_payable}</p>
         </div>
       </div>
     </div>

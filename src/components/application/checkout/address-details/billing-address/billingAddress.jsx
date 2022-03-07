@@ -22,7 +22,15 @@ export default function BillingAddress(props) {
             <div className="col-12">
               <AddressRadioButton
                 checked={billingAddress?.id === deliveryAddress?.id}
-                onClick={() => setBillingAddress(deliveryAddress)}
+                onClick={() =>
+                  setBillingAddress({
+                    id: deliveryAddress?.id,
+                    address: deliveryAddress?.location?.address,
+                    phone: deliveryAddress?.phone || "",
+                    name: deliveryAddress?.name || "",
+                    email: deliveryAddress?.email || "",
+                  })
+                }
               >
                 <div className="px-3">
                   <p className={styles.address_line_1}>
@@ -38,13 +46,21 @@ export default function BillingAddress(props) {
         <div className={`${styles.address_wrapper} container-fluid`}>
           <div className="row">
             {billingAddresses.map((billing_address) => {
-              const { id, name, address } = billing_address;
+              const { id, name, address, email, phone } = billing_address;
               return (
                 <div className="col-lg-6" key={id}>
                   <AddressRadioButton
                     key={id}
                     checked={billingAddress?.id === id}
-                    onClick={() => setBillingAddress(billing_address)}
+                    onClick={() =>
+                      setBillingAddress({
+                        id,
+                        address,
+                        phone,
+                        name,
+                        email,
+                      })
+                    }
                   >
                     <div className="px-3">
                       <p className={styles.address_name_and_phone}>{name}</p>

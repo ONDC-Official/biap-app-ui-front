@@ -1,4 +1,10 @@
-import React, { Fragment, useContext, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { buttonTypes } from "../../../../utils/button";
 import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
@@ -15,25 +21,31 @@ import Toast from "../../../shared/toast/toast";
 import { useHistory } from "react-router-dom";
 
 export default function PaymentConfirmationCard(props) {
-  const { currentActiveStep, productsQuote } = props;
+  const { currentActiveStep } = props;
   const history = useHistory();
   const transaction_id = Cookies.get("transaction_id");
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
   const { cartItems, setCartItems } = useContext(CartContext);
   const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
-  const [onConfirmed, setOnConfirmed] = useState([]);
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
     message: "",
   });
   const confirm_polling_timer = useRef(0);
+  const onConfirmed = useRef();
+
+  useEffect(() => {
+    return () => {
+      clearInterval(confirm_polling_timer.current);
+    };
+  }, []);
 
   // use this function to get the total amount of the quote
-  function getTotalPayable(products) {
+  function getTotalPayable(items) {
     let sum = 0;
-    products.forEach((product) => {
-      return (sum += Number(product.price));
+    items.forEach((item) => {
+      return (sum += Number(item.product.price.value));
     });
     return sum;
   }
@@ -42,7 +54,7 @@ export default function PaymentConfirmationCard(props) {
     try {
       const data = await postCall(
         "/client/v2/confirm_order",
-        items.map((item) => ({
+        items.map((item, index) => ({
           context: {
             transaction_id,
           },
@@ -56,15 +68,13 @@ export default function PaymentConfirmationCard(props) {
             },
             delivery_info: {
               type: "HOME-DELIVERY",
-              name: deliveryAddress?.descriptor?.name,
-              email: "",
-              phone: "",
-              location: {
-                address: deliveryAddress?.address,
-              },
+              name: deliveryAddress?.name,
+              email: deliveryAddress?.email,
+              phone: deliveryAddress?.phone,
+              location: deliveryAddress?.location,
             },
             payment: {
-              paid_amount: getTotalPayable(productsQuote),
+              paid_amount: getTotalPayable(item),
               status: "PAID",
               transaction_id,
             },
@@ -98,7 +108,7 @@ export default function PaymentConfirmationCard(props) {
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
-      setOnConfirmed(data);
+      onConfirmed.current = data;
     } catch (err) {
       console.log(err);
       setConfirmOrderLoading(false);
@@ -111,7 +121,7 @@ export default function PaymentConfirmationCard(props) {
     confirm_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setConfirmOrderLoading(false);
-        const allOrderConfirmed = onConfirmed.every(
+        const allOrderConfirmed = onConfirmed.current.every(
           (data) => data?.message?.order
         );
         if (allOrderConfirmed) {

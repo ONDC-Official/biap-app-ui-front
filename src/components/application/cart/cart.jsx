@@ -73,7 +73,9 @@ export default function Cart() {
                             bpp_id={bpp_id}
                             location_id={provider?.locations[0]}
                             bpp_provider_id={provider?.id}
-                            bpp_provider_descriptor={{ name: provider?.name }}
+                            bpp_provider_descriptor={{
+                              name: product?.provider_name,
+                            }}
                           />
                         </div>
                       );
