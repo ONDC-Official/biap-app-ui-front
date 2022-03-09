@@ -14,12 +14,8 @@ import { debounce } from "../../../utils/search";
 import { postCall } from "../../../api/axios";
 import Cookies from "js-cookie";
 
-export default function SearchProductModal({ onClose, onSearch }) {
-  const [searchedLocation, setSearchedLocation] = useState({
-    name: "",
-    lat: "",
-    lng: "",
-  });
+export default function SearchProductModal({ onClose, onSearch, location }) {
+  const [searchedLocation, setSearchedLocation] = useState(location);
   const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
   const [search, setSearch] = useState({
     type: search_types.PRODUCT,

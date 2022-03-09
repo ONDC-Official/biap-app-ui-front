@@ -154,6 +154,7 @@ export default function ProductList() {
       <Navbar />
       {toggleSearchProductModal && (
         <SearchProductModal
+          location={searchedLocation}
           onClose={() => setToggleSearchProductModal(false)}
           onSearch={({ search, location, message_id }) => {
             setSearchedProduct(search?.value);

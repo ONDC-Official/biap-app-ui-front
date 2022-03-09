@@ -17,7 +17,7 @@ import { toast_types } from "../../../../utils/toast";
 import Toast from "../../../shared/toast/toast";
 
 export default function AddressDetailsCard(props) {
-  const { currentActiveStep, setCurrentActiveStep } = props;
+  const { currentActiveStep, setCurrentActiveStep, initLoading } = props;
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
@@ -160,6 +160,7 @@ export default function AddressDetailsCard(props) {
         {isStepCompleted() && toggleChangeButton() && (
           <div className="ms-auto">
             <Button
+              disabled={initLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Change"

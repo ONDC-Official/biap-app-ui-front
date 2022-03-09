@@ -26,7 +26,7 @@ import Toast from "../../../shared/toast/toast";
 import { toast_types } from "../../../../utils/toast";
 
 export default function OrderConfirmationCard(props) {
-  const { currentActiveStep, setCurrentActiveStep } = props;
+  const { currentActiveStep, setCurrentActiveStep, updateInitLoading } = props;
   const transaction_id = Cookies.get("transaction_id");
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
   const { cartItems, onRemoveProduct } = useContext(CartContext);
@@ -87,6 +87,7 @@ export default function OrderConfirmationCard(props) {
     } catch (err) {
       console.log(err);
       setInitializeOrderLoading(false);
+      updateInitLoading(false);
     }
   }
 
@@ -102,6 +103,7 @@ export default function OrderConfirmationCard(props) {
     } catch (err) {
       console.log(err);
       setInitializeOrderLoading(false);
+      updateInitLoading(false);
     }
   }
 
@@ -111,6 +113,7 @@ export default function OrderConfirmationCard(props) {
     initialize_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setInitializeOrderLoading(false);
+        updateInitLoading(false);
         const allOrderInitialized = onInitialized.current.every(
           (data) => data?.message?.order
         );
@@ -270,6 +273,7 @@ export default function OrderConfirmationCard(props) {
               button_text="Initialize"
               onClick={() => {
                 setInitializeOrderLoading(true);
+                updateInitLoading(true);
                 const request_object = constructQouteObject(cartItems);
                 initializeOrder(request_object);
               }}

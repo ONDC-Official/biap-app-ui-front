@@ -31,6 +31,7 @@ export default function Checkout() {
   const transaction_id = Cookies.get("transaction_id");
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
+  const [initLoading, setInitLoading] = useState(false);
   const [productsQuote, setProductsQoute] = useState();
   const [currentActiveStep, setCurrentActiveStep] = useState(
     get_current_step(checkout_steps.SELECT_ADDRESS)
@@ -191,6 +192,7 @@ export default function Checkout() {
                         setCurrentActiveStep={(value) =>
                           setCurrentActiveStep(value)
                         }
+                        initLoading={initLoading}
                       />
                     </div>
                     <div className="col-12 pb-3">
@@ -199,6 +201,7 @@ export default function Checkout() {
                         setCurrentActiveStep={(value) =>
                           setCurrentActiveStep(value)
                         }
+                        updateInitLoading={(value) => setInitLoading(value)}
                       />
                     </div>
                     <div className="col-12 pb-3">
