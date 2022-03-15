@@ -212,27 +212,34 @@ export default function ProductList() {
                     return (
                       <Fragment key={`${bpp_id}-id-${index}`}>
                         {bpp_providers.map(
-                          ({ id, items, locations, descriptor }) => {
-                            return (
-                              <Fragment>
-                                {items.map((item) => {
-                                  return (
-                                    <div
-                                      key={item.id}
-                                      className="col-lg-4 col-md-6 col-sm-6 p-2"
-                                    >
-                                      <ProductCard
-                                        product={item}
-                                        bpp_provider_descriptor={descriptor}
-                                        bpp_id={bpp_id}
-                                        location_id={locations[0].id}
-                                        bpp_provider_id={id}
-                                      />
-                                    </div>
-                                  );
-                                })}
-                              </Fragment>
-                            );
+                          ({ id, items, locations = "", descriptor }) => {
+                            if (locations && bpp_id) {
+                              return (
+                                <Fragment>
+                                  {items.map((item) => {
+                                    return (
+                                      <div
+                                        key={item.id}
+                                        className="col-lg-4 col-md-6 col-sm-6 p-2"
+                                      >
+                                        <ProductCard
+                                          product={item}
+                                          bpp_provider_descriptor={descriptor}
+                                          bpp_id={bpp_id}
+                                          location_id={
+                                            locations.length > 0
+                                              ? locations[0].id
+                                              : ""
+                                          }
+                                          bpp_provider_id={id}
+                                        />
+                                      </div>
+                                    );
+                                  })}
+                                </Fragment>
+                              );
+                            }
+                            return null;
                           }
                         )}
                       </Fragment>
