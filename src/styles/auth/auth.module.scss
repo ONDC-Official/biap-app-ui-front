@@ -1,8 +1,8 @@
 @import "../../assets/scss/variables.scss";
 
 .auth_card_background {
-  height: 100%;
-  width: 100%;
+  height: 80%;
+  width: 50%;
   background-color: $white;
   padding: 10px;
   border-radius: 10px;
@@ -49,4 +49,11 @@
 .navigation_link:hover {
   color: $accentColor;
   text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  .auth_card_background {
+    width: 100%;
+    height: 100%;
+  }
 }

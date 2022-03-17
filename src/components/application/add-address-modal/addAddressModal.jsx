@@ -90,6 +90,8 @@ export default function AddAddressModal(props) {
   function checkFormvalidation() {
     return (
       address?.name === "" ||
+      address?.phone === "" ||
+      address?.email === "" ||
       address?.street === "" ||
       address?.city === "" ||
       address?.state === "" ||
