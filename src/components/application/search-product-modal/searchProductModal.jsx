@@ -5,7 +5,6 @@ import styles from "../../../styles/search-product-modal/searchProductModal.modu
 import { buttonTypes } from "../../../utils/button";
 import Button from "../../shared/button/button";
 import { ONDC_COLORS } from "../../shared/colors";
-import Dropdown from "../../shared/dropdown/dropdown";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Loading from "../../shared/loading/loading";
 import CrossIcon from "../../shared/svg/cross-icon";
@@ -195,6 +194,33 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
           </div>
         </div>
         <div className={styles.card_body}>
+          <div className="py-2 d-flex align-items-center justify-content-center flex-wrap">
+            {Object.values(search_types).map((search_type, index) => {
+              return (
+                <div
+                  className="p-2 flex-fill"
+                  key={`${search_type}-${index}`}
+                  onClick={() =>
+                    setSearch((search) => ({
+                      ...search,
+                      type: search_type,
+                      value: "",
+                    }))
+                  }
+                >
+                  <div
+                    className={
+                      search.type === search_type
+                        ? styles.active_search_type
+                        : styles.search_type_wrapper
+                    }
+                  >
+                    <p className={styles.search_type_value}>{search_type}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           <div className="py-3" style={{ position: "relative" }}>
             <div
               className={`${styles.modal_input_wrappper} d-flex align-items-center`}
@@ -269,59 +295,27 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
             <div
               className={`${styles.modal_input_wrappper} d-flex align-items-center`}
             >
-              <Dropdown
-                header={
-                  <div
-                    className={`${styles.category_drodpwon_wrapper} d-flex align-items-center`}
-                  >
-                    <div className="px-2">
-                      <p className={styles.search_type_text}>{search.type}</p>
-                    </div>
-                    <div className="px-2">
-                      <DropdonwSvg
-                        width="10"
-                        height="7"
-                        color={ONDC_COLORS.WHITE}
-                      />
-                    </div>
-                  </div>
-                }
-                body_classes="dropdown-menu-right"
-                click={(search_type) => {
+              <input
+                id="search"
+                name="search"
+                type="text"
+                placeholder={`Search ${search.type}`}
+                autoComplete="off"
+                value={search.value}
+                onBlur={checkSearch}
+                onChange={(event) => {
+                  const searchValue = event.target.value.trim();
                   setSearch((search) => ({
                     ...search,
-                    type: search_type,
-                    value: "",
+                    value: searchValue,
+                  }));
+                  setInlineError((inlineError) => ({
+                    ...inlineError,
+                    search_error: "",
                   }));
                 }}
-                options={Object.values(search_types).map((type) => ({
-                  value: type,
-                }))}
-                show_icons={false}
+                className={styles.formControl}
               />
-              <div className={styles.category_name_input_wrapper}>
-                <input
-                  id="search"
-                  name="search"
-                  type="text"
-                  placeholder={`Search ${search.type}`}
-                  autoComplete="off"
-                  value={search.value}
-                  onBlur={checkSearch}
-                  onChange={(event) => {
-                    const searchValue = event.target.value.trim();
-                    setSearch((search) => ({
-                      ...search,
-                      value: searchValue,
-                    }));
-                    setInlineError((inlineError) => ({
-                      ...inlineError,
-                      search_error: "",
-                    }));
-                  }}
-                  className={styles.formControl}
-                />
-              </div>
             </div>
             {inlineError.search_error && (
               <ErrorMessage>{inlineError.search_error}</ErrorMessage>

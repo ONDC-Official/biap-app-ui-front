@@ -185,31 +185,45 @@
   color: $secondaryColor;
 }
 
-.category_drodpwon_wrapper {
-  flex-basis: 30%;
-  padding: 15px;
-  background-color: $accentColor;
-  cursor: pointer;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-}
-
-.category_name_input_wrapper {
-  flex-basis: 70%;
-}
-
-.search_type_text {
-  font-size: $font-14;
-  font-weight: $medium;
-  text-align: center;
-  color: $white;
-  margin: 0;
-}
-
 .address_form_wrapper {
   max-height: 300px;
   overflow: auto;
   max-width: 500px;
+}
+
+.search_type_wrapper {
+  padding: 10px 20px;
+  border-radius: 36px;
+  border: 1px solid $secondaryColor;
+  cursor: pointer;
+}
+
+.search_type_wrapper:hover {
+  background-color: $accentColor;
+  border: 1px solid $accentColor;
+  transition: all 0.3s;
+
+  .search_type_value {
+    color: $white;
+  }
+}
+
+.search_type_value {
+  margin: 0;
+  font-size: $font-14;
+  color: $secondaryColor;
+  text-align: center;
+}
+
+.active_search_type {
+  padding: 10px 20px;
+  border-radius: 36px;
+  background-color: $accentColor;
+  border: 1px solid $accentColor;
+
+  .search_type_value {
+    color: $white;
+  }
 }
 
 @keyframes fade {
