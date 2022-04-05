@@ -2,8 +2,6 @@ import React from "react";
 import moment from "moment";
 import { getOrderStatus } from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
-import { buttonTypes } from "../../../../utils/button";
-import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
 import IndianRupee from "../../../shared/svg/indian-rupee";
 
@@ -11,9 +9,9 @@ export default function OrderCard(props) {
   const {
     product,
     address,
-    order_id,
+    // order_id,
     status,
-    transaction_id,
+    // transaction_id,
     created_at,
   } = props;
   const current_order_status = getOrderStatus(status);

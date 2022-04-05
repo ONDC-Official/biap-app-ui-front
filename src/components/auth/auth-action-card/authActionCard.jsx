@@ -1,7 +1,6 @@
 import React from "react";
 import styles from "../../../styles/auth/auth.module.scss";
 import logo from "../../../assets/images/logo.png";
-import authIllustration from "../../../assets/images/login_illustration.png";
 
 export default function AuthActionCard(props) {
   const { action_form, navigation_link } = props;

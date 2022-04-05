@@ -6,14 +6,6 @@ import IndianRupee from "../../../shared/svg/indian-rupee";
 export default function PriceDetailsCard(props) {
   const { productsQuote } = props;
 
-  function getTotalPayable(products) {
-    let sum = 0;
-    products.forEach((product) => {
-      return (sum += Number(product.price));
-    });
-    return sum;
-  }
-
   return (
     <div className={styles.price_summary_card}>
       <div className={styles.card_header}>
