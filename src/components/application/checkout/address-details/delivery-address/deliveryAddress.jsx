@@ -18,41 +18,50 @@ export default function DeliveryAddress(props) {
       {deliveryAddresses.length > 0 && (
         <div className={`${styles.address_wrapper} container-fluid pt-2`}>
           <div className="row">
-            {deliveryAddresses.map((delivery_address) => {
-              const { id, descriptor, address } = delivery_address;
-              return (
-                <div className="col-lg-6" key={id}>
-                  <AddressRadioButton
-                    key={id}
-                    checked={deliveryAddress?.id === id}
-                    onClick={() =>
-                      setDeliveryAddress(() => ({
-                        id,
-                        name: descriptor?.name || "",
-                        email: descriptor?.email || "",
-                        phone: descriptor?.phone || "",
-                        location: {
-                          address: address,
-                        },
-                      }))
-                    }
-                  >
-                    <div className="px-3">
-                      <p className={styles.address_name_and_phone}>
-                        {descriptor?.name}
-                      </p>
-                      <p className={styles.address_line_1}>
-                        {address?.street ? address.street : address?.door},{" "}
-                        {address?.city} {address?.state}
-                      </p>
-                      <p className={styles.address_line_2}>
-                        {address?.area_code}
-                      </p>
-                    </div>
-                  </AddressRadioButton>
-                </div>
-              );
-            })}
+            {deliveryAddresses
+              .filter(
+                (delivery_address) =>
+                  delivery_address?.descriptor.phone !== "" &&
+                  delivery_address?.descriptor.email !== ""
+              )
+              .map((delivery_address) => {
+                const { id, descriptor, address } = delivery_address;
+                return (
+                  <div className="col-lg-6" key={id}>
+                    <AddressRadioButton
+                      key={id}
+                      checked={deliveryAddress?.id === id}
+                      onClick={() =>
+                        setDeliveryAddress(() => ({
+                          id,
+                          name: descriptor?.name || "",
+                          email: descriptor?.email || "",
+                          phone: descriptor?.phone || "",
+                          location: {
+                            address: address,
+                          },
+                        }))
+                      }
+                    >
+                      <div className="px-3">
+                        <p className={styles.address_name_and_phone}>
+                          {descriptor?.name}
+                        </p>
+                        <p className={`${styles.address_line_2} pb-2`}>
+                          {descriptor?.email} - {descriptor?.phone}
+                        </p>
+                        <p className={styles.address_line_1}>
+                          {address?.street ? address.street : address?.door},{" "}
+                          {address?.city} {address?.state}
+                        </p>
+                        <p className={styles.address_line_2}>
+                          {address?.area_code}
+                        </p>
+                      </div>
+                    </AddressRadioButton>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}

@@ -32,48 +32,26 @@
 
 .orders_card {
   width: 100%;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px 0 rgba($primaryColor, 0.15);
   background-color: $white;
 }
 
-.card_header {
-  padding: 20px 25px;
-  background-color: $white;
-  border-bottom: 1px solid rgba($secondaryColor, 0.15);
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-
-  .card_header_title {
-    font-family: $firaSans;
-    font-size: $font-18;
-    font-weight: $medium;
-    text-align: left;
-    color: $primaryColor;
-    margin: 0;
-  }
+.card_header_title {
+  font-family: $firaSans;
+  font-size: $font-20;
+  font-weight: $medium;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
 }
 
-.card_body {
-  padding: 20px 25px;
-  border-bottom: 1px solid rgba($secondaryColor, 0.15);
-
-  .card_body_text {
-    font-size: $font-14;
-    text-align: left;
-    color: $secondaryColor;
-    margin: 0;
-  }
-}
-
-.card_footer {
-  padding: 20px 25px;
-  .card_body_text {
-    font-size: $font-14;
-    text-align: left;
-    color: $secondaryColor;
-    margin: 0;
-  }
+.card_body_text {
+  font-size: $font-16;
+  text-align: left;
+  color: $secondaryColor;
+  margin: 0;
 }
 
 .product_name {
@@ -84,7 +62,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: break-all;
-  font-size: $font-14;
+  font-size: $font-18;
   font-weight: $medium;
   color: $primaryColor;
   margin: 0;
@@ -140,9 +118,49 @@
 }
 
 .status_bar {
-  width: 60px;
+  width: 30px;
   height: 5px;
   border-radius: 10px;
   position: relative;
   top: 8px;
+}
+
+.return_button {
+  width: 100px;
+  height: 40px;
+  background-color: $white;
+  border: 1px solid $secondaryColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $secondaryColor;
+}
+
+.return_button:hover {
+  background-color: $secondaryColor;
+  color: $white;
+  transition: all 0.3s;
+}
+
+.cancel_button {
+  width: 100px;
+  height: 40px;
+  background-color: $white;
+  border: 1px solid $error;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $error;
+}
+
+.cancel_button:hover {
+  background-color: $error;
+  color: $white;
+  transition: all 0.3s;
 }

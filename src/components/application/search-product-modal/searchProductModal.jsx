@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { search_types } from "../../../constants/searchTypes";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
@@ -24,6 +24,7 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
     location_error: "",
     search_error: "",
   });
+  const criteria = useRef();
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
@@ -35,6 +36,28 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
       setSearchProductLoading(false);
     };
   }, []);
+
+  useEffect(() => {
+    if (search.type === search_types.PRODUCT) {
+      criteria.current = {
+        search_string: search.value,
+        delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+      };
+    }
+    if (search.type === search_types.CATEGORY) {
+      criteria.current = {
+        category_id: search.value,
+        delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+      };
+    }
+    if (search.type === search_types.PROVIDER) {
+      criteria.current = {
+        provider_id: search.value,
+        delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+      };
+    }
+    // eslint-disable-next-line
+  }, [search]);
 
   // get all the suggested location api
   async function getAllLocations(query) {
@@ -83,10 +106,7 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
       const { context } = await postCall("/client/v1/search", {
         context: {},
         message: {
-          criteria: {
-            search_string: search.value,
-            delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
-          },
+          criteria: criteria.current,
         },
       });
       // generating context for search

@@ -8,8 +8,9 @@ import AddressRadioButton from "../address-radio-button/addressRadioButton";
 
 export default function BillingAddress(props) {
   const { billingAddresses, setBillingAddresses } = props;
-  const { deliveryAddress, billingAddress, setBillingAddress } =
-    useContext(AddressContext);
+  const { deliveryAddress, billingAddress, setBillingAddress } = useContext(
+    AddressContext
+  );
   const [toggleAddressModal, setToggleAddressModal] = useState(false);
   return (
     <Fragment>
@@ -45,37 +46,45 @@ export default function BillingAddress(props) {
       {billingAddresses.length > 0 && (
         <div className={`${styles.address_wrapper} container-fluid`}>
           <div className="row">
-            {billingAddresses.map((billing_address) => {
-              const { id, name, address, email, phone } = billing_address;
-              return (
-                <div className="col-lg-6" key={id}>
-                  <AddressRadioButton
-                    key={id}
-                    checked={billingAddress?.id === id}
-                    onClick={() =>
-                      setBillingAddress({
-                        id,
-                        address,
-                        phone,
-                        name,
-                        email,
-                      })
-                    }
-                  >
-                    <div className="px-3">
-                      <p className={styles.address_name_and_phone}>{name}</p>
-                      <p className={styles.address_line_1}>
-                        {address?.street ? address.street : address?.door},{" "}
-                        {address?.city} {address?.state}
-                      </p>
-                      <p className={styles.address_line_2}>
-                        {address?.area_code}
-                      </p>
-                    </div>
-                  </AddressRadioButton>
-                </div>
-              );
-            })}
+            {billingAddresses
+              .filter(
+                (billing_address) =>
+                  billing_address?.phone !== "" && billing_address?.email !== ""
+              )
+              .map((billing_address) => {
+                const { id, name, address, email, phone } = billing_address;
+                return (
+                  <div className="col-lg-6" key={id}>
+                    <AddressRadioButton
+                      key={id}
+                      checked={billingAddress?.id === id}
+                      onClick={() =>
+                        setBillingAddress({
+                          id,
+                          address,
+                          phone,
+                          name,
+                          email,
+                        })
+                      }
+                    >
+                      <div className="px-3">
+                        <p className={styles.address_name_and_phone}>{name}</p>
+                        <p className={`${styles.address_line_2} pb-2`}>
+                          {email} - {phone}
+                        </p>
+                        <p className={styles.address_line_1}>
+                          {address?.street ? address.street : address?.door},{" "}
+                          {address?.city} {address?.state}
+                        </p>
+                        <p className={styles.address_line_2}>
+                          {address?.area_code}
+                        </p>
+                      </div>
+                    </AddressRadioButton>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}

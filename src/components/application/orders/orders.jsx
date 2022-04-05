@@ -20,8 +20,14 @@ export default function Orders() {
       try {
         const data = await getCall("/client/v1/orders");
         const formated_orders = data.map((order) => {
-          const { quote, state, id, transaction_id, fulfillment, billing } =
-            order;
+          const {
+            quote,
+            state,
+            id,
+            transaction_id,
+            fulfillment,
+            billing,
+          } = order;
           return {
             product: {
               name: quote?.breakup[0].title,
@@ -38,16 +44,6 @@ export default function Orders() {
           };
         });
         setOrders(formated_orders);
-        // setOrders(
-        //   formated_orders.sort((a, b) =>
-        //     a.created_at > b.created_at
-        //       ? 1
-        //       : b.created_at > a.created_at
-        //       ? -1
-        //       : 0
-        //   )
-        // );
-
         setFetchOrderLoading(false);
       } catch (err) {
         console.log(err);
@@ -123,10 +119,7 @@ export default function Orders() {
                   created_at,
                 }) => {
                   return (
-                    <div
-                      className="col-lg-4 col-md-6 col-sm-12 py-2"
-                      key={`order_id_${order_id}`}
-                    >
+                    <div className="col-12 py-2" key={`order_id_${order_id}`}>
                       <OrderCard
                         product={product}
                         address={address}
