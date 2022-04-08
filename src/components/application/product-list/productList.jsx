@@ -52,10 +52,10 @@ export default function ProductList() {
         `/client/v1/on_search?messageId=${message_id}`
       );
       const filteredProducts = data?.message?.catalogs.map((catalog) => {
-        if (catalog?.bpp_providers) {
+        if (catalog?.bpp_providers && catalog?.bpp_id) {
           return { ...catalog };
         } else {
-          return { ...catalog, bpp_providers: [] };
+          return { ...catalog, bpp_providers: [], bpp_id: "" };
         }
       });
       setProducts(filteredProducts);
@@ -198,7 +198,8 @@ export default function ProductList() {
             </div>
           </div>
           {/* list of product view  */}
-          {products.length > 0 ? (
+          {products.filter((catalog) => catalog?.bpp_providers?.length > 0)
+            .length > 0 ? (
             <div
               className={`py-2 ${
                 cartItems.length > 0

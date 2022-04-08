@@ -270,7 +270,7 @@ export default function OrderConfirmationCard(props) {
               disabled={initializeOrderLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
-              button_text="Initialize"
+              button_text="Place Order"
               onClick={() => {
                 setInitializeOrderLoading(true);
                 updateInitLoading(true);

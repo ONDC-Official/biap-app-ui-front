@@ -12,6 +12,7 @@ import DropdonwSvg from "../../shared/svg/dropdonw";
 import { debounce } from "../../../utils/search";
 import { postCall } from "../../../api/axios";
 import Cookies from "js-cookie";
+import MMI_LOGO from "../../../assets/images/mmi_logo.png";
 
 export default function SearchProductModal({ onClose, onSearch, location }) {
   const [searchedLocation, setSearchedLocation] = useState(location);
@@ -28,7 +29,6 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
-  const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 
   useEffect(() => {
     return () => {
@@ -63,12 +63,12 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
   async function getAllLocations(query) {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}maps/api/place/autocomplete/json?input=${query}&key=${API_KEY}`
+        `${process.env.REACT_APP_BASE_URL}/mmi/api/mmi_query?query=${query}`
       );
-      const formattedLocations = data.predictions.map((location) => ({
-        place_id: location.place_id,
-        name: location.structured_formatting.main_text,
-        description: location.structured_formatting.secondary_text,
+      const formattedLocations = data.map((location) => ({
+        place_id: location?.eLoc,
+        name: location?.placeName,
+        description: location?.alternateName,
       }));
       setLocations(formattedLocations);
     } catch (err) {
@@ -82,13 +82,13 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
   async function getPlaceFromPlaceId(location) {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}maps/api/place/details/json?place_id=${location.place_id}&key=${API_KEY}`
+        `${process.env.REACT_APP_BASE_URL}/mmi/api/mmi_place_info?eloc=${location.place_id}`
       );
       setSearchedLocation({
         ...searchedLocation,
-        name: data?.result?.formatted_address,
-        lat: data?.result?.geometry.location.lat,
-        lng: data?.result?.geometry.location.lng,
+        name: location?.name,
+        lat: data?.latitude,
+        lng: data?.longitude,
       });
       setToggleLocationListCard(false);
     } catch (err) {
@@ -241,7 +241,7 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
               );
             })}
           </div>
-          <div className="py-3" style={{ position: "relative" }}>
+          <div className="pt-3" style={{ position: "relative" }}>
             <div
               className={`${styles.modal_input_wrappper} d-flex align-items-center`}
             >
@@ -273,6 +273,25 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
             {inlineError.location_error && (
               <ErrorMessage>{inlineError.location_error}</ErrorMessage>
             )}
+            <div className="py-2">
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: ONDC_COLORS.SECONDARYCOLOR,
+                  margin: 0,
+                  padding: "0 10px",
+                }}
+              >
+                powered by{" "}
+                <span>
+                  <img
+                    src={MMI_LOGO}
+                    alt="MMI_LOGO"
+                    style={{ height: "20px" }}
+                  />
+                </span>
+              </p>
+            </div>
             {toggleLocationListCard && searchedLocation.name !== "" && (
               <div className={styles.location_list_wrapper}>
                 {searchedLocationLoading ? (
