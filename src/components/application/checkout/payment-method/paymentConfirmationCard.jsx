@@ -19,9 +19,14 @@ import Cookies from "js-cookie";
 import { toast_types } from "../../../../utils/toast";
 import Toast from "../../../shared/toast/toast";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
+import CrossIcon from "../../../shared/svg/cross-icon";
 
 export default function PaymentConfirmationCard(props) {
-  const { currentActiveStep } = props;
+  const { currentActiveStep, productsQuote } = props;
+  const token = Cookies.get("token");
+  const user = JSON.parse(Cookies.get("user"));
+  const hyperServiceObject = new window.HyperServices();
   const history = useHistory();
   const transaction_id = Cookies.get("transaction_id");
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
@@ -32,8 +37,34 @@ export default function PaymentConfirmationCard(props) {
     type: "",
     message: "",
   });
+  const [togglePaymentGateway, setTogglePaymentGateway] = useState(false);
   const confirm_polling_timer = useRef(0);
   const onConfirmed = useRef();
+  const sdkPayload = useRef({
+    action: "initiate",
+    clientId: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+    merchantId: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+    merchantKeyId: process.env.REACT_APP_MERCHANT_KEY_ID,
+    signaturePayload: "",
+    signature: "",
+    environment: process.env.REACT_APP_PAYMENT_SDK_ENV,
+    integrationType: "iframe",
+    hyperSDKDiv: "sdk_frame", // Div ID to be used for rendering
+  });
+  const processPayload = useRef({
+    action: "paymentPage",
+    merchantId: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+    clientId: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+    orderId: "",
+    amount: "",
+    customerId: user.id,
+    customerEmail: "",
+    customerMobile: "",
+    orderDetails: "",
+    signature: "",
+    merchantKeyId: process.env.REACT_APP_MERCHANT_KEY_ID,
+    environment: process.env.REACT_APP_PAYMENT_SDK_ENV,
+  });
 
   useEffect(() => {
     return () => {
@@ -158,8 +189,121 @@ export default function PaymentConfirmationCard(props) {
     }
     return false;
   }
+
+  async function signSDKPayload() {
+    try {
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_PAYMENT_SERVICE_URL}api/payment/signPayload`,
+        {
+          payload: {
+            merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+            customer_id: user.id,
+            mobile_number: billingAddress?.phone,
+            email_address: billingAddress?.email,
+            timestamp: new Date(),
+          },
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      sdkPayload.current = {
+        ...sdkPayload.current,
+        signaturePayload: JSON.stringify({
+          merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+          customer_id: user.id,
+          mobile_number: billingAddress?.phone,
+          email_address: billingAddress?.email,
+          timestamp: new Date(),
+        }),
+        signature: data.signedPayload,
+      };
+      // calling the sdk method
+      hyperServiceObject.initiate(
+        {
+          service: "in.juspay.hyperpay",
+          requestId: transaction_id,
+          payload: sdkPayload.current,
+        },
+        () => {}
+      );
+      processSdkPayload();
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function processSdkPayload() {
+    try {
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_PAYMENT_SERVICE_URL}api/payment/signPayload`,
+        {
+          payload: {
+            merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+            customer_id: user.id,
+            order_id: transaction_id,
+            customer_phone: billingAddress?.phone,
+            customer_email: billingAddress?.email,
+            amount: productsQuote.total_payable,
+            timestamp: new Date(),
+          },
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      processPayload.current = {
+        ...processPayload.current,
+        customerEmail: billingAddress?.email,
+        customerMobile: billingAddress?.phone,
+        orderId: transaction_id,
+        orderDetails: JSON.stringify({
+          merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+          customer_id: user.id,
+          order_id: transaction_id,
+          customer_phone: billingAddress?.phone,
+          customer_email: billingAddress?.email,
+          amount: productsQuote.total_payable,
+          timestamp: new Date(),
+        }),
+        signature: data.signedPayload,
+        amount: productsQuote.total_payable,
+      };
+      hyperServiceObject.process(
+        {
+          service: "in.juspay.hyperpay",
+          requestId: transaction_id,
+          payload: processPayload.current,
+        },
+        (res) => {
+          console.log(res);
+        }
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <div className={styles.price_summary_card}>
+      {togglePaymentGateway && (
+        <div>
+          <div style={{ position: "fixed", top: "5%", right: "5%" }}>
+            <CrossIcon onClick={() => setTogglePaymentGateway(false)} />
+          </div>
+          <div
+            id="sdk_frame"
+            style={{
+              height: "80%",
+              overflow: "auto",
+              position: "fixed",
+              top: "10%",
+              left: "30%",
+              right: "30%",
+            }}
+          ></div>
+        </div>
+      )}
       {toast.toggle && (
         <Toast
           type={toast.type}
@@ -195,10 +339,22 @@ export default function PaymentConfirmationCard(props) {
             {/* payment optios list will come here */}
             <div className="container-fluid pt-2">
               <div className="row">
-                <div className="col-12">
+                <div className="col-6">
                   <AddressRadioButton checked={true}>
                     <div className="px-3">
                       <p className={styles.address_line_1}>Cash on delivery</p>
+                    </div>
+                  </AddressRadioButton>
+                </div>
+                <div className="col-6">
+                  <AddressRadioButton
+                    onClick={() => {
+                      setTogglePaymentGateway(true);
+                      signSDKPayload();
+                    }}
+                  >
+                    <div className="px-3">
+                      <p className={styles.address_line_1}>Jus pay</p>
                     </div>
                   </AddressRadioButton>
                 </div>

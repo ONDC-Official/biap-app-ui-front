@@ -23,8 +23,9 @@ export default function SignUp() {
   const history = useHistory();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const [signUpUsingGoogleloading, setSignUpUsingGoogleLoading] =
-    useState(false);
+  const [signUpUsingGoogleloading, setSignUpUsingGoogleLoading] = useState(
+    false
+  );
   const [
     signUpUsingEmailAndPasswordloading,
     setSignUpUsingEmailAndPasswordLoading,
@@ -102,7 +103,7 @@ export default function SignUp() {
       .finally(() => setSignUpUsingGoogleLoading(false));
   }
   function handleRedirect(user) {
-    const { displayName, email, photoURL, accessToken } = user;
+    const { displayName, email, photoURL, accessToken, uid } = user;
     const cookie_expiry_time = new Date();
     cookie_expiry_time.setTime(cookie_expiry_time.getTime() + 3600 * 1000); // expires in 1 hour
     Cookies.set("token", accessToken, {
@@ -110,7 +111,7 @@ export default function SignUp() {
     });
     Cookies.set(
       "user",
-      JSON.stringify({ name: displayName, email, photoURL }),
+      JSON.stringify({ name: displayName, id: uid, email, photoURL }),
       {
         expires: cookie_expiry_time,
       }

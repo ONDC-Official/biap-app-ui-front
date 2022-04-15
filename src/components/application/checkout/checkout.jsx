@@ -207,6 +207,7 @@ export default function Checkout() {
                     <div className="col-12 pb-3">
                       <PaymentConfirmationCard
                         currentActiveStep={currentActiveStep}
+                        productsQuote={productsQuote}
                       />
                     </div>
                   </div>
