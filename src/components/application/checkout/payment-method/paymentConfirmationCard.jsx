@@ -193,7 +193,7 @@ export default function PaymentConfirmationCard(props) {
   async function signSDKPayload() {
     try {
       const { data } = await axios.post(
-        `${process.env.REACT_APP_PAYMENT_SERVICE_URL}api/payment/signPayload`,
+        `${process.env.REACT_APP_PAYMENT_SERVICE_URL}/api/payment/signPayload`,
         {
           payload: {
             merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
@@ -236,7 +236,7 @@ export default function PaymentConfirmationCard(props) {
   async function processSdkPayload() {
     try {
       const { data } = await axios.post(
-        `${process.env.REACT_APP_PAYMENT_SERVICE_URL}api/payment/signPayload`,
+        `${process.env.REACT_APP_PAYMENT_SERVICE_URL}/api/payment/signPayload`,
         {
           payload: {
             merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
