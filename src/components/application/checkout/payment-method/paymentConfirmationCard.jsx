@@ -190,18 +190,44 @@ export default function PaymentConfirmationCard(props) {
     return false;
   }
 
-  async function signSDKPayload() {
+  function hyperCallbackHandler(eventData) {
     try {
+      if (eventData) {
+        const eventJSON = typeof eventData === 'string' ? JSON.parse(eventData) : eventData;
+        const event = eventJSON.event
+        // Check for event key
+        if (event == "initiate_result") {
+          processPayment();
+        } else if (event == "process_result") {
+          //Handle process result here
+        } else if (event == "user_event") {
+          //Handle Payment Page events
+        } else {
+          console.log("Unhandled event", event, " Event data", eventData);
+        }
+      } else {
+        console.log("No data received in event", eventData);
+      }
+    } catch (error) {
+      console.log("Error in hyperSDK response", error);
+    }
+  }
+
+  async function initiateSDK() {
+    try {
+
+      const initiatePayloadObj = {
+        merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+        customer_id: user.id,
+        mobile_number: billingAddress?.phone,
+        email_address: billingAddress?.email,
+        timestamp: String(new Date().getTime()),
+      }
+
       const { data } = await axios.post(
-        `https://buyer-app.ondc.org/api/payment/signPayload`,
+        `http://localhost:3001/api/payment/signPayload`,
         {
-          payload: {
-            merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-            customer_id: user.id,
-            mobile_number: billingAddress?.phone,
-            email_address: billingAddress?.email,
-            timestamp: new Date(),
-          },
+          payload: JSON.stringify(initiatePayloadObj)
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -209,13 +235,7 @@ export default function PaymentConfirmationCard(props) {
       );
       sdkPayload.current = {
         ...sdkPayload.current,
-        signaturePayload: JSON.stringify({
-          merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-          customer_id: user.id,
-          mobile_number: billingAddress?.phone,
-          email_address: billingAddress?.email,
-          timestamp: new Date(),
-        }),
+        signaturePayload: JSON.stringify(initiatePayloadObj),
         signature: data.signedPayload,
       };
       // calling the sdk method
@@ -225,28 +245,33 @@ export default function PaymentConfirmationCard(props) {
           requestId: transaction_id,
           payload: sdkPayload.current,
         },
-        () => {}
+        hyperCallbackHandler
       );
-      processSdkPayload();
     } catch (err) {
       console.log(err);
     }
   }
 
-  async function processSdkPayload() {
+  async function processPayment() {
     try {
+
+      if (!hyperServiceObject.isInitialised()) {
+        alert('not initiated');
+      }
+      const processPayloadObj = {
+        merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+        customer_id: user.id,
+        order_id: transaction_id,
+        customer_phone: billingAddress?.phone,
+        customer_email: billingAddress?.email,
+        amount: process.env.REACT_APP_PAYMENT_SDK_ENV == "sandbox" ? 9 : productsQuote.total_payable,
+        timestamp: String(new Date().getTime()),
+        return_url: String(window.location.href)
+      }
       const { data } = await axios.post(
-        `https://buyer-app.ondc.org/api/payment/signPayload`,
+        `http://localhost:3001/api/payment/signPayload`,
         {
-          payload: {
-            merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-            customer_id: user.id,
-            order_id: transaction_id,
-            customer_phone: billingAddress?.phone,
-            customer_email: billingAddress?.email,
-            amount: productsQuote.total_payable,
-            timestamp: new Date(),
-          },
+          payload: JSON.stringify(processPayloadObj)
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -257,18 +282,13 @@ export default function PaymentConfirmationCard(props) {
         customerEmail: billingAddress?.email,
         customerMobile: billingAddress?.phone,
         orderId: transaction_id,
-        orderDetails: JSON.stringify({
-          merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-          customer_id: user.id,
-          order_id: transaction_id,
-          customer_phone: billingAddress?.phone,
-          customer_email: billingAddress?.email,
-          amount: productsQuote.total_payable,
-          timestamp: new Date(),
-        }),
+        orderDetails: JSON.stringify(processPayloadObj),
         signature: data.signedPayload,
-        amount: productsQuote.total_payable,
+        amount: process.env.REACT_APP_PAYMENT_SDK_ENV == "sandbox" ? 9 : productsQuote.total_payable,
       };
+
+      console.log(processPayload.current);
+
       hyperServiceObject.process(
         {
           service: "in.juspay.hyperpay",
@@ -321,14 +341,14 @@ export default function PaymentConfirmationCard(props) {
         style={
           isCurrentStep()
             ? {
-                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-                borderBottomRightRadius: 0,
-                borderBottomLeftRadius: 0,
-              }
+              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+              borderBottomRightRadius: 0,
+              borderBottomLeftRadius: 0,
+            }
             : {
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }
+              borderBottomRightRadius: "10px",
+              borderBottomLeftRadius: "10px",
+            }
         }
       >
         <p className={styles.card_header_title}>Payment Options</p>
@@ -350,7 +370,7 @@ export default function PaymentConfirmationCard(props) {
                   <AddressRadioButton
                     onClick={() => {
                       setTogglePaymentGateway(true);
-                      signSDKPayload();
+                      initiateSDK()
                     }}
                   >
                     <div className="px-3">
@@ -371,9 +391,10 @@ export default function PaymentConfirmationCard(props) {
               button_hover_type={buttonTypes.primary_hover}
               button_text="Checkout"
               onClick={() => {
-                setConfirmOrderLoading(true);
-                const request_object = constructQouteObject(cartItems);
-                confirmOrder(request_object);
+                processPayment();
+                // setConfirmOrderLoading(true);
+                // const request_object = constructQouteObject(cartItems);
+                // confirmOrder(request_object);
               }}
             />
           </div>
