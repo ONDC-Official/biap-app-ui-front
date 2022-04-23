@@ -5,7 +5,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import {
+  useHistory,
+  useLocation,
+} from "react-router-dom/cjs/react-router-dom.min";
 import Navbar from "../../shared/navbar/navbar";
 import { CartContext } from "../../../context/cartContext";
 import styles from "../../../styles/cart/cartView.module.scss";
@@ -25,9 +28,13 @@ import {
   checkout_steps,
   get_current_step,
 } from "../../../constants/checkout-steps";
+import Toast from "../../shared/toast/toast";
+import { toast_types } from "../../../utils/toast";
 
 export default function Checkout() {
+  const location = useLocation();
   const { cartItems } = useContext(CartContext);
+  const [orderStatus, setOrderStatus] = useState("");
   const transaction_id = Cookies.get("transaction_id");
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
@@ -36,7 +43,25 @@ export default function Checkout() {
   const [currentActiveStep, setCurrentActiveStep] = useState(
     get_current_step(checkout_steps.SELECT_ADDRESS)
   );
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
+  });
   const quote_polling_timer = useRef(0);
+
+  // use this effect to handle callback from justpay
+  useEffect(() => {
+    if (location?.search) {
+      let searchParams = new URLSearchParams(location.search);
+      setOrderStatus(searchParams.get("status"));
+      setCurrentActiveStep(
+        get_current_step(checkout_steps.SELECT_PAYMENT_METHOD)
+      );
+      setGetQuoteLoading(false);
+    }
+  }, [location]);
+
   useEffect(() => {
     // use this function to get the quote of the items
     async function getQuote(items) {
@@ -66,7 +91,29 @@ export default function Checkout() {
             message_id: d.context.message_id,
           };
         });
-        callApiMultipleTimes(array_of_ids);
+        // check here if the response returned error or not
+        const isContainingError = array_of_ids.find(
+          (idObj) => idObj.error_reason !== ""
+        );
+
+        // If error than show toast
+        if (isContainingError) {
+          setToast((toast) => ({
+            ...toast,
+            toggle: true,
+            type: toast_types.error,
+            message: isContainingError.error_reason,
+          }));
+          if (
+            array_of_ids.filter((idObj) => idObj.error_reason === "").length <=
+            0
+          ) {
+            setGetQuoteLoading(false);
+          }
+        }
+        callApiMultipleTimes(
+          array_of_ids.filter((idObj) => idObj.error_reason === "")
+        );
       } catch (err) {
         console.log(err);
         setGetQuoteLoading(false);
@@ -74,7 +121,8 @@ export default function Checkout() {
     }
 
     // this check is so that when cart is empty we do not call the
-    if (cartItems.length > 0) {
+    // and when the payment is not maid
+    if (cartItems.length > 0 && orderStatus === "") {
       const request_object = constructQouteObject(cartItems);
       getQuote(request_object);
     }
@@ -170,7 +218,19 @@ export default function Checkout() {
   return (
     <Fragment>
       <Navbar />
-      {cartItems.length <= 0 ? (
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
+      {cartItems.length <= 0 && orderStatus === "" ? (
         empty_cart_state
       ) : getQuoteLoading ? (
         loadingSpin
@@ -208,6 +268,7 @@ export default function Checkout() {
                       <PaymentConfirmationCard
                         currentActiveStep={currentActiveStep}
                         productsQuote={productsQuote}
+                        orderStatus={orderStatus}
                       />
                     </div>
                   </div>

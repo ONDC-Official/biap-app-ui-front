@@ -5,6 +5,7 @@ import styles from "../../../../../styles/cart/cartView.module.scss";
 import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
+import { AddCookie } from "../../../../../utils/cookies";
 
 export default function DeliveryAddress(props) {
   const { deliveryAddresses, setDeliveryAddresses } = props;
@@ -31,7 +32,7 @@ export default function DeliveryAddress(props) {
                     <AddressRadioButton
                       key={id}
                       checked={deliveryAddress?.id === id}
-                      onClick={() =>
+                      onClick={() => {
                         setDeliveryAddress(() => ({
                           id,
                           name: descriptor?.name || "",
@@ -40,8 +41,20 @@ export default function DeliveryAddress(props) {
                           location: {
                             address: address,
                           },
-                        }))
-                      }
+                        }));
+                        AddCookie(
+                          "delivery_address",
+                          JSON.stringify({
+                            id,
+                            name: descriptor?.name || "",
+                            email: descriptor?.email || "",
+                            phone: descriptor?.phone || "",
+                            location: {
+                              address: address,
+                            },
+                          })
+                        );
+                      }}
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>
