@@ -11,7 +11,7 @@ import bannerStyles from "../../../../styles/products/productList.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import DropdonwSvg from "../../../shared/svg/dropdonw";
 import CrossIcon from "../../../shared/svg/cross-icon";
-import MMI_LOGO from "../../../../assets/images/mmi_logo.png";
+import MMI_LOGO from "../../../../assets/images/mmi_logo.svg";
 import LocationSvg from "../../../shared/svg/location";
 import Dropdown from "../../../shared/dropdown/dropdown";
 

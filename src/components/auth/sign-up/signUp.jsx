@@ -16,6 +16,7 @@ import { Link, useHistory } from "react-router-dom";
 import { toast_types } from "../../../utils/toast";
 import Cookies from "js-cookie";
 import { getErrorMessage } from "../../../utils/mapFirebaseError";
+import { AddCookie } from "../../../utils/cookies";
 
 export default function SignUp() {
   const auth = getAuth();
@@ -104,17 +105,10 @@ export default function SignUp() {
   }
   function handleRedirect(user) {
     const { displayName, email, photoURL, accessToken, uid } = user;
-    const cookie_expiry_time = new Date();
-    cookie_expiry_time.setTime(cookie_expiry_time.getTime() + 3600 * 1000); // expires in 1 hour
-    Cookies.set("token", accessToken, {
-      expires: cookie_expiry_time,
-    });
-    Cookies.set(
+    AddCookie("token", accessToken);
+    AddCookie(
       "user",
-      JSON.stringify({ name: displayName, id: uid, email, photoURL }),
-      {
-        expires: cookie_expiry_time,
-      }
+      JSON.stringify({ name: displayName, id: uid, email, photoURL })
     );
     history.push("/application");
   }

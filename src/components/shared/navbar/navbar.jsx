@@ -1,7 +1,6 @@
 import React from "react";
 import styles from "./navbar.module.scss";
 import logo from "../../../assets/images/logo.png";
-import MoreOptionsSvg from "../svg/more-option";
 import Dropdown from "../dropdown/dropdown";
 import Logout from "../svg/logout";
 import Orders from "../svg/orders";
@@ -10,8 +9,10 @@ import Cart from "../svg/cart";
 import { useHistory } from "react-router-dom";
 import ProductList from "../svg/productList";
 import { deleteAllCookies } from "../../../utils/deleteCookies";
+import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Navbar() {
+  const user = JSON.parse(getValueFromCookie("user"));
   const history = useHistory();
   const dropdown_links = {
     PRODUCTS: "Products",
@@ -47,6 +48,17 @@ export default function Navbar() {
     deleteAllCookies();
     history.replace("/");
   }
+
+  const avatar = (
+    <div className={styles.avatar_back}>
+      <img
+        src={user?.photoURL}
+        alt="user_avatar"
+        className={styles.avatar_image}
+      />
+    </div>
+  );
+
   return (
     <div className={`${styles.navbar_back}`}>
       <div className="container h-100">
@@ -59,7 +71,7 @@ export default function Navbar() {
           />
           <div className="ms-auto">
             <Dropdown
-              header={<MoreOptionsSvg />}
+              header={avatar}
               body_classes="dropdown-menu-right"
               click={(value) => {
                 if (value === dropdown_links.PRODUCTS) {

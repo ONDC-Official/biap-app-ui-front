@@ -12,7 +12,7 @@ import DropdonwSvg from "../../shared/svg/dropdonw";
 import { debounce } from "../../../utils/search";
 import { postCall } from "../../../api/axios";
 import Cookies from "js-cookie";
-import MMI_LOGO from "../../../assets/images/mmi_logo.png";
+import MMI_LOGO from "../../../assets/images/mmi_logo.svg";
 
 export default function SearchProductModal({ onClose, onSearch, location }) {
   const [searchedLocation, setSearchedLocation] = useState(location);
