@@ -1,4 +1,5 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
+import { getValueFromCookie, AddCookie } from "../utils/cookies";
 
 export const CartContext = createContext({
   cartItems: [],
@@ -10,8 +11,14 @@ export const CartContext = createContext({
 });
 
 export function CartContextProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
-  // call api to get the items from the cart
+  const parsedCartItems = JSON.parse(getValueFromCookie("cartItems") || "{}");
+  const [cartItems, setCartItems] = useState(
+    parsedCartItems.length > 0 ? parsedCartItems : []
+  );
+
+  useEffect(() => {
+    AddCookie("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // use this function to remove the product from cart
   function removeProductFromCart(id) {

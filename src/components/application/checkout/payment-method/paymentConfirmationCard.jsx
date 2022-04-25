@@ -11,25 +11,30 @@ import Button from "../../../shared/button/button";
 import { checkout_steps } from "../../../../constants/checkout-steps";
 import { ONDC_COLORS } from "../../../shared/colors";
 import AddressRadioButton from "../address-details/address-radio-button/addressRadioButton";
-import { AddressContext } from "../../../../context/addressContext";
 import { CartContext } from "../../../../context/cartContext";
 import { getCall, postCall } from "../../../../api/axios";
 import { constructQouteObject } from "../../../../utils/constructRequestObject";
-import Cookies from "js-cookie";
 import { toast_types } from "../../../../utils/toast";
 import Toast from "../../../shared/toast/toast";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import CrossIcon from "../../../shared/svg/cross-icon";
+import { payment_methods } from "../../../../constants/payment-methods";
+import { removeCookie, getValueFromCookie } from "../../../../utils/cookies";
 
 export default function PaymentConfirmationCard(props) {
-  const { currentActiveStep, productsQuote } = props;
-  const token = Cookies.get("token");
-  const user = JSON.parse(Cookies.get("user"));
+  const { currentActiveStep, productsQuote, orderStatus } = props;
+  const token = getValueFromCookie("token");
+  const user = JSON.parse(getValueFromCookie("user"));
+  const transaction_id = getValueFromCookie("transaction_id");
   const hyperServiceObject = new window.HyperServices();
   const history = useHistory();
-  const transaction_id = Cookies.get("transaction_id");
-  const { deliveryAddress, billingAddress } = useContext(AddressContext);
+  const deliveryAddress = JSON.parse(
+    getValueFromCookie("delivery_address") || "{}"
+  );
+  const billingAddress = JSON.parse(
+    getValueFromCookie("billing_address") || "{}"
+  );
   const { cartItems, setCartItems } = useContext(CartContext);
   const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
   const [toast, setToast] = useState({
@@ -38,6 +43,9 @@ export default function PaymentConfirmationCard(props) {
     message: "",
   });
   const [togglePaymentGateway, setTogglePaymentGateway] = useState(false);
+  const [activePaymentMethod, setActivePaymentMethod] = useState(
+    payment_methods.COD
+  );
   const confirm_polling_timer = useRef(0);
   const onConfirmed = useRef();
   const sdkPayload = useRef({
@@ -65,6 +73,19 @@ export default function PaymentConfirmationCard(props) {
     merchantKeyId: process.env.REACT_APP_MERCHANT_KEY_ID,
     environment: process.env.REACT_APP_PAYMENT_SDK_ENV,
   });
+
+  useEffect(() => {
+    if (orderStatus === "CHARGED") {
+      setActivePaymentMethod(payment_methods.JUSPAY);
+      const parsedCartItems = JSON.parse(
+        getValueFromCookie("cartItems") || "{}"
+      );
+      setConfirmOrderLoading(true);
+      const request_object = constructQouteObject(parsedCartItems);
+      confirmOrder(request_object);
+    }
+    // eslint-disable-next-line
+  }, [orderStatus]);
 
   useEffect(() => {
     return () => {
@@ -158,10 +179,13 @@ export default function PaymentConfirmationCard(props) {
         if (allOrderConfirmed) {
           // redirect to order listing page.
           // remove transaction_id, search_context from cookies
-          Cookies.remove("transaction_id");
-          Cookies.remove("search_context");
+          removeCookie("transaction_id");
+          removeCookie("search_context");
+          removeCookie("cartItems");
+          removeCookie("delivery_address");
+          removeCookie("billing_address");
           setCartItems([]);
-          history.push("/application/orders");
+          history.replace("/application/orders");
         } else {
           setToast((toast) => ({
             ...toast,
@@ -190,18 +214,47 @@ export default function PaymentConfirmationCard(props) {
     return false;
   }
 
-  async function signSDKPayload() {
+  function hyperCallbackHandler(eventData) {
     try {
+      if (eventData) {
+        const eventJSON =
+          typeof eventData === "string" ? JSON.parse(eventData) : eventData;
+        const event = eventJSON.event;
+        // Check for event key
+        // eslint-disable-next-line
+        if (event == "initiate_result") {
+          processPayment();
+          // eslint-disable-next-line
+        } else if (event == "process_result") {
+          //Handle process result here
+          // eslint-disable-next-line
+        } else if (event == "user_event") {
+          //Handle Payment Page events
+        } else {
+          console.log("Unhandled event", event, " Event data", eventData);
+        }
+      } else {
+        console.log("No data received in event", eventData);
+      }
+    } catch (error) {
+      console.log("Error in hyperSDK response", error);
+    }
+  }
+
+  async function initiateSDK() {
+    try {
+      const initiatePayloadObj = {
+        merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+        customer_id: user.id,
+        mobile_number: billingAddress?.phone,
+        email_address: billingAddress?.email,
+        timestamp: String(new Date().getTime()),
+      };
+
       const { data } = await axios.post(
         `https://buyer-app.ondc.org/api/payment/signPayload`,
         {
-          payload: {
-            merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-            customer_id: user.id,
-            mobile_number: billingAddress?.phone,
-            email_address: billingAddress?.email,
-            timestamp: new Date(),
-          },
+          payload: JSON.stringify(initiatePayloadObj),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -209,13 +262,7 @@ export default function PaymentConfirmationCard(props) {
       );
       sdkPayload.current = {
         ...sdkPayload.current,
-        signaturePayload: JSON.stringify({
-          merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-          customer_id: user.id,
-          mobile_number: billingAddress?.phone,
-          email_address: billingAddress?.email,
-          timestamp: new Date(),
-        }),
+        signaturePayload: JSON.stringify(initiatePayloadObj),
         signature: data.signedPayload,
       };
       // calling the sdk method
@@ -225,28 +272,35 @@ export default function PaymentConfirmationCard(props) {
           requestId: transaction_id,
           payload: sdkPayload.current,
         },
-        () => {}
+        hyperCallbackHandler
       );
-      processSdkPayload();
     } catch (err) {
       console.log(err);
     }
   }
 
-  async function processSdkPayload() {
+  async function processPayment() {
     try {
+      if (!hyperServiceObject.isInitialised()) {
+        alert("not initiated");
+      }
+      const processPayloadObj = {
+        merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
+        customer_id: user.id,
+        order_id: transaction_id,
+        customer_phone: billingAddress?.phone,
+        customer_email: billingAddress?.email,
+        amount:
+          process.env.REACT_APP_PAYMENT_SDK_ENV === "sandbox"
+            ? 9
+            : productsQuote.total_payable,
+        timestamp: String(new Date().getTime()),
+        return_url: String(window.location.href),
+      };
       const { data } = await axios.post(
         `https://buyer-app.ondc.org/api/payment/signPayload`,
         {
-          payload: {
-            merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-            customer_id: user.id,
-            order_id: transaction_id,
-            customer_phone: billingAddress?.phone,
-            customer_email: billingAddress?.email,
-            amount: productsQuote.total_payable,
-            timestamp: new Date(),
-          },
+          payload: JSON.stringify(processPayloadObj),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -257,17 +311,12 @@ export default function PaymentConfirmationCard(props) {
         customerEmail: billingAddress?.email,
         customerMobile: billingAddress?.phone,
         orderId: transaction_id,
-        orderDetails: JSON.stringify({
-          merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
-          customer_id: user.id,
-          order_id: transaction_id,
-          customer_phone: billingAddress?.phone,
-          customer_email: billingAddress?.email,
-          amount: productsQuote.total_payable,
-          timestamp: new Date(),
-        }),
+        orderDetails: JSON.stringify(processPayloadObj),
         signature: data.signedPayload,
-        amount: productsQuote.total_payable,
+        amount:
+          process.env.REACT_APP_PAYMENT_SDK_ENV === "sandbox"
+            ? 9
+            : productsQuote.total_payable,
       };
       hyperServiceObject.process(
         {
@@ -340,7 +389,11 @@ export default function PaymentConfirmationCard(props) {
             <div className="container-fluid pt-2">
               <div className="row">
                 <div className="col-6">
-                  <AddressRadioButton checked={true}>
+                  <AddressRadioButton
+                    checked={activePaymentMethod === payment_methods.COD}
+                    disabled={confirmOrderLoading}
+                    onClick={() => setActivePaymentMethod(payment_methods.COD)}
+                  >
                     <div className="px-3">
                       <p className={styles.address_line_1}>Cash on delivery</p>
                     </div>
@@ -348,9 +401,12 @@ export default function PaymentConfirmationCard(props) {
                 </div>
                 <div className="col-6">
                   <AddressRadioButton
+                    checked={activePaymentMethod === payment_methods.JUSPAY}
+                    disabled={confirmOrderLoading}
                     onClick={() => {
+                      setActivePaymentMethod(payment_methods.JUSPAY);
                       setTogglePaymentGateway(true);
-                      signSDKPayload();
+                      initiateSDK();
                     }}
                   >
                     <div className="px-3">

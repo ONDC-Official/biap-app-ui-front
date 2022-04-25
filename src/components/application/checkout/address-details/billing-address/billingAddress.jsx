@@ -5,6 +5,7 @@ import styles from "../../../../../styles/cart/cartView.module.scss";
 import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
+import { AddCookie } from "../../../../../utils/cookies";
 
 export default function BillingAddress(props) {
   const { billingAddresses, setBillingAddresses } = props;
@@ -23,15 +24,25 @@ export default function BillingAddress(props) {
             <div className="col-12">
               <AddressRadioButton
                 checked={billingAddress?.id === deliveryAddress?.id}
-                onClick={() =>
+                onClick={() => {
                   setBillingAddress({
                     id: deliveryAddress?.id,
                     address: deliveryAddress?.location?.address,
                     phone: deliveryAddress?.phone || "",
                     name: deliveryAddress?.name || "",
                     email: deliveryAddress?.email || "",
-                  })
-                }
+                  });
+                  AddCookie(
+                    "billing_address",
+                    JSON.stringify({
+                      id: deliveryAddress?.id,
+                      address: deliveryAddress?.location?.address,
+                      phone: deliveryAddress?.phone || "",
+                      name: deliveryAddress?.name || "",
+                      email: deliveryAddress?.email || "",
+                    })
+                  );
+                }}
               >
                 <div className="px-3">
                   <p className={styles.address_line_1}>
@@ -58,15 +69,25 @@ export default function BillingAddress(props) {
                     <AddressRadioButton
                       key={id}
                       checked={billingAddress?.id === id}
-                      onClick={() =>
+                      onClick={() => {
                         setBillingAddress({
                           id,
                           address,
                           phone,
                           name,
                           email,
-                        })
-                      }
+                        });
+                        AddCookie(
+                          "billing_address",
+                          JSON.stringify({
+                            id,
+                            address,
+                            phone,
+                            name,
+                            email,
+                          })
+                        );
+                      }}
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>{name}</p>
