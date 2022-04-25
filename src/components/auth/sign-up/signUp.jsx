@@ -14,7 +14,6 @@ import styles from "../../../styles/auth/auth.module.scss";
 import { buttonTypes } from "../../../utils/button";
 import { Link, useHistory } from "react-router-dom";
 import { toast_types } from "../../../utils/toast";
-import Cookies from "js-cookie";
 import { getErrorMessage } from "../../../utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 

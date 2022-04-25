@@ -14,7 +14,6 @@ import Input from "../../shared/input/input";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Toast from "../../shared/toast/toast";
 import { toast_types } from "../../../utils/toast";
-import Cookies from "js-cookie";
 import { getErrorMessage } from "../../../utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 
