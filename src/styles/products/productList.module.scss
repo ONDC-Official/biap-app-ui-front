@@ -21,7 +21,7 @@
 }
 
 .searched_history_banner {
-  height: 10%;
+  height: 15%;
   background-color: $white;
   display: flex;
   align-items: center;
@@ -40,11 +40,56 @@
 }
 
 .product_list_without_summary_wrapper {
-  height: 90%;
+  height: 85%;
   overflow: auto;
 }
 
 .product_list_with_summary_wrapper {
-  height: 80%;
+  height: 75%;
   overflow: auto;
+}
+
+.cancel_button {
+  width: 100px;
+  height: 35px;
+  background-color: $white;
+  border: 1px solid $secondaryColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $secondaryColor;
+}
+
+.cancel_button:hover {
+  background-color: $secondaryColor;
+  color: $white;
+  transition: all 0.3s;
+}
+
+.search_button {
+  width: 100px;
+  height: 35px;
+  background-color: $white;
+  border: 1px solid $accentColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $accentColor;
+}
+
+.search_button:hover {
+  background-color: $accentColor;
+  color: $white;
+  transition: all 0.3s;
+}
+
+.search_button:disabled {
+  opacity: 0.5;
+  cursor: no-drop;
 }

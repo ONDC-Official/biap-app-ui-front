@@ -9,9 +9,6 @@ import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import search_empty_illustration from "../../../assets/images/search_prod_illustration.png";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
-import Button from "../../shared/button/button";
-import { buttonTypes } from "../../../utils/button";
-import SearchProductModal from "../search-product-modal/searchProductModal";
 import { getCall } from "../../../api/axios";
 import { ONDC_COLORS } from "../../shared/colors";
 import Loading from "../../shared/loading/loading";
@@ -19,6 +16,7 @@ import ProductCard from "./product-card/productCard";
 import { CartContext } from "../../../context/cartContext";
 import OrderSummary from "./order-summary/orderSummary";
 import Cookies from "js-cookie";
+import SearchBanner from "./search-banner/searchBanner";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -30,7 +28,6 @@ export default function ProductList() {
     lng: "",
   });
   const [searchedProduct, setSearchedProduct] = useState();
-  const [toggleSearchProductModal, setToggleSearchProductModal] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const search_polling_timer = useRef(0);
   useEffect(() => {
@@ -82,7 +79,8 @@ export default function ProductList() {
 
   const loadingSpin = (
     <div
-      className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
+      className={"d-flex align-items-center justify-content-center"}
+      style={{ height: "85%" }}
     >
       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
     </div>
@@ -90,7 +88,8 @@ export default function ProductList() {
 
   const search_empty_state = (
     <div
-      className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
+      className={"d-flex align-items-center justify-content-center"}
+      style={{ height: "85%" }}
     >
       <div className="text-center">
         <div className="py-2">
@@ -103,16 +102,8 @@ export default function ProductList() {
         <div className="py-2">
           <p className={styles.illustration_header}>Looking for Something</p>
           <p className={styles.illustration_body}>
-            Search what you are looking fro by clicking on the button below
+            Search what you are looking on the top search bar
           </p>
-        </div>
-        <div className="py-3">
-          <Button
-            button_type={buttonTypes.primary}
-            button_hover_type={buttonTypes.primary_hover}
-            button_text="Search"
-            onClick={() => setToggleSearchProductModal(true)}
-          />
         </div>
       </div>
     </div>
@@ -137,14 +128,6 @@ export default function ProductList() {
             else by clicking the button
           </p>
         </div>
-        <div className="py-3">
-          <Button
-            button_type={buttonTypes.primary}
-            button_hover_type={buttonTypes.primary_hover}
-            button_text="Search"
-            onClick={() => setToggleSearchProductModal(true)}
-          />
-        </div>
       </div>
     </div>
   );
@@ -152,54 +135,26 @@ export default function ProductList() {
   return (
     <Fragment>
       <Navbar />
-      {toggleSearchProductModal && (
-        <SearchProductModal
-          location={searchedLocation}
-          onClose={() => setToggleSearchProductModal(false)}
-          onSearch={({ search, location, message_id }) => {
-            setSearchedProduct(search?.value);
-            setToggleSearchProductModal(false);
-            setSearchedLocation(location);
-            // call On Search api
-            callApiMultipleTimes(message_id);
-          }}
-        />
-      )}
       {searchProductLoading ? (
         loadingSpin
-      ) : !searchedProduct || !searchedLocation ? (
-        search_empty_state
       ) : (
         <div className={styles.playground_height}>
           {/* change search banner html  */}
-          <div className={styles.searched_history_banner}>
-            <div className="px-2">
-              <p className={styles.searched_history_text}>
-                Searching
-                <span className={`px-2 ${styles.semibold}`}>
-                  {searchedProduct}
-                </span>
-                in
-                <span className={`px-2 ${styles.semibold}`}>
-                  {searchedLocation.name}
-                </span>
-              </p>
-            </div>
-            <div className="px-2">
-              <Button
-                button_type={buttonTypes.primary}
-                button_hover_type={buttonTypes.primary_hover}
-                button_text="Change"
-                onClick={() => {
-                  clearInterval(search_polling_timer.current);
-                  setToggleSearchProductModal(true);
-                }}
-              />
-            </div>
-          </div>
+          <SearchBanner
+            location={searchedLocation}
+            onSearch={({ search, location, message_id }) => {
+              clearInterval(search_polling_timer.current);
+              setSearchedProduct(search?.value);
+              setSearchedLocation(location);
+              // call On Search api
+              callApiMultipleTimes(message_id);
+            }}
+          />
           {/* list of product view  */}
-          {products.filter((catalog) => catalog?.bpp_providers?.length > 0)
-            .length > 0 ? (
+          {!searchedProduct || !searchedLocation ? (
+            search_empty_state
+          ) : products.filter((catalog) => catalog?.bpp_providers?.length > 0)
+              .length > 0 ? (
             <div
               className={`py-2 ${
                 cartItems.length > 0
@@ -258,3 +213,8 @@ export default function ProductList() {
     </Fragment>
   );
 }
+
+// !searchedProduct || !searchedLocation ? (
+//   search_empty_state
+// ) : (
+// )
