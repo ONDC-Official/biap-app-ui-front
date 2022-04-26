@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom";
 import ProductList from "../svg/productList";
 import { deleteAllCookies } from "../../../utils/deleteCookies";
 import { getValueFromCookie } from "../../../utils/cookies";
+import default_user_avatar from "../../../assets/images/user.svg";
 
 export default function Navbar() {
   const user = JSON.parse(getValueFromCookie("user"));
@@ -52,9 +53,13 @@ export default function Navbar() {
   const avatar = (
     <div className={styles.avatar_back}>
       <img
-        src={user?.photoURL}
+        src={user?.photoURL ?? default_user_avatar}
         alt="user_avatar"
         className={styles.avatar_image}
+        onError={(event) => {
+          event.target.onerror = null;
+          event.target.src = default_user_avatar;
+        }}
       />
     </div>
   );
