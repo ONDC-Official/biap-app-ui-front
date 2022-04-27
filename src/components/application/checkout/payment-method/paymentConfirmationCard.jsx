@@ -105,7 +105,7 @@ export default function PaymentConfirmationCard(props) {
   async function confirmOrder(items) {
     try {
       const data = await postCall(
-        "/client/v2/confirm_order",
+        "/clientApis/v2/confirm_order",
         items.map((item, index) => ({
           context: {
             transaction_id,
@@ -127,7 +127,10 @@ export default function PaymentConfirmationCard(props) {
             },
             payment: {
               paid_amount: getTotalPayable(item),
-              status: "PAID",
+              type:
+                currentActiveStep === payment_methods.COD
+                  ? "ON-FULFILLMENT"
+                  : "ON-ORDER",
               transaction_id,
             },
           },
@@ -156,7 +159,7 @@ export default function PaymentConfirmationCard(props) {
   async function onConfirmOrder(array_of_ids) {
     try {
       const data = await getCall(
-        `/client/v2/on_confirm_order?messageIds=${array_of_ids
+        `/clientApis/v2/on_confirm_order?messageIds=${array_of_ids
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
@@ -252,7 +255,7 @@ export default function PaymentConfirmationCard(props) {
       };
 
       const { data } = await axios.post(
-        `https://buyer-app.ondc.org/api/payment/signPayload`,
+        `https://buyer-app.ondc.org/clientApis/payment/signPayload`,
         {
           payload: JSON.stringify(initiatePayloadObj),
         },
@@ -298,7 +301,7 @@ export default function PaymentConfirmationCard(props) {
         return_url: String(window.location.href),
       };
       const { data } = await axios.post(
-        `https://buyer-app.ondc.org/api/payment/signPayload`,
+        `https://buyer-app.ondc.org/clientApis/payment/signPayload`,
         {
           payload: JSON.stringify(processPayloadObj),
         },

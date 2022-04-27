@@ -19,3 +19,24 @@
   border-radius: 50%;
   cursor: pointer;
 }
+
+.support_link_back {
+  background: transparent;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.support_link_back:hover {
+  background: rgba($accentColor, $alpha: 0.15);
+  border: 1px solid $accentColor;
+
+  .support_link_text {
+    color: $accentColor;
+  }
+}
+
+.support_link_text {
+  font-size: 12px;
+  color: $primaryColor;
+}

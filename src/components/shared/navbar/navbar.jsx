@@ -11,6 +11,7 @@ import ProductList from "../svg/productList";
 import { deleteAllCookies } from "../../../utils/deleteCookies";
 import { getValueFromCookie } from "../../../utils/cookies";
 import default_user_avatar from "../../../assets/images/user.svg";
+import supportSvg from "../../../assets/images/help.svg";
 
 export default function Navbar() {
   const user = JSON.parse(getValueFromCookie("user"));
@@ -74,7 +75,19 @@ export default function Navbar() {
             style={{ height: "40px", cursor: "pointer" }}
             onClick={() => history.push("/application")}
           />
-          <div className="ms-auto">
+          <div className="ms-auto px-3">
+            <div
+              className={styles.avatar_back}
+              onClick={() => history.push("/application/support")}
+            >
+              <img
+                src={supportSvg}
+                alt="support"
+                className={styles.avatar_image}
+              />
+            </div>
+          </div>
+          <div className="px-2">
             <Dropdown
               header={avatar}
               body_classes="dropdown-menu-right"

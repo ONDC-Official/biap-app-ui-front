@@ -8,6 +8,7 @@ import Checkout from "./checkout/checkout";
 import Orders from "./orders/orders";
 import ProductList from "./product-list/productList";
 import Profile from "./profile/profile";
+import Support from "./support/support";
 
 export default function Application() {
   return (
@@ -29,6 +30,9 @@ export default function Application() {
         </PrivateRoute>
         <PrivateRoute path={"/application/profile"}>
           <Profile />
+        </PrivateRoute>
+        <PrivateRoute path={"/application/support"}>
+          <Support />
         </PrivateRoute>
         <AddressContextProvider>
           <PrivateRoute path={"/application/checkout"}>

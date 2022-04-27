@@ -9,6 +9,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import styles from "../../../styles/auth/auth.module.scss";
 import { buttonTypes } from "../../../utils/button";
@@ -21,6 +22,7 @@ export default function SignUp() {
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
   const history = useHistory();
+  const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [signUpUsingGoogleloading, setSignUpUsingGoogleLoading] = useState(
@@ -36,15 +38,28 @@ export default function SignUp() {
     message: "",
   });
   const [inlineError, setInlineError] = useState({
+    name_error: "",
     email_error: "",
     password_error: "",
   });
+  // use this function to check the name
+  function checkName() {
+    if (!name) {
+      setInlineError((inlineError) => ({
+        ...inlineError,
+        name_error: "Name cannot be empty",
+      }));
+      return false;
+    }
+    return true;
+  }
+
   // use this function to check the email
   function checkEmail() {
     if (!email) {
       setInlineError((inlineError) => ({
         ...inlineError,
-        email_error: "email cannot be empty",
+        email_error: "Email cannot be empty",
       }));
       return false;
     }
@@ -55,7 +70,7 @@ export default function SignUp() {
     if (!password) {
       setInlineError((inlineError) => ({
         ...inlineError,
-        password_error: "password cannot be empty",
+        password_error: "Password cannot be empty",
       }));
       return false;
     }
@@ -71,7 +86,21 @@ export default function SignUp() {
     setSignUpUsingEmailAndPasswordLoading(true);
     createUserWithEmailAndPassword(auth, email, password)
       .then((result) => {
-        handleRedirect(result.user);
+        const { user } = result;
+        updateProfile(user, { displayName: name.trim() })
+          .then(() => {
+            handleRedirect(user);
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = getErrorMessage(errorCode);
+            setToast((toast) => ({
+              ...toast,
+              toggle: true,
+              type: toast_types.error,
+              message: errorMessage,
+            }));
+          });
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -126,6 +155,26 @@ export default function SignUp() {
         />
       )}
       <Input
+        id="name"
+        name="name"
+        type="text"
+        placeholder="Enter Name"
+        label_name="Full Name"
+        autoComplete="off"
+        has_error={inlineError.name_error}
+        onChange={(event) => {
+          setName(event.target.value);
+          setInlineError((inlineError) => ({
+            ...inlineError,
+            name_error: "",
+          }));
+        }}
+        onBlur={checkName}
+      />
+      {inlineError.name_error && (
+        <ErrorMessage>{inlineError.name_error}</ErrorMessage>
+      )}
+      <Input
         id="email"
         name="email"
         type="email"
@@ -140,6 +189,7 @@ export default function SignUp() {
             email_error: "",
           }));
         }}
+        onBlur={checkEmail}
       />
       {inlineError.email_error && (
         <ErrorMessage>{inlineError.email_error}</ErrorMessage>
@@ -159,6 +209,7 @@ export default function SignUp() {
             password_error: "",
           }));
         }}
+        onBlur={checkPassword}
       />
       {inlineError.password_error && (
         <ErrorMessage>{inlineError.password_error}</ErrorMessage>
