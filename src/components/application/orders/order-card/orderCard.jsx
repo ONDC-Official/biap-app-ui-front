@@ -1,20 +1,75 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import moment from "moment";
-import { getOrderStatus } from "../../../../constants/order-status";
+import {
+  getOrderStatus,
+  order_statuses,
+} from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
 import { ONDC_COLORS } from "../../../shared/colors";
 import IndianRupee from "../../../shared/svg/indian-rupee";
+import { postCall, getCall } from "../../../../api/axios";
+import Loading from "../../../shared/loading/loading";
 
 export default function OrderCard(props) {
   const {
     product,
     address,
-    // order_id,
     status,
-    // transaction_id,
     created_at,
+    order_id,
+    transaction_id,
+    bpp_id,
   } = props;
   const current_order_status = getOrderStatus(status);
+  const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
+  const cancel_order_polling = useRef(0);
+
+  async function handleCancelOrder() {
+    setCancelOrderLoading(true);
+    try {
+      const { context } = await postCall("/clientApis/v1/cancel_order", {
+        context: {
+          bpp_id,
+          transaction_id,
+        },
+        message: {
+          order_id,
+          cancellation_reason_id: "item",
+        },
+      });
+      callApiMultipleTimes(context.message_id);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  // on get quote Api
+  async function onCancelOrder(array_of_id) {
+    try {
+      const data = await getCall(
+        `/clientApis/v1/on_cancel_order?messageId=${array_of_id}`
+      );
+    } catch (err) {
+      console.log(err);
+      setCancelOrderLoading(false);
+    }
+  }
+
+  // use this function to call on get quote call multiple times
+  function callApiMultipleTimes(message_id) {
+    let counter = 3;
+    cancel_order_polling.current = setInterval(async () => {
+      if (counter <= 0) {
+        setCancelOrderLoading(false);
+        clearInterval(cancel_order_polling.current);
+        return;
+      }
+      await onCancelOrder(message_id).finally(() => {
+        counter -= 1;
+      });
+    }, 2000);
+  }
+
   return (
     <div className={styles.orders_card}>
       <div className="container">
@@ -61,125 +116,141 @@ export default function OrderCard(props) {
           </div>
           <div className="col-lg-3 col-md-6 col-sm-12 p-2">
             <p className={styles.address_type_label}>Status:</p>
-            <div className="pt-3 d-flex align-items-start">
-              {/* ORDERED */}
-              <div className="px-1">
-                <div className="text-center">
+            {status !== order_statuses.canceled ? (
+              <div className="pt-3 d-flex align-items-start">
+                {/* ORDERED */}
+                <div className="px-1">
+                  <div className="text-center">
+                    <div
+                      className={styles.status_indicator}
+                      style={{
+                        backgroundColor:
+                          current_order_status.step_value >= 1
+                            ? ONDC_COLORS.SUCCESS
+                            : ONDC_COLORS.BACKGROUNDCOLOR,
+                      }}
+                    ></div>
+                    <p
+                      className={styles.status_value}
+                      style={{
+                        color:
+                          current_order_status.step_value >= 1
+                            ? ONDC_COLORS.SUCCESS
+                            : ONDC_COLORS.PRIMARYCOLOR,
+                      }}
+                    >
+                      Ordered
+                    </p>
+                  </div>
+                </div>
+                <div className="px-1">
                   <div
-                    className={styles.status_indicator}
+                    className={styles.status_bar}
                     style={{
                       backgroundColor:
-                        current_order_status.step_value >= 1
+                        current_order_status.step_value > 1
                           ? ONDC_COLORS.SUCCESS
                           : ONDC_COLORS.BACKGROUNDCOLOR,
                     }}
                   ></div>
-                  <p
-                    className={styles.status_value}
-                    style={{
-                      color:
-                        current_order_status.step_value >= 1
-                          ? ONDC_COLORS.SUCCESS
-                          : ONDC_COLORS.PRIMARYCOLOR,
-                    }}
-                  >
-                    Ordered
-                  </p>
                 </div>
-              </div>
-              <div className="px-1">
-                <div
-                  className={styles.status_bar}
-                  style={{
-                    backgroundColor:
-                      current_order_status.step_value > 1
-                        ? ONDC_COLORS.SUCCESS
-                        : ONDC_COLORS.BACKGROUNDCOLOR,
-                  }}
-                ></div>
-              </div>
-              {/* SHIPPED */}
-              <div className="px-1">
-                <div className="text-center">
+                {/* SHIPPED */}
+                <div className="px-1">
+                  <div className="text-center">
+                    <div
+                      className={styles.status_indicator}
+                      style={{
+                        backgroundColor:
+                          current_order_status.step_value >= 2
+                            ? ONDC_COLORS.SUCCESS
+                            : ONDC_COLORS.BACKGROUNDCOLOR,
+                      }}
+                    ></div>
+                    <p
+                      className={styles.status_value}
+                      style={{
+                        color:
+                          current_order_status.step_value >= 2
+                            ? ONDC_COLORS.SUCCESS
+                            : ONDC_COLORS.PRIMARYCOLOR,
+                      }}
+                    >
+                      Shipped
+                    </p>
+                  </div>
+                </div>
+                <div className="px-1">
                   <div
-                    className={styles.status_indicator}
+                    className={styles.status_bar}
                     style={{
                       backgroundColor:
-                        current_order_status.step_value >= 2
+                        current_order_status.step_value > 2
                           ? ONDC_COLORS.SUCCESS
                           : ONDC_COLORS.BACKGROUNDCOLOR,
                     }}
                   ></div>
-                  <p
-                    className={styles.status_value}
-                    style={{
-                      color:
-                        current_order_status.step_value >= 2
-                          ? ONDC_COLORS.SUCCESS
-                          : ONDC_COLORS.PRIMARYCOLOR,
-                    }}
-                  >
-                    Shipped
-                  </p>
+                </div>
+                {/* DELIVERED */}
+                <div className="px-1">
+                  <div className="text-center">
+                    <div
+                      className={styles.status_indicator}
+                      style={{
+                        backgroundColor:
+                          current_order_status.step_value >= 3
+                            ? ONDC_COLORS.SUCCESS
+                            : ONDC_COLORS.BACKGROUNDCOLOR,
+                      }}
+                    ></div>
+                    <p
+                      className={styles.status_value}
+                      style={{
+                        color:
+                          current_order_status.step_value >= 3
+                            ? ONDC_COLORS.SUCCESS
+                            : ONDC_COLORS.PRIMARYCOLOR,
+                      }}
+                    >
+                      Delivered
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="px-1">
-                <div
-                  className={styles.status_bar}
-                  style={{
-                    backgroundColor:
-                      current_order_status.step_value > 2
-                        ? ONDC_COLORS.SUCCESS
-                        : ONDC_COLORS.BACKGROUNDCOLOR,
-                  }}
-                ></div>
-              </div>
-              {/* DELIVERED */}
-              <div className="px-1">
-                <div className="text-center">
-                  <div
-                    className={styles.status_indicator}
-                    style={{
-                      backgroundColor:
-                        current_order_status.step_value >= 3
-                          ? ONDC_COLORS.SUCCESS
-                          : ONDC_COLORS.BACKGROUNDCOLOR,
-                    }}
-                  ></div>
-                  <p
-                    className={styles.status_value}
-                    style={{
-                      color:
-                        current_order_status.step_value >= 3
-                          ? ONDC_COLORS.SUCCESS
-                          : ONDC_COLORS.PRIMARYCOLOR,
-                    }}
-                  >
-                    Delivered
-                  </p>
+            ) : (
+              <div className="d-flex align-items-center justify-content-start flex-wrap py-2">
+                <div className={styles.canceled_order_back}>
+                  <p className="mb-0">Canceled</p>
                 </div>
               </div>
-            </div>
+            )}
           </div>
           <div className="col-lg-3 col-md-6 col-sm-12 p-2">
-            <div className="h-100 d-flex align-items-center justify-content-center flex-wrap">
-              <div className="pe-3 py-1">
-                <button
-                  className={styles.return_button}
-                  onClick={() => console.log("will return order")}
-                >
-                  Return
-                </button>
+            {status !== order_statuses.canceled && (
+              <div className="h-100 d-flex align-items-center justify-content-center flex-wrap">
+                <div className="pe-3 py-1">
+                  <button
+                    disabled={cancelOrderLoading}
+                    className={styles.return_button}
+                    onClick={() => console.log("will return order")}
+                  >
+                    Return
+                  </button>
+                </div>
+                <div className="pe-3 py-1">
+                  <button
+                    disabled={cancelOrderLoading}
+                    className={styles.cancel_button}
+                    onClick={() => handleCancelOrder()}
+                  >
+                    {cancelOrderLoading ? (
+                      <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+                    ) : (
+                      "Cancel"
+                    )}
+                  </button>
+                </div>
               </div>
-              <div className="pe-3 py-1">
-                <button
-                  className={styles.cancel_button}
-                  onClick={() => console.log("will cancel order")}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

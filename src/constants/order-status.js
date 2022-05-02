@@ -2,6 +2,8 @@ export const order_statuses = {
   ordered: "Ordered",
   shipped: "Shipped",
   delivered: "Delivered",
+  canceled: "CANCELLED",
+  pending_confirmation: "PENDING-CONFIRMATION",
 };
 export function getOrderStatus(status) {
   switch (status) {

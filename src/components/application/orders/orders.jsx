@@ -18,15 +18,17 @@ export default function Orders() {
     async function getAllOrders() {
       setFetchOrderLoading(true);
       try {
-        const data = await getCall("/client/v1/orders");
+        const data = await getCall("/clientApis/v1/orders");
         const formated_orders = data.map((order) => {
           const {
             quote,
             state,
             id,
-            transaction_id,
+            transactionId,
             fulfillment,
             billing,
+            created_at,
+            bppId,
           } = order;
           return {
             product: {
@@ -34,13 +36,14 @@ export default function Orders() {
               price: quote?.price?.value,
             },
             address: {
-              name: fulfillment?.customer?.person?.name,
+              name: billing?.name,
               location: fulfillment?.end?.location?.address,
             },
             status: state,
             order_id: id,
-            transaction_id: transaction_id,
-            created_at: billing?.created_at,
+            transaction_id: transactionId,
+            created_at,
+            bpp_id: bppId,
           };
         });
         setOrders(formated_orders);
@@ -117,6 +120,7 @@ export default function Orders() {
                   order_id,
                   transaction_id,
                   created_at,
+                  bpp_id,
                 }) => {
                   return (
                     <div className="col-12 py-2" key={`order_id_${order_id}`}>
@@ -127,6 +131,7 @@ export default function Orders() {
                         transaction_id={transaction_id}
                         order_id={order_id}
                         created_at={created_at}
+                        bpp_id={bpp_id}
                       />
                     </div>
                   );

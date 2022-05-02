@@ -97,7 +97,8 @@ export default function SearchBanner({ onSearch, location }) {
     }
   }
 
-  async function searchProduct() {
+  async function searchProduct(e) {
+    e.preventDefault();
     const allCheckPassed = [checkLocation(), checkSearch()].every(Boolean);
     if (!allCheckPassed) {
       return;
@@ -293,63 +294,68 @@ export default function SearchBanner({ onSearch, location }) {
             )}
           </div>
           <div className="col-md-6 col-lg-6 col-xl-6 px-4">
-            <div
-              className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
-            >
-              <Dropdown
-                header={
-                  <div
-                    className={`${styles.category_drodpwon_wrapper} d-flex align-items-center`}
-                  >
-                    <div className="px-2">
-                      <p className={styles.search_type_text}>{search.type}</p>
+            <form onSubmit={searchProduct} className="w-100">
+              <div
+                className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
+              >
+                <Dropdown
+                  header={
+                    <div
+                      className={`${styles.category_drodpwon_wrapper} d-flex align-items-center`}
+                    >
+                      <div className="px-2">
+                        <p className={styles.search_type_text}>{search.type}</p>
+                      </div>
+                      <div className="px-2">
+                        <DropdonwSvg
+                          width="10"
+                          height="7"
+                          color={ONDC_COLORS.WHITE}
+                        />
+                      </div>
                     </div>
-                    <div className="px-2">
-                      <DropdonwSvg
-                        width="10"
-                        height="7"
-                        color={ONDC_COLORS.WHITE}
-                      />
-                    </div>
-                  </div>
-                }
-                body_classes="dropdown-menu-right"
-                click={(search_type) => {
-                  setSearch((search) => ({
-                    ...search,
-                    type: search_type,
-                    value: "",
-                  }));
-                }}
-                options={Object.values(search_types).map((type) => ({
-                  value: type,
-                }))}
-                show_icons={false}
-              />
-              <div className="flex-grow-1">
-                <input
-                  id="search"
-                  name="search"
-                  type="text"
-                  placeholder={`Search ${search.type}`}
-                  autoComplete="off"
-                  value={search.value}
-                  onBlur={checkSearch}
-                  onChange={(event) => {
-                    const searchValue = event.target.value.trim();
+                  }
+                  body_classes="dropdown-menu-right"
+                  click={(search_type) => {
                     setSearch((search) => ({
                       ...search,
-                      value: searchValue,
-                    }));
-                    setInlineError((inlineError) => ({
-                      ...inlineError,
-                      search_error: "",
+                      type: search_type,
+                      value: "",
                     }));
                   }}
-                  className={styles.formControl}
+                  options={Object.values(search_types).map((type) => ({
+                    value: type,
+                  }))}
+                  show_icons={false}
                 />
+                <div className="flex-grow-1">
+                  <input
+                    id="search"
+                    name="search"
+                    type="text"
+                    placeholder={`Search ${search.type}`}
+                    autoComplete="off"
+                    value={search.value}
+                    onBlur={checkSearch}
+                    onChange={(event) => {
+                      const searchValue = event.target.value.trim();
+                      setSearch((search) => ({
+                        ...search,
+                        value: searchValue,
+                      }));
+                      setInlineError((inlineError) => ({
+                        ...inlineError,
+                        search_error: "",
+                      }));
+                    }}
+                    className={styles.formControl}
+                  />
+                </div>
               </div>
-            </div>
+              {inlineError.search_error && (
+                <ErrorMessage>{inlineError.search_error}</ErrorMessage>
+              )}
+            </form>
           </div>
           <div className="col-md-6 col-lg-3 col-xl-3">
             <div className="d-flex align-items-center justify-content-center">
@@ -376,9 +382,7 @@ export default function SearchBanner({ onSearch, location }) {
                       searchProductLoading
                     }
                     className={bannerStyles.search_button}
-                    onClick={() => {
-                      searchProduct();
-                    }}
+                    type="submit"
                   >
                     {searchProductLoading ? (
                       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />

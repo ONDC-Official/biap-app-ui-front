@@ -200,3 +200,12 @@
   fill: $accentColor;
   // margin-bottom: 5px;
 }
+
+.juspay_card {
+  height: 80%;
+  position: fixed;
+  top: 10%;
+  left: 30%;
+  right: 30%;
+  background: $white;
+}

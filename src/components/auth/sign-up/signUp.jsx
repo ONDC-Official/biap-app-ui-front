@@ -78,7 +78,8 @@ export default function SignUp() {
     return true;
   }
 
-  function handleSignUpWithEmailAndPassword() {
+  function handleSignUpWithEmailAndPassword(e) {
+    e.preventDefault();
     const allCheckPassed = [checkEmail(), checkPassword()].every(Boolean);
     if (!allCheckPassed) {
       return;
@@ -154,91 +155,93 @@ export default function SignUp() {
           }
         />
       )}
-      <Input
-        id="name"
-        name="name"
-        type="text"
-        placeholder="Enter Name"
-        label_name="Full Name"
-        autoComplete="off"
-        has_error={inlineError.name_error}
-        onChange={(event) => {
-          setName(event.target.value);
-          setInlineError((inlineError) => ({
-            ...inlineError,
-            name_error: "",
-          }));
-        }}
-        onBlur={checkName}
-      />
-      {inlineError.name_error && (
-        <ErrorMessage>{inlineError.name_error}</ErrorMessage>
-      )}
-      <Input
-        id="email"
-        name="email"
-        type="email"
-        placeholder="Enter Email"
-        label_name="Email"
-        autoComplete="off"
-        has_error={inlineError.email_error}
-        onChange={(event) => {
-          setEmail(event.target.value);
-          setInlineError((inlineError) => ({
-            ...inlineError,
-            email_error: "",
-          }));
-        }}
-        onBlur={checkEmail}
-      />
-      {inlineError.email_error && (
-        <ErrorMessage>{inlineError.email_error}</ErrorMessage>
-      )}
-      <Input
-        id="password"
-        name="password"
-        type="password"
-        placeholder="Enter Password"
-        label_name="Password"
-        autoComplete="off"
-        has_error={inlineError.password_error}
-        onChange={(event) => {
-          setPassword(event.target.value);
-          setInlineError((inlineError) => ({
-            ...inlineError,
-            password_error: "",
-          }));
-        }}
-        onBlur={checkPassword}
-      />
-      {inlineError.password_error && (
-        <ErrorMessage>{inlineError.password_error}</ErrorMessage>
-      )}
-      <div className="py-3 text-center">
-        <Button
-          isloading={signUpUsingEmailAndPasswordloading ? 1 : 0}
-          disabled={
-            signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
-          }
-          button_type={buttonTypes.primary}
-          button_hover_type={buttonTypes.primary_hover}
-          button_text="Sign up"
-          onClick={handleSignUpWithEmailAndPassword}
+      <form onSubmit={handleSignUpWithEmailAndPassword}>
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          placeholder="Enter Name"
+          label_name="Full Name"
+          autoComplete="off"
+          has_error={inlineError.name_error}
+          onChange={(event) => {
+            setName(event.target.value);
+            setInlineError((inlineError) => ({
+              ...inlineError,
+              name_error: "",
+            }));
+          }}
+          onBlur={checkName}
         />
-      </div>
-      <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
-      <div className="py-3 text-center">
-        <Button
-          isloading={signUpUsingGoogleloading ? 1 : 0}
-          disabled={
-            signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
-          }
-          button_type={buttonTypes.primary}
-          button_hover_type={buttonTypes.primary_hover}
-          button_text="Sign up with google"
-          onClick={handleSignUpWithGoogle}
+        {inlineError.name_error && (
+          <ErrorMessage>{inlineError.name_error}</ErrorMessage>
+        )}
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Enter Email"
+          label_name="Email"
+          autoComplete="off"
+          has_error={inlineError.email_error}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setInlineError((inlineError) => ({
+              ...inlineError,
+              email_error: "",
+            }));
+          }}
+          onBlur={checkEmail}
         />
-      </div>
+        {inlineError.email_error && (
+          <ErrorMessage>{inlineError.email_error}</ErrorMessage>
+        )}
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Enter Password"
+          label_name="Password"
+          autoComplete="off"
+          has_error={inlineError.password_error}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            setInlineError((inlineError) => ({
+              ...inlineError,
+              password_error: "",
+            }));
+          }}
+          onBlur={checkPassword}
+        />
+        {inlineError.password_error && (
+          <ErrorMessage>{inlineError.password_error}</ErrorMessage>
+        )}
+        <div className="py-3 text-center">
+          <Button
+            isloading={signUpUsingEmailAndPasswordloading ? 1 : 0}
+            disabled={
+              signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
+            }
+            button_type={buttonTypes.primary}
+            button_hover_type={buttonTypes.primary_hover}
+            button_text="Sign up"
+            type="submit"
+          />
+        </div>
+        <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
+        <div className="py-3 text-center">
+          <Button
+            isloading={signUpUsingGoogleloading ? 1 : 0}
+            disabled={
+              signUpUsingGoogleloading || signUpUsingEmailAndPasswordloading
+            }
+            button_type={buttonTypes.primary}
+            button_hover_type={buttonTypes.primary_hover}
+            button_text="Sign up with google"
+            onClick={handleSignUpWithGoogle}
+          />
+        </div>
+      </form>
     </div>
   );
   const navigation_link = (

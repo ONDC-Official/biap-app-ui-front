@@ -63,7 +63,8 @@ export default function Login() {
     return true;
   }
 
-  function handleLoginWithEmailAndPassword() {
+  function handleLoginWithEmailAndPassword(e) {
+    e.preventDefault();
     const allCheckPassed = [checkEmail(), checkPassword()].every(Boolean);
     if (!allCheckPassed) {
       return;
@@ -125,69 +126,71 @@ export default function Login() {
           }
         />
       )}
-      <Input
-        id="email"
-        name="email"
-        type="email"
-        placeholder="Enter Email"
-        label_name="Email"
-        autoComplete="off"
-        has_error={inlineError.email_error}
-        onChange={(event) => {
-          setEmail(event.target.value);
-          setInlineError((inlineError) => ({
-            ...inlineError,
-            email_error: "",
-          }));
-        }}
-      />
-      {inlineError.email_error && (
-        <ErrorMessage>{inlineError.email_error}</ErrorMessage>
-      )}
-      <Input
-        id="password"
-        name="password"
-        type="password"
-        placeholder="Enter Password"
-        label_name="Password"
-        autoComplete="off"
-        has_error={inlineError.password_error}
-        onChange={(event) => {
-          setPassword(event.target.value);
-          setInlineError((inlineError) => ({
-            ...inlineError,
-            password_error: "",
-          }));
-        }}
-      />
-      {inlineError.password_error && (
-        <ErrorMessage>{inlineError.password_error}</ErrorMessage>
-      )}
-      <div className="py-3 text-center">
-        <Button
-          isloading={signInUsingEmailAndPasswordloading ? 1 : 0}
-          disabled={
-            signInUsingGoogleloading || signInUsingEmailAndPasswordloading
-          }
-          button_type={buttonTypes.primary}
-          button_hover_type={buttonTypes.primary_hover}
-          button_text="Login"
-          onClick={handleLoginWithEmailAndPassword}
+      <form onSubmit={handleLoginWithEmailAndPassword}>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Enter Email"
+          label_name="Email"
+          autoComplete="off"
+          has_error={inlineError.email_error}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setInlineError((inlineError) => ({
+              ...inlineError,
+              email_error: "",
+            }));
+          }}
         />
-      </div>
-      <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
-      <div className="py-3 text-center">
-        <Button
-          isloading={signInUsingGoogleloading ? 1 : 0}
-          disabled={
-            signInUsingGoogleloading || signInUsingEmailAndPasswordloading
-          }
-          button_type={buttonTypes.primary}
-          button_hover_type={buttonTypes.primary_hover}
-          button_text="Login with google"
-          onClick={handleLoginWithGoogle}
+        {inlineError.email_error && (
+          <ErrorMessage>{inlineError.email_error}</ErrorMessage>
+        )}
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          placeholder="Enter Password"
+          label_name="Password"
+          autoComplete="off"
+          has_error={inlineError.password_error}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            setInlineError((inlineError) => ({
+              ...inlineError,
+              password_error: "",
+            }));
+          }}
         />
-      </div>
+        {inlineError.password_error && (
+          <ErrorMessage>{inlineError.password_error}</ErrorMessage>
+        )}
+        <div className="py-3 text-center">
+          <Button
+            isloading={signInUsingEmailAndPasswordloading ? 1 : 0}
+            disabled={
+              signInUsingGoogleloading || signInUsingEmailAndPasswordloading
+            }
+            button_type={buttonTypes.primary}
+            button_hover_type={buttonTypes.primary_hover}
+            button_text="Login"
+            type="submit"
+          />
+        </div>
+        <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
+        <div className="py-3 text-center">
+          <Button
+            isloading={signInUsingGoogleloading ? 1 : 0}
+            disabled={
+              signInUsingGoogleloading || signInUsingEmailAndPasswordloading
+            }
+            button_type={buttonTypes.primary}
+            button_hover_type={buttonTypes.primary_hover}
+            button_text="Login with google"
+            onClick={handleLoginWithGoogle}
+          />
+        </div>
+      </form>
     </div>
   );
   const navigation_link = (

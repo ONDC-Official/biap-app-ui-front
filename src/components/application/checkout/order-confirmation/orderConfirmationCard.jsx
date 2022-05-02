@@ -48,7 +48,7 @@ export default function OrderConfirmationCard(props) {
   async function initializeOrder(items) {
     try {
       const data = await postCall(
-        "/client/v2/initialize_order",
+        "/clientApis/v2/initialize_order",
         items.map((item) => ({
           context: {
             transaction_id,
@@ -95,7 +95,7 @@ export default function OrderConfirmationCard(props) {
   async function onInitializeOrder(array_of_ids) {
     try {
       const data = await getCall(
-        `/client/v2/on_initialize_order?messageIds=${array_of_ids
+        `/clientApis/v2/on_initialize_order?messageIds=${array_of_ids
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
@@ -233,21 +233,23 @@ export default function OrderConfirmationCard(props) {
                   return (
                     <div className="col-lg-6 col-sm-12 p-2" key={id}>
                       <div style={{ position: "relative" }}>
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "5px",
-                            right: "5px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => onRemoveProduct(id)}
-                        >
-                          <CrossIcon
-                            width="20"
-                            height="20"
-                            color={ONDC_COLORS.SECONDARYCOLOR}
-                          />
-                        </div>
+                        {!initializeOrderLoading && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "5px",
+                              right: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => onRemoveProduct(id)}
+                          >
+                            <CrossIcon
+                              width="20"
+                              height="20"
+                              color={ONDC_COLORS.SECONDARYCOLOR}
+                            />
+                          </div>
+                        )}
                         <ProductCard
                           product={product}
                           bpp_id={bpp_id}

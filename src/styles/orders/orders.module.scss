@@ -164,3 +164,17 @@
   color: $white;
   transition: all 0.3s;
 }
+
+.canceled_order_back {
+  padding: 15px;
+  height: 30px;
+  background-color: rgba($error, 0.14);
+  border: 1px solid $error;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $error;
+}

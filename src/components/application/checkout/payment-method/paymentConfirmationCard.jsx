@@ -21,6 +21,7 @@ import axios from "axios";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import { payment_methods } from "../../../../constants/payment-methods";
 import { removeCookie, getValueFromCookie } from "../../../../utils/cookies";
+import Loading from "../../../shared/loading/loading";
 
 export default function PaymentConfirmationCard(props) {
   const { currentActiveStep, productsQuote, orderStatus } = props;
@@ -29,9 +30,6 @@ export default function PaymentConfirmationCard(props) {
   const transaction_id = getValueFromCookie("transaction_id");
   const hyperServiceObject = new window.HyperServices();
   const history = useHistory();
-  const deliveryAddress = JSON.parse(
-    getValueFromCookie("delivery_address") || "{}"
-  );
   const billingAddress = JSON.parse(
     getValueFromCookie("billing_address") || "{}"
   );
@@ -46,6 +44,7 @@ export default function PaymentConfirmationCard(props) {
   const [activePaymentMethod, setActivePaymentMethod] = useState(
     payment_methods.COD
   );
+  const [loadingSdkForPayment, setLoadingSdkForPayment] = useState(false);
   const confirm_polling_timer = useRef(0);
   const onConfirmed = useRef();
   const sdkPayload = useRef({
@@ -111,20 +110,6 @@ export default function PaymentConfirmationCard(props) {
             transaction_id,
           },
           message: {
-            items: item,
-            billing_info: {
-              address: billingAddress?.address,
-              phone: billingAddress?.phone,
-              name: billingAddress?.name,
-              email: billingAddress?.email,
-            },
-            delivery_info: {
-              type: "HOME-DELIVERY",
-              name: deliveryAddress?.name,
-              email: deliveryAddress?.email,
-              phone: deliveryAddress?.phone,
-              location: deliveryAddress?.location,
-            },
             payment: {
               paid_amount: getTotalPayable(item),
               type:
@@ -226,6 +211,7 @@ export default function PaymentConfirmationCard(props) {
         // Check for event key
         // eslint-disable-next-line
         if (event == "initiate_result") {
+          setLoadingSdkForPayment(false);
           processPayment();
           // eslint-disable-next-line
         } else if (event == "process_result") {
@@ -339,21 +325,25 @@ export default function PaymentConfirmationCard(props) {
   return (
     <div className={styles.price_summary_card}>
       {togglePaymentGateway && (
-        <div>
-          <div style={{ position: "fixed", top: "5%", right: "5%" }}>
-            <CrossIcon onClick={() => setTogglePaymentGateway(false)} />
-          </div>
-          <div
-            id="sdk_frame"
-            style={{
-              height: "80%",
-              overflow: "auto",
-              position: "fixed",
-              top: "10%",
-              left: "30%",
-              right: "30%",
-            }}
-          ></div>
+        <div id="sdk_frame" className={styles.juspay_card}>
+          {loadingSdkForPayment ? (
+            <div className="h-100 d-flex align-items-center justify-content-center">
+              <Loading />
+            </div>
+          ) : (
+            <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+              <CrossIcon
+                width="25"
+                height="25"
+                style={{ cursor: "pointer" }}
+                color={ONDC_COLORS.SECONDARYCOLOR}
+                onClick={() => {
+                  setTogglePaymentGateway(false);
+                  setActivePaymentMethod(payment_methods.COD);
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
       {toast.toggle && (
@@ -409,6 +399,7 @@ export default function PaymentConfirmationCard(props) {
                     onClick={() => {
                       setActivePaymentMethod(payment_methods.JUSPAY);
                       setTogglePaymentGateway(true);
+                      setLoadingSdkForPayment(true);
                       initiateSDK();
                     }}
                   >

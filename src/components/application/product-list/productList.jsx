@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
-import search_empty_illustration from "../../../assets/images/search_prod_illustration.png";
+import search_empty_illustration from "../../../assets/images/search_prod_illustration.svg";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import { getCall } from "../../../api/axios";
 import { ONDC_COLORS } from "../../shared/colors";
