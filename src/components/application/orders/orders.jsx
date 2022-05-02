@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, useCallback } from "react";
 import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
@@ -14,45 +14,45 @@ export default function Orders() {
   const history = useHistory();
   const [orders, setOrders] = useState([]);
   const [fetchOrderLoading, setFetchOrderLoading] = useState(false);
-  useEffect(() => {
-    async function getAllOrders() {
-      setFetchOrderLoading(true);
-      try {
-        const data = await getCall("/clientApis/v1/orders");
-        const formated_orders = data.map((order) => {
-          const {
-            quote,
-            state,
-            id,
-            transactionId,
-            fulfillment,
-            billing,
-            created_at,
-            bppId,
-          } = order;
-          return {
-            product: {
-              name: quote?.breakup[0].title,
-              price: quote?.price?.value,
-            },
-            address: {
-              name: billing?.name,
-              location: fulfillment?.end?.location?.address,
-            },
-            status: state,
-            order_id: id,
-            transaction_id: transactionId,
-            created_at,
-            bpp_id: bppId,
-          };
-        });
-        setOrders(formated_orders);
-        setFetchOrderLoading(false);
-      } catch (err) {
-        console.log(err);
-        setFetchOrderLoading(false);
-      }
+  const getAllOrders = useCallback(async () => {
+    setFetchOrderLoading(true);
+    try {
+      const data = await getCall("/clientApis/v1/orders");
+      const formated_orders = data.map((order) => {
+        const {
+          quote,
+          state,
+          id,
+          transactionId,
+          fulfillment,
+          billing,
+          created_at,
+          bppId,
+        } = order;
+        return {
+          product: {
+            name: quote?.breakup[0].title,
+            price: quote?.price?.value,
+          },
+          address: {
+            name: billing?.name,
+            location: fulfillment?.end?.location?.address,
+          },
+          status: state,
+          order_id: id,
+          transaction_id: transactionId,
+          created_at,
+          bpp_id: bppId,
+        };
+      });
+      setOrders(formated_orders);
+      setFetchOrderLoading(false);
+    } catch (err) {
+      console.log(err);
+      setFetchOrderLoading(false);
     }
+  }, []);
+  useEffect(() => {
     getAllOrders();
   }, []);
 
@@ -132,6 +132,7 @@ export default function Orders() {
                         order_id={order_id}
                         created_at={created_at}
                         bpp_id={bpp_id}
+                        onFetchUpdatedOrder={() => getAllOrders()}
                       />
                     </div>
                   );

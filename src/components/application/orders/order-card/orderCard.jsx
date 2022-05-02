@@ -9,6 +9,8 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import IndianRupee from "../../../shared/svg/indian-rupee";
 import { postCall, getCall } from "../../../../api/axios";
 import Loading from "../../../shared/loading/loading";
+import Toast from "../../../shared/toast/toast";
+import { toast_types } from "../../../../utils/toast";
 
 export default function OrderCard(props) {
   const {
@@ -19,10 +21,16 @@ export default function OrderCard(props) {
     order_id,
     transaction_id,
     bpp_id,
+    onFetchUpdatedOrder,
   } = props;
   const current_order_status = getOrderStatus(status);
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const cancel_order_polling = useRef(0);
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
+  });
 
   async function handleCancelOrder() {
     setCancelOrderLoading(true);
@@ -49,6 +57,20 @@ export default function OrderCard(props) {
       const data = await getCall(
         `/clientApis/v1/on_cancel_order?messageId=${array_of_id}`
       );
+      if (data[0]?.error) {
+        setToast((toast) => ({
+          ...toast,
+          toggle: true,
+          type: toast_types.error,
+          message: "Something went wrong!",
+        }));
+        setCancelOrderLoading(false);
+        clearInterval(cancel_order_polling.current);
+        return;
+      }
+      setCancelOrderLoading(false);
+      clearInterval(cancel_order_polling.current);
+      onFetchUpdatedOrder();
     } catch (err) {
       console.log(err);
       setCancelOrderLoading(false);
@@ -72,6 +94,18 @@ export default function OrderCard(props) {
 
   return (
     <div className={styles.orders_card}>
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
       <div className="container">
         <div className="row">
           <div className="col-lg-3 col-md-6 col-sm-12 p-2">
