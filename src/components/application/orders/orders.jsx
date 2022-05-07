@@ -1,10 +1,4 @@
-import React, {
-  Fragment,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { Fragment, useEffect, useState, useCallback } from "react";
 import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
@@ -69,7 +63,7 @@ export default function Orders() {
       console.log(err);
       setFetchOrderLoading(false);
     }
-  }, [pagination.currentPage]);
+  }, [pagination.currentPage, pagination.postPerPage]);
 
   useEffect(() => {
     getAllOrders();
