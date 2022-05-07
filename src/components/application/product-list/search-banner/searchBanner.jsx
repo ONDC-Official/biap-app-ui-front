@@ -41,19 +41,19 @@ export default function SearchBanner({ onSearch, location }) {
   useEffect(() => {
     if (search.type === search_types.PRODUCT) {
       criteria.current = {
-        search_string: search.value,
+        search_string: search.value.trim(),
         delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
       };
     }
     if (search.type === search_types.CATEGORY) {
       criteria.current = {
-        category_id: search.value,
+        category_id: search.value.trim(),
         delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
       };
     }
     if (search.type === search_types.PROVIDER) {
       criteria.current = {
-        provider_id: search.value,
+        provider_id: search.value.trim(),
         delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
       };
     }
@@ -338,7 +338,7 @@ export default function SearchBanner({ onSearch, location }) {
                     value={search.value}
                     onBlur={checkSearch}
                     onChange={(event) => {
-                      const searchValue = event.target.value.trim();
+                      const searchValue = event.target.value;
                       setSearch((search) => ({
                         ...search,
                         value: searchValue,
@@ -383,6 +383,7 @@ export default function SearchBanner({ onSearch, location }) {
                     }
                     className={bannerStyles.search_button}
                     type="submit"
+                    onClick={searchProduct}
                   >
                     {searchProductLoading ? (
                       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />

@@ -19,7 +19,7 @@ export default function Support() {
           <div className="row">
             <div className="col-md-6 col-lg-4 col-xl-3 py-3">
               <SupportCard
-                link={"https://google.com"}
+                link={"https://github.com/Open-network-for-digital-commerce"}
                 img={<Orders width="90" height="90" />}
                 header="Our Policy"
                 description="Read Abc's condition of Use & Sale, privacy policy and other applicable user's policy"
@@ -27,7 +27,7 @@ export default function Support() {
             </div>
             <div className="col-md-6 col-lg-4 col-xl-3 py-3">
               <SupportCard
-                link={"https://google.com"}
+                link={"https://ondc.org/Bring-buyers-on-the-network.html"}
                 img={
                   <img
                     src={supportSvg}
@@ -41,7 +41,7 @@ export default function Support() {
             </div>
             <div className="col-md-6 col-lg-4 col-xl-3 py-3">
               <SupportCard
-                link={"https://google.com"}
+                link={"https://ondc.org/index.html"}
                 img={<img src={logo} alt="logo" style={{ width: "100%" }} />}
                 header="ONDC Policy"
                 description="Read the policy and confitions of the ONDC network"
@@ -49,7 +49,7 @@ export default function Support() {
             </div>
             <div className="col-md-6 col-lg-4 col-xl-3 py-3">
               <SupportCard
-                link={"https://google.com"}
+                link={"https://ondc.org/contactus.html"}
                 img={<User width="80" height="80" />}
                 header="Contact Us"
                 description="Not Satisfied? You can reach out to Customer Care"

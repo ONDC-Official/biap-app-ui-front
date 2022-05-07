@@ -1,0 +1,84 @@
+@import "../../../assets/scss/variables.scss";
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  list-style: none;
+}
+
+.active_page {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: $accentColor;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .page_number {
+    color: $white;
+  }
+}
+
+.page_wrapper {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page_wrapper:hover {
+  background-color: $accentColor;
+  transition: background-color 0.3s;
+
+  .page_number {
+    color: $white;
+  }
+}
+
+.page_anchor {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page_anchor:hover {
+  background-color: rgba($accentColor, $alpha: 0.3);
+  transition: background-color 0.3s;
+}
+
+.page_number {
+  font-size: $font-14;
+  color: $accentColor;
+}
+
+.arrow_left {
+  transform: rotate(90deg);
+}
+
+.arrow_right {
+  transform: rotate(-90deg);
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: no-drop;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

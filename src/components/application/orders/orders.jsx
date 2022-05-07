@@ -1,4 +1,10 @@
-import React, { Fragment, useEffect, useState, useCallback } from "react";
+import React, {
+  Fragment,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
@@ -9,16 +15,24 @@ import { getCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
 import OrderCard from "./order-card/orderCard";
+import Pagination from "../../shared/pagination/pagination";
 
 export default function Orders() {
   const history = useHistory();
   const [orders, setOrders] = useState([]);
   const [fetchOrderLoading, setFetchOrderLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalCount: 0,
+    postPerPage: 10,
+  });
   const getAllOrders = useCallback(async () => {
     setFetchOrderLoading(true);
     try {
-      const data = await getCall("/clientApis/v1/orders");
-      const formated_orders = data.map((order) => {
+      const { totalCount, orders } = await getCall(
+        `/clientApis/v1/orders?pageNumber=${pagination.currentPage}&limit=${pagination.postPerPage}`
+      );
+      const formated_orders = orders.map((order) => {
         const {
           quote,
           state,
@@ -45,16 +59,21 @@ export default function Orders() {
           bpp_id: bppId,
         };
       });
+      setPagination((prev) => ({
+        ...prev,
+        totalCount,
+      }));
       setOrders(formated_orders);
       setFetchOrderLoading(false);
     } catch (err) {
       console.log(err);
       setFetchOrderLoading(false);
     }
-  }, []);
+  }, [pagination.currentPage]);
+
   useEffect(() => {
     getAllOrders();
-  }, []);
+  }, [getAllOrders, pagination.currentPage]);
 
   // loading UI
   const loadingSpin = (
@@ -96,6 +115,7 @@ export default function Orders() {
       </div>
     </div>
   );
+
   return (
     <Fragment>
       <Navbar />
@@ -104,7 +124,10 @@ export default function Orders() {
       ) : orders.length <= 0 ? (
         empty_orders_state
       ) : (
-        <div className={styles.playground_height}>
+        <div
+          className={styles.playground_height}
+          style={{ height: "calc(100vh - 120px)" }}
+        >
           <div className="container">
             <div className="row py-3">
               <div className="col-12">
@@ -142,6 +165,22 @@ export default function Orders() {
           </div>
         </div>
       )}
+      <div
+        className="d-flex align-items-center justify-content-center"
+        style={{ height: "60px" }}
+      >
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalCount={pagination.totalCount}
+          pageSize={pagination.postPerPage}
+          onPageChange={(page) =>
+            setPagination((prev) => ({
+              ...prev,
+              currentPage: page,
+            }))
+          }
+        />
+      </div>
     </Fragment>
   );
 }

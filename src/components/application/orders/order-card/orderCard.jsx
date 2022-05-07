@@ -47,6 +47,7 @@ export default function OrderCard(props) {
       });
       callApiMultipleTimes(context.message_id);
     } catch (err) {
+      setCancelOrderLoading(false);
       console.log(err);
     }
   }
