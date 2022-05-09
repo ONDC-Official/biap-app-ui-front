@@ -75,13 +75,12 @@ export default function PaymentConfirmationCard(props) {
 
   useEffect(() => {
     if (orderStatus === "CHARGED") {
-      setActivePaymentMethod(payment_methods.JUSPAY);
       const parsedCartItems = JSON.parse(
         getValueFromCookie("cartItems") || "{}"
       );
       setConfirmOrderLoading(true);
       const request_object = constructQouteObject(parsedCartItems);
-      confirmOrder(request_object);
+      confirmOrder(request_object, payment_methods.JUSPAY);
     }
     // eslint-disable-next-line
   }, [orderStatus]);
@@ -101,7 +100,7 @@ export default function PaymentConfirmationCard(props) {
     return sum;
   }
 
-  async function confirmOrder(items) {
+  async function confirmOrder(items, method) {
     try {
       const data = await postCall(
         "/clientApis/v2/confirm_order",
@@ -113,9 +112,7 @@ export default function PaymentConfirmationCard(props) {
             payment: {
               paid_amount: getTotalPayable(item),
               type:
-                activePaymentMethod === payment_methods.COD
-                  ? "ON-FULFILLMENT"
-                  : "ON-ORDER",
+                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
               transaction_id,
             },
           },
@@ -423,7 +420,7 @@ export default function PaymentConfirmationCard(props) {
               onClick={() => {
                 setConfirmOrderLoading(true);
                 const request_object = constructQouteObject(cartItems);
-                confirmOrder(request_object);
+                confirmOrder(request_object, payment_methods.COD);
               }}
             />
           </div>

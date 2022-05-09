@@ -34,7 +34,7 @@ export default function Orders() {
           transactionId,
           fulfillment,
           billing,
-          created_at,
+          createdAt,
           bppId,
         } = order;
         return {
@@ -49,7 +49,7 @@ export default function Orders() {
           status: state,
           order_id: id,
           transaction_id: transactionId,
-          created_at,
+          createdAt,
           bpp_id: bppId,
         };
       });
@@ -136,7 +136,7 @@ export default function Orders() {
                   status,
                   order_id,
                   transaction_id,
-                  created_at,
+                  createdAt,
                   bpp_id,
                 }) => {
                   return (
@@ -147,7 +147,7 @@ export default function Orders() {
                         status={status}
                         transaction_id={transaction_id}
                         order_id={order_id}
-                        created_at={created_at}
+                        created_at={createdAt}
                         bpp_id={bpp_id}
                         onFetchUpdatedOrder={() => getAllOrders()}
                       />
