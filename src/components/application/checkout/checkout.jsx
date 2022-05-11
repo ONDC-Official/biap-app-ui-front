@@ -115,7 +115,12 @@ export default function Checkout() {
           array_of_ids.filter((idObj) => idObj.error_reason === "")
         );
       } catch (err) {
-        console.log(err);
+        setToast((toast) => ({
+          ...toast,
+          toggle: true,
+          type: toast_types.error,
+          message: err.response.data.error,
+        }));
         setGetQuoteLoading(false);
       }
     }
@@ -157,14 +162,20 @@ export default function Checkout() {
       });
       setProductsQoute({ products: quotes.flat(), total_payable });
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
+      clearInterval(quote_polling_timer.current);
       setGetQuoteLoading(false);
     }
   }
 
   // use this function to call on get quote call multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 3;
+    let counter = 6;
     quote_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setGetQuoteLoading(false);

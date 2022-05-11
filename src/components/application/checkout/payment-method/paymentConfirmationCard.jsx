@@ -132,7 +132,12 @@ export default function PaymentConfirmationCard(props) {
       });
       callApiMultipleTimes(array_of_ids);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
       setConfirmOrderLoading(false);
     }
   }
@@ -147,7 +152,12 @@ export default function PaymentConfirmationCard(props) {
       );
       onConfirmed.current = data;
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
       setConfirmOrderLoading(false);
     }
   }
@@ -261,7 +271,12 @@ export default function PaymentConfirmationCard(props) {
         hyperCallbackHandler
       );
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
     }
   }
 
@@ -310,12 +325,15 @@ export default function PaymentConfirmationCard(props) {
           requestId: transaction_id,
           payload: processPayload.current,
         },
-        (res) => {
-          console.log(res);
-        }
+        () => {}
       );
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
     }
   }
 
@@ -401,7 +419,7 @@ export default function PaymentConfirmationCard(props) {
                     }}
                   >
                     <div className="px-3">
-                      <p className={styles.address_line_1}>Jus pay</p>
+                      <p className={styles.address_line_1}>Prepaid</p>
                     </div>
                   </AddressRadioButton>
                 </div>

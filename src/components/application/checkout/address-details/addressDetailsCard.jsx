@@ -26,10 +26,14 @@ export default function AddressDetailsCard(props) {
     type: "",
     message: "",
   });
-  const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
-    useState();
-  const [fetchBillingAddressLoading, setFetchBillingAddressLoading] =
-    useState();
+  const [
+    fetchDeliveryAddressLoading,
+    setFetchDeliveryAddressLoading,
+  ] = useState();
+  const [
+    fetchBillingAddressLoading,
+    setFetchBillingAddressLoading,
+  ] = useState();
 
   // function to check whether step is completed or not
   function isStepCompleted() {
@@ -73,7 +77,7 @@ export default function AddressDetailsCard(props) {
           ...toast,
           toggle: true,
           type: toast_types.error,
-          message: "Something went wrong!",
+          message: err.response.data.error,
         }));
       } finally {
         setFetchDeliveryAddressLoading(false);
@@ -99,7 +103,7 @@ export default function AddressDetailsCard(props) {
           ...toast,
           toggle: true,
           type: toast_types.error,
-          message: "Something went wrong!",
+          message: err.response.data.error,
         }));
       } finally {
         setFetchBillingAddressLoading(false);

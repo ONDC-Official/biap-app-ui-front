@@ -10,6 +10,8 @@ import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
 import OrderCard from "./order-card/orderCard";
 import Pagination from "../../shared/pagination/pagination";
+import Toast from "../../shared/toast/toast";
+import { toast_types } from "../../../utils/toast";
 
 export default function Orders() {
   const history = useHistory();
@@ -19,6 +21,11 @@ export default function Orders() {
     currentPage: 1,
     totalCount: 0,
     postPerPage: 10,
+  });
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
   });
   const getAllOrders = useCallback(async () => {
     setFetchOrderLoading(true);
@@ -60,7 +67,12 @@ export default function Orders() {
       setOrders(formated_orders);
       setFetchOrderLoading(false);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
       setFetchOrderLoading(false);
     }
   }, [pagination.currentPage, pagination.postPerPage]);
@@ -113,6 +125,18 @@ export default function Orders() {
   return (
     <Fragment>
       <Navbar />
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
       {fetchOrderLoading ? (
         loadingSpin
       ) : orders.length <= 0 ? (

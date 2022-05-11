@@ -17,6 +17,8 @@ import { CartContext } from "../../../context/cartContext";
 import OrderSummary from "./order-summary/orderSummary";
 import Cookies from "js-cookie";
 import SearchBanner from "./search-banner/searchBanner";
+import Toast from "../../shared/toast/toast";
+import { toast_types } from "../../../utils/toast";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -30,6 +32,11 @@ export default function ProductList() {
   const [searchedProduct, setSearchedProduct] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const search_polling_timer = useRef(0);
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
+  });
   useEffect(() => {
     if (Object.keys(search_context).length > 0) {
       setSearchedProduct(search_context?.search?.value);
@@ -58,8 +65,14 @@ export default function ProductList() {
       setProducts(filteredProducts);
       setSearchProductLoading(false);
     } catch (err) {
-      console.log(err);
       setSearchProductLoading(false);
+      clearInterval(search_polling_timer.current);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
     }
   }
 
@@ -135,6 +148,18 @@ export default function ProductList() {
   return (
     <Fragment>
       <Navbar />
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
       {searchProductLoading ? (
         loadingSpin
       ) : (

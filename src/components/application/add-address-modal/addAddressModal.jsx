@@ -7,6 +7,8 @@ import { ONDC_COLORS } from "../../shared/colors";
 import Input from "../../shared/input/input";
 import CrossIcon from "../../shared/svg/cross-icon";
 import { address_types } from "../../../constants/address-types";
+import Toast from "../../shared/toast/toast";
+import { toast_types } from "../../../utils/toast";
 
 export default function AddAddressModal(props) {
   const { address_type, onClose, onAddAddress } = props;
@@ -31,6 +33,11 @@ export default function AddAddressModal(props) {
     state_name_error: "",
     street_name_error: "",
   });
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
+  });
 
   // add billing address
   async function handleAddBillingAddress() {
@@ -52,7 +59,12 @@ export default function AddAddressModal(props) {
       });
       onAddAddress(data);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
     } finally {
       setAddAddressLoading(false);
     }
@@ -80,7 +92,12 @@ export default function AddAddressModal(props) {
       });
       onAddAddress(data);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
     } finally {
       setAddAddressLoading(false);
     }
@@ -103,6 +120,18 @@ export default function AddAddressModal(props) {
 
   return (
     <div className={styles.overlay}>
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
       <div className={styles.popup_card}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <p className={styles.card_header_title}>Add {address_type} Address</p>

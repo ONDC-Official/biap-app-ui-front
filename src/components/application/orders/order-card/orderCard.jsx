@@ -48,7 +48,12 @@ export default function OrderCard(props) {
       callApiMultipleTimes(context.message_id);
     } catch (err) {
       setCancelOrderLoading(false);
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
     }
   }
 
@@ -73,8 +78,14 @@ export default function OrderCard(props) {
       clearInterval(cancel_order_polling.current);
       onFetchUpdatedOrder();
     } catch (err) {
-      console.log(err);
       setCancelOrderLoading(false);
+      clearInterval(cancel_order_polling.current);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
     }
   }
 

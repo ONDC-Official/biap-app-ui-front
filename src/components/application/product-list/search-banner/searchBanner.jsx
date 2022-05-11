@@ -14,6 +14,8 @@ import CrossIcon from "../../../shared/svg/cross-icon";
 import MMI_LOGO from "../../../../assets/images/mmi_logo.svg";
 import LocationSvg from "../../../shared/svg/location";
 import Dropdown from "../../../shared/dropdown/dropdown";
+import Toast from "../../../shared/toast/toast";
+import { toast_types } from "../../../../utils/toast";
 
 export default function SearchBanner({ onSearch, location }) {
   const [inlineError, setInlineError] = useState({
@@ -30,6 +32,11 @@ export default function SearchBanner({ onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
+  const [toast, setToast] = useState({
+    toggle: false,
+    type: "",
+    message: "",
+  });
 
   useEffect(() => {
     return () => {
@@ -73,7 +80,12 @@ export default function SearchBanner({ onSearch, location }) {
       }));
       setLocations(formattedLocations);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
     } finally {
       setSearchLocationLoading(false);
     }
@@ -93,7 +105,12 @@ export default function SearchBanner({ onSearch, location }) {
       });
       setToggleLocationListCard(false);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
     }
   }
 
@@ -122,7 +139,12 @@ export default function SearchBanner({ onSearch, location }) {
       AddCookie("search_context", JSON.stringify(search_context));
       onSearch(search_context);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
     } finally {
       setSearchProductLoading(false);
     }
@@ -196,6 +218,18 @@ export default function SearchBanner({ onSearch, location }) {
 
   return (
     <div className={bannerStyles.searched_history_banner}>
+      {toast.toggle && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onRemove={() =>
+            setToast((toast) => ({
+              ...toast,
+              toggle: false,
+            }))
+          }
+        />
+      )}
       <div className="container">
         <div className="row">
           <div

@@ -85,7 +85,12 @@ export default function OrderConfirmationCard(props) {
       });
       callApiMultipleTimes(array_of_ids);
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
       setInitializeOrderLoading(false);
       updateInitLoading(false);
     }
@@ -101,7 +106,12 @@ export default function OrderConfirmationCard(props) {
       );
       onInitialized.current = data;
     } catch (err) {
-      console.log(err);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
       setInitializeOrderLoading(false);
       updateInitLoading(false);
     }
@@ -109,7 +119,7 @@ export default function OrderConfirmationCard(props) {
 
   // use this function to call initlaize order multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 3;
+    let counter = 6;
     initialize_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setInitializeOrderLoading(false);
