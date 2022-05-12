@@ -6,4 +6,5 @@ export const ONDC_COLORS = {
   ERROR: "#FF5959",
   SUCCESS: "#2EB086",
   WHITE: "#ffffff",
+  WARNING: "#F9C132",
 };

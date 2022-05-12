@@ -1,6 +1,6 @@
 import React from "react";
 import { usePagination, DOTS } from "./usePagination";
-import DropdonwSvg from "../svg/dropdonw";
+import DropdownSvg from "../svg/dropdonw";
 import styles from "./pagination.module.scss";
 import { ONDC_COLORS } from "../colors";
 
@@ -40,7 +40,7 @@ export default function Pagination({
           onClick={onPrevious}
         >
           <div className={styles.arrow_left}>
-            <DropdonwSvg
+            <DropdownSvg
               width="11"
               height="8"
               color={ONDC_COLORS.ACCENTCOLOR}
@@ -49,17 +49,17 @@ export default function Pagination({
         </li>
       </div>
       <div className="px-1 d-flex align-items-center">
-        {paginationRange.map((pageNumber) => {
+        {paginationRange.map((pageNumber, index) => {
           if (pageNumber === DOTS) {
             return (
-              <div className="px-2">
+              <div className="px-2" id={`id-${index}`}>
                 <li className="pagination-item dots">&#8230;</li>
               </div>
             );
           }
 
           return (
-            <div className="px-1">
+            <div className="px-1" id={`id-${index}`}>
               <li
                 className={
                   currentPage === pageNumber
@@ -82,7 +82,7 @@ export default function Pagination({
           onClick={onNext}
         >
           <div className={styles.arrow_right}>
-            <DropdonwSvg
+            <DropdownSvg
               width="11"
               height="8"
               color={ONDC_COLORS.ACCENTCOLOR}

@@ -9,7 +9,7 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import bannerStyles from "../../../../styles/products/productList.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
-import DropdonwSvg from "../../../shared/svg/dropdonw";
+import DropdownSvg from "../../../shared/svg/dropdonw";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import MMI_LOGO from "../../../../assets/images/mmi_logo.svg";
 import LocationSvg from "../../../shared/svg/location";
@@ -264,7 +264,7 @@ export default function SearchBanner({ onSearch, location }) {
                     onClick={clearSearch}
                   />
                 ) : (
-                  <DropdonwSvg width="13" height="8" />
+                  <DropdownSvg width="13" height="8" />
                 )}
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function SearchBanner({ onSearch, location }) {
                         <p className={styles.search_type_text}>{search.type}</p>
                       </div>
                       <div className="px-2">
-                        <DropdonwSvg
+                        <DropdownSvg
                           width="10"
                           height="7"
                           color={ONDC_COLORS.WHITE}

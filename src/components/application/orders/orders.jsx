@@ -27,6 +27,7 @@ export default function Orders() {
     type: "",
     message: "",
   });
+  const [currentSelectedAccordion, setCurrentSelectedAccordion] = useState("");
   const getAllOrders = useCallback(async () => {
     setFetchOrderLoading(true);
     try {
@@ -43,14 +44,25 @@ export default function Orders() {
           billing,
           createdAt,
           bppId,
+          items,
         } = order;
         return {
-          product: {
-            name: quote?.breakup[0].title,
-            price: quote?.price?.value,
-          },
-          address: {
+          product: items?.map(({ id, quantity }, index) => ({
+            id,
+            name: quote?.breakup[index]?.title,
+            quantity: quantity?.count,
+            price: quote?.breakup[index]?.price?.value,
+          })),
+          billing_address: {
             name: billing?.name,
+            email: billing?.email,
+            phone: billing?.phone,
+            location: billing?.address,
+          },
+          delivery_address: {
+            name: fulfillment?.end?.location?.address?.name,
+            email: fulfillment?.end?.contact?.email,
+            phone: fulfillment?.end?.contact?.phone,
             location: fulfillment?.end?.location?.address,
           },
           status: state,
@@ -144,61 +156,81 @@ export default function Orders() {
       ) : (
         <div
           className={styles.playground_height}
-          style={{ height: "calc(100vh - 120px)" }}
+          style={{ height: "calc(100vh - 60px)" }}
         >
-          <div className="container">
-            <div className="row py-3">
-              <div className="col-12">
-                <p className={styles.cart_label}>Orders</p>
+          <div className="accordion" id="ordersAccordion">
+            <div className="container">
+              <div className="row py-3">
+                <div className="col-12">
+                  <p className={styles.cart_label}>Orders</p>
+                </div>
+              </div>
+              <div className={styles.order_list_wrapper}>
+                {orders.map(
+                  (
+                    {
+                      product,
+                      billing_address,
+                      delivery_address,
+                      status,
+                      order_id,
+                      transaction_id,
+                      createdAt,
+                      bpp_id,
+                    },
+                    index
+                  ) => {
+                    return (
+                      <div className="py-2" key={`order_id_${index}`}>
+                        <OrderCard
+                          product={product}
+                          billing_address={billing_address}
+                          delivery_address={delivery_address}
+                          status={status}
+                          transaction_id={transaction_id}
+                          order_id={order_id}
+                          created_at={createdAt}
+                          bpp_id={bpp_id}
+                          accoodion_id={`order_id_${index}`}
+                          onFetchUpdatedOrder={() => getAllOrders()}
+                          currentSelectedAccordion={currentSelectedAccordion}
+                          setCurrentSelectedAccordion={(value) => {
+                            if (
+                              currentSelectedAccordion.toLowerCase() ===
+                              `order_id_${index}`.toLowerCase()
+                            ) {
+                              setCurrentSelectedAccordion("");
+                              return;
+                            }
+                            setCurrentSelectedAccordion(value);
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+                )}
               </div>
             </div>
-            <div className="row py-2">
-              {orders.map(
-                ({
-                  product,
-                  address,
-                  status,
-                  order_id,
-                  transaction_id,
-                  createdAt,
-                  bpp_id,
-                }) => {
-                  return (
-                    <div className="col-12 py-2" key={`order_id_${order_id}`}>
-                      <OrderCard
-                        product={product}
-                        address={address}
-                        status={status}
-                        transaction_id={transaction_id}
-                        order_id={order_id}
-                        created_at={createdAt}
-                        bpp_id={bpp_id}
-                        onFetchUpdatedOrder={() => getAllOrders()}
-                      />
-                    </div>
-                  );
-                }
-              )}
-            </div>
+          </div>
+          <div
+            className="d-flex align-items-center justify-content-center"
+            style={{ height: "60px" }}
+          >
+            <Pagination
+              className="m-0"
+              currentPage={pagination.currentPage}
+              totalCount={pagination.totalCount}
+              pageSize={pagination.postPerPage}
+              onPageChange={(page) =>
+                setPagination((prev) => ({
+                  ...prev,
+                  currentPage: page,
+                }))
+              }
+            />
           </div>
         </div>
       )}
-      <div
-        className="d-flex align-items-center justify-content-center"
-        style={{ height: "60px" }}
-      >
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalCount={pagination.totalCount}
-          pageSize={pagination.postPerPage}
-          onPageChange={(page) =>
-            setPagination((prev) => ({
-              ...prev,
-              currentPage: page,
-            }))
-          }
-        />
-      </div>
     </Fragment>
   );
 }

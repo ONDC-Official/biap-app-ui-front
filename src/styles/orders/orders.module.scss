@@ -30,12 +30,21 @@
   color: $secondaryColor;
 }
 
+.order_list_wrapper {
+  width: 700px;
+  margin: 0 auto;
+}
+
+.padding_20 {
+  padding: 20px;
+}
+
 .orders_card {
   width: 100%;
-  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px 0 rgba($primaryColor, 0.15);
   background-color: $white;
+  // cursor: pointer;
 }
 
 .card_header_title {
@@ -70,7 +79,7 @@
 
 .address_type_label {
   font-size: $font-14;
-  color: $secondaryColor;
+  color: #a1a1a1;
   margin: 0;
 }
 
@@ -103,31 +112,35 @@
   margin: 0;
 }
 
-.status_indicator {
-  margin: 0 auto;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-}
-
-.status_value {
+.status_label {
   font-size: $font-14;
-  font-weight: $medium;
   margin: 0;
-  padding: 5px 0 0;
+  color: $primaryColor;
+  text-align: left;
 }
 
-.status_bar {
-  width: 30px;
-  height: 5px;
-  border-radius: 10px;
-  position: relative;
-  top: 8px;
+.status_chip {
+  padding: 2px 15px;
+  border-radius: 36px;
+  text-align: center;
 }
 
-.return_button {
+.status_text {
+  font-size: $font-12;
+  text-align: center;
+  margin: 0;
+}
+
+.quantity_count {
+  font-size: $font-12;
+  color: #a1a1a1;
+  text-align: left;
+  margin: 0;
+}
+
+.secondary_action {
   width: 100px;
-  height: 40px;
+  height: 35px;
   background-color: $white;
   border: 1px solid $secondaryColor;
   border-radius: 36px;
@@ -139,15 +152,15 @@
   color: $secondaryColor;
 }
 
-.return_button:hover {
+.secondary_action:hover {
   background-color: $secondaryColor;
   color: $white;
   transition: all 0.3s;
 }
 
-.cancel_button {
+.primary_action {
   width: 100px;
-  height: 40px;
+  height: 35px;
   background-color: $white;
   border: 1px solid $accentColor;
   border-radius: 36px;
@@ -159,22 +172,14 @@
   color: $accentColor;
 }
 
-.cancel_button:hover {
+.primary_action:hover {
   background-color: $accentColor;
   color: $white;
   transition: all 0.3s;
 }
 
-.canceled_order_back {
-  padding: 15px;
-  height: 30px;
-  background-color: rgba($error, 0.14);
-  border: 1px solid $error;
-  border-radius: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: $font-14;
-  font-weight: $medium;
-  color: $error;
+@media screen and (max-width: 767px) {
+  .order_list_wrapper {
+    width: 100%;
+  }
 }

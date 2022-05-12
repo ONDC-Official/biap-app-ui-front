@@ -6,7 +6,7 @@ import { buttonTypes } from "../../../../utils/button";
 import { getSubTotal } from "../../../../utils/getSubTotal";
 import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
-import DropdonwSvg from "../../../shared/svg/dropdonw";
+import DropdownSvg from "../../../shared/svg/dropdonw";
 import IndianRupee from "../../../shared/svg/indian-rupee";
 import CartItems from "./cart-items/cartItems";
 
@@ -32,7 +32,7 @@ export default function OrderSummary() {
                         transition: "transform 0.7s",
                       }}
                     >
-                      <DropdonwSvg
+                      <DropdownSvg
                         width="15"
                         height="15"
                         color={ONDC_COLORS.WHITE}
@@ -45,7 +45,7 @@ export default function OrderSummary() {
                         transition: "transform 0.7s",
                       }}
                     >
-                      <DropdonwSvg
+                      <DropdownSvg
                         width="15"
                         height="15"
                         color={ONDC_COLORS.WHITE}

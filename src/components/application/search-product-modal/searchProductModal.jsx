@@ -8,7 +8,7 @@ import { ONDC_COLORS } from "../../shared/colors";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Loading from "../../shared/loading/loading";
 import CrossIcon from "../../shared/svg/cross-icon";
-import DropdonwSvg from "../../shared/svg/dropdonw";
+import DropdownSvg from "../../shared/svg/dropdonw";
 import { debounce } from "../../../utils/search";
 import { postCall } from "../../../api/axios";
 import Cookies from "js-cookie";
@@ -266,7 +266,7 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
                     onClick={clearSearch}
                   />
                 ) : (
-                  <DropdonwSvg width="13" height="8" />
+                  <DropdownSvg width="13" height="8" />
                 )}
               </div>
             </div>
