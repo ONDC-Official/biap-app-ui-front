@@ -146,13 +146,13 @@ export default function OrderCard(props) {
             <div
               className={styles.status_chip}
               style={{
-                background: `rgba(${current_order_status.color}, 0.15)`,
-                border: `1px solid ${current_order_status.color}`,
+                background: `rgba(${current_order_status.color}, 0.05)`,
+                border: `1px solid ${current_order_status.border}`,
               }}
             >
               <p
                 className={styles.status_text}
-                style={{ color: current_order_status.color }}
+                style={{ color: current_order_status.border }}
               >
                 {current_order_status.status}
               </p>

@@ -52,14 +52,14 @@ export default function Pagination({
         {paginationRange.map((pageNumber, index) => {
           if (pageNumber === DOTS) {
             return (
-              <div className="px-2" id={`id-${index}`}>
+              <div className="px-2" key={`id-${index}`}>
                 <li className="pagination-item dots">&#8230;</li>
               </div>
             );
           }
 
           return (
-            <div className="px-1" id={`id-${index}`}>
+            <div className="px-1" key={`id-${index}`}>
               <li
                 className={
                   currentPage === pageNumber
