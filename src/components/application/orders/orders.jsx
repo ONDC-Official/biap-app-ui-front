@@ -192,7 +192,15 @@ export default function Orders() {
                           created_at={createdAt}
                           bpp_id={bpp_id}
                           accoodion_id={`order_id_${index}`}
-                          onFetchUpdatedOrder={() => getAllOrders()}
+                          onFetchUpdatedOrder={() => {
+                            setToast((toast) => ({
+                              ...toast,
+                              toggle: true,
+                              type: toast_types.success,
+                              message: "Order status updated successfully!",
+                            }));
+                            getAllOrders();
+                          }}
                           currentSelectedAccordion={currentSelectedAccordion}
                           setCurrentSelectedAccordion={(value) => {
                             if (
