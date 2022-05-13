@@ -422,6 +422,18 @@ export default function PaymentConfirmationCard(props) {
                       <p className={styles.address_line_1}>Prepaid</p>
                     </div>
                   </AddressRadioButton>
+                  <div className="px-2">
+                    <p style={{ color: "#aaa", fontSize: "12px", margin: 0 }}>
+                      powered by{" "}
+                      <span>
+                        <img
+                          src="https://imgee.s3.amazonaws.com/imgee/a0baca393d534736b152750c7bde97f1.png"
+                          alt="juspay_logo"
+                          style={{ height: "15px", padding: "0 5px" }}
+                        />
+                      </span>{" "}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
