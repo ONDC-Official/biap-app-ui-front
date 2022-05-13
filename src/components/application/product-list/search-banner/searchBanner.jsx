@@ -396,7 +396,8 @@ export default function SearchBanner({ onSearch, location }) {
               <div className="h-100 d-flex align-items-center justify-content-center flex-wrap">
                 <div className="pe-3 py-1">
                   <button
-                    className={bannerStyles.cancel_button}
+                    disabled={searchProductLoading}
+                    className={bannerStyles.secondary_action}
                     onClick={() => {
                       setSearch((search) => ({
                         ...search,
@@ -415,7 +416,11 @@ export default function SearchBanner({ onSearch, location }) {
                       !search?.value ||
                       searchProductLoading
                     }
-                    className={bannerStyles.search_button}
+                    className={
+                      searchProductLoading
+                        ? bannerStyles.primary_action_hover
+                        : bannerStyles.primary_action
+                    }
                     type="submit"
                     onClick={searchProduct}
                   >

@@ -49,7 +49,7 @@
   overflow: auto;
 }
 
-.cancel_button {
+.secondary_action {
   width: 100px;
   height: 35px;
   background-color: $white;
@@ -63,13 +63,14 @@
   color: $secondaryColor;
 }
 
-.cancel_button:hover {
+.secondary_action:hover {
   background-color: $secondaryColor;
   color: $white;
   transition: all 0.3s;
 }
 
-.search_button {
+.primary_action,
+.primary_action_hover {
   width: 100px;
   height: 35px;
   background-color: $white;
@@ -83,13 +84,13 @@
   color: $accentColor;
 }
 
-.search_button:hover {
+.primary_action:hover {
   background-color: $accentColor;
   color: $white;
   transition: all 0.3s;
 }
 
-.search_button:disabled {
+.primary_action:disabled {
   opacity: 0.5;
   cursor: no-drop;
 }

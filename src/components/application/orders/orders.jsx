@@ -221,12 +221,13 @@ export default function Orders() {
               currentPage={pagination.currentPage}
               totalCount={pagination.totalCount}
               pageSize={pagination.postPerPage}
-              onPageChange={(page) =>
+              onPageChange={(page) => {
                 setPagination((prev) => ({
                   ...prev,
                   currentPage: page,
-                }))
-              }
+                }));
+                setCurrentSelectedAccordion("");
+              }}
             />
           </div>
         </div>

@@ -12,7 +12,7 @@ import CallSvg from "../../../shared/svg/callSvg";
 
 export default function OrderCard(props) {
   const {
-    product,
+    product = [],
     billing_address,
     delivery_address,
     status,
@@ -27,13 +27,15 @@ export default function OrderCard(props) {
   } = props;
   const current_order_status = getOrderStatus(status);
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
-  const cancel_order_polling = useRef(0);
+  const [trackOrderLoading, setTrackOrderLoading] = useState(false);
+  const trackOrderRef = useRef(null);
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
     message: "",
   });
 
+  // use this api to cancel an order
   async function handleCancelOrder() {
     setCancelOrderLoading(true);
     try {
@@ -47,41 +49,40 @@ export default function OrderCard(props) {
           cancellation_reason_id: "item",
         },
       });
-      callApiMultipleTimes(context.message_id);
+      onCancelOrder(context.message_id);
     } catch (err) {
       setCancelOrderLoading(false);
       setToast((toast) => ({
         ...toast,
         toggle: true,
         type: toast_types.error,
-        message: "Something went wrong!",
+        message: err?.response?.data?.error?.message,
       }));
     }
   }
 
-  // on get quote Api
+  // on cancel Api
   async function onCancelOrder(array_of_id) {
     try {
       const data = await getCall(
         `/clientApis/v1/on_cancel_order?messageId=${array_of_id}`
       );
       if (data[0]?.error) {
+        const err = data[0]?.error;
         setToast((toast) => ({
           ...toast,
           toggle: true,
           type: toast_types.error,
-          message: "Something went wrong!",
+          message: err?.message,
         }));
         setCancelOrderLoading(false);
-        clearInterval(cancel_order_polling.current);
         return;
       }
       setCancelOrderLoading(false);
-      clearInterval(cancel_order_polling.current);
+      setCurrentSelectedAccordion("");
       onFetchUpdatedOrder();
     } catch (err) {
       setCancelOrderLoading(false);
-      clearInterval(cancel_order_polling.current);
       setToast((toast) => ({
         ...toast,
         toggle: true,
@@ -91,19 +92,62 @@ export default function OrderCard(props) {
     }
   }
 
-  // use this function to call on get quote call multiple times
-  function callApiMultipleTimes(message_id) {
-    let counter = 3;
-    cancel_order_polling.current = setInterval(async () => {
-      if (counter <= 0) {
-        setCancelOrderLoading(false);
-        clearInterval(cancel_order_polling.current);
+  // use this api to track and order
+  async function handleTrackOrder() {
+    setTrackOrderLoading(true);
+    try {
+      const data = await postCall("/clientApis/v2/track", [
+        {
+          context: {
+            transaction_id,
+            bpp_id,
+          },
+          message: {
+            order_id,
+          },
+        },
+      ]);
+      onTrackOrder(data[0]?.context?.message_id);
+    } catch (err) {
+      setTrackOrderLoading(false);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
+    }
+  }
+
+  // on track order
+  async function onTrackOrder(array_of_id) {
+    try {
+      const data = await getCall(
+        `/clientApis/v2/on_track?messageIds=${array_of_id}`
+      );
+      if (data[0]?.message?.tracking?.url === "") {
+        setToast((toast) => ({
+          ...toast,
+          toggle: true,
+          type: toast_types.error,
+          message: "Tracking information not available for this product",
+        }));
+        setTrackOrderLoading(false);
         return;
       }
-      await onCancelOrder(message_id).finally(() => {
-        counter -= 1;
-      });
-    }, 2000);
+      trackOrderRef.current.href = data[0]?.message?.tracking?.url;
+      trackOrderRef.current.target = "_blank";
+      trackOrderRef.current.click();
+      setTrackOrderLoading(false);
+    } catch (err) {
+      setTrackOrderLoading(false);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
+    }
   }
 
   return (
@@ -136,7 +180,7 @@ export default function OrderCard(props) {
           <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
             Ordered on
             <span style={{ fontWeight: "500", padding: "0 5px" }}>
-              {moment(created_at).format("MMMM Do, YYYY")}
+              {created_at ? moment(created_at).format("MMMM Do, YYYY") : "NA"}
             </span>
           </p>
         </div>
@@ -174,7 +218,7 @@ export default function OrderCard(props) {
               color={
                 currentSelectedAccordion === accoodion_id
                   ? ONDC_COLORS.ACCENTCOLOR
-                  : ONDC_COLORS.BACKGROUNDCOLOR
+                  : "#ddd"
               }
             />
           </div>
@@ -229,12 +273,12 @@ export default function OrderCard(props) {
               <p className={styles.address_line_1}>
                 {delivery_address?.location?.street
                   ? delivery_address.location.street
-                  : delivery_address?.location?.door}
-                , {delivery_address?.location?.city}
+                  : delivery_address?.location?.door ?? "NA"}
+                , {delivery_address?.location?.city ?? "NA"}
               </p>
               <p className={styles.address_line_2}>
-                {delivery_address?.location?.state},{" "}
-                {delivery_address?.location?.area_code}
+                {delivery_address?.location?.state ?? "NA"},{" "}
+                {delivery_address?.location?.area_code ?? "NA"}
               </p>
             </div>
             <div className="col-md-6 py-2">
@@ -250,12 +294,12 @@ export default function OrderCard(props) {
               <p className={styles.address_line_1}>
                 {billing_address?.location?.street
                   ? billing_address.location.street
-                  : billing_address?.location?.door}
-                , {billing_address?.location?.city}
+                  : billing_address?.location?.door ?? "NA"}
+                , {billing_address?.location?.city ?? "NA"}
               </p>
               <p className={styles.address_line_2}>
-                {billing_address?.location?.state},{" "}
-                {billing_address?.location?.area_code}
+                {billing_address?.location?.state ?? "NA"},{" "}
+                {billing_address?.location?.area_code ?? "NA"}
               </p>
             </div>
           </div>
@@ -272,17 +316,29 @@ export default function OrderCard(props) {
               <div className="d-flex align-items-center justify-content-center flex-wrap">
                 <div className="pe-3 py-1">
                   <button
-                    disabled={cancelOrderLoading}
-                    className={styles.secondary_action}
-                    onClick={() => console.log("will track order")}
+                    disabled={trackOrderLoading || cancelOrderLoading}
+                    className={
+                      trackOrderLoading
+                        ? styles.secondary_action_loading
+                        : styles.secondary_action
+                    }
+                    onClick={() => handleTrackOrder()}
                   >
-                    Track
+                    {trackOrderLoading ? (
+                      <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                    ) : (
+                      "Track"
+                    )}
                   </button>
                 </div>
                 <div className="pe-3 py-1">
                   <button
-                    disabled={cancelOrderLoading}
-                    className={styles.primary_action}
+                    disabled={cancelOrderLoading || trackOrderLoading}
+                    className={
+                      cancelOrderLoading
+                        ? styles.primary_action_loading
+                        : styles.primary_action
+                    }
                     onClick={() => handleCancelOrder()}
                   >
                     {cancelOrderLoading ? (
@@ -295,6 +351,7 @@ export default function OrderCard(props) {
               </div>
             )}
           </div>
+          <a ref={trackOrderRef} style={{ visibility: "hidden" }}></a>
         </div>
       </div>
     </div>
