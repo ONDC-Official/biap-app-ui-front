@@ -331,7 +331,7 @@ export default function OrderCard(props) {
                     )}
                   </button>
                 </div>
-                <div className="pe-3 py-1">
+                <div className="py-1">
                   <button
                     disabled={cancelOrderLoading || trackOrderLoading}
                     className={
@@ -351,7 +351,13 @@ export default function OrderCard(props) {
               </div>
             )}
           </div>
-          <a ref={trackOrderRef} style={{ visibility: "hidden" }}></a>
+          {/* eslint-disable-next-line */}
+          <a
+            ref={trackOrderRef}
+            style={{ visibility: "hidden", display: "none" }}
+          >
+            navigate
+          </a>
         </div>
       </div>
     </div>
