@@ -53,7 +53,7 @@ export default function ProductList() {
   async function onSearchPolling(message_id) {
     try {
       const data = await getCall(
-        `/client/v1/on_search?messageId=${message_id}`
+        `/clientApis/v1/on_search?messageId=${message_id}`
       );
       const filteredProducts = data?.message?.catalogs.map((catalog) => {
         if (catalog?.bpp_providers && catalog?.bpp_id) {

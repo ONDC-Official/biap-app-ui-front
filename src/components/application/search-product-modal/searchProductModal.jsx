@@ -103,7 +103,7 @@ export default function SearchProductModal({ onClose, onSearch, location }) {
     }
     setSearchProductLoading(true);
     try {
-      const { context } = await postCall("/client/v1/search", {
+      const { context } = await postCall("/clientApis/v1/search", {
         context: {},
         message: {
           criteria: criteria.current,
