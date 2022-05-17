@@ -9,6 +9,7 @@ import Toast from "../../../shared/toast/toast";
 import { toast_types } from "../../../../utils/toast";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import CallSvg from "../../../shared/svg/callSvg";
+import CustomerPhoneCard from "../customer-phone-card/customerPhoneCard";
 
 export default function OrderCard(props) {
   const {
@@ -28,6 +29,9 @@ export default function OrderCard(props) {
   const current_order_status = getOrderStatus(status);
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
+  const [supportOrderLoading, setSupportOrderLoading] = useState(false);
+  const [supportOrderDetails, setSupportOrderDetails] = useState();
+  const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const trackOrderRef = useRef(null);
   const [toast, setToast] = useState({
     toggle: false,
@@ -150,6 +154,56 @@ export default function OrderCard(props) {
     }
   }
 
+  // use this api to call support
+  async function handleSupportForOrder() {
+    if (supportOrderDetails) {
+      setToggleCustomerPhoneCard(true);
+      return;
+    }
+    setSupportOrderLoading(true);
+    try {
+      const data = await postCall("/clientApis/v2/get_support", [
+        {
+          context: {
+            transaction_id,
+            bpp_id,
+          },
+          message: {
+            ref_id: order_id,
+          },
+        },
+      ]);
+      onSupportOrder(data[0]?.context?.message_id);
+    } catch (err) {
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
+    }
+  }
+
+  // on support order
+  async function onSupportOrder(array_of_id) {
+    try {
+      const data = await getCall(
+        `/clientApis/v2/on_support?messageIds=${array_of_id}`
+      );
+      setSupportOrderDetails(data[0]?.message);
+      setToggleCustomerPhoneCard(true);
+      setSupportOrderLoading(false);
+    } catch (err) {
+      setTrackOrderLoading(false);
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.message,
+      }));
+    }
+  }
+
   return (
     <div className={styles.orders_card}>
       {toast.toggle && (
@@ -162,6 +216,12 @@ export default function OrderCard(props) {
               toggle: false,
             }))
           }
+        />
+      )}
+      {toggleCustomerPhoneCard && (
+        <CustomerPhoneCard
+          supportOrderDetails={supportOrderDetails}
+          onClose={() => setToggleCustomerPhoneCard(false)}
         />
       )}
       <div
@@ -309,7 +369,14 @@ export default function OrderCard(props) {
           className="d-flex align-items-center mt-3 pt-3"
           style={{ borderTop: "1px solid #ddd" }}
         >
-          <CallSvg style={{ cursor: "pointer" }} />
+          {supportOrderLoading ? (
+            <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+          ) : (
+            <CallSvg
+              style={{ cursor: "pointer" }}
+              click={handleSupportForOrder}
+            />
+          )}
           <div className="ms-auto">
             {/* IF ORDER STATUS IS NOT CANCEL  */}
             {current_order_status.status !== "Cancled" && (
@@ -333,7 +400,11 @@ export default function OrderCard(props) {
                 </div>
                 <div className="py-1">
                   <button
-                    disabled={cancelOrderLoading || trackOrderLoading}
+                    disabled={
+                      cancelOrderLoading ||
+                      trackOrderLoading ||
+                      supportOrderLoading
+                    }
                     className={
                       cancelOrderLoading
                         ? styles.primary_action_loading
