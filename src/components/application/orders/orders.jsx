@@ -17,6 +17,7 @@ export default function Orders() {
   const history = useHistory();
   const [orders, setOrders] = useState([]);
   const [fetchOrderLoading, setFetchOrderLoading] = useState(false);
+  const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalCount: 0,
@@ -183,6 +184,10 @@ export default function Orders() {
                     return (
                       <div className="py-2" key={`order_id_${index}`}>
                         <OrderCard
+                          supportOrderLoading={supportOrderLoading}
+                          setSupportOrderLoading={(value) =>
+                            setSupportOrderLoading(value)
+                          }
                           product={product}
                           billing_address={billing_address}
                           delivery_address={delivery_address}

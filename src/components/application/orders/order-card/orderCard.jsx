@@ -25,14 +25,16 @@ export default function OrderCard(props) {
     accoodion_id,
     currentSelectedAccordion,
     setCurrentSelectedAccordion,
+    supportOrderLoading,
+    setSupportOrderLoading,
   } = props;
   const current_order_status = getOrderStatus(status);
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
-  const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const trackOrderRef = useRef(null);
+  const support_order_timer = useRef();
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
@@ -173,7 +175,7 @@ export default function OrderCard(props) {
           },
         },
       ]);
-      onSupportOrder(data[0]?.context?.message_id);
+      callApiMultipleTimes(data[0]?.context?.message_id);
     } catch (err) {
       setToast((toast) => ({
         ...toast,
@@ -191,8 +193,6 @@ export default function OrderCard(props) {
         `/clientApis/v2/on_support?messageIds=${array_of_id}`
       );
       setSupportOrderDetails(data[0]?.message);
-      setToggleCustomerPhoneCard(true);
-      setSupportOrderLoading(false);
     } catch (err) {
       setTrackOrderLoading(false);
       setToast((toast) => ({
@@ -202,6 +202,22 @@ export default function OrderCard(props) {
         message: err.message,
       }));
     }
+  }
+
+  // use this function to call on get quote call multiple times
+  function callApiMultipleTimes(message_ids) {
+    let counter = 3;
+    support_order_timer.current = setInterval(async () => {
+      if (counter <= 0) {
+        setToggleCustomerPhoneCard(true);
+        setSupportOrderLoading(false);
+        clearInterval(support_order_timer.current);
+        return;
+      }
+      await onSupportOrder(message_ids).finally(() => {
+        counter -= 1;
+      });
+    }, 2000);
   }
 
   return (
@@ -222,6 +238,16 @@ export default function OrderCard(props) {
         <CustomerPhoneCard
           supportOrderDetails={supportOrderDetails}
           onClose={() => setToggleCustomerPhoneCard(false)}
+          onSuccess={() => {
+            setToast((toast) => ({
+              ...toast,
+              toggle: true,
+              type: toast_types.success,
+              message: "Call successfully placed",
+            }));
+            setSupportOrderDetails();
+            setToggleCustomerPhoneCard(false);
+          }}
         />
       )}
       <div
@@ -383,7 +409,11 @@ export default function OrderCard(props) {
               <div className="d-flex align-items-center justify-content-center flex-wrap">
                 <div className="pe-3 py-1">
                   <button
-                    disabled={trackOrderLoading || cancelOrderLoading}
+                    disabled={
+                      trackOrderLoading ||
+                      cancelOrderLoading ||
+                      supportOrderLoading
+                    }
                     className={
                       trackOrderLoading
                         ? styles.secondary_action_loading

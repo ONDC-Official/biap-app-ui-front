@@ -6,16 +6,22 @@ import { buttonTypes } from "../../../../utils/button";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import Input from "../../../shared/input/input";
-import { postCall } from "../../../../api/axios";
 import Toast from "../../../shared/toast/toast";
 import { toast_types } from "../../../../utils/toast";
+import axios from "axios";
+import { getValueFromCookie } from "../../../../utils/cookies";
 
-export default function CustomerPhoneCard({ supportOrderDetails, onClose }) {
+export default function CustomerPhoneCard({
+  supportOrderDetails,
+  onClose,
+  onSuccess,
+}) {
+  const token = getValueFromCookie("token");
+  //eslint-disable-next-line
+  const PHONE_REGEXP = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
   const [inlineError, setInlineError] = useState({
     phone_number_error: "",
   });
-  //eslint-disable-next-line
-  const PHONE_REGEXP = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
   const [loading, setLoading] = useState(false);
   const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
   const [toast, setToast] = useState({
@@ -44,11 +50,26 @@ export default function CustomerPhoneCard({ supportOrderDetails, onClose }) {
     }
     setLoading(true);
     try {
-      const data = await postCall("knowlarity/api/call-patron", {
-        customer_phone_number: `+91${customerPhoneNumber.trim()}`,
-        seller_phone_number: supportOrderDetails?.phone,
-      });
-      console.log(data);
+      const { status } = await axios.post(
+        "knowlarity/api/call-patron",
+        {
+          customer_phone_number: `+91${customerPhoneNumber.trim()}`,
+          seller_phone_number: supportOrderDetails?.phone,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (status === 200) {
+        onSuccess();
+        return;
+      }
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: "Something went wrong!",
+      }));
     } catch (err) {
       setToast((toast) => ({
         ...toast,
