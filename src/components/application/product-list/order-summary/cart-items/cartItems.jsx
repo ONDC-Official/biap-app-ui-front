@@ -26,7 +26,9 @@ export default function CartItems(props) {
           </div>
         </div>
         <div className={`row pb-3 ${cartItemStyles.items_wrapper}`}>
-          {cartItems.map(({ product, id, bpp_id, provider }) => {
+          {cartItems.map(({ id, bpp_id, product, provider }) => {
+            const { descriptor, price, provider_name } = product;
+            const { locations } = provider;
             return (
               <div className="col-lg-4 col-md-6 col-sm-6 p-2" key={id}>
                 <div style={{ position: "relative" }}>
@@ -46,11 +48,12 @@ export default function CartItems(props) {
                     />
                   </div>
                   <ProductCard
-                    product={product}
+                    product={{ id, descriptor }}
+                    price={price}
+                    bpp_provider_descriptor={{ name: provider_name }}
                     bpp_id={bpp_id}
-                    location_id={provider?.locations[0]}
+                    location_id={locations ? locations[0] : ""}
                     bpp_provider_id={provider?.id}
-                    bpp_provider_descriptor={{ name: provider?.name }}
                   />
                 </div>
               </div>

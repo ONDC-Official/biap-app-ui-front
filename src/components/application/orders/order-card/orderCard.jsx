@@ -364,7 +364,7 @@ export default function OrderCard(props) {
               </p>
               <p className={styles.address_line_2}>
                 {delivery_address?.location?.state ?? "NA"},{" "}
-                {delivery_address?.location?.area_code ?? "NA"}
+                {delivery_address?.location?.areaCode ?? "NA"}
               </p>
             </div>
             <div className="col-md-6 py-2">
@@ -385,7 +385,7 @@ export default function OrderCard(props) {
               </p>
               <p className={styles.address_line_2}>
                 {billing_address?.location?.state ?? "NA"},{" "}
-                {billing_address?.location?.area_code ?? "NA"}
+                {billing_address?.location?.areaCode ?? "NA"}
               </p>
             </div>
           </div>

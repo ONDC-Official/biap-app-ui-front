@@ -55,14 +55,14 @@ export default function ProductList() {
       const data = await getCall(
         `/clientApis/v1/on_search?messageId=${message_id}`
       );
-      const filteredProducts = data?.message?.catalogs.map((catalog) => {
-        if (catalog?.bpp_providers && catalog?.bpp_id) {
-          return { ...catalog };
-        } else {
-          return { ...catalog, bpp_providers: [], bpp_id: "" };
-        }
-      });
-      setProducts(filteredProducts);
+      // const filteredProducts = data?.message?.catalogs.map((catalog) => {
+      //   if (catalog?.bpp_providers && catalog?.bpp_id) {
+      //     return { ...catalog };
+      //   } else {
+      //     return { ...catalog, bpp_providers: [], bpp_id: "" };
+      //   }
+      // });
+      setProducts(data?.message?.catalogs);
       setSearchProductLoading(false);
     } catch (err) {
       setSearchProductLoading(false);
@@ -178,8 +178,7 @@ export default function ProductList() {
           {/* list of product view  */}
           {!searchedProduct || !searchedLocation ? (
             search_empty_state
-          ) : products.filter((catalog) => catalog?.bpp_providers?.length > 0)
-              .length > 0 ? (
+          ) : (
             <div
               className={`py-2 ${
                 cartItems.length > 0
@@ -189,48 +188,39 @@ export default function ProductList() {
             >
               <div className="container">
                 <div className="row">
-                  {products?.map(({ bpp_id, bpp_providers }, index) => {
-                    return (
-                      <Fragment key={`${bpp_id}-id-${index}`}>
-                        {bpp_providers.map(
-                          ({ id, items, locations = "", descriptor }) => {
-                            if (locations && bpp_id) {
-                              return (
-                                <Fragment>
-                                  {items.map((item) => {
-                                    return (
-                                      <div
-                                        key={item.id}
-                                        className="col-lg-4 col-md-6 col-sm-6 p-2"
-                                      >
-                                        <ProductCard
-                                          product={item}
-                                          bpp_provider_descriptor={descriptor}
-                                          bpp_id={bpp_id}
-                                          location_id={
-                                            locations.length > 0
-                                              ? locations[0].id
-                                              : ""
-                                          }
-                                          bpp_provider_id={id}
-                                        />
-                                      </div>
-                                    );
-                                  })}
-                                </Fragment>
-                              );
+                  {products.map(
+                    ({
+                      bpp_details,
+                      descriptor,
+                      id,
+                      location_details,
+                      provider_details,
+                      price,
+                    }) => {
+                      return (
+                        <div
+                          key={id}
+                          className="col-lg-4 col-md-6 col-sm-6 p-2"
+                        >
+                          <ProductCard
+                            product={{ id, descriptor }}
+                            price={price}
+                            bpp_provider_descriptor={
+                              provider_details?.descriptor
                             }
-                            return null;
-                          }
-                        )}
-                      </Fragment>
-                    );
-                  })}
+                            bpp_id={bpp_details?.bpp_id}
+                            location_id={
+                              location_details ? location_details?.id : ""
+                            }
+                            bpp_provider_id={provider_details?.id}
+                          />
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               </div>
             </div>
-          ) : (
-            no_prodcut_found_empty_state
           )}
           {cartItems.length > 0 && <OrderSummary />}
         </div>
@@ -239,7 +229,40 @@ export default function ProductList() {
   );
 }
 
-// !searchedProduct || !searchedLocation ? (
-//   search_empty_state
-// ) : (
-// )
+// {products?.map(({ bpp_id, bpp_providers }, index) => {
+//   return (
+//     <Fragment key={`${bpp_id}-id-${index}`}>
+//       {bpp_providers.map(
+//         ({ id, items, locations = "", descriptor }) => {
+//           if (locations && bpp_id) {
+//             return (
+//               <Fragment>
+//                 {items.map((item) => {
+//                   return (
+//                     <div
+//                       key={item.id}
+//                       className="col-lg-4 col-md-6 col-sm-6 p-2"
+//                     >
+//                       <ProductCard
+//                         product={item}
+//                         bpp_provider_descriptor={descriptor}
+//                         bpp_id={bpp_id}
+//                         location_id={
+//                           locations.length > 0
+//                             ? locations[0].id
+//                             : ""
+//                         }
+//                         bpp_provider_id={id}
+//                       />
+//                     </div>
+//                   );
+//                 })}
+//               </Fragment>
+//             );
+//           }
+//           return null;
+//         }
+//       )}
+//     </Fragment>
+//   );
+// })}

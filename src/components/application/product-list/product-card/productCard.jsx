@@ -9,14 +9,19 @@ import { CartContext } from "../../../../context/cartContext";
 export default function ProductCard(props) {
   const {
     product,
+    price,
     bpp_id,
     location_id,
     bpp_provider_id,
     bpp_provider_descriptor,
   } = props;
-  const { id, descriptor, price } = product;
-  const { cartItems, onAddProduct, onAddQuantity, onReduceQuantity } =
-    useContext(CartContext);
+  const { id, descriptor } = product;
+  const {
+    cartItems,
+    onAddProduct,
+    onAddQuantity,
+    onReduceQuantity,
+  } = useContext(CartContext);
   const { name: provider_name } = bpp_provider_descriptor;
   const { name: product_name, images } = descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
