@@ -61,7 +61,9 @@ export default function Cart() {
               <div className="col-lg-8">
                 <div className="container-fluid p-0">
                   <div className="row">
-                    {cartItems.map(({ bpp_id, id, product, provider }) => {
+                    {cartItems.map(({ id, bpp_id, product, provider }) => {
+                      const { descriptor, price, provider_name } = product;
+                      const { locations } = provider;
                       return (
                         <div
                           className="col-lg-6 col-md-12 p-2"
@@ -69,13 +71,12 @@ export default function Cart() {
                           id={id}
                         >
                           <ProductCard
-                            product={product}
+                            product={{ id, descriptor }}
+                            price={price}
+                            bpp_provider_descriptor={{ name: provider_name }}
                             bpp_id={bpp_id}
-                            location_id={provider?.locations[0]}
+                            location_id={locations ? locations[0] : ""}
                             bpp_provider_id={provider?.id}
-                            bpp_provider_descriptor={{
-                              name: product?.provider_name,
-                            }}
                           />
                         </div>
                       );

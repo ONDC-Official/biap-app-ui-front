@@ -55,13 +55,6 @@ export default function ProductList() {
       const data = await getCall(
         `/clientApis/v1/on_search?messageId=${message_id}`
       );
-      // const filteredProducts = data?.message?.catalogs.map((catalog) => {
-      //   if (catalog?.bpp_providers && catalog?.bpp_id) {
-      //     return { ...catalog };
-      //   } else {
-      //     return { ...catalog, bpp_providers: [], bpp_id: "" };
-      //   }
-      // });
       setProducts(data?.message?.catalogs);
       setSearchProductLoading(false);
     } catch (err) {
@@ -124,7 +117,8 @@ export default function ProductList() {
 
   const no_prodcut_found_empty_state = (
     <div
-      className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
+      className={"d-flex align-items-center justify-content-center"}
+      style={{ height: "85%" }}
     >
       <div className="text-center">
         <div className="py-2">
@@ -178,6 +172,8 @@ export default function ProductList() {
           {/* list of product view  */}
           {!searchedProduct || !searchedLocation ? (
             search_empty_state
+          ) : products.length <= 0 ? (
+            no_prodcut_found_empty_state
           ) : (
             <div
               className={`py-2 ${
@@ -228,41 +224,3 @@ export default function ProductList() {
     </Fragment>
   );
 }
-
-// {products?.map(({ bpp_id, bpp_providers }, index) => {
-//   return (
-//     <Fragment key={`${bpp_id}-id-${index}`}>
-//       {bpp_providers.map(
-//         ({ id, items, locations = "", descriptor }) => {
-//           if (locations && bpp_id) {
-//             return (
-//               <Fragment>
-//                 {items.map((item) => {
-//                   return (
-//                     <div
-//                       key={item.id}
-//                       className="col-lg-4 col-md-6 col-sm-6 p-2"
-//                     >
-//                       <ProductCard
-//                         product={item}
-//                         bpp_provider_descriptor={descriptor}
-//                         bpp_id={bpp_id}
-//                         location_id={
-//                           locations.length > 0
-//                             ? locations[0].id
-//                             : ""
-//                         }
-//                         bpp_provider_id={id}
-//                       />
-//                     </div>
-//                   );
-//                 })}
-//               </Fragment>
-//             );
-//           }
-//           return null;
-//         }
-//       )}
-//     </Fragment>
-//   );
-// })}
