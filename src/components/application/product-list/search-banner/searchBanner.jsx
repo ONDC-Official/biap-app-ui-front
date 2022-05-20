@@ -235,7 +235,7 @@ export default function SearchBanner({ onSearch, location }) {
       <div className="container">
         <div className="row">
           <div
-            className="col-md-6 col-lg-3 col-xl-3 px-4"
+            className="col-md-6 col-lg-3 col-xl-3 px-4 py-1"
             style={{ position: "relative" }}
           >
             <div
@@ -329,7 +329,7 @@ export default function SearchBanner({ onSearch, location }) {
               </div>
             )}
           </div>
-          <div className="col-md-6 col-lg-6 col-xl-6 px-4">
+          <div className="col-md-6 col-lg-6 col-xl-6 px-4 py-1">
             <form onSubmit={searchProduct} className="w-100">
               <div
                 className={`d-flex align-items-center ${styles.modal_input_wrappper}`}

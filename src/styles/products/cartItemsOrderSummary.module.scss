@@ -2,13 +2,12 @@
 
 .cart_items_order_summary_wrapper {
   position: fixed;
-  bottom: 62px;
   left: 0;
   right: 0;
   background-color: $backgroundColor;
   box-shadow: -10px 0 20px 0 rgba(0, 0, 0, 0.15);
   z-index: 0;
-  animation: slide 0.5s ease forwards;
+  animation: slideOnWeb 0.5s ease forwards;
 }
 
 .label {
@@ -31,17 +30,29 @@
   border-radius: 8px;
 }
 
-@keyframes slide {
+@keyframes slideOnMobile {
   from {
     bottom: -300px;
   }
   to {
-    bottom: 62px;
+    bottom: 100px;
+  }
+}
+
+@keyframes slideOnWeb {
+  from {
+    bottom: -300px;
+  }
+  to {
+    bottom: 70px;
   }
 }
 
 @media screen and (max-width: 600px) {
   .items_container {
     bottom: 120px;
+  }
+  .cart_items_order_summary_wrapper {
+    animation: slideOnMobile 0.5s ease forwards;
   }
 }

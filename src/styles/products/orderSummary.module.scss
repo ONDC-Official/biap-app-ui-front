@@ -41,6 +41,10 @@
   margin: 0;
 }
 
+.checkout_button_placement {
+  justify-content: flex-start;
+}
+
 @media screen and (max-width: 600px) {
   .order_summary_back {
     height: 120px;
@@ -54,5 +58,14 @@
   }
   .sub_total_text {
     font-size: $font-14;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .order_summary_background {
+    height: 15%;
+  }
+  .checkout_button_placement {
+    justify-content: center;
   }
 }

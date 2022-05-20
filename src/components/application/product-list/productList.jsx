@@ -19,6 +19,10 @@ import Cookies from "js-cookie";
 import SearchBanner from "./search-banner/searchBanner";
 import Toast from "../../shared/toast/toast";
 import { toast_types } from "../../../utils/toast";
+import ProductFilters from "./product-filters/productFilters";
+import ProductSort from "./product-sort/productSort";
+import Button from "../../shared/button/button";
+import { buttonTypes } from "../../../utils/button";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -31,6 +35,7 @@ export default function ProductList() {
   });
   const [searchedProduct, setSearchedProduct] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
+  const [toggleFiltersOnMobile, setToggleFiltersOnMobile] = useState(false);
   const search_polling_timer = useRef(0);
   const [toast, setToast] = useState({
     toggle: false,
@@ -154,6 +159,13 @@ export default function ProductList() {
           }
         />
       )}
+      {toggleFiltersOnMobile && (
+        <div className={styles.filter_on_mobile_wrapper}>
+          <ProductFilters
+            onCloseFilter={() => setToggleFiltersOnMobile(false)}
+          />
+        </div>
+      )}
       {searchProductLoading ? (
         loadingSpin
       ) : (
@@ -182,38 +194,60 @@ export default function ProductList() {
                   : styles.product_list_without_summary_wrapper
               }`}
             >
-              <div className="container">
-                <div className="row">
-                  {products.map(
-                    ({
-                      bpp_details,
-                      descriptor,
-                      id,
-                      location_details,
-                      provider_details,
-                      price,
-                    }) => {
-                      return (
-                        <div
-                          key={id}
-                          className="col-lg-4 col-md-6 col-sm-6 p-2"
-                        >
-                          <ProductCard
-                            product={{ id, descriptor }}
-                            price={price}
-                            bpp_provider_descriptor={
-                              provider_details?.descriptor
-                            }
-                            bpp_id={bpp_details?.bpp_id}
-                            location_id={
-                              location_details ? location_details?.id : ""
-                            }
-                            bpp_provider_id={provider_details?.id}
-                          />
-                        </div>
-                      );
-                    }
-                  )}
+              <div className="d-flex h-100">
+                <div
+                  className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
+                >
+                  <ProductFilters />
+                </div>
+                <div className={`${styles.product_list_container_width}`}>
+                  <div className="py-2 px-3 d-flex align-items-center">
+                    <div className="d-sm-block d-lg-none">
+                      <Button
+                        button_type={buttonTypes.primary}
+                        button_hover_type={buttonTypes.primary_hover}
+                        button_text="Filters"
+                        onClick={() => setToggleFiltersOnMobile(true)}
+                      />
+                    </div>
+                    <div className="ms-auto">
+                      <ProductSort />
+                    </div>
+                  </div>
+                  <div className="container-fluid">
+                    <div className="row">
+                      {products.map(
+                        ({
+                          bpp_details,
+                          descriptor,
+                          id,
+                          location_details,
+                          provider_details,
+                          price,
+                        }) => {
+                          return (
+                            <div
+                              key={id}
+                              className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
+                            >
+                              <ProductCard
+                                product={{ id, descriptor }}
+                                price={price}
+                                bpp_provider_descriptor={
+                                  provider_details?.descriptor
+                                }
+                                bpp_id={bpp_details?.bpp_id}
+                                location_id={
+                                  location_details ? location_details?.id : ""
+                                }
+                                bpp_provider_id={provider_details?.id}
+                              />
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

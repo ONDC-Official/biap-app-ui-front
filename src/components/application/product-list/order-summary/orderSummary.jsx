@@ -19,7 +19,7 @@ export default function OrderSummary() {
       <div className={`${styles.order_summary_background}`}>
         <div className="container h-100">
           <div className="row align-items-center h-100">
-            <div className="col-md-8 col-sm-6 d-flex align-items-center">
+            <div className="col-xl-8 col-md-6 d-flex align-items-center">
               <div className="px-1">
                 <div
                   className={styles.collapse_button_wrapper}
@@ -73,7 +73,9 @@ export default function OrderSummary() {
                 </p>
               </div>
             </div>
-            <div className="col-md-4 col-sm-6 d-flex align-items-center">
+            <div
+              className={`col-xl-4 col-md-6 d-flex align-items-center ${styles.checkout_button_placement}`}
+            >
               <div className="pe-3">
                 <Button
                   button_type={buttonTypes.secondary}

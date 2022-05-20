@@ -9,6 +9,7 @@ function Dropdown({
   options,
   click,
   show_icons = false,
+  style = {},
 }) {
   return (
     <div className="dropdown">
@@ -29,6 +30,7 @@ function Dropdown({
           zIndex: 1,
           margin: "10px 0",
           boxShadow: "0 3px 10px 0 rgba(47, 47, 47, 0.2)",
+          ...style,
         }}
         aria-labelledby={id}
       >

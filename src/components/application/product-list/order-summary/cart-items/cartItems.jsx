@@ -11,7 +11,7 @@ export default function CartItems(props) {
   return (
     <div className={cartItemStyles.cart_items_order_summary_wrapper}>
       <div className="container">
-        <div className="row">
+        <div className="row px-2">
           <div className="d-flex align-items-center py-3">
             <p className={cartItemStyles.label}>Cart</p>
             <div className="ms-auto">
