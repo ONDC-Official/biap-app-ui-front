@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "../../../../../styles/products/productFilters.module.scss";
 
-export default function PriceRange({ onUpdatePriceRange, error, resetError }) {
-  const MINIMUM_FILTER_VALUE = 0;
-  const MAXIMUM_FILTER_VALUE = 100000;
+export default function PriceRange({
+  onUpdatePriceRange,
+  error,
+  resetError,
+  MINIMUM_FILTER_VALUE,
+  MAXIMUM_FILTER_VALUE,
+}) {
   const [minValue, setMinValue] = useState(MINIMUM_FILTER_VALUE);
   const [maxValue, setMaxValue] = useState(MAXIMUM_FILTER_VALUE);
   const progressRef = useRef(null);

@@ -4,7 +4,7 @@ import Dropdown from "../../../shared/dropdown/dropdown";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import { ONDC_COLORS } from "../../../shared/colors";
 
-export default function ProductSort() {
+export default function ProductSort({ onUpdateSortType, sortType }) {
   const SORT_OPTIONS = [
     {
       key: "price_low_to_high",
@@ -31,7 +31,6 @@ export default function ProductSort() {
       name: "Rating: High To Low",
     },
   ];
-  const [sortType, setSortType] = useState("");
   return (
     <Dropdown
       header={
@@ -51,7 +50,10 @@ export default function ProductSort() {
       body_classes="dropdown-menu-right"
       style={{ width: "100%", minWidth: "200px" }}
       click={(sort_type) => {
-        setSortType(sort_type);
+        const type = SORT_OPTIONS.find(
+          ({ name }) => name.toLowerCase() === sort_type.toLowerCase()
+        );
+        onUpdateSortType(type);
       }}
       options={SORT_OPTIONS.map(({ name }) => ({
         value: name,

@@ -4,7 +4,7 @@ import CrossIcon from "../../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Loading from "../../../shared/loading/loading";
 import PriceRange from "./price-range-filter/priceRange";
-import ProviderListFilter from "./provider-list-filter/providerListFilter";
+import MultiAttributeFilter from "./multi-attribute-filter/multiAttributeFilter";
 
 export default function ProductFilters({
   messageId,
@@ -13,7 +13,12 @@ export default function ProductFilters({
   onCloseFilter = () => {},
   onUpdateFilters,
 }) {
-  const [productFilters, setProductFilters] = useState({});
+  const MINIMUM_FILTER_VALUE = 0;
+  const MAXIMUM_FILTER_VALUE = 100000;
+  const [productFilters, setProductFilters] = useState({
+    minPrice: MINIMUM_FILTER_VALUE,
+    maxPrice: MAXIMUM_FILTER_VALUE,
+  });
   const [error, setError] = useState({
     minValueError: "",
     maxValueError: "",
@@ -44,6 +49,8 @@ export default function ProductFilters({
       minPrice: productFilters?.minPrice,
       maxPrice: productFilters?.maxPrice,
       providers: productFilters?.providers,
+      categories: productFilters?.categories,
+      fulfillments: productFilters?.fulfillments,
     });
   }
 
@@ -75,11 +82,12 @@ export default function ProductFilters({
           <div className="py-2">
             <PriceRange
               error={error}
+              MAXIMUM_FILTER_VALUE={MAXIMUM_FILTER_VALUE}
+              MINIMUM_FILTER_VALUE={MINIMUM_FILTER_VALUE}
               resetError={() => resetError()}
               onUpdatePriceRange={({ minValue, maxValue }) => {
                 setProductFilters({
                   ...productFilters,
-                  messageId,
                   minPrice: minValue,
                   maxPrice: maxValue,
                 });
@@ -88,13 +96,41 @@ export default function ProductFilters({
           </div>
           {filters?.providers?.length > 0 && (
             <div className="py-2">
-              <ProviderListFilter
-                providers={filters?.providers}
-                onUpdateProviderFilter={(selectedProviders) => {
+              <MultiAttributeFilter
+                filterAttributeName="Providers"
+                filterAttributeArray={filters?.providers}
+                onUpdateAttributeFilter={(selectedProviders) => {
                   setProductFilters({
                     ...productFilters,
-                    messageId,
                     providers: selectedProviders,
+                  });
+                }}
+              />
+            </div>
+          )}
+          {filters?.categories?.length > 0 && (
+            <div className="py-2">
+              <MultiAttributeFilter
+                filterAttributeName="Categories"
+                filterAttributeArray={filters?.categories}
+                onUpdateAttributeFilter={(selectedCategories) => {
+                  setProductFilters({
+                    ...productFilters,
+                    categories: selectedCategories,
+                  });
+                }}
+              />
+            </div>
+          )}
+          {filters?.fulfillment?.length > 0 && (
+            <div className="py-2">
+              <MultiAttributeFilter
+                filterAttributeName="FullFillments"
+                filterAttributeArray={filters?.fulfillment}
+                onUpdateAttributeFilter={(selectedFulfillments) => {
+                  setProductFilters({
+                    ...productFilters,
+                    fulfillments: selectedFulfillments,
                   });
                 }}
               />

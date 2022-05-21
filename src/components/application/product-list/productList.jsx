@@ -40,6 +40,8 @@ export default function ProductList() {
   const [filters, setFilters] = useState();
   const [toggleFiltersOnMobile, setToggleFiltersOnMobile] = useState(false);
   const search_polling_timer = useRef(0);
+  const [sortType, setSortType] = useState({});
+  const [selectedFilters, setSelectedFilters] = useState({});
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
@@ -81,7 +83,7 @@ export default function ProductList() {
   function callApiMultipleTimes(message_id) {
     setSearchProductLoading(true);
     setFetchFilterLoading(true);
-    let counter = 6;
+    let counter = 1;
     search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         fetchAllFilters(message_id);
@@ -114,12 +116,13 @@ export default function ProductList() {
   }
 
   // use this function to generate query params for filters
-  function generateQueryForFilters(applied_filters) {
+  function generateQueryForFilters(applied_filters, sort_options) {
     let query = "";
-    if (applied_filters.messageId) {
-      query += `?messageId=${applied_filters.messageId}`;
+
+    if (messageId) {
+      query += `?messageId=${messageId}`;
     }
-    if (applied_filters.minPrice && applied_filters.maxPrice) {
+    if (!isNaN(applied_filters.minPrice) && !isNaN(applied_filters.maxPrice)) {
       query += `&priceMin=${applied_filters.minPrice}&priceMax=${applied_filters.maxPrice}`;
     }
     if (applied_filters?.providers?.length > 0) {
@@ -127,12 +130,25 @@ export default function ProductList() {
         (provider) => provider.id
       )}`;
     }
+    if (applied_filters?.categories?.length > 0) {
+      query += `&categoryId=${applied_filters.categories.map(
+        (provider) => provider.id
+      )}`;
+    }
+    if (applied_filters?.fulfillments?.length > 0) {
+      query += `&fulfillmentId=${applied_filters.fulfillments.map(
+        (provider) => provider.id
+      )}`;
+    }
+    if (Object.keys(sort_options).length > 0) {
+      query += `&sortField=${sort_options?.sortField}&sortOrder=${sort_options?.sortOrder}`;
+    }
     return query;
   }
 
-  async function onSearchBasedOnFilter(applied_filters) {
+  async function onSearchBasedOnFilter(applied_filters, sort_types) {
     setSearchProductLoading(true);
-    const query = generateQueryForFilters(applied_filters);
+    const query = generateQueryForFilters(applied_filters, sort_types);
     try {
       const { message } = await getCall(`/clientApis/v1/on_search${query}`);
       setProducts(message.catalogs);
@@ -226,7 +242,8 @@ export default function ProductList() {
             onCloseFilter={() => setToggleFiltersOnMobile(false)}
             onUpdateFilters={(applied_filters) => {
               setToggleFiltersOnMobile(false);
-              onSearchBasedOnFilter(applied_filters);
+              setSelectedFilters(applied_filters);
+              onSearchBasedOnFilter(applied_filters, sortType);
             }}
           />
         </div>
@@ -263,9 +280,10 @@ export default function ProductList() {
                   messageId={messageId}
                   fetchFilterLoading={fetchFilterLoading}
                   filters={filters}
-                  onUpdateFilters={(applied_filters) =>
-                    onSearchBasedOnFilter(applied_filters)
-                  }
+                  onUpdateFilters={(applied_filters) => {
+                    setSelectedFilters(applied_filters);
+                    onSearchBasedOnFilter(applied_filters, sortType);
+                  }}
                 />
               </div>
               {searchProductLoading ? (
@@ -284,7 +302,13 @@ export default function ProductList() {
                       />
                     </div>
                     <div className="ms-auto">
-                      <ProductSort />
+                      <ProductSort
+                        sortType={sortType?.name}
+                        onUpdateSortType={(sort_type) => {
+                          setSortType(sort_type);
+                          onSearchBasedOnFilter(selectedFilters, sort_type);
+                        }}
+                      />
                     </div>
                   </div>
                   <div className="container-fluid">
