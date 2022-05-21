@@ -85,7 +85,7 @@ export default function ProductList() {
   function callApiMultipleTimes(message_id) {
     setSearchProductLoading(true);
     setFetchFilterLoading(true);
-    let counter = 1;
+    let counter = 6;
     search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         fetchAllFilters(message_id);
