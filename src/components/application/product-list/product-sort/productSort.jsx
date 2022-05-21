@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import Dropdown from "../../../shared/dropdown/dropdown";
 import DropdownSvg from "../../../shared/svg/dropdonw";
