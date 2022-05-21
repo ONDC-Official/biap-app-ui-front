@@ -16,11 +16,13 @@
   height: 8%;
   display: flex;
   align-items: center;
+  padding: 5px;
 }
 
 .playground_area {
   height: 84%;
   overflow: auto;
+  padding: 5px;
 }
 
 .card_heading {

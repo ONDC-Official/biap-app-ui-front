@@ -141,6 +141,7 @@
   height: 75%;
   animation: slide 0.3s ease-in forwards;
   z-index: 10;
+  display: none;
 }
 
 @media screen and (max-width: 700px) {
@@ -158,6 +159,9 @@
 @media screen and (max-width: 1023px) {
   .product_list_container_width {
     width: 100%;
+  }
+  .filter_on_mobile_wrapper {
+    display: block;
   }
 }
 
