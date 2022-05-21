@@ -47,6 +47,7 @@ export default function ProductList() {
     type: "",
     message: "",
   });
+
   useEffect(() => {
     if (Object.keys(search_context).length > 0) {
       setMessageId(search_context?.message_id);
@@ -80,6 +81,7 @@ export default function ProductList() {
     }
   }
 
+  // use this to poll for multiple times
   function callApiMultipleTimes(message_id) {
     setSearchProductLoading(true);
     setFetchFilterLoading(true);
@@ -146,6 +148,7 @@ export default function ProductList() {
     return query;
   }
 
+  // use this function to handle filtering and sorting
   async function onSearchBasedOnFilter(applied_filters, sort_types) {
     setSearchProductLoading(true);
     const query = generateQueryForFilters(applied_filters, sort_types);
@@ -164,6 +167,7 @@ export default function ProductList() {
     }
   }
 
+  // loader for loading products
   const loadingSpin = (
     <div
       className={`d-flex align-items-center justify-content-center ${styles.product_list_container_width}`}
@@ -172,6 +176,7 @@ export default function ProductList() {
     </div>
   );
 
+  // empty state if user havent searhed anything
   const search_empty_state = (
     <div
       className={"d-flex align-items-center justify-content-center"}
@@ -195,6 +200,7 @@ export default function ProductList() {
     </div>
   );
 
+  // empty state if no products are found
   const no_prodcut_found_empty_state = (
     <div
       className={`d-flex align-items-center justify-content-center ${styles.product_list_container_width}`}
