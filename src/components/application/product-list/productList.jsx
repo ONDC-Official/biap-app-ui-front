@@ -28,6 +28,7 @@ export default function ProductList() {
   const { cartItems } = useContext(CartContext);
   const search_context = JSON.parse(Cookies.get("search_context") || "{}");
   const [products, setProducts] = useState([]);
+  const [messageId, setMessageId] = useState("");
   const [searchedLocation, setSearchedLocation] = useState({
     name: "",
     lat: "",
@@ -35,6 +36,8 @@ export default function ProductList() {
   });
   const [searchedProduct, setSearchedProduct] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
+  const [fetchFilterLoading, setFetchFilterLoading] = useState(false);
+  const [filters, setFilters] = useState();
   const [toggleFiltersOnMobile, setToggleFiltersOnMobile] = useState(false);
   const search_polling_timer = useRef(0);
   const [toast, setToast] = useState({
@@ -44,6 +47,7 @@ export default function ProductList() {
   });
   useEffect(() => {
     if (Object.keys(search_context).length > 0) {
+      setMessageId(search_context?.message_id);
       setSearchedProduct(search_context?.search?.value);
       setSearchedLocation(search_context?.location);
       callApiMultipleTimes(search_context?.message_id);
@@ -76,9 +80,11 @@ export default function ProductList() {
 
   function callApiMultipleTimes(message_id) {
     setSearchProductLoading(true);
+    setFetchFilterLoading(true);
     let counter = 6;
     search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
+        fetchAllFilters(message_id);
         clearInterval(search_polling_timer.current);
         return;
       }
@@ -88,10 +94,63 @@ export default function ProductList() {
     }, 2000);
   }
 
+  // use this api to fetch the filters.
+  async function fetchAllFilters(messageId) {
+    try {
+      const data = await getCall(
+        `/clientApis/v1/getFilterParams?messageId=${messageId}`
+      );
+      setFilters(data);
+    } catch (err) {
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
+    } finally {
+      setFetchFilterLoading(false);
+    }
+  }
+
+  // use this function to generate query params for filters
+  function generateQueryForFilters(applied_filters) {
+    let query = "";
+    if (applied_filters.messageId) {
+      query += `?messageId=${applied_filters.messageId}`;
+    }
+    if (applied_filters.minPrice && applied_filters.maxPrice) {
+      query += `&priceMin=${applied_filters.minPrice}&priceMax=${applied_filters.maxPrice}`;
+    }
+    if (applied_filters?.providers?.length > 0) {
+      query += `&providerId=${applied_filters.providers.map(
+        (provider) => provider.id
+      )}`;
+    }
+    return query;
+  }
+
+  async function onSearchBasedOnFilter(applied_filters) {
+    setSearchProductLoading(true);
+    const query = generateQueryForFilters(applied_filters);
+    try {
+      const { message } = await getCall(`/clientApis/v1/on_search${query}`);
+      setProducts(message.catalogs);
+    } catch (err) {
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
+    } finally {
+      setSearchProductLoading(false);
+    }
+  }
+
   const loadingSpin = (
     <div
-      className={"d-flex align-items-center justify-content-center"}
-      style={{ height: "85%" }}
+      className={`d-flex align-items-center justify-content-center ${styles.product_list_container_width}`}
     >
       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
     </div>
@@ -122,15 +181,14 @@ export default function ProductList() {
 
   const no_prodcut_found_empty_state = (
     <div
-      className={"d-flex align-items-center justify-content-center"}
-      style={{ height: "85%" }}
+      className={`d-flex align-items-center justify-content-center ${styles.product_list_container_width}`}
     >
       <div className="text-center">
         <div className="py-2">
           <img
             src={no_result_empty_illustration}
             alt="empty_search"
-            style={{ height: "130px" }}
+            style={{ height: "120px" }}
           />
         </div>
         <div className="py-2">
@@ -162,44 +220,59 @@ export default function ProductList() {
       {toggleFiltersOnMobile && (
         <div className={styles.filter_on_mobile_wrapper}>
           <ProductFilters
+            messageId={messageId}
+            fetchFilterLoading={fetchFilterLoading}
+            filters={filters}
             onCloseFilter={() => setToggleFiltersOnMobile(false)}
+            onUpdateFilters={(applied_filters) => {
+              setToggleFiltersOnMobile(false);
+              onSearchBasedOnFilter(applied_filters);
+            }}
           />
         </div>
       )}
-      {searchProductLoading ? (
-        loadingSpin
-      ) : (
-        <div className={styles.playground_height}>
-          {/* change search banner html  */}
-          <SearchBanner
-            location={searchedLocation}
-            onSearch={({ search, location, message_id }) => {
-              clearInterval(search_polling_timer.current);
-              setSearchedProduct(search?.value);
-              setSearchedLocation(location);
-              // call On Search api
-              callApiMultipleTimes(message_id);
-            }}
-          />
-          {/* list of product view  */}
-          {!searchedProduct || !searchedLocation ? (
-            search_empty_state
-          ) : products.length <= 0 ? (
-            no_prodcut_found_empty_state
-          ) : (
-            <div
-              className={`py-2 ${
-                cartItems.length > 0
-                  ? styles.product_list_with_summary_wrapper
-                  : styles.product_list_without_summary_wrapper
-              }`}
-            >
-              <div className="d-flex h-100">
-                <div
-                  className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
-                >
-                  <ProductFilters />
-                </div>
+      <div className={styles.playground_height}>
+        {/* change search banner html  */}
+        <SearchBanner
+          location={searchedLocation}
+          onSearch={({ search, location, message_id }) => {
+            clearInterval(search_polling_timer.current);
+            setSearchedProduct(search?.value);
+            setSearchedLocation(location);
+            setMessageId(message_id);
+            // call On Search api
+            callApiMultipleTimes(message_id);
+          }}
+        />
+        {/* list of product view  */}
+        {!searchedProduct || !searchedLocation ? (
+          search_empty_state
+        ) : (
+          <div
+            className={`py-2 ${
+              cartItems.length > 0
+                ? styles.product_list_with_summary_wrapper
+                : styles.product_list_without_summary_wrapper
+            }`}
+          >
+            <div className="d-flex h-100">
+              <div
+                className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
+              >
+                <ProductFilters
+                  messageId={messageId}
+                  fetchFilterLoading={fetchFilterLoading}
+                  filters={filters}
+                  onUpdateFilters={(applied_filters) =>
+                    onSearchBasedOnFilter(applied_filters)
+                  }
+                />
+              </div>
+              {searchProductLoading ? (
+                loadingSpin
+              ) : products.length <= 0 ? (
+                no_prodcut_found_empty_state
+              ) : (
                 <div className={`${styles.product_list_container_width}`}>
                   <div className="py-2 px-3 d-flex align-items-center">
                     <div className="d-sm-block d-lg-none">
@@ -249,12 +322,12 @@ export default function ProductList() {
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
-          )}
-          {cartItems.length > 0 && <OrderSummary />}
-        </div>
-      )}
+          </div>
+        )}
+        {cartItems.length > 0 && <OrderSummary />}
+      </div>
     </Fragment>
   );
 }

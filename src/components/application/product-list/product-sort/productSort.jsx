@@ -10,25 +10,25 @@ export default function ProductSort() {
       key: "price_low_to_high",
       sortField: "price",
       sortOrder: "asc",
-      name: "Price Low To High",
+      name: "Price: Low To High",
     },
     {
       key: "price_high_to_low",
       sortField: "price",
       sortOrder: "desc",
-      name: "Price High To Low",
+      name: "Price: High To Low",
     },
     {
       key: "rating_low_to_high",
       sortField: "rating",
       sortOrder: "asc",
-      name: "Rating Low To High",
+      name: "Rating: Low To High",
     },
     {
       key: "rating_high_to_low",
       sortField: "rating",
       sortOrder: "desc",
-      name: "Rating High To Low",
+      name: "Rating: High To Low",
     },
   ];
   const [sortType, setSortType] = useState("");

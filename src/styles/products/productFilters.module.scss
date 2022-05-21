@@ -11,6 +11,18 @@
   position: relative;
 }
 
+.header_area,
+.action_area {
+  height: 8%;
+  display: flex;
+  align-items: center;
+}
+
+.playground_area {
+  height: 84%;
+  overflow: auto;
+}
+
 .card_heading {
   width: 100%;
   font-family: $firaSans;
@@ -24,4 +36,135 @@
   font-weight: $medium;
   color: $primaryColor;
   margin: 0;
+}
+
+.filter_label {
+  font-size: $font-16;
+  font-weight: $medium;
+  color: $primaryColor;
+  margin-bottom: 10px;
+}
+
+.min_and_max_input_label {
+  font-size: $font-12;
+  color: $primaryColor;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.range_input_box {
+  padding: 5px;
+  border: 1px solid $backgroundColor;
+  background: $white;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.range_input_box:focus {
+  outline: none;
+  border: 1px solid $accentColor;
+}
+
+.error_message {
+  font-size: 10px;
+  color: $error;
+  margin: 0;
+}
+
+.slider {
+  position: relative;
+  height: 5px;
+  border-radius: 5px;
+  background: #ddd;
+}
+
+.progress {
+  height: 5px;
+  position: absolute;
+  border-radius: 5px;
+  background: $accentColor;
+}
+
+.range_input {
+  position: relative;
+}
+
+.range_input input {
+  position: absolute;
+  top: -5px;
+  height: 5px;
+  width: 100%;
+  background: none;
+  pointer-events: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  pointer-events: auto;
+  background: $accentColor;
+}
+
+input[type="range"]::-moz-range-thumb {
+  -moz-appearance: none;
+  width: 15px;
+  height: 15px;
+  border: none;
+  border-radius: 50%;
+  pointer-events: auto;
+  background: $accentColor;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.apply_filter {
+  height: 30px;
+  padding: 0 20px;
+  background-color: $white;
+  border: 1px solid $accentColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $accentColor;
+}
+
+.apply_filter:hover {
+  background-color: $accentColor;
+  color: $white;
+  transition: all 0.3s;
+}
+
+// PROVIDERS STYLES
+.provider_name {
+  font-size: $font-14;
+  text-align: left;
+  color: $primaryColor;
+  margin: 0;
+  padding-left: 5px;
+}
+
+.active_provider_name {
+  font-size: $font-14;
+  font-weight: $medium;
+  text-align: left;
+  color: $accentColor;
+  margin: 0;
+  padding-left: 10px;
 }

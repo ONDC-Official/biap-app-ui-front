@@ -71,7 +71,7 @@ export default function SearchBanner({ onSearch, location }) {
   async function getAllLocations(query) {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/mmi/api/mmi_query?query=${query}`
+        `${process.env.REACT_APP_BASE_URL}mmi/api/mmi_query?query=${query}`
       );
       const formattedLocations = data.map((location) => ({
         place_id: location?.eLoc,
@@ -95,7 +95,7 @@ export default function SearchBanner({ onSearch, location }) {
   async function getPlaceFromPlaceId(location) {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/mmi/api/mmi_place_info?eloc=${location.place_id}`
+        `${process.env.REACT_APP_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
       );
       setSearchedLocation({
         ...searchedLocation,
