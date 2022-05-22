@@ -9,6 +9,7 @@ import Orders from "./orders/orders";
 import ProductList from "./product-list/productList";
 import Profile from "./profile/profile";
 import Support from "./support/support";
+import ProductDetails from "./product-list/product-details/productDetails";
 
 export default function Application() {
   return (
@@ -19,6 +20,9 @@ export default function Application() {
           exact
           component={() => <Redirect to={"/application/products"} />}
         />
+        <PrivateRoute path={"/application/products/:id"}>
+          <ProductDetails />
+        </PrivateRoute>
         <PrivateRoute path={"/application/products"}>
           <ProductList />
         </PrivateRoute>

@@ -88,9 +88,12 @@ export default function ProductList() {
     let counter = 6;
     search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
-        fetchAllFilters(message_id);
         clearInterval(search_polling_timer.current);
         return;
+      }
+      if (counter === 4) {
+        // fetch filters for that.
+        fetchAllFilters(message_id);
       }
       await onSearchPolling(message_id).finally(() => {
         counter -= 1;
@@ -278,7 +281,7 @@ export default function ProductList() {
                 : styles.product_list_without_summary_wrapper
             }`}
           >
-            <div className="d-flex h-100">
+            <div className="d-flex h-100 px-2">
               <div
                 className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
               >
@@ -318,7 +321,7 @@ export default function ProductList() {
                     </div>
                   </div>
                   <div className="container-fluid">
-                    <div className="row">
+                    <div className="row pe-2">
                       {products.map(
                         ({
                           bpp_details,

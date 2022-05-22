@@ -5,6 +5,7 @@ import IndianRupee from "../../../shared/svg/indian-rupee";
 import Subtract from "../../../shared/svg/subtract";
 import Add from "../../../shared/svg/add";
 import { CartContext } from "../../../../context/cartContext";
+import { Link } from "react-router-dom";
 
 export default function ProductCard(props) {
   const {
@@ -44,6 +45,8 @@ export default function ProductCard(props) {
         <img
           src={images?.length > 0 ? images[0] : no_image_found}
           alt={product_name}
+          width="110"
+          height="110"
           className={styles.product_img}
           onError={(event) => {
             event.target.onerror = null;
@@ -51,11 +54,18 @@ export default function ProductCard(props) {
           }}
         />
       </div>
-      <div className="px-3 flex-grow-1">
+      <div className="px-3" style={{ flexBasis: "70%" }}>
         <div className={styles.product_name_and_description_wrapper}>
-          <p className={styles.product_name} title={product_name}>
+          <Link
+            to={{
+              pathname: `/application/products/${id}`,
+              state: { product, price, bpp_provider_descriptor },
+            }}
+            className={styles.product_name}
+            title={product_name}
+          >
             {product_name}
-          </p>
+          </Link>
           <p className={styles.ordered_from}>
             Ordering from <span className={styles.bold}>{provider_name}</span>
           </p>

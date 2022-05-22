@@ -7,6 +7,13 @@
   align-items: flex-start;
 }
 
+.box_basis {
+  flex-basis: 5%;
+}
+.name_basis {
+  flex-basis: 95%;
+}
+
 .radio_button_wrapper:hover {
   background-color: rgba($accentColor, $alpha: 0.15);
   transition: background-color 0.3s;

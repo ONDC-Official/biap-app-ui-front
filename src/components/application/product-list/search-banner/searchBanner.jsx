@@ -123,9 +123,7 @@ export default function SearchBanner({ onSearch, location }) {
     setSearchProductLoading(true);
     try {
       const { context } = await postCall("/clientApis/v1/search", {
-        context: {
-          bpp_id: "bpp1.beckn.org",
-        },
+        context: {},
         message: {
           criteria: criteria.current,
         },

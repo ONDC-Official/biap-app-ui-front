@@ -11,6 +11,14 @@
 .product_img_container {
   height: 110px;
   width: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-basis: 30%;
+  border-radius: 8px;
+
+  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.16);
+  padding: 5px;
 }
 
 .product_img {
@@ -63,7 +71,7 @@
 
 .add_to_cart_button {
   width: 120px;
-  height: 40px;
+  height: 35px;
   background-color: $white;
   border: 1px solid $accentColor;
   border-radius: 36px;
@@ -83,7 +91,7 @@
 
 .quantity_count_wrapper {
   width: 120px;
-  height: 40px;
+  height: 35px;
   background-color: $accentColor;
   border-radius: 36px;
   display: flex;
@@ -92,7 +100,7 @@
 
 .quantity_count_wrapper > div {
   width: 40px;
-  height: 40px;
+  height: 35px;
 }
 
 .subtract_svg_color,

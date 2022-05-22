@@ -6,12 +6,20 @@
   display: flex;
   align-items: center;
   padding: 5px;
+  width: 100%;
 }
 
 .checkbox_wrapper:hover {
   .checkbox_background {
     background-color: rgba($accentColor, $alpha: 0.35);
   }
+}
+
+.box_basis {
+  flex-basis: 20%;
+}
+.name_basis {
+  flex-basis: 80%;
 }
 
 .checkbox_background {
