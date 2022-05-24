@@ -131,17 +131,17 @@ export default function ProductList() {
       query += `&priceMin=${applied_filters.minPrice}&priceMax=${applied_filters.maxPrice}`;
     }
     if (applied_filters?.providers?.length > 0) {
-      query += `&providerId=${applied_filters.providers.map(
+      query += `&providerIds=${applied_filters.providers.map(
         (provider) => provider.id
       )}`;
     }
     if (applied_filters?.categories?.length > 0) {
-      query += `&categoryId=${applied_filters.categories.map(
+      query += `&categoryIds=${applied_filters.categories.map(
         (provider) => provider.id
       )}`;
     }
     if (applied_filters?.fulfillments?.length > 0) {
-      query += `&fulfillmentId=${applied_filters.fulfillments.map(
+      query += `&fulfillmentIds=${applied_filters.fulfillments.map(
         (provider) => provider.id
       )}`;
     }
