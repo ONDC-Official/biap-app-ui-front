@@ -192,9 +192,20 @@ export default function OrderCard(props) {
       const data = await getCall(
         `/clientApis/v2/on_support?messageIds=${array_of_id}`
       );
+      if (data[0]?.error) {
+        setToast((toast) => ({
+          ...toast,
+          toggle: true,
+          type: toast_types.error,
+          message: "Could not get data for this order!",
+        }));
+        setSupportOrderLoading(false);
+        clearInterval(support_order_timer.current);
+        return;
+      }
       setSupportOrderDetails(data[0]?.message);
     } catch (err) {
-      setTrackOrderLoading(false);
+      setSupportOrderLoading(false);
       setToast((toast) => ({
         ...toast,
         toggle: true,

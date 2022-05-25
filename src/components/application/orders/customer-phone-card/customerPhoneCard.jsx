@@ -110,9 +110,9 @@ export default function CustomerPhoneCard({
         </div>
         <div className={styles.card_body}>
           <Input
-            label_name="Phone Number"
+            label_name="Enter your phone number"
             type="text"
-            placeholder="Enter Phone Number"
+            placeholder="Enter the phone number on which you want us to call."
             id="phone_number"
             has_error={inlineError.phone_number_error}
             onBlur={checkPhoneNumber}

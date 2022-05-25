@@ -10,6 +10,7 @@ import ProductList from "./product-list/productList";
 import Profile from "./profile/profile";
 import Support from "./support/support";
 import ProductDetails from "./product-list/product-details/productDetails";
+import InitializeOrder from "./initialize-order/initializeOrder";
 
 export default function Application() {
   return (
@@ -39,6 +40,9 @@ export default function Application() {
           <Support />
         </PrivateRoute>
         <AddressContextProvider>
+          <PrivateRoute path={"/application/initialize"}>
+            <InitializeOrder />
+          </PrivateRoute>
           <PrivateRoute path={"/application/checkout"}>
             <Checkout />
           </PrivateRoute>

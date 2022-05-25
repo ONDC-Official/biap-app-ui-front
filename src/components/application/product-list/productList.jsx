@@ -23,17 +23,24 @@ import ProductFilters from "./product-filters/productFilters";
 import ProductSort from "./product-sort/productSort";
 import Button from "../../shared/button/button";
 import { buttonTypes } from "../../../utils/button";
+import Pagination from "../../shared/pagination/pagination";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
   const search_context = JSON.parse(Cookies.get("search_context") || "{}");
   const [products, setProducts] = useState([]);
   const [messageId, setMessageId] = useState("");
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalCount: 0,
+    postPerPage: 10,
+  });
   const [searchedLocation, setSearchedLocation] = useState({
     name: "",
     lat: "",
     lng: "",
   });
+  const [newSearchedProduct, setNewSearchedProduct] = useState();
   const [searchedProduct, setSearchedProduct] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [fetchFilterLoading, setFetchFilterLoading] = useState(false);
@@ -65,12 +72,17 @@ export default function ProductList() {
   async function onSearchPolling(message_id) {
     try {
       const data = await getCall(
-        `/clientApis/v1/on_search?messageId=${message_id}`
+        `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
       );
+      setPagination((prev) => ({
+        ...prev,
+        totalCount: data?.message?.count,
+        currentPage: 1,
+      }));
       setProducts(data?.message?.catalogs);
-      setSearchProductLoading(false);
+      setNewSearchedProduct(false);
     } catch (err) {
-      setSearchProductLoading(false);
+      setNewSearchedProduct(false);
       clearInterval(search_polling_timer.current);
       setToast((toast) => ({
         ...toast,
@@ -83,17 +95,15 @@ export default function ProductList() {
 
   // use this to poll for multiple times
   function callApiMultipleTimes(message_id) {
-    setSearchProductLoading(true);
+    setNewSearchedProduct(true);
     setFetchFilterLoading(true);
     let counter = 6;
     search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
-        clearInterval(search_polling_timer.current);
-        return;
-      }
-      if (counter === 4) {
         // fetch filters for that.
         fetchAllFilters(message_id);
+        clearInterval(search_polling_timer.current);
+        return;
       }
       await onSearchPolling(message_id).finally(() => {
         counter -= 1;
@@ -121,12 +131,13 @@ export default function ProductList() {
   }
 
   // use this function to generate query params for filters
-  function generateQueryForFilters(applied_filters, sort_options) {
-    let query = "";
+  function generateQueryForFilters(applied_filters, sort_options, page_number) {
+    let query = `?messageId=${messageId}&limit=10`;
 
-    if (messageId) {
-      query += `?messageId=${messageId}`;
+    if (page_number) {
+      query += `&pageNumber=${page_number}`;
     }
+
     if (!isNaN(applied_filters.minPrice) && !isNaN(applied_filters.maxPrice)) {
       query += `&priceMin=${applied_filters.minPrice}&priceMax=${applied_filters.maxPrice}`;
     }
@@ -152,11 +163,23 @@ export default function ProductList() {
   }
 
   // use this function to handle filtering and sorting
-  async function onSearchBasedOnFilter(applied_filters, sort_types) {
+  async function onSearchBasedOnFilter(
+    applied_filters,
+    sort_types,
+    page_number
+  ) {
     setSearchProductLoading(true);
-    const query = generateQueryForFilters(applied_filters, sort_types);
+    const query = generateQueryForFilters(
+      applied_filters,
+      sort_types,
+      page_number
+    );
     try {
       const { message } = await getCall(`/clientApis/v1/on_search${query}`);
+      setPagination((prev) => ({
+        ...prev,
+        totalCount: message.count,
+      }));
       setProducts(message.catalogs);
     } catch (err) {
       setToast((toast) => ({
@@ -171,9 +194,10 @@ export default function ProductList() {
   }
 
   // loader for loading products
-  const loadingSpin = (
+  const loadingSpin = (width, height) => (
     <div
       className={`d-flex align-items-center justify-content-center ${styles.product_list_container_width}`}
+      style={{ width, height }}
     >
       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
     </div>
@@ -250,9 +274,13 @@ export default function ProductList() {
             filters={filters}
             onCloseFilter={() => setToggleFiltersOnMobile(false)}
             onUpdateFilters={(applied_filters) => {
+              setPagination((prev) => ({
+                ...prev,
+                currentPage: 1,
+              }));
               setToggleFiltersOnMobile(false);
               setSelectedFilters(applied_filters);
-              onSearchBasedOnFilter(applied_filters, sortType);
+              onSearchBasedOnFilter(applied_filters, sortType, 1);
             }}
           />
         </div>
@@ -263,6 +291,8 @@ export default function ProductList() {
           location={searchedLocation}
           onSearch={({ search, location, message_id }) => {
             clearInterval(search_polling_timer.current);
+            setSelectedFilters({});
+            setSortType({});
             setSearchedProduct(search?.value);
             setSearchedLocation(location);
             setMessageId(message_id);
@@ -281,82 +311,126 @@ export default function ProductList() {
                 : styles.product_list_without_summary_wrapper
             }`}
           >
-            <div className="d-flex h-100 px-2">
-              <div
-                className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
-              >
-                <ProductFilters
-                  messageId={messageId}
-                  fetchFilterLoading={fetchFilterLoading}
-                  filters={filters}
-                  onUpdateFilters={(applied_filters) => {
-                    setSelectedFilters(applied_filters);
-                    onSearchBasedOnFilter(applied_filters, sortType);
-                  }}
-                />
-              </div>
-              {searchProductLoading ? (
-                loadingSpin
-              ) : products.length <= 0 ? (
-                no_prodcut_found_empty_state
-              ) : (
-                <div className={`${styles.product_list_container_width}`}>
-                  <div className="py-2 px-3 d-flex align-items-center">
-                    <div className="d-sm-block d-lg-none">
-                      <Button
-                        button_type={buttonTypes.primary}
-                        button_hover_type={buttonTypes.primary_hover}
-                        button_text="Filters"
-                        onClick={() => setToggleFiltersOnMobile(true)}
-                      />
-                    </div>
-                    <div className="ms-auto">
-                      <ProductSort
-                        sortType={sortType?.name}
-                        onUpdateSortType={(sort_type) => {
-                          setSortType(sort_type);
-                          onSearchBasedOnFilter(selectedFilters, sort_type);
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="container-fluid">
-                    <div className="row pe-2">
-                      {products.map(
-                        ({
-                          bpp_details,
-                          descriptor,
-                          id,
-                          location_details,
-                          provider_details,
-                          price,
-                        }) => {
-                          return (
-                            <div
-                              key={id}
-                              className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
-                            >
-                              <ProductCard
-                                product={{ id, descriptor }}
-                                price={price}
-                                bpp_provider_descriptor={
-                                  provider_details?.descriptor
-                                }
-                                bpp_id={bpp_details?.bpp_id}
-                                location_id={
-                                  location_details ? location_details?.id : ""
-                                }
-                                bpp_provider_id={provider_details?.id}
-                              />
-                            </div>
-                          );
-                        }
-                      )}
-                    </div>
-                  </div>
+            {newSearchedProduct ? (
+              loadingSpin("100%", "100%")
+            ) : (
+              <div className="d-flex h-100 px-2">
+                <div
+                  className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
+                >
+                  <ProductFilters
+                    messageId={messageId}
+                    fetchFilterLoading={fetchFilterLoading}
+                    filters={filters}
+                    onUpdateFilters={(applied_filters) => {
+                      setPagination((prev) => ({
+                        ...prev,
+                        currentPage: 1,
+                      }));
+                      setSelectedFilters(applied_filters);
+                      onSearchBasedOnFilter(applied_filters, sortType, 1);
+                    }}
+                  />
                 </div>
-              )}
-            </div>
+                {searchProductLoading ? (
+                  loadingSpin("", "100%")
+                ) : products.length <= 0 ? (
+                  no_prodcut_found_empty_state
+                ) : (
+                  <div className={`${styles.product_list_container_width}`}>
+                    <div className="py-2 px-3 d-flex align-items-center">
+                      <div className="d-sm-block d-lg-none">
+                        <Button
+                          button_type={buttonTypes.primary}
+                          button_hover_type={buttonTypes.primary_hover}
+                          button_text="Filters"
+                          onClick={() => setToggleFiltersOnMobile(true)}
+                        />
+                      </div>
+                      <div className="ms-auto">
+                        {fetchFilterLoading ? (
+                          <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+                        ) : (
+                          <ProductSort
+                            sortType={sortType?.name}
+                            onUpdateSortType={(sort_type) => {
+                              setPagination((prev) => ({
+                                ...prev,
+                                currentPage: 1,
+                              }));
+                              setSortType(sort_type);
+                              onSearchBasedOnFilter(
+                                selectedFilters,
+                                sort_type,
+                                1
+                              );
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <div className="container-fluid">
+                      <div className="row pe-2">
+                        {products.map(
+                          ({
+                            bpp_details,
+                            descriptor,
+                            id,
+                            location_details,
+                            provider_details,
+                            price,
+                          }) => {
+                            return (
+                              <div
+                                key={id}
+                                className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
+                              >
+                                <ProductCard
+                                  product={{ id, descriptor }}
+                                  price={price}
+                                  bpp_provider_descriptor={
+                                    provider_details?.descriptor
+                                  }
+                                  bpp_id={bpp_details?.bpp_id}
+                                  location_id={
+                                    location_details ? location_details?.id : ""
+                                  }
+                                  bpp_provider_id={provider_details?.id}
+                                />
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+                    {!fetchFilterLoading && (
+                      <div
+                        className="d-flex align-items-center justify-content-center"
+                        style={{ height: "60px" }}
+                      >
+                        <Pagination
+                          className="m-0"
+                          currentPage={pagination.currentPage}
+                          totalCount={pagination.totalCount}
+                          pageSize={pagination.postPerPage}
+                          onPageChange={(page) => {
+                            setPagination((prev) => ({
+                              ...prev,
+                              currentPage: page,
+                            }));
+                            onSearchBasedOnFilter(
+                              selectedFilters,
+                              sortType,
+                              page
+                            );
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
         {cartItems.length > 0 && <OrderSummary />}
