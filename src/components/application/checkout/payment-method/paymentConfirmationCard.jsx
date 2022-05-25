@@ -24,7 +24,13 @@ import { removeCookie, getValueFromCookie } from "../../../../utils/cookies";
 import Loading from "../../../shared/loading/loading";
 
 export default function PaymentConfirmationCard(props) {
-  const { currentActiveStep, productsQuote, orderStatus } = props;
+  const {
+    currentActiveStep,
+    productsQuote,
+    orderStatus,
+    setActivePaymentMethod,
+    activePaymentMethod,
+  } = props;
   const token = getValueFromCookie("token");
   const user = JSON.parse(getValueFromCookie("user"));
   const transaction_id = getValueFromCookie("transaction_id");
@@ -41,9 +47,6 @@ export default function PaymentConfirmationCard(props) {
     message: "",
   });
   const [togglePaymentGateway, setTogglePaymentGateway] = useState(false);
-  const [activePaymentMethod, setActivePaymentMethod] = useState(
-    payment_methods.COD
-  );
   const [loadingSdkForPayment, setLoadingSdkForPayment] = useState(false);
   const confirm_polling_timer = useRef(0);
   const onConfirmed = useRef();

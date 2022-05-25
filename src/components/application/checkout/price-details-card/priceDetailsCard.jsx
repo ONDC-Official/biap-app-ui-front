@@ -4,7 +4,7 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import IndianRupee from "../../../shared/svg/indian-rupee";
 
 export default function PriceDetailsCard(props) {
-  const { productsQuote } = props;
+  const { productsQuote, show_order_from = true } = props;
 
   return (
     <div className={styles.price_summary_card}>
@@ -20,12 +20,14 @@ export default function PriceDetailsCard(props) {
             >
               <div className="pe-2">
                 <p className={styles.product_name}>{quote.title}</p>
-                <p className={styles.ordered_from}>
-                  Ordering from
-                  <span className={`px-2 ${styles.bold}`}>
-                    {quote.provided_by}
-                  </span>
-                </p>
+                {show_order_from && (
+                  <p className={styles.ordered_from}>
+                    Ordering from
+                    <span className={`px-2 ${styles.bold}`}>
+                      {quote.provided_by}
+                    </span>
+                  </p>
+                )}
               </div>
               <div className="ms-auto d-flex align-items-center">
                 <div className="px-1">

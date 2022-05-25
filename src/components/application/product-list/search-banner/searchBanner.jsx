@@ -22,7 +22,12 @@ export default function SearchBanner({ onSearch, location }) {
     location_error: "",
     search_error: "",
   });
-  const [searchedLocation, setSearchedLocation] = useState(location);
+
+  const [searchedLocation, setSearchedLocation] = useState({
+    name: "",
+    lat: "",
+    lng: "",
+  });
   const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
   const [search, setSearch] = useState({
     type: search_types.PRODUCT,
@@ -39,6 +44,10 @@ export default function SearchBanner({ onSearch, location }) {
   });
 
   useEffect(() => {
+    setSearchedLocation(location);
+  }, [location]);
+
+  useEffect(() => {
     return () => {
       setSearchLocationLoading(false);
       setSearchProductLoading(false);
@@ -49,19 +58,19 @@ export default function SearchBanner({ onSearch, location }) {
     if (search.type === search_types.PRODUCT) {
       criteria.current = {
         search_string: search.value.trim(),
-        delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+        delivery_location: `${searchedLocation?.lat},${searchedLocation?.lng}`,
       };
     }
     if (search.type === search_types.CATEGORY) {
       criteria.current = {
         category_id: search.value.trim(),
-        delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+        delivery_location: `${searchedLocation?.lat},${searchedLocation?.lng}`,
       };
     }
     if (search.type === search_types.PROVIDER) {
       criteria.current = {
         provider_id: search.value.trim(),
-        delivery_location: `${searchedLocation.lat},${searchedLocation.lng}`,
+        delivery_location: `${searchedLocation?.lat},${searchedLocation?.lng}`,
       };
     }
     // eslint-disable-next-line
@@ -177,7 +186,7 @@ export default function SearchBanner({ onSearch, location }) {
 
   // use this function to validate the location value
   function checkLocation() {
-    if (!searchedLocation.name) {
+    if (!searchedLocation?.name) {
       setInlineError((error) => ({
         ...error,
         location_error: "Location cannot be empty",
@@ -248,14 +257,14 @@ export default function SearchBanner({ onSearch, location }) {
                 type="text"
                 placeholder="Search Location"
                 autoComplete="off"
-                value={searchedLocation.name}
+                value={searchedLocation?.name}
                 onChange={(event) => onChange(event)}
                 onBlur={checkLocation}
                 className={styles.formControl}
                 style={{ padding: "8px 10px" }}
               />
               <div className="px-2">
-                {searchedLocation.name !== "" ? (
+                {searchedLocation?.name !== "" ? (
                   <CrossIcon
                     width="20"
                     height="20"
@@ -289,7 +298,7 @@ export default function SearchBanner({ onSearch, location }) {
                 </span>
               </p>
             )}
-            {toggleLocationListCard && searchedLocation.name !== "" && (
+            {toggleLocationListCard && searchedLocation?.name !== "" && (
               <div className={styles.location_list_wrapper}>
                 {searchedLocationLoading ? (
                   loadingSpin
@@ -412,7 +421,7 @@ export default function SearchBanner({ onSearch, location }) {
                 <div className="pe-3 py-1">
                   <button
                     disabled={
-                      !searchedLocation.name ||
+                      !searchedLocation?.name ||
                       !search?.value ||
                       searchProductLoading
                     }

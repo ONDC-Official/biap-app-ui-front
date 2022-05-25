@@ -24,10 +24,13 @@ import Cookies from "js-cookie";
 import { constructQouteObject } from "../../../../utils/constructRequestObject";
 import Toast from "../../../shared/toast/toast";
 import { toast_types } from "../../../../utils/toast";
+import { AddCookie } from "../../../../utils/cookies";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function OrderConfirmationCard(props) {
   const { currentActiveStep, setCurrentActiveStep, updateInitLoading } = props;
   const transaction_id = Cookies.get("transaction_id");
+  const history = useHistory();
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
   const { cartItems, onRemoveProduct } = useContext(CartContext);
   const [initializeOrderLoading, setInitializeOrderLoading] = useState(false);
@@ -119,11 +122,12 @@ export default function OrderConfirmationCard(props) {
 
   // use this function to call initlaize order multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 6;
+    let counter = 3;
     initialize_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setInitializeOrderLoading(false);
         updateInitLoading(false);
+        console.log(onInitialized.current[0]);
         const allOrderInitialized = onInitialized.current.every(
           (data) => data?.message?.order
         );
@@ -137,6 +141,13 @@ export default function OrderConfirmationCard(props) {
           setCurrentActiveStep(
             get_current_step(checkout_steps.SELECT_PAYMENT_METHOD)
           );
+          AddCookie(
+            "product-quote",
+            JSON.stringify({
+              quote: onInitialized.current[0]?.message?.order?.quote,
+            })
+          );
+          history.replace("/application/checkout");
         } else {
           setToast((toast) => ({
             ...toast,
