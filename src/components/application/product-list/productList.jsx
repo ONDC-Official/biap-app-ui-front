@@ -15,7 +15,6 @@ import Loading from "../../shared/loading/loading";
 import ProductCard from "./product-card/productCard";
 import { CartContext } from "../../../context/cartContext";
 import OrderSummary from "./order-summary/orderSummary";
-import Cookies from "js-cookie";
 import SearchBanner from "./search-banner/searchBanner";
 import Toast from "../../shared/toast/toast";
 import { toast_types } from "../../../utils/toast";
