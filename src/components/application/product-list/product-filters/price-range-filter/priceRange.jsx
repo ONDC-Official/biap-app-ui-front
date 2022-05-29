@@ -7,9 +7,15 @@ export default function PriceRange({
   resetError,
   MINIMUM_FILTER_VALUE,
   MAXIMUM_FILTER_VALUE,
+  selectedMinValue,
+  selectedMaxValue,
 }) {
-  const [minValue, setMinValue] = useState(MINIMUM_FILTER_VALUE);
-  const [maxValue, setMaxValue] = useState(MAXIMUM_FILTER_VALUE);
+  const [minValue, setMinValue] = useState(
+    selectedMinValue ?? MINIMUM_FILTER_VALUE
+  );
+  const [maxValue, setMaxValue] = useState(
+    selectedMaxValue ?? MAXIMUM_FILTER_VALUE
+  );
   const progressRef = useRef(null);
 
   useEffect(() => {

@@ -5,8 +5,10 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import Loading from "../../../shared/loading/loading";
 import PriceRange from "./price-range-filter/priceRange";
 import MultiAttributeFilter from "./multi-attribute-filter/multiAttributeFilter";
+import { AddCookie } from "../../../../utils/cookies";
 
 export default function ProductFilters({
+  selectedFilters,
   messageId,
   fetchFilterLoading,
   filters,
@@ -15,10 +17,7 @@ export default function ProductFilters({
 }) {
   const MINIMUM_FILTER_VALUE = 0;
   const MAXIMUM_FILTER_VALUE = 100000;
-  const [productFilters, setProductFilters] = useState({
-    minPrice: MINIMUM_FILTER_VALUE,
-    maxPrice: MAXIMUM_FILTER_VALUE,
-  });
+  const [productFilters, setProductFilters] = useState(selectedFilters);
   const [error, setError] = useState({
     minValueError: "",
     maxValueError: "",
@@ -42,6 +41,7 @@ export default function ProductFilters({
       return;
     }
     resetError();
+    AddCookie("product_filters", JSON.stringify(productFilters));
     // update parent
     onUpdateFilters({
       ...productFilters,
@@ -82,6 +82,8 @@ export default function ProductFilters({
           <div className="py-2">
             <PriceRange
               error={error}
+              selectedMaxValue={productFilters?.maxPrice}
+              selectedMinValue={productFilters?.minPrice}
               MAXIMUM_FILTER_VALUE={MAXIMUM_FILTER_VALUE}
               MINIMUM_FILTER_VALUE={MINIMUM_FILTER_VALUE}
               resetError={() => resetError()}
@@ -99,6 +101,7 @@ export default function ProductFilters({
               <MultiAttributeFilter
                 filterAttributeName="Providers"
                 filterAttributeArray={filters?.providers}
+                selectedAttributes={selectedFilters.providers}
                 onUpdateAttributeFilter={(selectedProviders) => {
                   setProductFilters({
                     ...productFilters,
@@ -113,6 +116,7 @@ export default function ProductFilters({
               <MultiAttributeFilter
                 filterAttributeName="Categories"
                 filterAttributeArray={filters?.categories}
+                selectedAttributes={selectedFilters.categories}
                 onUpdateAttributeFilter={(selectedCategories) => {
                   setProductFilters({
                     ...productFilters,
@@ -127,6 +131,7 @@ export default function ProductFilters({
               <MultiAttributeFilter
                 filterAttributeName="FullFillments"
                 filterAttributeArray={filters?.fulfillment}
+                selectedAttributes={selectedFilters.fulfillment}
                 onUpdateAttributeFilter={(selectedFulfillments) => {
                   setProductFilters({
                     ...productFilters,

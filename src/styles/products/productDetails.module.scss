@@ -37,8 +37,6 @@ a {
 }
 
 .product_img_container {
-  //   height: 100%;
-  //   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,12 +54,6 @@ a {
 }
 
 .product_name {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-all;
   font-size: $font-24;
   font-weight: $medium;
   color: $primaryColor;
@@ -134,6 +126,81 @@ a {
   font-weight: $medium;
   margin: 0;
   color: $primaryColor;
+}
+
+.add_to_cart_button {
+  width: 120px;
+  height: 35px;
+  background-color: $white;
+  border: 1px solid $accentColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $accentColor;
+}
+
+.add_to_cart_button:hover {
+  background-color: $accentColor;
+  color: $white;
+  transition: all 0.3s;
+}
+
+.quantity_count_wrapper {
+  width: 120px;
+  height: 35px;
+  background-color: $accentColor;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.quantity_count_wrapper > div {
+  width: 40px;
+  height: 35px;
+}
+
+.subtract_svg_color,
+.add_svg_color {
+  fill: $white;
+}
+
+.subtract_svg_wrapper {
+  border-top-left-radius: 36px;
+  border-bottom-left-radius: 36px;
+  cursor: pointer;
+}
+
+.subtract_svg_wrapper:hover {
+  background-color: rgba($white, $alpha: 0.75);
+  transition: all 0.3s;
+  .subtract_svg_color {
+    fill: $accentColor;
+  }
+}
+
+.add_svg_wrapper {
+  border-top-right-radius: 36px;
+  border-bottom-right-radius: 36px;
+  cursor: pointer;
+}
+
+.add_svg_wrapper:hover {
+  background-color: rgba($white, $alpha: 0.75);
+  transition: all 0.3s;
+  .add_svg_color {
+    fill: $accentColor;
+  }
+}
+
+.quantity_count {
+  font-size: $font-14;
+  font-weight: $medium;
+  color: $white;
+  text-align: center;
+  margin: 0;
 }
 
 @media screen and (max-width: 767px) {

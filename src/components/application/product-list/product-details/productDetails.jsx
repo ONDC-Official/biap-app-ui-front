@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import styles from "../../../../styles/products/productDetails.module.scss";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
@@ -9,14 +9,41 @@ import { useContext } from "react";
 import { CartContext } from "../../../../context/cartContext";
 import returnableSvg from "../../../../assets/images/returnable_product.svg";
 import cancelableSvg from "../../../../assets/images/cancelable_product.svg";
+import Subtract from "../../../shared/svg/subtract";
+import Add from "../../../shared/svg/add";
 
 export default function ProductDetails() {
   const location = useLocation();
-  const { product, price, bpp_provider_descriptor } = location.state;
-  const { descriptor } = product;
+  const {
+    product,
+    price,
+    bpp_provider_descriptor,
+    bpp_provider_id,
+    bpp_id,
+    location_id,
+  } = location.state;
+  const { id, descriptor } = product;
   const { name: product_name, images } = descriptor;
   const { name: provider_name } = bpp_provider_descriptor;
-  const { cartItems } = useContext(CartContext);
+  const [quantityCount, setQuantityCount] = useState(0);
+  const [toggleAddToCart, setToggleAddToCart] = useState();
+  const {
+    cartItems,
+    onReduceQuantity,
+    onAddQuantity,
+    onAddProduct,
+  } = useContext(CartContext);
+
+  useEffect(() => {
+    const isProductPresent = cartItems.find(({ product }) => product.id === id);
+    if (isProductPresent) {
+      setToggleAddToCart(true);
+      setQuantityCount(isProductPresent.quantity.count);
+    } else {
+      setToggleAddToCart(false);
+      setQuantityCount(0);
+    }
+  }, [cartItems, id]);
 
   const product_details = [
     {
@@ -143,7 +170,7 @@ export default function ProductDetails() {
                   <div className="pe-3">{renderOrderTypes("cancel")}</div>
                 </div>
                 {/* PRODUCT DETAILS  */}
-                <div className="pt-4">
+                <div className="pt-4 pb-2">
                   <p className={styles.product_details_header}>
                     Product Details
                   </p>
@@ -162,6 +189,75 @@ export default function ProductDetails() {
                       );
                     })}
                   </div>
+                </div>
+                {/* ADD TO CART BUTTON  */}
+                <div className="py-3">
+                  {toggleAddToCart && quantityCount > 0 ? (
+                    <div className={styles.quantity_count_wrapper}>
+                      <div
+                        className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
+                        onClick={() => {
+                          setQuantityCount(quantityCount - 1);
+                          onReduceQuantity(id);
+                          if (quantityCount - 1 === 0) {
+                            setToggleAddToCart(false);
+                            return;
+                          }
+                        }}
+                      >
+                        <Subtract
+                          width="13"
+                          classes={styles.subtract_svg_color}
+                        />
+                      </div>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <p className={styles.quantity_count}>{quantityCount}</p>
+                      </div>
+                      <div
+                        className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
+                        onClick={() => {
+                          setQuantityCount(
+                            (quantityCount) => quantityCount + 1
+                          );
+                          onAddQuantity(id);
+                        }}
+                      >
+                        <Add
+                          width="13"
+                          height="13"
+                          classes={styles.add_svg_color}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className={styles.add_to_cart_button}
+                      onClick={() => {
+                        setToggleAddToCart(true);
+                        setQuantityCount((quantityCount) => quantityCount + 1);
+                        onAddProduct({
+                          id,
+                          quantity: { count: quantityCount + 1 },
+                          bpp_id,
+                          provider: {
+                            id: bpp_provider_id,
+                            locations: [location_id],
+                          },
+                          product: {
+                            id,
+                            descriptor: product.descriptor,
+                            price: {
+                              ...product.price,
+                              value: Math.round(price.value),
+                            },
+                            provider_name,
+                          },
+                        });
+                      }}
+                    >
+                      Add
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

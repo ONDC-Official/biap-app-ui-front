@@ -48,6 +48,7 @@ export default function Navbar() {
 
   async function handleLogout() {
     deleteAllCookies();
+    localStorage.removeItem("product_list");
     history.replace("/");
   }
 

@@ -24,10 +24,20 @@ import ProductSort from "./product-sort/productSort";
 import Button from "../../shared/button/button";
 import { buttonTypes } from "../../../utils/button";
 import Pagination from "../../shared/pagination/pagination";
+import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
-  const search_context = JSON.parse(Cookies.get("search_context") || "{}");
+  const search_context = JSON.parse(
+    getValueFromCookie("search_context") || "{}"
+  );
+  const product_list = JSON.parse(localStorage.getItem("product_list") || "{}");
+  const selected_filters = JSON.parse(
+    getValueFromCookie("product_filters") || "{}"
+  );
+  const selected_sort_options = JSON.parse(
+    getValueFromCookie("sort_options") || "{}"
+  );
   const [products, setProducts] = useState([]);
   const [messageId, setMessageId] = useState("");
   const [pagination, setPagination] = useState({
@@ -62,9 +72,24 @@ export default function ProductList() {
       setSearchedLocation(search_context?.location);
       callApiMultipleTimes(search_context?.message_id);
     }
-    return () => {
+    if (Object.keys(product_list).length > 0) {
+      setProducts(product_list);
+      setNewSearchedProduct(false);
+      fetchAllFilters(search_context?.message_id);
       clearInterval(search_polling_timer.current);
-    };
+    }
+    if (Object.keys(selected_filters).length > 0) {
+      setSelectedFilters(selected_filters);
+    }
+    if (Object.keys(selected_sort_options).length > 0) {
+      setSortType(selected_sort_options);
+    }
+    onSearchBasedOnFilter(
+      selected_filters,
+      search_context?.message_id,
+      selected_sort_options,
+      1
+    );
     // eslint-disable-next-line
   }, []);
 
@@ -79,6 +104,10 @@ export default function ProductList() {
         totalCount: data?.message?.count,
         currentPage: 1,
       }));
+      localStorage.setItem(
+        "product_list",
+        JSON.stringify(data?.message?.catalogs)
+      );
       setProducts(data?.message?.catalogs);
       setNewSearchedProduct(false);
     } catch (err) {
@@ -131,8 +160,13 @@ export default function ProductList() {
   }
 
   // use this function to generate query params for filters
-  function generateQueryForFilters(applied_filters, sort_options, page_number) {
-    let query = `?messageId=${messageId}&limit=10`;
+  function generateQueryForFilters(
+    applied_filters,
+    message_id,
+    sort_options,
+    page_number
+  ) {
+    let query = `?messageId=${message_id}&limit=10`;
 
     if (page_number) {
       query += `&pageNumber=${page_number}`;
@@ -156,7 +190,7 @@ export default function ProductList() {
         (provider) => provider.id
       )}`;
     }
-    if (Object.keys(sort_options).length > 0) {
+    if (Object.keys(sort_options)?.length > 0) {
       query += `&sortField=${sort_options?.sortField}&sortOrder=${sort_options?.sortOrder}`;
     }
     return query;
@@ -165,12 +199,14 @@ export default function ProductList() {
   // use this function to handle filtering and sorting
   async function onSearchBasedOnFilter(
     applied_filters,
+    message_id,
     sort_types,
     page_number
   ) {
     setSearchProductLoading(true);
     const query = generateQueryForFilters(
       applied_filters,
+      message_id,
       sort_types,
       page_number
     );
@@ -178,9 +214,9 @@ export default function ProductList() {
       const { message } = await getCall(`/clientApis/v1/on_search${query}`);
       setPagination((prev) => ({
         ...prev,
-        totalCount: message.count,
+        totalCount: message?.count,
       }));
-      setProducts(message.catalogs);
+      setProducts(message?.catalogs);
     } catch (err) {
       setToast((toast) => ({
         ...toast,
@@ -269,6 +305,7 @@ export default function ProductList() {
       {toggleFiltersOnMobile && (
         <div className={styles.filter_on_mobile_wrapper}>
           <ProductFilters
+            selectedFilters={selectedFilters}
             messageId={messageId}
             fetchFilterLoading={fetchFilterLoading}
             filters={filters}
@@ -280,7 +317,7 @@ export default function ProductList() {
               }));
               setToggleFiltersOnMobile(false);
               setSelectedFilters(applied_filters);
-              onSearchBasedOnFilter(applied_filters, sortType, 1);
+              onSearchBasedOnFilter(applied_filters, messageId, sortType, 1);
             }}
           />
         </div>
@@ -319,6 +356,7 @@ export default function ProductList() {
                   className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
                 >
                   <ProductFilters
+                    selectedFilters={selectedFilters}
                     messageId={messageId}
                     fetchFilterLoading={fetchFilterLoading}
                     filters={filters}
@@ -328,7 +366,12 @@ export default function ProductList() {
                         currentPage: 1,
                       }));
                       setSelectedFilters(applied_filters);
-                      onSearchBasedOnFilter(applied_filters, sortType, 1);
+                      onSearchBasedOnFilter(
+                        applied_filters,
+                        messageId,
+                        sortType,
+                        1
+                      );
                     }}
                   />
                 </div>
@@ -354,6 +397,10 @@ export default function ProductList() {
                           <ProductSort
                             sortType={sortType?.name}
                             onUpdateSortType={(sort_type) => {
+                              AddCookie(
+                                "sort_options",
+                                JSON.stringify(sort_type)
+                              );
                               setPagination((prev) => ({
                                 ...prev,
                                 currentPage: 1,
@@ -361,6 +408,7 @@ export default function ProductList() {
                               setSortType(sort_type);
                               onSearchBasedOnFilter(
                                 selectedFilters,
+                                messageId,
                                 sort_type,
                                 1
                               );
@@ -420,6 +468,7 @@ export default function ProductList() {
                             }));
                             onSearchBasedOnFilter(
                               selectedFilters,
+                              messageId,
                               sortType,
                               page
                             );

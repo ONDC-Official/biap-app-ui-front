@@ -6,8 +6,9 @@ export default function MultiAttributeFilter({
   filterAttributeName,
   filterAttributeArray,
   onUpdateAttributeFilter,
+  selectedAttributes,
 }) {
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState(selectedAttributes ?? []);
 
   // use this function to check if the provider is already selected
   function isProviderSelected(id) {

@@ -59,7 +59,14 @@ export default function ProductCard(props) {
           <Link
             to={{
               pathname: `/application/products/${id}`,
-              state: { product, price, bpp_provider_descriptor },
+              state: {
+                product,
+                price,
+                bpp_provider_descriptor,
+                bpp_provider_id,
+                bpp_id,
+                location_id,
+              },
             }}
             className={styles.product_name}
             title={product_name}
