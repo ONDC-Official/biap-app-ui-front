@@ -66,7 +66,7 @@ export default function AddressDetailsCard(props) {
     async function fetchDeliveryAddress() {
       setFetchDeliveryAddressLoading(true);
       try {
-        const data = await getCall("/client/v1/delivery_address");
+        const data = await getCall("/clientApis/v1/delivery_address");
         setDeliveryAddresses(data);
       } catch (err) {
         if (err.response.data.length > 0) {
@@ -92,7 +92,7 @@ export default function AddressDetailsCard(props) {
     async function fetchBillingAddress() {
       setFetchBillingAddressLoading(true);
       try {
-        const data = await getCall("/client/v1/billing_details");
+        const data = await getCall("/clientApis/v1/billing_details");
         setBillingAddresses(data);
       } catch (err) {
         if (err.response.data.length > 0) {

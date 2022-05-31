@@ -54,7 +54,7 @@ export default function BillingAddress(props) {
           </div>
         </div>
       )}
-      {billingAddresses.length > 0 && (
+      {billingAddresses && billingAddresses?.length > 0 && (
         <div className={`${styles.address_wrapper} container-fluid`}>
           <div className="row">
             {billingAddresses
@@ -99,7 +99,7 @@ export default function BillingAddress(props) {
                           {address?.city} {address?.state}
                         </p>
                         <p className={styles.address_line_2}>
-                          {address?.area_code}
+                          {address?.areaCode}
                         </p>
                       </div>
                     </AddressRadioButton>

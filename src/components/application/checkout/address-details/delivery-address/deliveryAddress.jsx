@@ -16,7 +16,7 @@ export default function DeliveryAddress(props) {
       {/* delivery address list card */}
       <p className={`${styles.address_type_label} py-2`}>Delivery Address</p>
       {/* delivery address list card */}
-      {deliveryAddresses.length > 0 && (
+      {deliveryAddresses && deliveryAddresses.length > 0 && (
         <div className={`${styles.address_wrapper} container-fluid pt-2`}>
           <div className="row">
             {deliveryAddresses
@@ -68,7 +68,7 @@ export default function DeliveryAddress(props) {
                           {address?.city} {address?.state}
                         </p>
                         <p className={styles.address_line_2}>
-                          {address?.area_code}
+                          {address?.areaCode}
                         </p>
                       </div>
                     </AddressRadioButton>
