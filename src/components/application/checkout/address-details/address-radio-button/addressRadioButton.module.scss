@@ -10,11 +10,13 @@
 .box_basis {
   flex-basis: 5%;
 }
+
 .name_basis {
   flex-basis: 95%;
 }
 
-.radio_button_wrapper:hover {
+.radio_button_wrapper:hover,
+.edit_button:hover {
   background-color: rgba($accentColor, $alpha: 0.15);
   transition: background-color 0.3s;
   border-radius: 10px;
@@ -45,5 +47,14 @@
   height: 10px;
   border-radius: 50%;
   background-color: $white;
+  border: 0;
+}
+
+.edit_button {
+  font-size: $font-12;
+  color: $accentColor;
+  text-align: left;
+  margin: 0;
+  background-color: transparent;
   border: 0;
 }

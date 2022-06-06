@@ -6,11 +6,28 @@ import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
 import { AddCookie } from "../../../../../utils/cookies";
+import { restoreToDefault } from "../../../../../utils/restoreDefaultAddress";
 
 export default function DeliveryAddress(props) {
   const { deliveryAddresses, setDeliveryAddresses } = props;
   const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
-  const [toggleAddressModal, setToggleAddressModal] = useState(false);
+  const [toggleAddressModal, setToggleAddressModal] = useState({
+    toggle: false,
+    address: restoreToDefault()
+  });
+
+  const onSetDeliveryAddress = (id, descriptor, address) => {
+    return {
+      id,
+      name: descriptor?.name || "",
+      email: descriptor?.email || "",
+      phone: descriptor?.phone || "",
+      location: {
+        address,
+      },
+    }
+  }
+
   return (
     <Fragment>
       {/* delivery address list card */}
@@ -30,31 +47,30 @@ export default function DeliveryAddress(props) {
                 return (
                   <div className="col-lg-6" key={id}>
                     <AddressRadioButton
+                      iseditable
                       key={id}
                       checked={deliveryAddress?.id === id}
                       onClick={() => {
-                        setDeliveryAddress(() => ({
-                          id,
-                          name: descriptor?.name || "",
-                          email: descriptor?.email || "",
-                          phone: descriptor?.phone || "",
-                          location: {
-                            address: address,
-                          },
-                        }));
+                        setDeliveryAddress(() => onSetDeliveryAddress(id, descriptor, address));
                         AddCookie(
                           "delivery_address",
-                          JSON.stringify({
-                            id,
-                            name: descriptor?.name || "",
-                            email: descriptor?.email || "",
-                            phone: descriptor?.phone || "",
-                            location: {
-                              address: address,
-                            },
-                          })
+                          JSON.stringify(onSetDeliveryAddress(id, descriptor, address))
                         );
                       }}
+                      oneditaddress={() => setToggleAddressModal({
+                        toggle: true,
+                        address: {
+                          id,
+                          name: descriptor?.name,
+                          email: descriptor?.email,
+                          phone: descriptor?.phone,
+                          areaCode: address?.areaCode,
+                          city: address?.city,
+                          door: address?.door,
+                          state: address?.state,
+                          street: address?.street,
+                        }
+                      })}
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>
@@ -83,7 +99,10 @@ export default function DeliveryAddress(props) {
           <div className="col-12">
             <div
               className={styles.add_address_wrapper}
-              onClick={() => setToggleAddressModal(true)}
+              onClick={() => setToggleAddressModal({
+                toggle: true,
+                address: restoreToDefault()
+              })}
             >
               <Add width="15" height="15" classes={styles.add_svg_color} />
               <div className="ps-3 flex-grow-1">
@@ -93,13 +112,33 @@ export default function DeliveryAddress(props) {
           </div>
         </div>
       </div>
-      {toggleAddressModal && (
+      {toggleAddressModal.toggle && (
         <AddAddressModal
           address_type={address_types.delivery}
-          onClose={() => setToggleAddressModal(false)}
+          selectedAddress={toggleAddressModal.address}
+          onClose={() => setToggleAddressModal({
+            toggle: false,
+            address: restoreToDefault()
+          })}
           onAddAddress={(address) => {
-            setToggleAddressModal(false);
+            setToggleAddressModal({
+              toggle: false,
+              address: restoreToDefault()
+            })
             setDeliveryAddresses([...deliveryAddresses, address]);
+          }}
+          onUpdateAddress={(address) => {
+            const updatedAddress = deliveryAddresses.map((d) => {
+              if (d.id === address.id) {
+                return address;
+              }
+              return d
+            });
+            setDeliveryAddresses(updatedAddress)
+            setToggleAddressModal({
+              toggle: false,
+              address: restoreToDefault()
+            })
           }}
         />
       )}

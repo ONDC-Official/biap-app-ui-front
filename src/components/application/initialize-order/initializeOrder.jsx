@@ -61,7 +61,7 @@ export default function InitializeOrder() {
             },
           }))
         );
-        const array_of_ids = data.map((d) => {
+        const array_of_ids = data?.map((d) => {
           if (d.error) {
             return {
               error_reason: d.error.message,
@@ -92,6 +92,7 @@ export default function InitializeOrder() {
           ) {
             setGetQuoteLoading(false);
           }
+          return;
         }
         callApiMultipleTimes(
           array_of_ids.filter((idObj) => idObj.error_reason === "")
@@ -130,17 +131,20 @@ export default function InitializeOrder() {
           .map((txn) => txn.message_id)}`
       );
       let total_payable = 0;
-      const quotes = data.map((item) => {
+      const quotes = data?.map((item) => {
         const { message } = item;
-        total_payable += Number(message?.quote?.quote?.price?.value);
-        const breakup = message?.quote?.quote?.breakup;
-        const provided_by = message?.quote?.provider?.descriptor?.name;
-        const product = breakup.map((break_up_item) => ({
-          title: break_up_item?.title,
-          price: Math.round(break_up_item?.price?.value),
-          provided_by,
-        }));
-        return product;
+        if (message) {
+          total_payable += Number(message?.quote?.quote?.price?.value);
+          const breakup = message?.quote?.quote?.breakup;
+          const provided_by = message?.quote?.provider?.descriptor?.name;
+          const product = breakup.map((break_up_item) => ({
+            title: break_up_item?.title,
+            price: Math.round(break_up_item?.price?.value),
+            provided_by,
+          }));
+          return product;
+        }
+        return null;
       });
       setProductsQoute({ products: quotes.flat(), total_payable });
     } catch (err) {
@@ -265,7 +269,7 @@ export default function InitializeOrder() {
                 <div className="container-fluid p-0">
                   <div className="row">
                     <div className="col-12">
-                      <PriceDetailsCard productsQuote={productsQuote} />
+                      <PriceDetailsCard productsQuote={productsQuote} totalLabel="Total cost" />
                     </div>
                   </div>
                 </div>

@@ -4,7 +4,7 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import IndianRupee from "../../../shared/svg/indian-rupee";
 
 export default function PriceDetailsCard(props) {
-  const { productsQuote, show_order_from = true } = props;
+  const { productsQuote, show_order_from = true, totalLabel = "Total Payable" } = props;
 
   return (
     <div className={styles.price_summary_card}>
@@ -44,7 +44,7 @@ export default function PriceDetailsCard(props) {
         })}
       </div>
       <div className={`${styles.card_footer} d-flex align-items-center`}>
-        <p className={styles.card_body_text}>Total Payable</p>
+        <p className={styles.card_body_text}>{totalLabel}</p>
         <div className="ms-auto d-flex align-items-center">
           <div className="px-1">
             <IndianRupee
