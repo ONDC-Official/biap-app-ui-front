@@ -17,7 +17,7 @@ export default function AddAddressModal(props) {
     name: "",
     email: "",
     phone: "",
-    area_code: "",
+    areaCode: "",
     city: "",
     door: "",
     state: "",
@@ -27,7 +27,7 @@ export default function AddAddressModal(props) {
     name_error: "",
     email_error: "",
     phone_error: "",
-    area_code_error: "",
+    areaCode_error: "",
     city_name_error: "",
     door_error: "",
     state_name_error: "",
@@ -43,10 +43,10 @@ export default function AddAddressModal(props) {
   async function handleAddBillingAddress() {
     setAddAddressLoading(true);
     try {
-      const data = await postCall("/client/v1/billing_details", {
+      const data = await postCall("/clientApis/v1/billing_details", {
         name: address.name,
         address: {
-          area_code: address.area_code,
+          areaCode: address.areaCode,
           building: address.door,
           city: address.city,
           country: "IND",
@@ -74,14 +74,14 @@ export default function AddAddressModal(props) {
   async function handleAddDeliveryAddress() {
     setAddAddressLoading(true);
     try {
-      const data = await postCall("/client/v1/delivery_address", {
+      const data = await postCall("/clientApis/v1/delivery_address", {
         descriptor: {
           name: address.name,
           email: address.email,
           phone: address.phone,
         },
         address: {
-          area_code: address.area_code,
+          areaCode: address.areaCode,
           building: address.door,
           city: address.city,
           country: "IND",
@@ -112,7 +112,7 @@ export default function AddAddressModal(props) {
       address?.street === "" ||
       address?.city === "" ||
       address?.state === "" ||
-      address?.pinCode === "" ||
+      address?.areaCode === "" ||
       address?.landmark === "" ||
       address?.building === ""
     );
@@ -294,11 +294,11 @@ export default function AddAddressModal(props) {
                       const name = event.target.value;
                       setAddress((address) => ({
                         ...address,
-                        area_code: name.trim(),
+                        areaCode: name.trim(),
                       }));
                       setError((error) => ({
                         ...error,
-                        area_code_error: "",
+                        areaCode_error: "",
                       }));
                     }}
                   />
