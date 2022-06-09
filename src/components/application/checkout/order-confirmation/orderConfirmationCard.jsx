@@ -205,25 +205,24 @@ export default function OrderConfirmationCard(props) {
         />
       )}
       <div
-        className={`${
-          isStepCompleted()
-            ? styles.step_completed_card_header
-            : styles.card_header
-        } d-flex align-items-center`}
+        className={`${isStepCompleted()
+          ? styles.step_completed_card_header
+          : styles.card_header
+          } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
-                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-                borderBottomRightRadius: 0,
-                borderBottomLeftRadius: 0,
-              }
+              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+              borderBottomRightRadius: 0,
+              borderBottomLeftRadius: 0,
+            }
             : {
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }
+              borderBottomRightRadius: "10px",
+              borderBottomLeftRadius: "10px",
+            }
         }
       >
-        <p className={styles.card_header_title}>Order Confirmation</p>
+        <p className={styles.card_header_title}>Update Cart</p>
         {isStepCompleted() && (
           <div className="px-3">
             <Checkmark width="25" height="16" style={{ marginBottom: "5px" }} />
@@ -251,7 +250,6 @@ export default function OrderConfirmationCard(props) {
             <div className="container-fluid">
               <div className="row">
                 {cartItems.map(({ id, bpp_id, product, provider }) => {
-                  const { descriptor, price, provider_name } = product;
                   const { locations } = provider;
                   return (
                     <div className="col-lg-6 col-sm-12 p-2" key={id}>
@@ -274,9 +272,9 @@ export default function OrderConfirmationCard(props) {
                           </div>
                         )}
                         <ProductCard
-                          product={{ id, descriptor }}
-                          price={price}
-                          bpp_provider_descriptor={{ name: provider_name }}
+                          product={product}
+                          price={product?.price}
+                          bpp_provider_descriptor={{ name: product?.provider_details?.descriptor?.name }}
                           bpp_id={bpp_id}
                           location_id={locations ? locations[0] : ""}
                           bpp_provider_id={provider?.id}
@@ -296,7 +294,7 @@ export default function OrderConfirmationCard(props) {
               disabled={initializeOrderLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
-              button_text="Place Order"
+              button_text="Proceed to pay"
               onClick={() => {
                 setInitializeOrderLoading(true);
                 updateInitLoading(true);

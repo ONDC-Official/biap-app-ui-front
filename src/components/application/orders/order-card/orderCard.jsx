@@ -305,9 +305,9 @@ export default function OrderCard(props) {
             style={
               currentSelectedAccordion === accoodion_id
                 ? {
-                    transform: "rotate(180deg)",
-                    transition: "all 0.7s",
-                  }
+                  transform: "rotate(180deg)",
+                  transition: "all 0.7s",
+                }
                 : { transform: "rotate(0)", transition: "all 0.7s" }
             }
           >
@@ -332,8 +332,8 @@ export default function OrderCard(props) {
         <div className="py-2" style={{ borderTop: "1px solid #ddd" }}>
           {product.map(({ id, name, price, quantity }) => {
             return (
-              <div key={id} className="d-flex align-items-center py-2">
-                <div>
+              <div key={id} className="d-flex align-items-start py-2">
+                <div style={{ width: '90%' }}>
                   <p
                     className={styles.product_name}
                     title={name}

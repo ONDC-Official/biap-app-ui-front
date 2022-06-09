@@ -87,13 +87,13 @@ export default function BillingAddress(props) {
                       key={id}
                       checked={billingAddress?.id === id}
                       onClick={() => {
-                        onSetBillingAddress(
+                        setBillingAddress(() => onSetBillingAddress(
                           id,
                           address,
                           phone,
                           name,
                           email,
-                        );
+                        ))
                         AddCookie(
                           "billing_address",
                           JSON.stringify(onSetBillingAddress(

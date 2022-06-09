@@ -341,11 +341,10 @@ export default function ProductList() {
           search_empty_state
         ) : (
           <div
-            className={`py-2 ${
-              cartItems.length > 0
-                ? styles.product_list_with_summary_wrapper
-                : styles.product_list_without_summary_wrapper
-            }`}
+            className={`py-2 ${cartItems.length > 0
+              ? styles.product_list_with_summary_wrapper
+              : styles.product_list_without_summary_wrapper
+              }`}
           >
             {newSearchedProduct ? (
               loadingSpin("100%", "100%")
@@ -419,30 +418,23 @@ export default function ProductList() {
                     <div className="container-fluid">
                       <div className="row pe-2">
                         {products.map(
-                          ({
-                            bpp_details,
-                            descriptor,
-                            id,
-                            location_details,
-                            provider_details,
-                            price,
-                          }) => {
+                          (product) => {
                             return (
                               <div
-                                key={id}
+                                key={product?.id}
                                 className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
                               >
                                 <ProductCard
-                                  product={{ id, descriptor }}
-                                  price={price}
+                                  product={product}
+                                  price={product?.price}
                                   bpp_provider_descriptor={
-                                    provider_details?.descriptor
+                                    product?.provider_details?.descriptor
                                   }
-                                  bpp_id={bpp_details?.bpp_id}
+                                  bpp_id={product?.bpp_details?.bpp_id}
                                   location_id={
-                                    location_details ? location_details?.id : ""
+                                    product?.location_details ? product.location_details?.id : ""
                                   }
-                                  bpp_provider_id={provider_details?.id}
+                                  bpp_provider_id={product?.provider_details?.id}
                                 />
                               </div>
                             );

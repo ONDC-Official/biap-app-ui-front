@@ -64,13 +64,7 @@
 }
 
 .product_name {
-  width: 100%;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-all;
+  width: 90%;
   font-size: $font-18;
   font-weight: $medium;
   color: $primaryColor;

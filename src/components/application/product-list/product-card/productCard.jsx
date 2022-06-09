@@ -127,15 +127,7 @@ export default function ProductCard(props) {
                       id: bpp_provider_id,
                       locations: [location_id],
                     },
-                    product: {
-                      id: product.id,
-                      descriptor: product.descriptor,
-                      price: {
-                        ...product.price,
-                        value: Math.round(price.value),
-                      },
-                      provider_name,
-                    },
+                    product,
                   });
                 }}
               >

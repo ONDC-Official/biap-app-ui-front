@@ -13,6 +13,7 @@ export default function PriceDetailsCard(props) {
       </div>
       <div className={styles.card_body}>
         {productsQuote?.products.map((quote, index) => {
+          console.log(quote)
           return (
             <div
               className="py-2 d-flex align-items-center"

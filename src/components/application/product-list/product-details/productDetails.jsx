@@ -7,8 +7,6 @@ import Navbar from "../../../shared/navbar/navbar";
 import OrderSummary from "../order-summary/orderSummary";
 import { useContext } from "react";
 import { CartContext } from "../../../../context/cartContext";
-import returnableSvg from "../../../../assets/images/returnable_product.svg";
-import cancelableSvg from "../../../../assets/images/cancelable_product.svg";
 import Subtract from "../../../shared/svg/subtract";
 import Add from "../../../shared/svg/add";
 
@@ -16,15 +14,13 @@ export default function ProductDetails() {
   const location = useLocation();
   const {
     product,
-    price,
-    bpp_provider_descriptor,
-    bpp_provider_id,
     bpp_id,
     location_id,
   } = location.state;
-  const { id, descriptor } = product;
-  const { name: product_name, images } = descriptor;
-  const { name: provider_name } = bpp_provider_descriptor;
+  const { id, descriptor, price, provider_details } = product;
+  const { name: product_name, images, short_desc: product_description } = descriptor;
+  const { descriptor: provider_descriptor, id: bpp_provider_id } = provider_details;
+  const { name: provider_name } = provider_descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
   const [toggleAddToCart, setToggleAddToCart] = useState();
   const {
@@ -45,56 +41,36 @@ export default function ProductDetails() {
     }
   }, [cartItems, id]);
 
-  const product_details = [
-    {
-      key: "Manufactor Name:",
-      value: "Grocery Retail",
-    },
-    {
-      key: "Net Quantity:",
-      value: "500 grams",
-    },
-    {
-      key: "Manufactoring Date:",
-      value: "25th June 2022",
-    },
-    {
-      key: "Country of Origin:",
-      value: "India",
-    },
-    {
-      key: "Brand Owner Name:",
-      value: "ONDc",
-    },
-  ];
-
-  function typeChips(img, text) {
-    return (
-      <div className="d-flex align-items-center">
-        <div className="px-2">
-          <div className={styles.order_type_image_container}>{img}</div>
-        </div>
-        <div className="px-2">
-          <p className={styles.order_type_value}>{text}</p>
-        </div>
-      </div>
-    );
-  }
-
-  function renderOrderTypes(type) {
-    if (type === "return") {
-      return typeChips(
-        <img src={returnableSvg} alt="returnable" width="20" />,
-        "Returnable"
-      );
+  const renderProductDetails = (detail) => {
+    const obj = product?.["@ondc/org/statutory_reqs_packaged_commodities"];
+    switch (detail) {
+      case "manufacturer_or_packer_name":
+        return {
+          key: "Manufacturer Name:",
+          value: obj?.["manufacturer_or_packer_name"]
+        }
+      case "net_quantity_or_measure_of_commodity_in_pkg":
+        return {
+          key: "Net Quantity:",
+          value: obj?.["net_quantity_or_measure_of_commodity_in_pkg"]
+        }
+      case "month_year_of_manufacture_packing_import":
+        return {
+          key: "Manufacturing Date:",
+          value: obj?.["month_year_of_manufacture_packing_import"]
+        }
+      case "imported_product_country_of_origin":
+        return {
+          key: "Country of Origin:",
+          value: obj?.["imported_product_country_of_origin"]
+        }
+      default:
+        return {
+          key: null,
+          value: null
+        }
     }
-    if (type === "cancel") {
-      return typeChips(
-        <img src={cancelableSvg} alt="cancelable" width="20" />,
-        "Cancelable"
-      );
-    }
-  }
+  };
 
   return (
     <Fragment>
@@ -102,11 +78,10 @@ export default function ProductDetails() {
 
       <div className={styles.playground_height}>
         <div
-          className={`py-2 ${
-            cartItems.length > 0
-              ? styles.product_list_with_summary_wrapper
-              : styles.product_list_without_summary_wrapper
-          }`}
+          className={`py-2 ${cartItems.length > 0
+            ? styles.product_list_with_summary_wrapper
+            : styles.product_list_without_summary_wrapper
+            }`}
         >
           <div className="container">
             <div className="row py-3 px-2">
@@ -149,9 +124,7 @@ export default function ProductDetails() {
                   <p
                     className={`${styles.product_description} ${styles.width}`}
                   >
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                    Molestias sequi minima atque modi, vel quo provident
-                    consectetur delectus iusto repellat.
+                    {product_description}
                   </p>
                 </div>
                 {/* PRICE  */}
@@ -163,33 +136,68 @@ export default function ProductDetails() {
                 {/* DIVIDER  */}
                 <div className={styles.width}>
                   <hr style={{ border: "1px solid #aaa" }} />
-                </div>
-                {/* ORDER TYPES  */}
-                <div className="d-flex align-items-center flex-wrap py-2">
-                  <div className="pe-3">{renderOrderTypes("return")}</div>
-                  <div className="pe-3">{renderOrderTypes("cancel")}</div>
+                  {/* AVAILABLE QUANTITY  */}
+                  {Number(product?.AvailableQuantity > 0) ? <div
+                    className="d-flex align-items-center py-1"
+                  >
+                    <p className={styles.prodcut_details_key}>Available Quantity:</p>
+                    <p className={styles.prodcut_details_value}>
+                      {product?.AvailableQuantity}
+                    </p>
+                  </div> : null}
+                  {/* RETURNABLE  */}
+                  {typeof product?.["@ondc/org/returnable"] !== "undefined" ? <div
+                    className="d-flex align-items-center py-1"
+                  >
+                    <p className={styles.prodcut_details_key}>Returnable:</p>
+                    <p className={styles.prodcut_details_value}>
+                      {product?.["@ondc/org/returnable"] == true ? "Yes" : "No"}
+                    </p>
+                  </div> : null}
+                  {/* CANCELABLE  */}
+                  {typeof product?.["@ondc/org/cancellable"] !== "undefined" ? <div
+                    className="d-flex align-items-center py-1"
+                  >
+                    <p className={styles.prodcut_details_key}>Cancelable:</p>
+                    <p className={styles.prodcut_details_value}>
+                      {product?.["@ondc/org/cancellable"] == true ? "Yes" : "No"}
+                    </p>
+                  </div> : null}
+                  {/* COD  */}
+                  {typeof product?.["@ondc/org/available_on_cod"] !== "undefined" ? <div
+                    className="d-flex align-items-center py-1"
+                  >
+                    <p className={styles.prodcut_details_key}>Cash On Delivery:</p>
+                    <p className={styles.prodcut_details_value}>
+                      {product?.["@ondc/org/available_on_cod"] == true ? "Yes" : "No"}
+                    </p>
+                  </div> : null}
                 </div>
                 {/* PRODUCT DETAILS  */}
-                <div className="pt-4 pb-2">
+                {Object.keys(product?.["@ondc/org/statutory_reqs_packaged_commodities"] || {}).length > 0 && <div className="pt-4 pb-2">
                   <p className={styles.product_details_header}>
                     Product Details
                   </p>
                   <div className={`${styles.width} pt-2`}>
-                    {product_details.map(({ key, value }, index) => {
-                      return (
-                        <div
-                          className="d-flex align-items-center py-1"
-                          key={`id-${index}`}
-                        >
-                          <p className={styles.prodcut_details_key}>{key}</p>
-                          <p className={styles.prodcut_details_value}>
-                            {value}
-                          </p>
-                        </div>
-                      );
+                    {Object.keys(product?.["@ondc/org/statutory_reqs_packaged_commodities"]).map((commodity, index) => {
+                      const { key, value } = renderProductDetails(commodity);
+                      if (key && value) {
+                        return (
+                          <div
+                            className="d-flex align-items-center py-1"
+                            key={`id-${index}`}
+                          >
+                            <p className={styles.prodcut_details_key}>{key}</p>
+                            <p className={styles.prodcut_details_value}>
+                              {value}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null
                     })}
                   </div>
-                </div>
+                </div>}
                 {/* ADD TO CART BUTTON  */}
                 <div className="py-3">
                   {toggleAddToCart && quantityCount > 0 ? (
@@ -243,15 +251,7 @@ export default function ProductDetails() {
                             id: bpp_provider_id,
                             locations: [location_id],
                           },
-                          product: {
-                            id,
-                            descriptor: product.descriptor,
-                            price: {
-                              ...product.price,
-                              value: Math.round(price.value),
-                            },
-                            provider_name,
-                          },
+                          product,
                         });
                       }}
                     >

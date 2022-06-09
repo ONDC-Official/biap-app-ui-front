@@ -328,7 +328,7 @@ export default function PaymentConfirmationCard(props) {
           requestId: transaction_id,
           payload: processPayload.current,
         },
-        () => {}
+        () => { }
       );
     } catch (err) {
       setToast((toast) => ({
@@ -381,17 +381,17 @@ export default function PaymentConfirmationCard(props) {
         style={
           isCurrentStep()
             ? {
-                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-                borderBottomRightRadius: 0,
-                borderBottomLeftRadius: 0,
-              }
+              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+              borderBottomRightRadius: 0,
+              borderBottomLeftRadius: 0,
+            }
             : {
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }
+              borderBottomRightRadius: "10px",
+              borderBottomLeftRadius: "10px",
+            }
         }
       >
-        <p className={styles.card_header_title}>Payment Options</p>
+        <p className={styles.card_header_title}>{"Payment & order confirmation"}</p>
       </div>
       {isCurrentStep() && (
         <Fragment>
@@ -449,7 +449,7 @@ export default function PaymentConfirmationCard(props) {
               disabled={confirmOrderLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
-              button_text="Checkout"
+              button_text="Place Order"
               onClick={() => {
                 setConfirmOrderLoading(true);
                 const request_object = constructQouteObject(cartItems);

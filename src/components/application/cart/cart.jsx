@@ -62,7 +62,6 @@ export default function Cart() {
                 <div className="container-fluid p-0">
                   <div className="row">
                     {cartItems.map(({ id, bpp_id, product, provider }) => {
-                      const { descriptor, price, provider_name } = product;
                       const { locations } = provider;
                       return (
                         <div
@@ -71,9 +70,9 @@ export default function Cart() {
                           id={id}
                         >
                           <ProductCard
-                            product={{ id, descriptor }}
-                            price={price}
-                            bpp_provider_descriptor={{ name: provider_name }}
+                            product={product}
+                            price={product?.price}
+                            bpp_provider_descriptor={{ name: product?.provider_details?.descriptor?.name }}
                             bpp_id={bpp_id}
                             location_id={locations ? locations[0] : ""}
                             bpp_provider_id={provider?.id}
@@ -120,7 +119,7 @@ export default function Cart() {
                               button_hover_type={buttonTypes.primary_hover}
                               button_text="Checkout"
                               onClick={() =>
-                                history.push("/application/checkout")
+                                history.push("/application/initialize")
                               }
                             />
                           </div>
