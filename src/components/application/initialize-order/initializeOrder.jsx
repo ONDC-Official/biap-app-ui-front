@@ -28,7 +28,7 @@ import no_result_empty_illustration from "../../../assets/images/empty-state-ill
 import Button from "../../shared/button/button";
 
 export default function InitializeOrder() {
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, setCartItems } = useContext(CartContext);
   const transaction_id = getValueFromCookie("transaction_id");
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function InitializeOrder() {
     async function getQuote(items) {
       try {
         const data = await postCall(
-          "/client/v2/get_quote",
+          "/clientApis/v2/get_quote",
           items.map((item) => ({
             context: {
               transaction_id,
@@ -124,15 +124,27 @@ export default function InitializeOrder() {
 
   // on get quote Api
   async function onGetQuote(array_of_ids) {
+    console.log(array_of_ids);
     try {
       const data = await getCall(
-        `/client/v2/on_get_quote?messageIds=${array_of_ids
+        `/clientApis/v2/on_get_quote?messageIds=${array_of_ids
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
       let total_payable = 0;
-      const quotes = data?.map((item) => {
-        const { message } = item;
+      const quotes = data?.map((item, index) => {
+        const { message, error = {} } = item;
+        if(Object.keys(error).length > 0) {
+          setToast((toast) => ({
+            ...toast,
+            toggle: true,
+            type: toast_types.error,
+            message: "Something went wrong!",
+          }));
+          clearInterval(quote_polling_timer.current);
+          setGetQuoteLoading(false);
+          setCartItems(cartItems.filter((cart_item,item_index) => item_index !== index))
+        }
         if (message) {
           total_payable += Number(message?.quote?.quote?.price?.value);
           const breakup = message?.quote?.quote?.breakup;
@@ -144,7 +156,11 @@ export default function InitializeOrder() {
           }));
           return product;
         }
-        return null;
+        return {
+          title: "",
+          price: "",
+          provided_by: "",
+        };
       });
       setProductsQoute({ products: quotes.flat(), total_payable });
     } catch (err) {

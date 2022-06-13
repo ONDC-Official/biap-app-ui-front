@@ -13,15 +13,14 @@ export default function PriceDetailsCard(props) {
       </div>
       <div className={styles.card_body}>
         {productsQuote?.products.map((quote, index) => {
-          console.log(quote)
           return (
             <div
               className="py-2 d-flex align-items-center"
               key={`quote-item-${index}`}
             >
               <div className="pe-2">
-                <p className={styles.product_name}>{quote.title}</p>
-                {show_order_from && (
+                {quote.title && <p className={styles.product_name}>{quote.title}</p>}
+                {show_order_from && quote.provided_by !== "" && (
                   <p className={styles.ordered_from}>
                     Ordering from
                     <span className={`px-2 ${styles.bold}`}>
@@ -30,7 +29,7 @@ export default function PriceDetailsCard(props) {
                   </p>
                 )}
               </div>
-              <div className="ms-auto d-flex align-items-center">
+              {quote.price && <div className="ms-auto d-flex align-items-center">
                 <div className="px-1">
                   <IndianRupee
                     width="8"
@@ -39,7 +38,7 @@ export default function PriceDetailsCard(props) {
                   />
                 </div>
                 <p className={styles.sub_total_text}>{quote.price}</p>
-              </div>
+              </div>}
             </div>
           );
         })}

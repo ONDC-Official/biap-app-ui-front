@@ -127,7 +127,6 @@ export default function OrderConfirmationCard(props) {
       if (counter <= 0) {
         setInitializeOrderLoading(false);
         updateInitLoading(false);
-        console.log(onInitialized.current[0]);
         const allOrderInitialized = onInitialized.current.every(
           (data) => data?.message?.order
         );
