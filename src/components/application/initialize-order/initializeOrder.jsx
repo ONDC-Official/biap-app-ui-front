@@ -4,6 +4,7 @@ import React, {
   useEffect,
   Fragment,
   useRef,
+  useCallback,
 } from "react";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import styles from "../../../styles/cart/cartView.module.scss";
@@ -32,11 +33,13 @@ export default function InitializeOrder() {
   const transaction_id = getValueFromCookie("transaction_id");
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
+  const [updateCartLoading, setUpdateCartLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [productsQuote, setProductsQoute] = useState();
   const [currentActiveStep, setCurrentActiveStep] = useState(
     get_current_step(checkout_steps.SELECT_ADDRESS)
   );
+  const errorRef = useRef({ errors: [], index: 0 });
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
@@ -44,70 +47,69 @@ export default function InitializeOrder() {
   });
   const quote_polling_timer = useRef(0);
 
-  useEffect(() => {
-    // use this function to get the quote of the items
-    async function getQuote(items) {
-      try {
-        const data = await postCall(
-          "/clientApis/v2/get_quote",
-          items.map((item) => ({
-            context: {
-              transaction_id,
+  // use this function to get the quote of the items
+  const getQuote = useCallback(async (items) => {
+    try {
+      const data = await postCall(
+        "/clientApis/v2/get_quote",
+        items.map((item) => ({
+          context: {
+            transaction_id,
+          },
+          message: {
+            cart: {
+              items: item,
             },
-            message: {
-              cart: {
-                items: item,
-              },
-            },
-          }))
-        );
-        const array_of_ids = data?.map((d) => {
-          if (d.error) {
-            return {
-              error_reason: d.error.message,
-              message_id: d.context.message_id,
-            };
-          }
+          },
+        }))
+      );
+      const array_of_ids = data?.map((d) => {
+        if (d.error) {
           return {
-            error_reason: "",
+            error_reason: d.error.message,
             message_id: d.context.message_id,
           };
-        });
-        // check here if the response returned error or not
-        const isContainingError = array_of_ids.find(
-          (idObj) => idObj.error_reason !== ""
-        );
-
-        // If error than show toast
-        if (isContainingError) {
-          setToast((toast) => ({
-            ...toast,
-            toggle: true,
-            type: toast_types.error,
-            message: isContainingError.error_reason,
-          }));
-          if (
-            array_of_ids.filter((idObj) => idObj.error_reason === "").length <=
-            0
-          ) {
-            setGetQuoteLoading(false);
-          }
-          return;
         }
-        callApiMultipleTimes(
-          array_of_ids.filter((idObj) => idObj.error_reason === "")
-        );
-      } catch (err) {
+        return {
+          error_reason: "",
+          message_id: d.context.message_id,
+        };
+      });
+      // check here if the response returned error or not
+      const isContainingError = array_of_ids.find(
+        (idObj) => idObj.error_reason !== ""
+      );
+
+      // If error than show toast
+      if (isContainingError) {
         setToast((toast) => ({
           ...toast,
           toggle: true,
           type: toast_types.error,
-          message: err.response.data.error,
+          message: isContainingError.error_reason,
         }));
-        setGetQuoteLoading(false);
+        if (
+          array_of_ids.filter((idObj) => idObj.error_reason === "").length <= 0
+        ) {
+          setGetQuoteLoading(false);
+        }
+        return;
       }
+      callApiMultipleTimes(
+        array_of_ids.filter((idObj) => idObj.error_reason === "")
+      );
+    } catch (err) {
+      setToast((toast) => ({
+        ...toast,
+        toggle: true,
+        type: toast_types.error,
+        message: err.response.data.error,
+      }));
+      setGetQuoteLoading(false);
     }
+  }, []);
 
+  useEffect(() => {
     // this check is so that when cart is empty we do not call the
     // and when the payment is not maid
     if (cartItems.length > 0) {
@@ -120,36 +122,31 @@ export default function InitializeOrder() {
       clearInterval(quote_polling_timer.current);
     };
     // eslint-disable-next-line
-  }, [cartItems, transaction_id]);
+  }, []);
 
   // on get quote Api
   async function onGetQuote(array_of_ids) {
-    console.log(array_of_ids);
     try {
       const data = await getCall(
         `/clientApis/v2/on_get_quote?messageIds=${array_of_ids
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
+      setUpdateCartLoading(false);
       let total_payable = 0;
       const quotes = data?.map((item, index) => {
         const { message, error = {} } = item;
-        if(Object.keys(error).length > 0) {
-          setToast((toast) => ({
-            ...toast,
-            toggle: true,
-            type: toast_types.error,
-            message: "Something went wrong!",
-          }));
-          clearInterval(quote_polling_timer.current);
-          setGetQuoteLoading(false);
-          setCartItems(cartItems.filter((cart_item,item_index) => item_index !== index))
+        if (Object.keys(error).length > 0) {
+          errorRef.current = {
+            errors: [...errorRef.current.errors, error],
+            index,
+          };
         }
         if (message) {
           total_payable += Number(message?.quote?.quote?.price?.value);
           const breakup = message?.quote?.quote?.breakup;
           const provided_by = message?.quote?.provider?.descriptor?.name;
-          const product = breakup.map((break_up_item) => ({
+          const product = breakup?.map((break_up_item) => ({
             title: break_up_item?.title,
             price: Math.round(break_up_item?.price?.value),
             provided_by,
@@ -168,7 +165,7 @@ export default function InitializeOrder() {
         ...toast,
         toggle: true,
         type: toast_types.error,
-        message: err.response.data.error,
+        message: err.message,
       }));
       clearInterval(quote_polling_timer.current);
       setGetQuoteLoading(false);
@@ -177,10 +174,24 @@ export default function InitializeOrder() {
 
   // use this function to call on get quote call multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 3;
+    let counter = 5;
     quote_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setGetQuoteLoading(false);
+        if (errorRef.current.errors.length >= 5) {
+          setToast((toast) => ({
+            ...toast,
+            toggle: true,
+            type: toast_types.error,
+            message: errorRef.current.errors[0].message,
+          }));
+          clearInterval(quote_polling_timer.current);
+          setCartItems(
+            cartItems.filter(
+              (cart_item, item_index) => item_index !== errorRef.current.index
+            )
+          );
+        }
         clearInterval(quote_polling_timer.current);
         return;
       }
@@ -266,7 +277,7 @@ export default function InitializeOrder() {
                         setCurrentActiveStep={(value) =>
                           setCurrentActiveStep(value)
                         }
-                        initLoading={initLoading}
+                        initLoading={initLoading || updateCartLoading}
                       />
                     </div>
                     <div className="col-12 pb-3">
@@ -276,6 +287,14 @@ export default function InitializeOrder() {
                           setCurrentActiveStep(value)
                         }
                         updateInitLoading={(value) => setInitLoading(value)}
+                        updateCartLoading={updateCartLoading}
+                        fetchUpdatedQuote={() => {
+                          setUpdateCartLoading(true);
+                          clearInterval(quote_polling_timer.current);
+                          const request_object =
+                            constructQouteObject(cartItems);
+                          getQuote(request_object);
+                        }}
                       />
                     </div>
                   </div>
@@ -285,7 +304,10 @@ export default function InitializeOrder() {
                 <div className="container-fluid p-0">
                   <div className="row">
                     <div className="col-12">
-                      <PriceDetailsCard productsQuote={productsQuote} totalLabel="Total cost" />
+                      <PriceDetailsCard
+                        productsQuote={productsQuote}
+                        totalLabel="Total cost"
+                      />
                     </div>
                   </div>
                 </div>

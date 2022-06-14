@@ -89,6 +89,9 @@ export default function ProductList() {
       selected_sort_options,
       1
     );
+    return () => {
+      clearInterval(search_polling_timer.current);
+    };
     // eslint-disable-next-line
   }, []);
 
@@ -341,10 +344,11 @@ export default function ProductList() {
           search_empty_state
         ) : (
           <div
-            className={`py-2 ${cartItems.length > 0
-              ? styles.product_list_with_summary_wrapper
-              : styles.product_list_without_summary_wrapper
-              }`}
+            className={`py-2 ${
+              cartItems.length > 0
+                ? styles.product_list_with_summary_wrapper
+                : styles.product_list_without_summary_wrapper
+            }`}
           >
             {newSearchedProduct ? (
               loadingSpin("100%", "100%")
@@ -417,29 +421,29 @@ export default function ProductList() {
                     </div>
                     <div className="container-fluid">
                       <div className="row pe-2">
-                        {products.map(
-                          (product) => {
-                            return (
-                              <div
-                                key={product?.id}
-                                className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
-                              >
-                                <ProductCard
-                                  product={product}
-                                  price={product?.price}
-                                  bpp_provider_descriptor={
-                                    product?.provider_details?.descriptor
-                                  }
-                                  bpp_id={product?.bpp_details?.bpp_id}
-                                  location_id={
-                                    product?.location_details ? product.location_details?.id : ""
-                                  }
-                                  bpp_provider_id={product?.provider_details?.id}
-                                />
-                              </div>
-                            );
-                          }
-                        )}
+                        {products.map((product) => {
+                          return (
+                            <div
+                              key={product?.id}
+                              className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
+                            >
+                              <ProductCard
+                                product={product}
+                                price={product?.price}
+                                bpp_provider_descriptor={
+                                  product?.provider_details?.descriptor
+                                }
+                                bpp_id={product?.bpp_details?.bpp_id}
+                                location_id={
+                                  product?.location_details
+                                    ? product.location_details?.id
+                                    : ""
+                                }
+                                bpp_provider_id={product?.provider_details?.id}
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     {!fetchFilterLoading && (

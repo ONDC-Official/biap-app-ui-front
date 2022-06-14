@@ -26,9 +26,16 @@ import Toast from "../../../shared/toast/toast";
 import { toast_types } from "../../../../utils/toast";
 import { AddCookie } from "../../../../utils/cookies";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import Loading from "../../../shared/loading/loading";
 
 export default function OrderConfirmationCard(props) {
-  const { currentActiveStep, setCurrentActiveStep, updateInitLoading } = props;
+  const {
+    currentActiveStep,
+    setCurrentActiveStep,
+    updateInitLoading,
+    fetchUpdatedQuote,
+    updateCartLoading,
+  } = props;
   const transaction_id = Cookies.get("transaction_id");
   const history = useHistory();
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
@@ -41,12 +48,21 @@ export default function OrderConfirmationCard(props) {
   });
   const initialize_polling_timer = useRef(0);
   const onInitialized = useRef();
+  const firstUpdate = useRef(true);
 
   useEffect(() => {
     return () => {
       clearInterval(initialize_polling_timer.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+      return;
+    }
+    fetchUpdatedQuote();
+  }, [cartItems]);
 
   async function initializeOrder(items) {
     try {
@@ -204,21 +220,22 @@ export default function OrderConfirmationCard(props) {
         />
       )}
       <div
-        className={`${isStepCompleted()
-          ? styles.step_completed_card_header
-          : styles.card_header
-          } d-flex align-items-center`}
+        className={`${
+          isStepCompleted()
+            ? styles.step_completed_card_header
+            : styles.card_header
+        } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
-              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
-            }
+                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+              }
             : {
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }
+                borderBottomRightRadius: "10px",
+                borderBottomLeftRadius: "10px",
+              }
         }
       >
         <p className={styles.card_header_title}>Update Cart</p>
@@ -248,40 +265,51 @@ export default function OrderConfirmationCard(props) {
             {/* List of items will come here */}
             <div className="container-fluid">
               <div className="row">
-                {cartItems.map(({ id, bpp_id, product, provider }) => {
-                  const { locations } = provider;
-                  return (
-                    <div className="col-lg-6 col-sm-12 p-2" key={id}>
-                      <div style={{ position: "relative" }}>
-                        {!initializeOrderLoading && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "5px",
-                              right: "5px",
-                              cursor: "pointer",
+                {updateCartLoading ? (
+                  <div
+                    style={{ height: "150px" }}
+                    className="d-flex align-items-center justify-content-center"
+                  >
+                    <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+                  </div>
+                ) : (
+                  cartItems.map(({ id, bpp_id, product, provider }) => {
+                    const { locations } = provider;
+                    return (
+                      <div className="col-lg-6 col-sm-12 p-2" key={id}>
+                        <div style={{ position: "relative" }}>
+                          {!initializeOrderLoading && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "5px",
+                                right: "5px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => onRemoveProduct(id)}
+                            >
+                              <CrossIcon
+                                width="20"
+                                height="20"
+                                color={ONDC_COLORS.SECONDARYCOLOR}
+                              />
+                            </div>
+                          )}
+                          <ProductCard
+                            product={product}
+                            price={product?.price}
+                            bpp_provider_descriptor={{
+                              name: product?.provider_details?.descriptor?.name,
                             }}
-                            onClick={() => onRemoveProduct(id)}
-                          >
-                            <CrossIcon
-                              width="20"
-                              height="20"
-                              color={ONDC_COLORS.SECONDARYCOLOR}
-                            />
-                          </div>
-                        )}
-                        <ProductCard
-                          product={product}
-                          price={product?.price}
-                          bpp_provider_descriptor={{ name: product?.provider_details?.descriptor?.name }}
-                          bpp_id={bpp_id}
-                          location_id={locations ? locations[0] : ""}
-                          bpp_provider_id={provider?.id}
-                        />
+                            bpp_id={bpp_id}
+                            location_id={locations ? locations[0] : ""}
+                            bpp_provider_id={provider?.id}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -290,7 +318,7 @@ export default function OrderConfirmationCard(props) {
           >
             <Button
               isloading={initializeOrderLoading ? 1 : 0}
-              disabled={initializeOrderLoading}
+              disabled={initializeOrderLoading || updateCartLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Proceed to pay"
