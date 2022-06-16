@@ -10,6 +10,7 @@ import { address_types } from "../../../constants/address-types";
 import { toast_actions, toast_types } from "../../../utils/toast";
 import { restoreToDefault } from "../../../utils/restoreDefaultAddress";
 import { ToastContext } from "../../../context/toastContext";
+import ErrorMessage from "../../shared/error-message/errorMessage";
 
 export default function AddAddressModal(props) {
   const {
@@ -174,6 +175,28 @@ export default function AddAddressModal(props) {
     }
   }
 
+  function checkPhoneNumber() {
+    if (address?.phone?.length < 10) {
+      setError((error) => ({
+        ...error,
+        phone_error: "Please enter a valid phone number",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkPinCode() {
+    if (address?.areaCode?.length < 6) {
+      setError((error) => ({
+        ...error,
+        areaCode_error: "Please enter a valid Area Code",
+      }));
+      return false;
+    }
+    return true;
+  }
+
   // use this function to check the disability of the button
   function checkFormvalidation() {
     return (
@@ -185,7 +208,15 @@ export default function AddAddressModal(props) {
       address?.state === "" ||
       address?.areaCode === "" ||
       address?.landmark === "" ||
-      address?.building === ""
+      address?.building === "" ||
+      error?.name_error !== "" ||
+      error?.email_error !== "" ||
+      error?.phone_error !== "" ||
+      error?.street_name_error !== "" ||
+      error?.door_error !== "" ||
+      error?.city_name_error !== "" ||
+      error?.state_name_error !== "" ||
+      error?.areaCode_error !== ""
     );
   }
 
@@ -234,6 +265,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                   />
+                  <ErrorMessage>{error.name_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
@@ -242,6 +274,7 @@ export default function AddAddressModal(props) {
                     id="email"
                     label_name="Email"
                     value={address?.email}
+                    has_error={error.email_error}
                     onChange={(event) => {
                       const name = event.target.value;
                       setAddress((address) => ({
@@ -254,15 +287,24 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                   />
+                  <ErrorMessage>{error.email_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
-                    type="number"
+                    type="text"
+                    maxlength="10"
                     placeholder="Enter Phone"
                     id="phone"
                     label_name="Phone Number"
                     value={address?.phone}
+                    has_error={error.phone_error}
                     onChange={(event) => {
+                      const regexp = /^[0-9]+$/;
+                      if (
+                        !regexp.test(event.target.value) &&
+                        event.target.value !== ""
+                      )
+                        return;
                       const name = event.target.value;
                       setAddress((address) => ({
                         ...address,
@@ -273,7 +315,9 @@ export default function AddAddressModal(props) {
                         phone_error: "",
                       }));
                     }}
+                    onBlur={checkPhoneNumber}
                   />
+                  <ErrorMessage>{error.phone_error}</ErrorMessage>
                 </div>
                 <div className="col-sm-12">
                   <Input
@@ -295,6 +339,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                   />
+                  <ErrorMessage>{error.street_name_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
@@ -302,6 +347,7 @@ export default function AddAddressModal(props) {
                     placeholder="Enter Landmark"
                     id="landmark"
                     label_name="Landmark"
+                    has_error={error.door_error}
                     value={address?.door}
                     onChange={(event) => {
                       const name = event.target.value;
@@ -315,6 +361,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                   />
+                  <ErrorMessage>{error.door_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
@@ -323,6 +370,7 @@ export default function AddAddressModal(props) {
                     id="city"
                     label_name="City"
                     value={address?.city}
+                    has_error={error.city_name_error}
                     onChange={(event) => {
                       const name = event.target.value;
                       setAddress((address) => ({
@@ -335,6 +383,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                   />
+                  <ErrorMessage>{error.city_name_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
@@ -342,6 +391,7 @@ export default function AddAddressModal(props) {
                     placeholder="Enter State"
                     id="state"
                     label_name="State"
+                    has_error={error.state_name_error}
                     value={address?.state}
                     onChange={(event) => {
                       const name = event.target.value;
@@ -355,15 +405,25 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                   />
+                  <ErrorMessage>{error.state_name_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
                     type="text"
+                    pattern="\d*"
+                    maxlength="6"
                     placeholder="Enter Pin code"
                     id="pin_code"
                     label_name="Pin Code"
                     value={address?.areaCode}
+                    has_error={error.areaCode_error}
                     onChange={(event) => {
+                      const regexp = /^[0-9]+$/;
+                      if (
+                        !regexp.test(event.target.value) &&
+                        event.target.value !== ""
+                      )
+                        return;
                       const name = event.target.value;
                       setAddress((address) => ({
                         ...address,
@@ -374,7 +434,9 @@ export default function AddAddressModal(props) {
                         areaCode_error: "",
                       }));
                     }}
+                    onBlur={checkPinCode}
                   />
+                  <ErrorMessage>{error.areaCode_error}</ErrorMessage>
                 </div>
               </div>
             </div>
@@ -399,7 +461,12 @@ export default function AddAddressModal(props) {
           ) : (
             <Button
               isloading={addAddressLoading ? 1 : 0}
-              disabled={addAddressLoading || checkFormvalidation()}
+              disabled={
+                addAddressLoading ||
+                checkFormvalidation() ||
+                checkPhoneNumber() ||
+                checkPinCode()
+              }
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Add Address"
