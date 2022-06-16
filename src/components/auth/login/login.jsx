@@ -129,6 +129,7 @@ export default function Login() {
               email_error: "",
             }));
           }}
+          required
         />
         {inlineError.email_error && (
           <ErrorMessage>{inlineError.email_error}</ErrorMessage>
@@ -148,6 +149,7 @@ export default function Login() {
               password_error: "",
             }));
           }}
+          required
         />
         {inlineError.password_error && (
           <ErrorMessage>{inlineError.password_error}</ErrorMessage>

@@ -264,6 +264,7 @@ export default function AddAddressModal(props) {
                         name_error: "",
                       }));
                     }}
+                    required
                   />
                   <ErrorMessage>{error.name_error}</ErrorMessage>
                 </div>
@@ -286,6 +287,7 @@ export default function AddAddressModal(props) {
                         email_error: "",
                       }));
                     }}
+                    required
                   />
                   <ErrorMessage>{error.email_error}</ErrorMessage>
                 </div>
@@ -316,6 +318,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                     onBlur={checkPhoneNumber}
+                    required
                   />
                   <ErrorMessage>{error.phone_error}</ErrorMessage>
                 </div>
@@ -338,6 +341,7 @@ export default function AddAddressModal(props) {
                         street_name_error: "",
                       }));
                     }}
+                    required
                   />
                   <ErrorMessage>{error.street_name_error}</ErrorMessage>
                 </div>
@@ -360,6 +364,7 @@ export default function AddAddressModal(props) {
                         door_error: "",
                       }));
                     }}
+                    required
                   />
                   <ErrorMessage>{error.door_error}</ErrorMessage>
                 </div>
@@ -382,6 +387,7 @@ export default function AddAddressModal(props) {
                         city_name_error: "",
                       }));
                     }}
+                    required
                   />
                   <ErrorMessage>{error.city_name_error}</ErrorMessage>
                 </div>
@@ -404,6 +410,7 @@ export default function AddAddressModal(props) {
                         state_name_error: "",
                       }));
                     }}
+                    required
                   />
                   <ErrorMessage>{error.state_name_error}</ErrorMessage>
                 </div>
@@ -435,6 +442,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                     onBlur={checkPinCode}
+                    required
                   />
                   <ErrorMessage>{error.areaCode_error}</ErrorMessage>
                 </div>

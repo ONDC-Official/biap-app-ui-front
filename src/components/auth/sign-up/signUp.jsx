@@ -163,6 +163,7 @@ export default function SignUp() {
             }));
           }}
           onBlur={checkName}
+          required
         />
         {inlineError.name_error && (
           <ErrorMessage>{inlineError.name_error}</ErrorMessage>
@@ -183,6 +184,7 @@ export default function SignUp() {
             }));
           }}
           onBlur={checkEmail}
+          required
         />
         {inlineError.email_error && (
           <ErrorMessage>{inlineError.email_error}</ErrorMessage>
@@ -203,6 +205,7 @@ export default function SignUp() {
             }));
           }}
           onBlur={checkPassword}
+          required
         />
         {inlineError.password_error && (
           <ErrorMessage>{inlineError.password_error}</ErrorMessage>

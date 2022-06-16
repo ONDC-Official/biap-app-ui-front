@@ -62,3 +62,8 @@
   opacity: 0.5;
   cursor: no-drop;
 }
+
+.required:after {
+  content:" *";
+  color: red;
+}
