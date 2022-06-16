@@ -129,6 +129,7 @@ export default function Login() {
               email_error: "",
             }));
           }}
+          onBlur={checkEmail}
           required
         />
         {inlineError.email_error && (
@@ -149,6 +150,7 @@ export default function Login() {
               password_error: "",
             }));
           }}
+          onBlur={checkPassword}
           required
         />
         {inlineError.password_error && (
