@@ -115,7 +115,7 @@ export default function PaymentConfirmationCard(props) {
             payment: {
               paid_amount: getTotalPayable(item),
               type:
-                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+                method === payment_methods.COD ? "POST-FULFILLMENT" : "ON-ORDER",
               transaction_id,
             },
           },
