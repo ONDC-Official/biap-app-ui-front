@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Button from "../../../shared/button/button";
@@ -6,10 +6,10 @@ import { buttonTypes } from "../../../../utils/button";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import Input from "../../../shared/input/input";
-import Toast from "../../../shared/toast/toast";
-import { toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../../utils/toast";
 import axios from "axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
+import { ToastContext } from "../../../../context/toastContext";
 
 export default function CustomerPhoneCard({
   supportOrderDetails,
@@ -18,17 +18,14 @@ export default function CustomerPhoneCard({
 }) {
   const token = getValueFromCookie("token");
   //eslint-disable-next-line
-  const PHONE_REGEXP = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+  const PHONE_REGEXP =
+    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
   const [inlineError, setInlineError] = useState({
     phone_number_error: "",
   });
   const [loading, setLoading] = useState(false);
   const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
   function checkPhoneNumber() {
     if (!customerPhoneNumber) {
       setInlineError({
@@ -64,37 +61,29 @@ export default function CustomerPhoneCard({
         onSuccess();
         return;
       }
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setLoading(false);
     }
   }
   return (
     <div className={styles.overlay}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <div className={styles.popup_card}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <p className={styles.card_header_title}>Phone number</p>

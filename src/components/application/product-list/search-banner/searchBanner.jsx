@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { search_types } from "../../../../constants/searchTypes";
 import axios from "axios";
 import { postCall } from "../../../../api/axios";
@@ -14,8 +14,8 @@ import CrossIcon from "../../../shared/svg/cross-icon";
 import MMI_LOGO from "../../../../assets/images/mmi_logo.svg";
 import LocationSvg from "../../../shared/svg/location";
 import Dropdown from "../../../shared/dropdown/dropdown";
-import Toast from "../../../shared/toast/toast";
-import { toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../../utils/toast";
+import { ToastContext } from "../../../../context/toastContext";
 
 export default function SearchBanner({ onSearch, location }) {
   const [inlineError, setInlineError] = useState({
@@ -37,11 +37,7 @@ export default function SearchBanner({ onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
 
   useEffect(() => {
     setSearchedLocation(location);
@@ -89,12 +85,14 @@ export default function SearchBanner({ onSearch, location }) {
       }));
       setLocations(formattedLocations);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setSearchLocationLoading(false);
     }
@@ -114,12 +112,14 @@ export default function SearchBanner({ onSearch, location }) {
       });
       setToggleLocationListCard(false);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -148,12 +148,14 @@ export default function SearchBanner({ onSearch, location }) {
       AddCookie("search_context", JSON.stringify(search_context));
       onSearch(search_context);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setSearchProductLoading(false);
     }
@@ -227,18 +229,6 @@ export default function SearchBanner({ onSearch, location }) {
 
   return (
     <div className={bannerStyles.searched_history_banner}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <div className="container">
         <div className="row">
           <div

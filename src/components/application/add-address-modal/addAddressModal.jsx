@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { postCall } from "../../../api/axios";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
 import { buttonTypes } from "../../../utils/button";
@@ -7,12 +7,18 @@ import { ONDC_COLORS } from "../../shared/colors";
 import Input from "../../shared/input/input";
 import CrossIcon from "../../shared/svg/cross-icon";
 import { address_types } from "../../../constants/address-types";
-import Toast from "../../shared/toast/toast";
-import { toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../../utils/toast";
 import { restoreToDefault } from "../../../utils/restoreDefaultAddress";
+import { ToastContext } from "../../../context/toastContext";
 
 export default function AddAddressModal(props) {
-  const { address_type, selectedAddress = restoreToDefault(), onClose, onAddAddress, onUpdateAddress } = props;
+  const {
+    address_type,
+    selectedAddress = restoreToDefault(),
+    onClose,
+    onAddAddress,
+    onUpdateAddress,
+  } = props;
   const [addAddressLoading, setAddAddressLoading] = useState(false);
   const [address, setAddress] = useState(selectedAddress);
   const [error, setError] = useState({
@@ -25,38 +31,38 @@ export default function AddAddressModal(props) {
     state_name_error: "",
     street_name_error: "",
   });
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
-
+  const dispatch = useContext(ToastContext);
   // update billing address
   async function handleUpdateBillingAddress() {
     setAddAddressLoading(true);
     try {
-      const data = await postCall(`/clientApis/v1/update_billing_details/${address.id}`, {
-        name: address.name.trim(),
-        address: {
-          areaCode: address.areaCode.trim(),
-          building: address.door.trim(),
-          city: address.city.trim(),
-          country: "IND",
-          door: address.door.trim(),
-          state: address.state.trim(),
-          street: address.street.trim(),
-        },
-        email: address.email.trim(),
-        phone: address.phone.trim(),
-      });
+      const data = await postCall(
+        `/clientApis/v1/update_billing_details/${address.id}`,
+        {
+          name: address.name.trim(),
+          address: {
+            areaCode: address.areaCode.trim(),
+            building: address.door.trim(),
+            city: address.city.trim(),
+            country: "IND",
+            door: address.door.trim(),
+            state: address.state.trim(),
+            street: address.street.trim(),
+          },
+          email: address.email.trim(),
+          phone: address.phone.trim(),
+        }
+      );
       onUpdateAddress(data);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setAddAddressLoading(false);
     }
@@ -82,12 +88,14 @@ export default function AddAddressModal(props) {
       });
       onAddAddress(data);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setAddAddressLoading(false);
     }
@@ -97,30 +105,35 @@ export default function AddAddressModal(props) {
   async function handleUpdateDeliveryAddress() {
     setAddAddressLoading(true);
     try {
-      const data = await postCall(`/clientApis/v1/update_delivery_address/${address.id}`, {
-        descriptor: {
-          name: address.name.trim(),
-          email: address.email.trim(),
-          phone: address.phone.trim(),
-        },
-        address: {
-          areaCode: address.areaCode.trim(),
-          building: address.door.trim(),
-          city: address.city.trim(),
-          country: "IND",
-          door: address.door.trim(),
-          state: address.state.trim(),
-          street: address.street.trim(),
-        },
-      });
+      const data = await postCall(
+        `/clientApis/v1/update_delivery_address/${address.id}`,
+        {
+          descriptor: {
+            name: address.name.trim(),
+            email: address.email.trim(),
+            phone: address.phone.trim(),
+          },
+          address: {
+            areaCode: address.areaCode.trim(),
+            building: address.door.trim(),
+            city: address.city.trim(),
+            country: "IND",
+            door: address.door.trim(),
+            state: address.state.trim(),
+            street: address.street.trim(),
+          },
+        }
+      );
       onUpdateAddress(data);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setAddAddressLoading(false);
     }
@@ -148,12 +161,14 @@ export default function AddAddressModal(props) {
       });
       onAddAddress(data);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setAddAddressLoading(false);
     }
@@ -175,26 +190,16 @@ export default function AddAddressModal(props) {
   }
 
   function shouldUpdateAddress() {
-    return address.name !== ""
+    return address.name !== "";
   }
 
   return (
     <div className={styles.overlay}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <div className={styles.popup_card}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
-          <p className={styles.card_header_title}>{shouldUpdateAddress() ? "Update" : "Add"} {address_type} Address</p>
+          <p className={styles.card_header_title}>
+            {shouldUpdateAddress() ? "Update" : "Add"} {address_type} Address
+          </p>
           <div className="ms-auto">
             <CrossIcon
               width="20"
@@ -378,29 +383,33 @@ export default function AddAddressModal(props) {
         <div
           className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
         >
-          {shouldUpdateAddress() ? <Button
-            isloading={addAddressLoading ? 1 : 0}
-            disabled={addAddressLoading || checkFormvalidation()}
-            button_type={buttonTypes.primary}
-            button_hover_type={buttonTypes.primary_hover}
-            button_text="Update Address"
-            onClick={() => {
-              if (address_type === address_types.delivery)
-                return handleUpdateDeliveryAddress();
-              handleUpdateBillingAddress();
-            }}
-          /> : <Button
-            isloading={addAddressLoading ? 1 : 0}
-            disabled={addAddressLoading || checkFormvalidation()}
-            button_type={buttonTypes.primary}
-            button_hover_type={buttonTypes.primary_hover}
-            button_text="Add Address"
-            onClick={() => {
-              if (address_type === address_types.delivery)
-                return handleAddDeliveryAddress();
-              handleAddBillingAddress();
-            }}
-          />}
+          {shouldUpdateAddress() ? (
+            <Button
+              isloading={addAddressLoading ? 1 : 0}
+              disabled={addAddressLoading || checkFormvalidation()}
+              button_type={buttonTypes.primary}
+              button_hover_type={buttonTypes.primary_hover}
+              button_text="Update Address"
+              onClick={() => {
+                if (address_type === address_types.delivery)
+                  return handleUpdateDeliveryAddress();
+                handleUpdateBillingAddress();
+              }}
+            />
+          ) : (
+            <Button
+              isloading={addAddressLoading ? 1 : 0}
+              disabled={addAddressLoading || checkFormvalidation()}
+              button_type={buttonTypes.primary}
+              button_hover_type={buttonTypes.primary_hover}
+              button_text="Add Address"
+              onClick={() => {
+                if (address_type === address_types.delivery)
+                  return handleAddDeliveryAddress();
+                handleAddBillingAddress();
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

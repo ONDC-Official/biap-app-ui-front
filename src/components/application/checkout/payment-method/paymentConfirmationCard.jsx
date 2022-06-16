@@ -14,14 +14,14 @@ import AddressRadioButton from "../address-details/address-radio-button/addressR
 import { CartContext } from "../../../../context/cartContext";
 import { getCall, postCall } from "../../../../api/axios";
 import { constructQouteObject } from "../../../../utils/constructRequestObject";
-import { toast_types } from "../../../../utils/toast";
-import Toast from "../../../shared/toast/toast";
+import { toast_actions, toast_types } from "../../../../utils/toast";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import { payment_methods } from "../../../../constants/payment-methods";
 import { removeCookie, getValueFromCookie } from "../../../../utils/cookies";
 import Loading from "../../../shared/loading/loading";
+import { ToastContext } from "../../../../context/toastContext";
 
 export default function PaymentConfirmationCard(props) {
   const {
@@ -40,12 +40,8 @@ export default function PaymentConfirmationCard(props) {
     getValueFromCookie("billing_address") || "{}"
   );
   const { cartItems, setCartItems } = useContext(CartContext);
+  const dispatch = useContext(ToastContext);
   const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
   const [togglePaymentGateway, setTogglePaymentGateway] = useState(false);
   const [loadingSdkForPayment, setLoadingSdkForPayment] = useState(false);
   const confirm_polling_timer = useRef(0);
@@ -115,7 +111,9 @@ export default function PaymentConfirmationCard(props) {
             payment: {
               paid_amount: getTotalPayable(item),
               type:
-                method === payment_methods.COD ? "POST-FULFILLMENT" : "ON-ORDER",
+                method === payment_methods.COD
+                  ? "POST-FULFILLMENT"
+                  : "ON-ORDER",
               transaction_id,
             },
           },
@@ -135,12 +133,14 @@ export default function PaymentConfirmationCard(props) {
       });
       callApiMultipleTimes(array_of_ids);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
       setConfirmOrderLoading(false);
     }
   }
@@ -155,12 +155,14 @@ export default function PaymentConfirmationCard(props) {
       );
       onConfirmed.current = data;
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
       setConfirmOrderLoading(false);
     }
   }
@@ -185,12 +187,14 @@ export default function PaymentConfirmationCard(props) {
           setCartItems([]);
           history.replace("/application/orders");
         } else {
-          setToast((toast) => ({
-            ...toast,
-            toggle: true,
-            type: toast_types.error,
-            message: "Something went wrong!",
-          }));
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Something went wrong!",
+            },
+          });
         }
         clearInterval(confirm_polling_timer.current);
         return;
@@ -274,12 +278,14 @@ export default function PaymentConfirmationCard(props) {
         hyperCallbackHandler
       );
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
     }
   }
 
@@ -328,15 +334,17 @@ export default function PaymentConfirmationCard(props) {
           requestId: transaction_id,
           payload: processPayload.current,
         },
-        () => { }
+        () => {}
       );
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
     }
   }
 
@@ -364,34 +372,24 @@ export default function PaymentConfirmationCard(props) {
           )}
         </div>
       )}
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <div
         className={styles.card_header}
         style={
           isCurrentStep()
             ? {
-              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
-            }
+                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+              }
             : {
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }
+                borderBottomRightRadius: "10px",
+                borderBottomLeftRadius: "10px",
+              }
         }
       >
-        <p className={styles.card_header_title}>{"Payment & order confirmation"}</p>
+        <p className={styles.card_header_title}>
+          {"Payment & order confirmation"}
+        </p>
       </div>
       {isCurrentStep() && (
         <Fragment>

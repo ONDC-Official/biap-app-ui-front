@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Button from "../../shared/button/button";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Input from "../../shared/input/input";
-import Toast from "../../shared/toast/toast";
 import AuthActionCard from "../auth-action-card/authActionCard";
 import {
   getAuth,
@@ -14,9 +13,10 @@ import {
 import styles from "../../../styles/auth/auth.module.scss";
 import { buttonTypes } from "../../../utils/button";
 import { Link, useHistory } from "react-router-dom";
-import { toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../../utils/toast";
 import { getErrorMessage } from "../../../utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
+import { ToastContext } from "../../../context/toastContext";
 
 export default function SignUp() {
   const auth = getAuth();
@@ -31,11 +31,7 @@ export default function SignUp() {
     signUpUsingEmailAndPasswordloading,
     setSignUpUsingEmailAndPasswordLoading,
   ] = useState(false);
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
   const [inlineError, setInlineError] = useState({
     name_error: "",
     email_error: "",
@@ -96,23 +92,27 @@ export default function SignUp() {
           .catch((error) => {
             const errorCode = error.code;
             const errorMessage = getErrorMessage(errorCode);
-            setToast((toast) => ({
-              ...toast,
-              toggle: true,
-              type: toast_types.error,
-              message: errorMessage,
-            }));
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.error,
+                message: errorMessage,
+              },
+            });
           });
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = getErrorMessage(errorCode);
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: errorMessage,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: errorMessage,
+          },
+        });
       })
       .finally(() => setSignUpUsingEmailAndPasswordLoading(false));
   }
@@ -124,12 +124,14 @@ export default function SignUp() {
       })
       .catch((error) => {
         const errorMessage = error.message;
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: errorMessage,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: errorMessage,
+          },
+        });
       })
       .finally(() => setSignUpUsingGoogleLoading(false));
   }
@@ -144,18 +146,6 @@ export default function SignUp() {
   }
   const signUpForm = (
     <div className={styles.auth_form}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <form onSubmit={handleSignUpWithEmailAndPassword}>
         <Input
           id="name"

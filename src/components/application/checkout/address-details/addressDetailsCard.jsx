@@ -13,27 +13,19 @@ import { getCall } from "../../../../api/axios";
 import { AddressContext } from "../../../../context/addressContext";
 import DeliveryAddress from "./delivery-address/deliveryAddress";
 import BillingAddress from "./billing-address/billingAddress";
-import { toast_types } from "../../../../utils/toast";
-import Toast from "../../../shared/toast/toast";
+import { toast_actions, toast_types } from "../../../../utils/toast";
+import { ToastContext } from "../../../../context/toastContext";
 
 export default function AddressDetailsCard(props) {
   const { currentActiveStep, setCurrentActiveStep, initLoading } = props;
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
-  const [
-    fetchDeliveryAddressLoading,
-    setFetchDeliveryAddressLoading,
-  ] = useState();
-  const [
-    fetchBillingAddressLoading,
-    setFetchBillingAddressLoading,
-  ] = useState();
+  const dispatch = useContext(ToastContext);
+  const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
+    useState();
+  const [fetchBillingAddressLoading, setFetchBillingAddressLoading] =
+    useState();
 
   // function to check whether step is completed or not
   function isStepCompleted() {
@@ -73,12 +65,14 @@ export default function AddressDetailsCard(props) {
           setDeliveryAddresses([]);
           return;
         }
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: err.response.data.error,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: err?.message,
+          },
+        });
       } finally {
         setFetchDeliveryAddressLoading(false);
       }
@@ -99,12 +93,14 @@ export default function AddressDetailsCard(props) {
           setBillingAddresses([]);
           return;
         }
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: err.response.data.error,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: err?.message,
+          },
+        });
       } finally {
         setFetchBillingAddressLoading(false);
       }
@@ -124,18 +120,6 @@ export default function AddressDetailsCard(props) {
 
   return (
     <div className={styles.price_summary_card}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <div
         className={`${
           isStepCompleted()

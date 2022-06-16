@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import moment from "moment";
 import { getOrderStatus } from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
@@ -6,10 +6,11 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import { postCall, getCall } from "../../../../api/axios";
 import Loading from "../../../shared/loading/loading";
 import Toast from "../../../shared/toast/toast";
-import { toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../../utils/toast";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import CallSvg from "../../../shared/svg/callSvg";
 import CustomerPhoneCard from "../customer-phone-card/customerPhoneCard";
+import { ToastContext } from "../../../../context/toastContext";
 
 export default function OrderCard(props) {
   const {
@@ -35,11 +36,7 @@ export default function OrderCard(props) {
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const trackOrderRef = useRef(null);
   const support_order_timer = useRef();
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
 
   // use this api to cancel an order
   async function handleCancelOrder() {
@@ -58,12 +55,14 @@ export default function OrderCard(props) {
       onCancelOrder(context.message_id);
     } catch (err) {
       setCancelOrderLoading(false);
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err?.response?.data?.error?.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -75,12 +74,14 @@ export default function OrderCard(props) {
       );
       if (data[0]?.error) {
         const err = data[0]?.error;
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: err?.message,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: err?.message,
+          },
+        });
         setCancelOrderLoading(false);
         return;
       }
@@ -89,12 +90,14 @@ export default function OrderCard(props) {
       onFetchUpdatedOrder();
     } catch (err) {
       setCancelOrderLoading(false);
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -116,12 +119,14 @@ export default function OrderCard(props) {
       onTrackOrder(data[0]?.context?.message_id);
     } catch (err) {
       setTrackOrderLoading(false);
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -132,12 +137,14 @@ export default function OrderCard(props) {
         `/clientApis/v2/on_track?messageIds=${array_of_id}`
       );
       if (data[0]?.message?.tracking?.url === "" || data[0]?.error?.message) {
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: "Tracking information not available for this product",
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: "Tracking information not available for this product",
+          },
+        });
         setTrackOrderLoading(false);
         return;
       }
@@ -147,12 +154,14 @@ export default function OrderCard(props) {
       setTrackOrderLoading(false);
     } catch (err) {
       setTrackOrderLoading(false);
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -177,12 +186,14 @@ export default function OrderCard(props) {
       ]);
       callApiMultipleTimes(data[0]?.context?.message_id);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -193,12 +204,14 @@ export default function OrderCard(props) {
         `/clientApis/v2/on_support?messageIds=${array_of_id}`
       );
       if (data[0]?.error) {
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: "Could not get data for this order!",
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: "Could not get data for this order!",
+          },
+        });
         setSupportOrderLoading(false);
         clearInterval(support_order_timer.current);
         return;
@@ -206,12 +219,14 @@ export default function OrderCard(props) {
       setSupportOrderDetails(data[0]?.message);
     } catch (err) {
       setSupportOrderLoading(false);
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -233,29 +248,19 @@ export default function OrderCard(props) {
 
   return (
     <div className={styles.orders_card}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       {toggleCustomerPhoneCard && (
         <CustomerPhoneCard
           supportOrderDetails={supportOrderDetails}
           onClose={() => setToggleCustomerPhoneCard(false)}
           onSuccess={() => {
-            setToast((toast) => ({
-              ...toast,
-              toggle: true,
-              type: toast_types.success,
-              message: "Call successfully placed",
-            }));
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.error,
+                message: "Call successfully placed",
+              },
+            });
             setSupportOrderDetails();
             setToggleCustomerPhoneCard(false);
           }}
@@ -305,9 +310,9 @@ export default function OrderCard(props) {
             style={
               currentSelectedAccordion === accoodion_id
                 ? {
-                  transform: "rotate(180deg)",
-                  transition: "all 0.7s",
-                }
+                    transform: "rotate(180deg)",
+                    transition: "all 0.7s",
+                  }
                 : { transform: "rotate(0)", transition: "all 0.7s" }
             }
           >
@@ -333,7 +338,7 @@ export default function OrderCard(props) {
           {product.map(({ id, name, price, quantity }) => {
             return (
               <div key={id} className="d-flex align-items-start py-2">
-                <div style={{ width: '90%' }}>
+                <div style={{ width: "90%" }}>
                   <p
                     className={styles.product_name}
                     title={name}

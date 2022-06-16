@@ -16,14 +16,14 @@ import ProductCard from "./product-card/productCard";
 import { CartContext } from "../../../context/cartContext";
 import OrderSummary from "./order-summary/orderSummary";
 import SearchBanner from "./search-banner/searchBanner";
-import Toast from "../../shared/toast/toast";
-import { toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../../utils/toast";
 import ProductFilters from "./product-filters/productFilters";
 import ProductSort from "./product-sort/productSort";
 import Button from "../../shared/button/button";
 import { buttonTypes } from "../../../utils/button";
 import Pagination from "../../shared/pagination/pagination";
 import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
+import { ToastContext } from "../../../context/toastContext";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -58,11 +58,7 @@ export default function ProductList() {
   const search_polling_timer = useRef(0);
   const [sortType, setSortType] = useState({});
   const [selectedFilters, setSelectedFilters] = useState({});
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
 
   useEffect(() => {
     if (Object.keys(search_context).length > 0) {
@@ -117,12 +113,14 @@ export default function ProductList() {
     } catch (err) {
       setNewSearchedProduct(false);
       clearInterval(search_polling_timer.current);
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     }
   }
 
@@ -153,12 +151,14 @@ export default function ProductList() {
       );
       setFilters(data);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setFetchFilterLoading(false);
     }
@@ -223,12 +223,14 @@ export default function ProductList() {
       }));
       setProducts(message?.catalogs);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
     } finally {
       setSearchProductLoading(false);
     }
@@ -295,18 +297,6 @@ export default function ProductList() {
   return (
     <Fragment>
       <Navbar />
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       {toggleFiltersOnMobile && (
         <div className={styles.filter_on_mobile_wrapper}>
           <ProductFilters

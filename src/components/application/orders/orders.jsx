@@ -1,4 +1,10 @@
-import React, { Fragment, useEffect, useState, useCallback } from "react";
+import React, {
+  Fragment,
+  useEffect,
+  useState,
+  useCallback,
+  useContext,
+} from "react";
 import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
@@ -10,8 +16,8 @@ import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
 import OrderCard from "./order-card/orderCard";
 import Pagination from "../../shared/pagination/pagination";
-import Toast from "../../shared/toast/toast";
-import { toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../../utils/toast";
+import { ToastContext } from "../../../context/toastContext";
 
 export default function Orders() {
   const history = useHistory();
@@ -23,11 +29,7 @@ export default function Orders() {
     totalCount: 0,
     postPerPage: 10,
   });
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
   const [currentSelectedAccordion, setCurrentSelectedAccordion] = useState("");
   const getAllOrders = useCallback(async () => {
     setFetchOrderLoading(true);
@@ -80,12 +82,14 @@ export default function Orders() {
       setOrders(formated_orders);
       setFetchOrderLoading(false);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
       setFetchOrderLoading(false);
     }
   }, [pagination.currentPage, pagination.postPerPage]);
@@ -138,18 +142,6 @@ export default function Orders() {
   return (
     <Fragment>
       <Navbar />
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       {fetchOrderLoading ? (
         loadingSpin
       ) : orders.length <= 0 ? (
@@ -198,12 +190,14 @@ export default function Orders() {
                           bpp_id={bpp_id}
                           accoodion_id={`order_id_${index}`}
                           onFetchUpdatedOrder={() => {
-                            setToast((toast) => ({
-                              ...toast,
-                              toggle: true,
-                              type: toast_types.success,
-                              message: "Order status updated successfully!",
-                            }));
+                            dispatch({
+                              type: toast_actions.ADD_TOAST,
+                              payload: {
+                                id: Math.floor(Math.random() * 100),
+                                type: toast_types.error,
+                                message: "Order status updated successfully!",
+                              },
+                            });
                             getAllOrders();
                           }}
                           currentSelectedAccordion={currentSelectedAccordion}

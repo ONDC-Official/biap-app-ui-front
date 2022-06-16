@@ -22,14 +22,16 @@ import Toast from "../../shared/toast/toast";
 import AddressDetailsCard from "../checkout/address-details/addressDetailsCard";
 import OrderConfirmationCard from "../checkout/order-confirmation/orderConfirmationCard";
 import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
-import { toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../../utils/toast";
 import { getValueFromCookie } from "../../../utils/cookies";
 import { constructQouteObject } from "../../../utils/constructRequestObject";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
+import { ToastContext } from "../../../context/toastContext";
 
 export default function InitializeOrder() {
   const { cartItems, setCartItems } = useContext(CartContext);
+  const dispatch = useContext(ToastContext);
   const transaction_id = getValueFromCookie("transaction_id");
   const history = useHistory();
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
@@ -42,11 +44,6 @@ export default function InitializeOrder() {
   const [currentActiveStep, setCurrentActiveStep] = useState(
     get_current_step(checkout_steps.SELECT_ADDRESS)
   );
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
   const quote_polling_timer = useRef(0);
   const onGotQuote = useRef();
   const bpps_with_error = useRef([]);
@@ -86,12 +83,14 @@ export default function InitializeOrder() {
 
       // If error than show toast
       if (isContainingError) {
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: isContainingError.error_reason,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: isContainingError.error_reason,
+          },
+        });
         if (
           array_of_ids.filter((idObj) => idObj.error_reason === "").length <= 0
         ) {
@@ -103,12 +102,14 @@ export default function InitializeOrder() {
         array_of_ids.filter((idObj) => idObj.error_reason === "")
       );
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.response.data.error,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error,
+        },
+      });
       setGetQuoteLoading(false);
     }
   }, []);
@@ -138,12 +139,14 @@ export default function InitializeOrder() {
       );
       onGotQuote.current = data;
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: err.message,
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err.message,
+        },
+      });
       clearInterval(quote_polling_timer.current);
       setGetQuoteLoading(false);
     }
@@ -162,6 +165,14 @@ export default function InitializeOrder() {
         );
         // if all orders contains error than throw back to listing page
         if (allNonValidOrder) {
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: onGotQuote.current[0].error.message,
+            },
+          });
           history.push("/application/");
         } else {
           // check if any one order contains error
@@ -175,12 +186,14 @@ export default function InitializeOrder() {
                 ...bpps_with_error.current,
                 cartItemWithError,
               ];
-              setToast((toast) => ({
-                ...toast,
-                toggle: true,
-                type: toast_types.error,
-                message: error?.message,
-              }));
+              dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                  id: Math.floor(Math.random() * 100),
+                  type: toast_types.error,
+                  message: onGotQuote.current[0].error.message,
+                },
+              });
               setCartItems(
                 cartItems.filter(
                   (cart_item) =>
@@ -260,18 +273,6 @@ export default function InitializeOrder() {
   return (
     <Fragment>
       <Navbar />
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       {cartItems.length <= 0 ? (
         empty_cart_state
       ) : getQuoteLoading ? (

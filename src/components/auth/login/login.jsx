@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   getAuth,
   signInWithPopup,
@@ -12,10 +12,10 @@ import AuthActionCard from "../auth-action-card/authActionCard";
 import { Link, useHistory } from "react-router-dom";
 import Input from "../../shared/input/input";
 import ErrorMessage from "../../shared/error-message/errorMessage";
-import Toast from "../../shared/toast/toast";
-import { toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../../utils/toast";
 import { getErrorMessage } from "../../../utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
+import { ToastContext } from "../../../context/toastContext";
 
 export default function Login() {
   const auth = getAuth();
@@ -23,18 +23,13 @@ export default function Login() {
   const history = useHistory();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const [signInUsingGoogleloading, setSignInUsingGoogleLoading] = useState(
-    false
-  );
+  const [signInUsingGoogleloading, setSignInUsingGoogleLoading] =
+    useState(false);
   const [
     signInUsingEmailAndPasswordloading,
     setSignInUsingEmailAndPasswordLoading,
   ] = useState(false);
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
   const [inlineError, setInlineError] = useState({
     email_error: "",
     password_error: "",
@@ -77,12 +72,14 @@ export default function Login() {
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = getErrorMessage(errorCode);
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: errorMessage,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: errorMessage,
+          },
+        });
       })
       .finally(() => setSignInUsingEmailAndPasswordLoading(false));
   }
@@ -94,12 +91,14 @@ export default function Login() {
       })
       .catch((error) => {
         const errorMessage = error.message;
-        setToast((toast) => ({
-          ...toast,
-          toggle: true,
-          type: toast_types.error,
-          message: errorMessage,
-        }));
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: errorMessage,
+          },
+        });
       })
       .finally(() => setSignInUsingGoogleLoading(false));
   }
@@ -114,18 +113,6 @@ export default function Login() {
   }
   const loginForm = (
     <div className={styles.auth_form}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <form onSubmit={handleLoginWithEmailAndPassword}>
         <Input
           id="email"

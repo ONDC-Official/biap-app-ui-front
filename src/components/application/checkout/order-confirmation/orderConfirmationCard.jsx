@@ -22,11 +22,11 @@ import ProductCard from "../../product-list/product-card/productCard";
 import { getCall, postCall } from "../../../../api/axios";
 import Cookies from "js-cookie";
 import { constructQouteObject } from "../../../../utils/constructRequestObject";
-import Toast from "../../../shared/toast/toast";
-import { toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../../utils/toast";
 import { AddCookie } from "../../../../utils/cookies";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import Loading from "../../../shared/loading/loading";
+import { ToastContext } from "../../../../context/toastContext";
 
 export default function OrderConfirmationCard(props) {
   const {
@@ -41,11 +41,7 @@ export default function OrderConfirmationCard(props) {
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
   const { cartItems, onRemoveProduct } = useContext(CartContext);
   const [initializeOrderLoading, setInitializeOrderLoading] = useState(false);
-  const [toast, setToast] = useState({
-    toggle: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useContext(ToastContext);
   const initialize_polling_timer = useRef(0);
   const onInitialized = useRef();
   const updateCartCounter = useRef(0);
@@ -102,12 +98,14 @@ export default function OrderConfirmationCard(props) {
       });
       callApiMultipleTimes(array_of_ids);
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
       setInitializeOrderLoading(false);
       updateInitLoading(false);
     }
@@ -123,12 +121,14 @@ export default function OrderConfirmationCard(props) {
       );
       onInitialized.current = data;
     } catch (err) {
-      setToast((toast) => ({
-        ...toast,
-        toggle: true,
-        type: toast_types.error,
-        message: "Something went wrong!",
-      }));
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Something went wrong!",
+        },
+      });
       setInitializeOrderLoading(false);
       updateInitLoading(false);
     }
@@ -145,12 +145,14 @@ export default function OrderConfirmationCard(props) {
           (data) => data?.message?.order
         );
         if (allOrderInitialized) {
-          setToast((toast) => ({
-            ...toast,
-            toggle: true,
-            type: toast_types.success,
-            message: "Your order is initialized!",
-          }));
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.success,
+              message: "Your order is initialised!",
+            },
+          });
           setCurrentActiveStep(
             get_current_step(checkout_steps.SELECT_PAYMENT_METHOD)
           );
@@ -162,12 +164,14 @@ export default function OrderConfirmationCard(props) {
           );
           history.replace("/application/checkout");
         } else {
-          setToast((toast) => ({
-            ...toast,
-            toggle: true,
-            type: toast_types.error,
-            message: "Something went wrong!",
-          }));
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Something went wrong!",
+            },
+          });
         }
         clearInterval(initialize_polling_timer.current);
         return;
@@ -205,18 +209,6 @@ export default function OrderConfirmationCard(props) {
   }
   return (
     <div className={styles.price_summary_card}>
-      {toast.toggle && (
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          onRemove={() =>
-            setToast((toast) => ({
-              ...toast,
-              toggle: false,
-            }))
-          }
-        />
-      )}
       <div
         className={`${
           isStepCompleted()
