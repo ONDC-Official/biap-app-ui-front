@@ -25,9 +25,8 @@ export default function SignUp() {
   const [name, setName] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  const [signUpUsingGoogleloading, setSignUpUsingGoogleLoading] = useState(
-    false
-  );
+  const [signUpUsingGoogleloading, setSignUpUsingGoogleLoading] =
+    useState(false);
   const [
     signUpUsingEmailAndPasswordloading,
     setSignUpUsingEmailAndPasswordLoading,
@@ -80,7 +79,9 @@ export default function SignUp() {
 
   function handleSignUpWithEmailAndPassword(e) {
     e.preventDefault();
-    const allCheckPassed = [checkEmail(), checkPassword()].every(Boolean);
+    const allCheckPassed = [checkName(), checkEmail(), checkPassword()].every(
+      Boolean
+    );
     if (!allCheckPassed) {
       return;
     }

@@ -35,17 +35,21 @@ export default function InitializeOrder() {
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
   const [updateCartLoading, setUpdateCartLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
-  const [productsQuote, setProductsQoute] = useState();
+  const [productsQuote, setProductsQoute] = useState({
+    products: [],
+    total_payable: 0,
+  });
   const [currentActiveStep, setCurrentActiveStep] = useState(
     get_current_step(checkout_steps.SELECT_ADDRESS)
   );
-  const errorRef = useRef({ errors: [], index: 0 });
   const [toast, setToast] = useState({
     toggle: false,
     type: "",
     message: "",
   });
   const quote_polling_timer = useRef(0);
+  const onGotQuote = useRef();
+  const bpps_with_error = useRef([]);
 
   // use this function to get the quote of the items
   const getQuote = useCallback(async (items) => {
@@ -132,34 +136,7 @@ export default function InitializeOrder() {
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
-      setUpdateCartLoading(false);
-      let total_payable = 0;
-      const quotes = data?.map((item, index) => {
-        const { message, error = {} } = item;
-        if (Object.keys(error).length > 0) {
-          errorRef.current = {
-            errors: [...errorRef.current.errors, error],
-            index,
-          };
-        }
-        if (message) {
-          total_payable += Number(message?.quote?.quote?.price?.value);
-          const breakup = message?.quote?.quote?.breakup;
-          const provided_by = message?.quote?.provider?.descriptor?.name;
-          const product = breakup?.map((break_up_item) => ({
-            title: break_up_item?.title,
-            price: Math.round(break_up_item?.price?.value),
-            provided_by,
-          }));
-          return product;
-        }
-        return {
-          title: "",
-          price: "",
-          provided_by: "",
-        };
-      });
-      setProductsQoute({ products: quotes.flat(), total_payable });
+      onGotQuote.current = data;
     } catch (err) {
       setToast((toast) => ({
         ...toast,
@@ -178,20 +155,60 @@ export default function InitializeOrder() {
     quote_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setGetQuoteLoading(false);
-        if (errorRef.current.errors.length >= 5) {
-          setToast((toast) => ({
-            ...toast,
-            toggle: true,
-            type: toast_types.error,
-            message: errorRef.current.errors[0].message,
-          }));
-          clearInterval(quote_polling_timer.current);
-          setCartItems(
-            cartItems.filter(
-              (cart_item, item_index) => item_index !== errorRef.current.index
-            )
-          );
+        setUpdateCartLoading(false);
+        // check if all orders does not contain error object
+        const allNonValidOrder = onGotQuote.current.every(
+          (data) => data?.error
+        );
+        // if all orders contains error than throw back to listing page
+        if (allNonValidOrder) {
+          history.push("/application/");
+        } else {
+          // check if any one order contains error
+          let total_payable = 0;
+          const quotes = onGotQuote.current?.map((item, index) => {
+            const { message, error = {} } = item;
+            // if order contains error than filter that order
+            if (Object.keys(error).length > 0) {
+              const cartItemWithError = cartItems[index]?.provider?.id;
+              bpps_with_error.current = [
+                ...bpps_with_error.current,
+                cartItemWithError,
+              ];
+              setToast((toast) => ({
+                ...toast,
+                toggle: true,
+                type: toast_types.error,
+                message: error?.message,
+              }));
+              setCartItems(
+                cartItems.filter(
+                  (cart_item) =>
+                    !bpps_with_error.current.includes(cart_item?.provider?.id)
+                )
+              );
+            }
+            // else generate quote of it
+            if (message) {
+              total_payable += Number(message?.quote?.quote?.price?.value);
+              const breakup = message?.quote?.quote?.breakup;
+              const provided_by = message?.quote?.provider?.descriptor?.name;
+              const product = breakup?.map((break_up_item) => ({
+                title: break_up_item?.title,
+                price: Math.round(break_up_item?.price?.value),
+                provided_by,
+              }));
+              return product;
+            }
+            return {
+              title: "",
+              price: "",
+              provided_by: "",
+            };
+          });
+          setProductsQoute({ products: quotes.flat(), total_payable });
         }
+
         clearInterval(quote_polling_timer.current);
         return;
       }
@@ -305,6 +322,7 @@ export default function InitializeOrder() {
                   <div className="row">
                     <div className="col-12">
                       <PriceDetailsCard
+                        updateCartLoading={updateCartLoading}
                         productsQuote={productsQuote}
                         totalLabel="Total cost"
                       />

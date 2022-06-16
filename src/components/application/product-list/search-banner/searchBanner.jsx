@@ -85,7 +85,7 @@ export default function SearchBanner({ onSearch, location }) {
       const formattedLocations = data.map((location) => ({
         place_id: location?.eLoc,
         name: location?.placeName,
-        description: location?.alternateName,
+        description: location?.placeAddress,
       }));
       setLocations(formattedLocations);
     } catch (err) {

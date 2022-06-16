@@ -15,14 +15,11 @@ export default function ProductCard(props) {
     location_id,
     bpp_provider_id,
     bpp_provider_descriptor,
+    onUpdateCart = () => {},
   } = props;
   const { id, descriptor } = product;
-  const {
-    cartItems,
-    onAddProduct,
-    onAddQuantity,
-    onReduceQuantity,
-  } = useContext(CartContext);
+  const { cartItems, onAddProduct, onAddQuantity, onReduceQuantity } =
+    useContext(CartContext);
   const { name: provider_name } = bpp_provider_descriptor;
   const { name: product_name, images } = descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
@@ -96,6 +93,7 @@ export default function ProductCard(props) {
                       setToggleAddToCart(false);
                       return;
                     }
+                    onUpdateCart();
                   }}
                 >
                   <Subtract width="13" classes={styles.subtract_svg_color} />
@@ -108,6 +106,7 @@ export default function ProductCard(props) {
                   onClick={() => {
                     setQuantityCount((quantityCount) => quantityCount + 1);
                     onAddQuantity(id);
+                    onUpdateCart();
                   }}
                 >
                   <Add width="13" height="13" classes={styles.add_svg_color} />
@@ -129,6 +128,7 @@ export default function ProductCard(props) {
                     },
                     product,
                   });
+                  onUpdateCart();
                 }}
               >
                 Add

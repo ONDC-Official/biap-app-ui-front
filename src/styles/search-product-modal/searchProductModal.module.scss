@@ -66,7 +66,7 @@
 
 .modal_input_wrappper {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid $secondaryColor;
 }
 
@@ -121,16 +121,11 @@
 
 .location_description {
   width: 100%;
-  height: 50%;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: $font-10;
   color: $white;
   margin: 0;
   word-break: break-all;
+  padding-top: 5px;
 }
 
 .empty_state_text {
@@ -228,7 +223,7 @@
 
 .category_drodpwon_wrapper {
   background: $accentColor;
-  border-radius: 5px;
+  border-radius: 7px;
   cursor: pointer;
   padding: 5px 10px;
 }

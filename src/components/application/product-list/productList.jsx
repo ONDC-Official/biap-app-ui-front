@@ -110,8 +110,10 @@ export default function ProductList() {
         "product_list",
         JSON.stringify(data?.message?.catalogs)
       );
+      if (data?.message?.catalogs?.length > 0) {
+        setNewSearchedProduct(false);
+      }
       setProducts(data?.message?.catalogs);
-      setNewSearchedProduct(false);
     } catch (err) {
       setNewSearchedProduct(false);
       clearInterval(search_polling_timer.current);
@@ -133,6 +135,7 @@ export default function ProductList() {
       if (counter <= 0) {
         // fetch filters for that.
         fetchAllFilters(message_id);
+        setNewSearchedProduct(false);
         clearInterval(search_polling_timer.current);
         return;
       }

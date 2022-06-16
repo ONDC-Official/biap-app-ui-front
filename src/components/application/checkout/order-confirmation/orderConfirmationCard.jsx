@@ -48,7 +48,7 @@ export default function OrderConfirmationCard(props) {
   });
   const initialize_polling_timer = useRef(0);
   const onInitialized = useRef();
-  const firstUpdate = useRef(true);
+  const updateCartCounter = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -57,12 +57,10 @@ export default function OrderConfirmationCard(props) {
   }, []);
 
   useEffect(() => {
-    if (firstUpdate.current) {
-      firstUpdate.current = false;
-      return;
+    if (updateCartCounter.current > 0) {
+      fetchUpdatedQuote();
     }
-    fetchUpdatedQuote();
-  }, [cartItems]);
+  }, [updateCartCounter.current]);
 
   async function initializeOrder(items) {
     try {
@@ -286,7 +284,10 @@ export default function OrderConfirmationCard(props) {
                                 right: "5px",
                                 cursor: "pointer",
                               }}
-                              onClick={() => onRemoveProduct(id)}
+                              onClick={() => {
+                                onRemoveProduct(id);
+                                updateCartCounter.current += 1;
+                              }}
                             >
                               <CrossIcon
                                 width="20"
@@ -304,6 +305,9 @@ export default function OrderConfirmationCard(props) {
                             bpp_id={bpp_id}
                             location_id={locations ? locations[0] : ""}
                             bpp_provider_id={provider?.id}
+                            onUpdateCart={() =>
+                              (updateCartCounter.current += 1)
+                            }
                           />
                         </div>
                       </div>

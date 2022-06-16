@@ -14,7 +14,7 @@ export default function AuthActionCard(props) {
           >
             <img src={logo} alt="logo" style={{ height: "50px" }} />
           </div>
-          <div style={{ height: "70%" }}>{action_form}</div>
+          <div style={{ height: "70%", overflow: "auto" }}>{action_form}</div>
           <div
             style={{ height: "10%" }}
             className="d-flex align-items-center justify-content-center"
