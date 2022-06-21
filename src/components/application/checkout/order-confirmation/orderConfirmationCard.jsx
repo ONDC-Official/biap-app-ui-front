@@ -84,6 +84,21 @@ export default function OrderConfirmationCard(props) {
           },
         }))
       );
+      const parentTransactionIdMap = new Map();
+      data.map((data) => {
+        const provider_id = data?.context?.provider_id;
+        return parentTransactionIdMap.set(provider_id, {
+          parent_order_id: data?.context?.parent_order_id,
+          transaction_id: data?.context?.transaction_id,
+        });
+      });
+      // store parent order id to cookies
+      AddCookie("parent_order_id", data[0]?.context?.parent_order_id);
+      // store the map into cookies
+      AddCookie(
+        "parent_and_transaction_id_map",
+        JSON.stringify(Array.from(parentTransactionIdMap.entries()))
+      );
       const array_of_ids = data.map((d) => {
         if (d.error) {
           return {
@@ -159,7 +174,9 @@ export default function OrderConfirmationCard(props) {
           AddCookie(
             "product-quote",
             JSON.stringify({
-              quote: onInitialized.current[0]?.message?.order?.quote,
+              quote: onInitialized.current?.map(
+                (data) => data?.message?.order?.quote
+              ),
             })
           );
           history.replace("/application/checkout");

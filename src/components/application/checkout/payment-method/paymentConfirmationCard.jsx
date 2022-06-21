@@ -33,11 +33,14 @@ export default function PaymentConfirmationCard(props) {
   } = props;
   const token = getValueFromCookie("token");
   const user = JSON.parse(getValueFromCookie("user"));
-  const transaction_id = getValueFromCookie("transaction_id");
+  const parent_order_id = getValueFromCookie("parent_order_id");
   const hyperServiceObject = new window.HyperServices();
   const history = useHistory();
   const billingAddress = JSON.parse(
     getValueFromCookie("billing_address") || "{}"
+  );
+  const parentOrderIDMap = new Map(
+    JSON.parse(getValueFromCookie("parent_and_transaction_id_map"))
   );
   const { cartItems, setCartItems } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
@@ -90,31 +93,22 @@ export default function PaymentConfirmationCard(props) {
     };
   }, []);
 
-  // use this function to get the total amount of the quote
-  function getTotalPayable(items) {
-    let sum = 0;
-    items.forEach((item) => {
-      return (sum += Number(item.product.price.value));
-    });
-    return sum;
-  }
-
   async function confirmOrder(items, method) {
     try {
       const data = await postCall(
         "/clientApis/v2/confirm_order",
         items.map((item, index) => ({
-          context: {
-            transaction_id,
-          },
+          // pass the map of parent order id and transaction id
+          context: parentOrderIDMap.get(item[0]?.provider?.id),
           message: {
             payment: {
-              paid_amount: getTotalPayable(item),
+              paid_amount: Number(productsQuote[index]?.price?.value),
               type:
                 method === payment_methods.COD
                   ? "POST-FULFILLMENT"
                   : "ON-ORDER",
-              transaction_id,
+              transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
+                .transaction_id,
             },
           },
         }))
@@ -131,6 +125,10 @@ export default function PaymentConfirmationCard(props) {
           message_id: d.context.message_id,
         };
       });
+      // TODO: add a check to validate that all Order are success
+      // than call on_confirm_order
+
+      // TODO: else push notification
       callApiMultipleTimes(array_of_ids);
     } catch (err) {
       dispatch({
@@ -138,7 +136,7 @@ export default function PaymentConfirmationCard(props) {
         payload: {
           id: Math.floor(Math.random() * 100),
           type: toast_types.error,
-          message: "Something went wrong!",
+          message: err.message,
         },
       });
       setConfirmOrderLoading(false);
@@ -178,8 +176,9 @@ export default function PaymentConfirmationCard(props) {
         );
         if (allOrderConfirmed) {
           // redirect to order listing page.
-          // remove transaction_id, search_context from cookies
+          // remove parent_order_id, search_context from cookies
           removeCookie("transaction_id");
+          removeCookie("parent_order_id");
           removeCookie("search_context");
           removeCookie("cartItems");
           removeCookie("delivery_address");
@@ -272,7 +271,7 @@ export default function PaymentConfirmationCard(props) {
       hyperServiceObject.initiate(
         {
           service: "in.juspay.hyperpay",
-          requestId: transaction_id,
+          requestId: parent_order_id,
           payload: sdkPayload.current,
         },
         hyperCallbackHandler
@@ -297,7 +296,7 @@ export default function PaymentConfirmationCard(props) {
       const processPayloadObj = {
         merchant_id: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
         customer_id: user.id,
-        order_id: transaction_id,
+        order_id: parent_order_id,
         customer_phone: billingAddress?.phone,
         customer_email: billingAddress?.email,
         amount:
@@ -320,7 +319,7 @@ export default function PaymentConfirmationCard(props) {
         ...processPayload.current,
         customerEmail: billingAddress?.email,
         customerMobile: billingAddress?.phone,
-        orderId: transaction_id,
+        orderId: parent_order_id,
         orderDetails: JSON.stringify(processPayloadObj),
         signature: data.signedPayload,
         amount:
@@ -331,7 +330,7 @@ export default function PaymentConfirmationCard(props) {
       hyperServiceObject.process(
         {
           service: "in.juspay.hyperpay",
-          requestId: transaction_id,
+          requestId: parent_order_id,
           payload: processPayload.current,
         },
         () => {}

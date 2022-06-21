@@ -191,7 +191,7 @@ export default function InitializeOrder() {
                 payload: {
                   id: Math.floor(Math.random() * 100),
                   type: toast_types.error,
-                  message: onGotQuote.current[0].error.message,
+                  message: error?.message,
                 },
               });
               setCartItems(

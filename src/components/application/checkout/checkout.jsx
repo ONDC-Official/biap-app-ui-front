@@ -20,6 +20,10 @@ export default function Checkout() {
   const { quote: productsQuote } = JSON.parse(
     getValueFromCookie("product-quote")
   );
+  const [quote, setQuote] = useState({
+    products: [],
+    total_payable: 0,
+  });
 
   // use this effect to handle callback from justpay
   useEffect(() => {
@@ -28,7 +32,28 @@ export default function Checkout() {
       setOrderStatus(searchParams.get("status"));
       setActivePaymentMethod(payment_methods.JUSPAY);
     }
+    fetchProductQuote();
   }, [location]);
+
+  // use this function to fetch the product quote
+  function fetchProductQuote() {
+    let products = [];
+    let total_payable = 0;
+    productsQuote?.forEach((data) => {
+      data?.breakup?.forEach((quote) => {
+        products = [
+          ...products,
+          { title: quote.title, price: quote.price.value },
+        ];
+      });
+      total_payable = Math.round(total_payable + Number(data?.price?.value));
+    });
+    setQuote((prev) => ({
+      ...prev,
+      products,
+      total_payable,
+    }));
+  }
 
   return (
     <Fragment>
@@ -67,13 +92,7 @@ export default function Checkout() {
                   <div className="col-12">
                     <PriceDetailsCard
                       show_order_from={false}
-                      productsQuote={{
-                        products: productsQuote?.breakup?.map((quote) => ({
-                          title: quote.title,
-                          price: quote.price.value,
-                        })),
-                        total_payable: productsQuote?.price?.value,
-                      }}
+                      productsQuote={quote}
                     />
                   </div>
                 </div>
