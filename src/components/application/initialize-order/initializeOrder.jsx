@@ -18,7 +18,6 @@ import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
 import { buttonTypes } from "../../../utils/button";
 import Navbar from "../../shared/navbar/navbar";
-import Toast from "../../shared/toast/toast";
 import AddressDetailsCard from "../checkout/address-details/addressDetailsCard";
 import OrderConfirmationCard from "../checkout/order-confirmation/orderConfirmationCard";
 import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
@@ -112,6 +111,7 @@ export default function InitializeOrder() {
       });
       setGetQuoteLoading(false);
     }
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {

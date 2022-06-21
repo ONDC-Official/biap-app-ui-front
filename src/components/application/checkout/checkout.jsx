@@ -33,6 +33,7 @@ export default function Checkout() {
       setActivePaymentMethod(payment_methods.JUSPAY);
     }
     fetchProductQuote();
+    // eslint-disable-next-line
   }, [location]);
 
   // use this function to fetch the product quote

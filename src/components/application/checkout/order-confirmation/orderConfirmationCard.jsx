@@ -56,6 +56,7 @@ export default function OrderConfirmationCard(props) {
     if (updateCartCounter.current > 0) {
       fetchUpdatedQuote();
     }
+    // eslint-disable-next-line
   }, [updateCartCounter.current]);
 
   async function initializeOrder(items) {
