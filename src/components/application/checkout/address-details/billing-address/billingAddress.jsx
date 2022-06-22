@@ -13,6 +13,7 @@ export default function BillingAddress(props) {
   const { deliveryAddress, billingAddress, setBillingAddress } =
     useContext(AddressContext);
   const [toggleAddressModal, setToggleAddressModal] = useState({
+    actionType: "",
     toggle: false,
     address: restoreToDefault(),
   });
@@ -97,6 +98,7 @@ export default function BillingAddress(props) {
                       }}
                       oneditaddress={() =>
                         setToggleAddressModal({
+                          actionType: "edit",
                           toggle: true,
                           address: {
                             id,
@@ -139,6 +141,7 @@ export default function BillingAddress(props) {
               className={styles.add_address_wrapper}
               onClick={() =>
                 setToggleAddressModal({
+                  actionType: "add",
                   toggle: true,
                   address: restoreToDefault(),
                 })
@@ -154,16 +157,19 @@ export default function BillingAddress(props) {
       </div>
       {toggleAddressModal.toggle && (
         <AddAddressModal
+          action_type={toggleAddressModal.actionType}
           address_type={address_types.billing}
           selectedAddress={toggleAddressModal.address}
           onClose={() =>
             setToggleAddressModal({
+              actionType: "",
               toggle: false,
               address: restoreToDefault(),
             })
           }
           onAddAddress={(address) => {
             setToggleAddressModal({
+              actionType: "",
               toggle: false,
               address: restoreToDefault(),
             });
@@ -178,6 +184,7 @@ export default function BillingAddress(props) {
             });
             setBillingAddresses(updatedAddress);
             setToggleAddressModal({
+              actionType: "",
               toggle: false,
               address: restoreToDefault(),
             });

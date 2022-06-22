@@ -11,9 +11,11 @@ import { toast_actions, toast_types } from "../../../utils/toast";
 import { restoreToDefault } from "../../../utils/restoreDefaultAddress";
 import { ToastContext } from "../../../context/toastContext";
 import ErrorMessage from "../../shared/error-message/errorMessage";
+import validator from "validator";
 
 export default function AddAddressModal(props) {
   const {
+    action_type,
     address_type,
     selectedAddress = restoreToDefault(),
     onClose,
@@ -33,8 +35,131 @@ export default function AddAddressModal(props) {
     street_name_error: "",
   });
   const dispatch = useContext(ToastContext);
+
+  function checkName() {
+    if (validator.isEmpty(address?.name)) {
+      setError((error) => ({
+        ...error,
+        name_error: "Please enter Name",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkEmail() {
+    if (validator.isEmpty(address?.email)) {
+      setError((error) => ({
+        ...error,
+        email_error: "Please enter Email",
+      }));
+      return false;
+    }
+    if (!validator.isEmail(address?.email)) {
+      setError((error) => ({
+        ...error,
+        email_error: "Please enter a valid Email",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkPhoneNumber() {
+    if (validator.isEmpty(address?.phone)) {
+      setError((error) => ({
+        ...error,
+        phone_error: "Please enter a valid phone number",
+      }));
+      return false;
+    }
+    if (!validator.isMobilePhone(address?.phone, "en-IN")) {
+      setError((error) => ({
+        ...error,
+        phone_error: "Please enter a valid phone number",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkStreetName() {
+    if (validator.isEmpty(address?.street)) {
+      setError((error) => ({
+        ...error,
+        street_name_error: "Street Name cannot be empty",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkLandMark() {
+    if (validator.isEmpty(address?.door)) {
+      setError((error) => ({
+        ...error,
+        door_error: "Landmark cannot be empty",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkCity() {
+    if (validator.isEmpty(address?.city)) {
+      setError((error) => ({
+        ...error,
+        city_name_error: "City Name cannot be empty",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkState() {
+    if (validator.isEmpty(address?.state)) {
+      setError((error) => ({
+        ...error,
+        state_name_error: "State Name cannot be empty",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  function checkPinCode() {
+    if (validator.isEmpty(address?.areaCode)) {
+      setError((error) => ({
+        ...error,
+        areaCode_error: "Area Code cannot be empty",
+      }));
+      return false;
+    }
+    if (address?.areaCode?.length < 6) {
+      setError((error) => ({
+        ...error,
+        areaCode_error: "Please enter a valid Area Code",
+      }));
+      return false;
+    }
+    return true;
+  }
+
   // update billing address
   async function handleUpdateBillingAddress() {
+    const allChecksPassed = [
+      checkName(),
+      checkEmail(),
+      checkPhoneNumber(),
+      checkStreetName(),
+      checkLandMark(),
+      checkCity(),
+      checkState(),
+      checkPinCode(),
+    ].every(Boolean);
+    if (!allChecksPassed) {
+      return;
+    }
     setAddAddressLoading(true);
     try {
       const data = await postCall(
@@ -71,6 +196,19 @@ export default function AddAddressModal(props) {
 
   // add billing address
   async function handleAddBillingAddress() {
+    const allChecksPassed = [
+      checkName(),
+      checkEmail(),
+      checkPhoneNumber(),
+      checkStreetName(),
+      checkLandMark(),
+      checkCity(),
+      checkState(),
+      checkPinCode(),
+    ].every(Boolean);
+    if (!allChecksPassed) {
+      return;
+    }
     setAddAddressLoading(true);
     try {
       const data = await postCall("/clientApis/v1/billing_details", {
@@ -104,6 +242,19 @@ export default function AddAddressModal(props) {
 
   // update delivery address
   async function handleUpdateDeliveryAddress() {
+    const allChecksPassed = [
+      checkName(),
+      checkEmail(),
+      checkPhoneNumber(),
+      checkStreetName(),
+      checkLandMark(),
+      checkCity(),
+      checkState(),
+      checkPinCode(),
+    ].every(Boolean);
+    if (!allChecksPassed) {
+      return;
+    }
     setAddAddressLoading(true);
     try {
       const data = await postCall(
@@ -142,6 +293,19 @@ export default function AddAddressModal(props) {
 
   // add delivery address
   async function handleAddDeliveryAddress() {
+    const allChecksPassed = [
+      checkName(),
+      checkEmail(),
+      checkPhoneNumber(),
+      checkStreetName(),
+      checkLandMark(),
+      checkCity(),
+      checkState(),
+      checkPinCode(),
+    ].every(Boolean);
+    if (!allChecksPassed) {
+      return;
+    }
     setAddAddressLoading(true);
     try {
       const data = await postCall("/clientApis/v1/delivery_address", {
@@ -175,61 +339,12 @@ export default function AddAddressModal(props) {
     }
   }
 
-  function checkPhoneNumber() {
-    if (address?.phone?.length < 10) {
-      setError((error) => ({
-        ...error,
-        phone_error: "Please enter a valid phone number",
-      }));
-      return false;
-    }
-    return true;
-  }
-
-  function checkPinCode() {
-    if (address?.areaCode?.length < 6) {
-      setError((error) => ({
-        ...error,
-        areaCode_error: "Please enter a valid Area Code",
-      }));
-      return false;
-    }
-    return true;
-  }
-
-  // use this function to check the disability of the button
-  function checkFormvalidation() {
-    return (
-      address?.name === "" ||
-      address?.phone === "" ||
-      address?.email === "" ||
-      address?.street === "" ||
-      address?.city === "" ||
-      address?.state === "" ||
-      address?.areaCode === "" ||
-      address?.landmark === "" ||
-      address?.building === "" ||
-      error?.name_error !== "" ||
-      error?.email_error !== "" ||
-      error?.phone_error !== "" ||
-      error?.street_name_error !== "" ||
-      error?.door_error !== "" ||
-      error?.city_name_error !== "" ||
-      error?.state_name_error !== "" ||
-      error?.areaCode_error !== ""
-    );
-  }
-
-  function shouldUpdateAddress() {
-    return address.name !== "";
-  }
-
   return (
     <div className={styles.overlay}>
       <div className={styles.popup_card}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <p className={styles.card_header_title}>
-            {shouldUpdateAddress() ? "Update" : "Add"} {address_type} Address
+            {action_type === "edit" ? "Update" : "Add"} {address_type} Address
           </p>
           <div className="ms-auto">
             <CrossIcon
@@ -264,13 +379,14 @@ export default function AddAddressModal(props) {
                         name_error: "",
                       }));
                     }}
+                    onBlur={checkName}
                     required
                   />
                   <ErrorMessage>{error.name_error}</ErrorMessage>
                 </div>
                 <div className="col-md-6 col-sm-12">
                   <Input
-                    type="text"
+                    type="email"
                     placeholder="Enter Email"
                     id="email"
                     label_name="Email"
@@ -287,6 +403,7 @@ export default function AddAddressModal(props) {
                         email_error: "",
                       }));
                     }}
+                    onBlur={checkEmail}
                     required
                   />
                   <ErrorMessage>{error.email_error}</ErrorMessage>
@@ -341,6 +458,7 @@ export default function AddAddressModal(props) {
                         street_name_error: "",
                       }));
                     }}
+                    onBlur={checkStreetName}
                     required
                   />
                   <ErrorMessage>{error.street_name_error}</ErrorMessage>
@@ -364,6 +482,7 @@ export default function AddAddressModal(props) {
                         door_error: "",
                       }));
                     }}
+                    onBlur={checkLandMark}
                     required
                   />
                   <ErrorMessage>{error.door_error}</ErrorMessage>
@@ -387,6 +506,7 @@ export default function AddAddressModal(props) {
                         city_name_error: "",
                       }));
                     }}
+                    onBlur={checkCity}
                     required
                   />
                   <ErrorMessage>{error.city_name_error}</ErrorMessage>
@@ -410,6 +530,7 @@ export default function AddAddressModal(props) {
                         state_name_error: "",
                       }));
                     }}
+                    onBlur={checkState}
                     required
                   />
                   <ErrorMessage>{error.state_name_error}</ErrorMessage>
@@ -453,10 +574,9 @@ export default function AddAddressModal(props) {
         <div
           className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
         >
-          {shouldUpdateAddress() ? (
+          {action_type === "edit" ? (
             <Button
               isloading={addAddressLoading ? 1 : 0}
-              disabled={addAddressLoading || checkFormvalidation()}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Update Address"
@@ -469,12 +589,6 @@ export default function AddAddressModal(props) {
           ) : (
             <Button
               isloading={addAddressLoading ? 1 : 0}
-              disabled={
-                addAddressLoading ||
-                checkFormvalidation() ||
-                checkPhoneNumber() ||
-                checkPinCode()
-              }
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Add Address"

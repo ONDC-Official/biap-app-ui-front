@@ -12,8 +12,9 @@ export default function DeliveryAddress(props) {
   const { deliveryAddresses, setDeliveryAddresses } = props;
   const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
   const [toggleAddressModal, setToggleAddressModal] = useState({
+    actionType: "",
     toggle: false,
-    address: restoreToDefault()
+    address: restoreToDefault(),
   });
 
   const onSetDeliveryAddress = (id, descriptor, address) => {
@@ -25,8 +26,8 @@ export default function DeliveryAddress(props) {
       location: {
         address,
       },
-    }
-  }
+    };
+  };
 
   return (
     <Fragment>
@@ -51,26 +52,33 @@ export default function DeliveryAddress(props) {
                       key={id}
                       checked={deliveryAddress?.id === id}
                       onClick={() => {
-                        setDeliveryAddress(() => onSetDeliveryAddress(id, descriptor, address));
+                        setDeliveryAddress(() =>
+                          onSetDeliveryAddress(id, descriptor, address)
+                        );
                         AddCookie(
                           "delivery_address",
-                          JSON.stringify(onSetDeliveryAddress(id, descriptor, address))
+                          JSON.stringify(
+                            onSetDeliveryAddress(id, descriptor, address)
+                          )
                         );
                       }}
-                      oneditaddress={() => setToggleAddressModal({
-                        toggle: true,
-                        address: {
-                          id,
-                          name: descriptor?.name,
-                          email: descriptor?.email,
-                          phone: descriptor?.phone,
-                          areaCode: address?.areaCode,
-                          city: address?.city,
-                          door: address?.door,
-                          state: address?.state,
-                          street: address?.street,
-                        }
-                      })}
+                      oneditaddress={() =>
+                        setToggleAddressModal({
+                          actionType: "edit",
+                          toggle: true,
+                          address: {
+                            id,
+                            name: descriptor?.name,
+                            email: descriptor?.email,
+                            phone: descriptor?.phone,
+                            areaCode: address?.areaCode,
+                            city: address?.city,
+                            door: address?.door,
+                            state: address?.state,
+                            street: address?.street,
+                          },
+                        })
+                      }
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>
@@ -99,10 +107,13 @@ export default function DeliveryAddress(props) {
           <div className="col-12">
             <div
               className={styles.add_address_wrapper}
-              onClick={() => setToggleAddressModal({
-                toggle: true,
-                address: restoreToDefault()
-              })}
+              onClick={() =>
+                setToggleAddressModal({
+                  actionType: "add",
+                  toggle: true,
+                  address: restoreToDefault(),
+                })
+              }
             >
               <Add width="15" height="15" classes={styles.add_svg_color} />
               <div className="ps-3 flex-grow-1">
@@ -114,17 +125,22 @@ export default function DeliveryAddress(props) {
       </div>
       {toggleAddressModal.toggle && (
         <AddAddressModal
+          action_type={toggleAddressModal.actionType}
           address_type={address_types.delivery}
           selectedAddress={toggleAddressModal.address}
-          onClose={() => setToggleAddressModal({
-            toggle: false,
-            address: restoreToDefault()
-          })}
+          onClose={() =>
+            setToggleAddressModal({
+              actionType: "",
+              toggle: false,
+              address: restoreToDefault(),
+            })
+          }
           onAddAddress={(address) => {
             setToggleAddressModal({
+              actionType: "",
               toggle: false,
-              address: restoreToDefault()
-            })
+              address: restoreToDefault(),
+            });
             setDeliveryAddresses([...deliveryAddresses, address]);
           }}
           onUpdateAddress={(address) => {
@@ -132,13 +148,14 @@ export default function DeliveryAddress(props) {
               if (d.id === address.id) {
                 return address;
               }
-              return d
+              return d;
             });
-            setDeliveryAddresses(updatedAddress)
+            setDeliveryAddresses(updatedAddress);
             setToggleAddressModal({
+              actionType: "",
               toggle: false,
-              address: restoreToDefault()
-            })
+              address: restoreToDefault(),
+            });
           }}
         />
       )}
