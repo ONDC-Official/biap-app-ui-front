@@ -325,7 +325,7 @@ export default function InitializeOrder() {
                       <PriceDetailsCard
                         updateCartLoading={updateCartLoading}
                         productsQuote={productsQuote}
-                        totalLabel="Total cost"
+                        totalLabel="Sub Total"
                       />
                     </div>
                   </div>

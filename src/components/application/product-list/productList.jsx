@@ -286,8 +286,8 @@ export default function ProductList() {
         <div className="py-2">
           <p className={styles.illustration_header}>Your search is empty</p>
           <p className={styles.illustration_body}>
-            No Products found with the given name try searching for something
-            else by clicking the button
+            No products found with the given name. Try searching for something
+            else.
           </p>
         </div>
       </div>

@@ -21,6 +21,7 @@ export default function AddressDetailsCard(props) {
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
+  console.log(deliveryAddress);
   const dispatch = useContext(ToastContext);
   const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
     useState();
@@ -125,7 +126,7 @@ export default function AddressDetailsCard(props) {
           isStepCompleted()
             ? styles.step_completed_card_header
             : styles.card_header
-        } d-flex align-items-center`}
+        }`}
         style={
           isCurrentStep()
             ? {
@@ -139,25 +140,57 @@ export default function AddressDetailsCard(props) {
               }
         }
       >
-        <p className={styles.card_header_title}>Address</p>
+        <div className="d-flex align-items-center">
+          <p className={styles.card_header_title}>Address</p>
+          {isStepCompleted() && (
+            <div className="px-3">
+              <Checkmark
+                width="25"
+                height="16"
+                style={{ marginBottom: "5px" }}
+              />
+            </div>
+          )}
+          {isStepCompleted() && toggleChangeButton() && (
+            <div className="ms-auto">
+              <Button
+                disabled={initLoading}
+                button_type={buttonTypes.primary}
+                button_hover_type={buttonTypes.primary_hover}
+                button_text="Change"
+                onClick={() =>
+                  setCurrentActiveStep(
+                    get_current_step(checkout_steps.SELECT_ADDRESS)
+                  )
+                }
+              />
+            </div>
+          )}
+        </div>
         {isStepCompleted() && (
-          <div className="px-3">
-            <Checkmark width="25" height="16" style={{ marginBottom: "5px" }} />
-          </div>
-        )}
-        {isStepCompleted() && toggleChangeButton() && (
-          <div className="ms-auto">
-            <Button
-              disabled={initLoading}
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Change"
-              onClick={() =>
-                setCurrentActiveStep(
-                  get_current_step(checkout_steps.SELECT_ADDRESS)
-                )
-              }
-            />
+          <div className="py-2">
+            <p
+              className={styles.address_type_label}
+              style={{ fontSize: "14px", fontWeight: "normal" }}
+            >
+              Delivering to:
+            </p>
+            <p className={styles.address_name_and_phone}>
+              {deliveryAddress?.name}
+            </p>
+            <p className={`${styles.address_line_2} pb-2`}>
+              {deliveryAddress?.email} - {deliveryAddress?.phone}
+            </p>
+            <p className={styles.address_line_1}>
+              {deliveryAddress?.location?.address?.street
+                ? deliveryAddress?.location?.address.street
+                : deliveryAddress?.location?.address?.door}
+              , {deliveryAddress?.location?.address?.city}{" "}
+              {deliveryAddress?.location?.address?.state}
+            </p>
+            <p className={styles.address_line_2}>
+              {deliveryAddress?.location?.address?.areaCode}
+            </p>
           </div>
         )}
       </div>

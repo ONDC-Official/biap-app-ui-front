@@ -15,3 +15,13 @@ export function getValueFromCookie(key) {
 export function removeCookie(key) {
   Cookies.remove(key);
 }
+
+export function deleteAllCookies() {
+  const cookies = document.cookie.split(";");
+  cookies.map((cookie) => {
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+    Cookies.remove(name.trim());
+    return null;
+  });
+}

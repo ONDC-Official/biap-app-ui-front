@@ -8,7 +8,7 @@ import User from "../svg/user";
 import Cart from "../svg/cart";
 import { useHistory } from "react-router-dom";
 import ProductList from "../svg/productList";
-import { deleteAllCookies } from "../../../utils/deleteCookies";
+import { deleteAllCookies } from "../../../utils/cookies";
 import { getValueFromCookie } from "../../../utils/cookies";
 import default_user_avatar from "../../../assets/images/user.svg";
 import supportSvg from "../../../assets/images/help.svg";

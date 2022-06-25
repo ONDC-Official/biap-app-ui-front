@@ -44,7 +44,7 @@ export default function Support() {
                 link={"https://ondc.org/index.html"}
                 img={<img src={logo} alt="logo" style={{ width: "100%" }} />}
                 header="ONDC Policy"
-                description="Read the policy and confitions of the ONDC network"
+                description="Read the policy and conditions of the ONDC network"
               />
             </div>
             <div className="col-md-6 col-lg-4 col-xl-3 py-3">
