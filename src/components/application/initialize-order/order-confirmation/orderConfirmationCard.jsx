@@ -152,7 +152,7 @@ export default function OrderConfirmationCard(props) {
 
   // use this function to call initlaize order multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 3;
+    let counter = 5;
     initialize_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setInitializeOrderLoading(false);

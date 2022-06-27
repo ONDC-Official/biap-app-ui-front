@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../../context/cartContext";
 import styles from "../../../../styles/products/orderSummary.module.scss";
 import { buttonTypes } from "../../../shared/button/utils";
-import { getSubTotal } from "../../cart/utils/getSubTotal";
+import { getSubTotal } from "../utils/getSubTotal";
 import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
 import DropdownSvg from "../../../shared/svg/dropdonw";

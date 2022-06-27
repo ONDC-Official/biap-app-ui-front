@@ -3,7 +3,7 @@ import { CartContext } from "../../../../../context/cartContext";
 import CrossIcon from "../../../../shared/svg/cross-icon";
 import cartItemStyles from "../../../../../styles/products/cartItemsOrderSummary.module.scss";
 import { ONDC_COLORS } from "../../../../shared/colors";
-import ProductCard from "../../product-card/productCard";
+import ProductCard from "../../../product-list/product-card/productCard";
 
 export default function CartItems(props) {
   const { onClose } = props;
@@ -49,7 +49,9 @@ export default function CartItems(props) {
                   <ProductCard
                     product={product}
                     price={product?.price}
-                    bpp_provider_descriptor={{ name: product?.provider_details?.descriptor?.name }}
+                    bpp_provider_descriptor={{
+                      name: product?.provider_details?.descriptor?.name,
+                    }}
                     bpp_id={bpp_id}
                     location_id={locations ? locations[0] : ""}
                     bpp_provider_id={provider?.id}

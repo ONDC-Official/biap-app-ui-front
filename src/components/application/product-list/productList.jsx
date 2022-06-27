@@ -14,7 +14,7 @@ import { ONDC_COLORS } from "../../shared/colors";
 import Loading from "../../shared/loading/loading";
 import ProductCard from "./product-card/productCard";
 import { CartContext } from "../../../context/cartContext";
-import OrderSummary from "./order-summary/orderSummary";
+import OrderSummary from "../cart/order-summary/orderSummary";
 import SearchBanner from "./search-banner/searchBanner";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import ProductFilters from "./product-filters/productFilters";

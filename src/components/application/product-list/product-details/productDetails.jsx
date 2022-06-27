@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import no_image_found from "../../../../assets/images/no_image_found.png";
 import Navbar from "../../../shared/navbar/navbar";
-import OrderSummary from "../order-summary/orderSummary";
+import OrderSummary from "../../cart/order-summary/orderSummary";
 import { useContext } from "react";
 import { CartContext } from "../../../../context/cartContext";
 import Subtract from "../../../shared/svg/subtract";
@@ -12,23 +12,20 @@ import Add from "../../../shared/svg/add";
 
 export default function ProductDetails() {
   const location = useLocation();
-  const {
-    product,
-    bpp_id,
-    location_id,
-  } = location.state;
+  const { product, bpp_id, location_id } = location.state;
   const { id, descriptor, price, provider_details } = product;
-  const { name: product_name, images, short_desc: product_description } = descriptor;
-  const { descriptor: provider_descriptor, id: bpp_provider_id } = provider_details;
+  const {
+    name: product_name,
+    images,
+    short_desc: product_description,
+  } = descriptor;
+  const { descriptor: provider_descriptor, id: bpp_provider_id } =
+    provider_details;
   const { name: provider_name } = provider_descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
   const [toggleAddToCart, setToggleAddToCart] = useState();
-  const {
-    cartItems,
-    onReduceQuantity,
-    onAddQuantity,
-    onAddProduct,
-  } = useContext(CartContext);
+  const { cartItems, onReduceQuantity, onAddQuantity, onAddProduct } =
+    useContext(CartContext);
 
   useEffect(() => {
     const isProductPresent = cartItems.find(({ product }) => product.id === id);
@@ -47,28 +44,28 @@ export default function ProductDetails() {
       case "manufacturer_or_packer_name":
         return {
           key: "Manufacturer Name:",
-          value: obj?.["manufacturer_or_packer_name"]
-        }
+          value: obj?.["manufacturer_or_packer_name"],
+        };
       case "net_quantity_or_measure_of_commodity_in_pkg":
         return {
           key: "Net Quantity:",
-          value: obj?.["net_quantity_or_measure_of_commodity_in_pkg"]
-        }
+          value: obj?.["net_quantity_or_measure_of_commodity_in_pkg"],
+        };
       case "month_year_of_manufacture_packing_import":
         return {
           key: "Manufacturing Date:",
-          value: obj?.["month_year_of_manufacture_packing_import"]
-        }
+          value: obj?.["month_year_of_manufacture_packing_import"],
+        };
       case "imported_product_country_of_origin":
         return {
           key: "Country of Origin:",
-          value: obj?.["imported_product_country_of_origin"]
-        }
+          value: obj?.["imported_product_country_of_origin"],
+        };
       default:
         return {
           key: null,
-          value: null
-        }
+          value: null,
+        };
     }
   };
 
@@ -78,10 +75,11 @@ export default function ProductDetails() {
 
       <div className={styles.playground_height}>
         <div
-          className={`py-2 ${cartItems.length > 0
-            ? styles.product_list_with_summary_wrapper
-            : styles.product_list_without_summary_wrapper
-            }`}
+          className={`py-2 ${
+            cartItems.length > 0
+              ? styles.product_list_with_summary_wrapper
+              : styles.product_list_without_summary_wrapper
+          }`}
         >
           <div className="container">
             <div className="row py-3 px-2">
@@ -137,67 +135,89 @@ export default function ProductDetails() {
                 <div className={styles.width}>
                   <hr style={{ border: "1px solid #aaa" }} />
                   {/* AVAILABLE QUANTITY  */}
-                  {Number(product?.AvailableQuantity > 0) ? <div
-                    className="d-flex align-items-center py-1"
-                  >
-                    <p className={styles.prodcut_details_key}>Available Quantity:</p>
-                    <p className={styles.prodcut_details_value}>
-                      {product?.AvailableQuantity}
-                    </p>
-                  </div> : null}
+                  {Number(product?.AvailableQuantity > 0) ? (
+                    <div className="d-flex align-items-center py-1">
+                      <p className={styles.prodcut_details_key}>
+                        Available Quantity:
+                      </p>
+                      <p className={styles.prodcut_details_value}>
+                        {product?.AvailableQuantity}
+                      </p>
+                    </div>
+                  ) : null}
                   {/* RETURNABLE  */}
-                  {typeof product?.["@ondc/org/returnable"] !== "undefined" ? <div
-                    className="d-flex align-items-center py-1"
-                  >
-                    <p className={styles.prodcut_details_key}>Returnable:</p>
-                    <p className={styles.prodcut_details_value}>
-                      {product?.["@ondc/org/returnable"] == true ? "Yes" : "No"}
-                    </p>
-                  </div> : null}
+                  {typeof product?.["@ondc/org/returnable"] !== "undefined" ? (
+                    <div className="d-flex align-items-center py-1">
+                      <p className={styles.prodcut_details_key}>Returnable:</p>
+                      <p className={styles.prodcut_details_value}>
+                        {product?.["@ondc/org/returnable"] == true
+                          ? "Yes"
+                          : "No"}
+                      </p>
+                    </div>
+                  ) : null}
                   {/* CANCELABLE  */}
-                  {typeof product?.["@ondc/org/cancellable"] !== "undefined" ? <div
-                    className="d-flex align-items-center py-1"
-                  >
-                    <p className={styles.prodcut_details_key}>Cancelable:</p>
-                    <p className={styles.prodcut_details_value}>
-                      {product?.["@ondc/org/cancellable"] == true ? "Yes" : "No"}
-                    </p>
-                  </div> : null}
+                  {typeof product?.["@ondc/org/cancellable"] !== "undefined" ? (
+                    <div className="d-flex align-items-center py-1">
+                      <p className={styles.prodcut_details_key}>Cancelable:</p>
+                      <p className={styles.prodcut_details_value}>
+                        {product?.["@ondc/org/cancellable"] == true
+                          ? "Yes"
+                          : "No"}
+                      </p>
+                    </div>
+                  ) : null}
                   {/* COD  */}
-                  {typeof product?.["@ondc/org/available_on_cod"] !== "undefined" ? <div
-                    className="d-flex align-items-center py-1"
-                  >
-                    <p className={styles.prodcut_details_key}>Cash On Delivery:</p>
-                    <p className={styles.prodcut_details_value}>
-                      {product?.["@ondc/org/available_on_cod"] == true ? "Yes" : "No"}
-                    </p>
-                  </div> : null}
+                  {typeof product?.["@ondc/org/available_on_cod"] !==
+                  "undefined" ? (
+                    <div className="d-flex align-items-center py-1">
+                      <p className={styles.prodcut_details_key}>
+                        Cash On Delivery:
+                      </p>
+                      <p className={styles.prodcut_details_value}>
+                        {product?.["@ondc/org/available_on_cod"] == true
+                          ? "Yes"
+                          : "No"}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
                 {/* PRODUCT DETAILS  */}
-                {Object.keys(product?.["@ondc/org/statutory_reqs_packaged_commodities"] || {}).length > 0 && <div className="pt-4 pb-2">
-                  <p className={styles.product_details_header}>
-                    Product Details
-                  </p>
-                  <div className={`${styles.width} pt-2`}>
-                    {Object.keys(product?.["@ondc/org/statutory_reqs_packaged_commodities"]).map((commodity, index) => {
-                      const { key, value } = renderProductDetails(commodity);
-                      if (key && value) {
-                        return (
-                          <div
-                            className="d-flex align-items-center py-1"
-                            key={`id-${index}`}
-                          >
-                            <p className={styles.prodcut_details_key}>{key}</p>
-                            <p className={styles.prodcut_details_value}>
-                              {value}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null
-                    })}
+                {Object.keys(
+                  product?.["@ondc/org/statutory_reqs_packaged_commodities"] ||
+                    {}
+                ).length > 0 && (
+                  <div className="pt-4 pb-2">
+                    <p className={styles.product_details_header}>
+                      Product Details
+                    </p>
+                    <div className={`${styles.width} pt-2`}>
+                      {Object.keys(
+                        product?.[
+                          "@ondc/org/statutory_reqs_packaged_commodities"
+                        ]
+                      ).map((commodity, index) => {
+                        const { key, value } = renderProductDetails(commodity);
+                        if (key && value) {
+                          return (
+                            <div
+                              className="d-flex align-items-center py-1"
+                              key={`id-${index}`}
+                            >
+                              <p className={styles.prodcut_details_key}>
+                                {key}
+                              </p>
+                              <p className={styles.prodcut_details_value}>
+                                {value}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
                   </div>
-                </div>}
+                )}
                 {/* ADD TO CART BUTTON  */}
                 <div className="py-3">
                   {toggleAddToCart && quantityCount > 0 ? (

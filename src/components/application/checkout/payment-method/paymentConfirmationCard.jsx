@@ -10,7 +10,7 @@ import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
 import { checkout_steps } from "../../../../constants/checkout-steps";
 import { ONDC_COLORS } from "../../../shared/colors";
-import AddressRadioButton from "../address-details/address-radio-button/addressRadioButton";
+import AddressRadioButton from "../../initialize-order/address-details/address-radio-button/addressRadioButton";
 import { CartContext } from "../../../../context/cartContext";
 import { getCall, postCall } from "../../../../api/axios";
 import { constructQouteObject } from "../../../../api/utils/constructRequestObject";
@@ -167,7 +167,7 @@ export default function PaymentConfirmationCard(props) {
 
   // use this function to call confirm order multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 3;
+    let counter = 5;
     confirm_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setConfirmOrderLoading(false);

@@ -18,7 +18,7 @@ import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
 import { buttonTypes } from "../../shared/button/utils";
 import Navbar from "../../shared/navbar/navbar";
-import AddressDetailsCard from "../checkout/address-details/addressDetailsCard";
+import AddressDetailsCard from "./add-address-modal/addAddressModal";
 import OrderConfirmationCard from "../checkout/order-confirmation/orderConfirmationCard";
 import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
