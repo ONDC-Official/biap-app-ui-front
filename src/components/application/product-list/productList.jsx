@@ -16,11 +16,11 @@ import ProductCard from "./product-card/productCard";
 import { CartContext } from "../../../context/cartContext";
 import OrderSummary from "./order-summary/orderSummary";
 import SearchBanner from "./search-banner/searchBanner";
-import { toast_actions, toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import ProductFilters from "./product-filters/productFilters";
 import ProductSort from "./product-sort/productSort";
 import Button from "../../shared/button/button";
-import { buttonTypes } from "../../../utils/button";
+import { buttonTypes } from "../../shared/button/utils";
 import Pagination from "../../shared/pagination/pagination";
 import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
@@ -61,6 +61,10 @@ export default function ProductList() {
   const dispatch = useContext(ToastContext);
 
   useEffect(() => {
+    if (!search_context?.message_id) {
+      clearInterval(search_polling_timer.current);
+      return;
+    }
     if (Object.keys(search_context).length > 0) {
       setMessageId(search_context?.message_id);
       setSearchedProduct(search_context?.search?.value);

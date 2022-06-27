@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getButtonStyle } from "../../../utils/button";
+import { getButtonStyle } from "./utils";
 import Loading from "../loading/loading";
 import styles from "./button.module.scss";
 

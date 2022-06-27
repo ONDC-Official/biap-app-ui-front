@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from "react";
-import { buttonTypes } from "../../../../utils/button";
+import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
@@ -13,7 +13,7 @@ import { getCall } from "../../../../api/axios";
 import { AddressContext } from "../../../../context/addressContext";
 import DeliveryAddress from "./delivery-address/deliveryAddress";
 import BillingAddress from "./billing-address/billingAddress";
-import { toast_actions, toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
 
 export default function AddressDetailsCard(props) {
@@ -80,6 +80,7 @@ export default function AddressDetailsCard(props) {
     }
 
     fetchDeliveryAddress();
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -108,6 +109,7 @@ export default function AddressDetailsCard(props) {
     }
 
     fetchBillingAddress();
+    // eslint-disable-next-line
   }, []);
 
   const in_card_loading = (

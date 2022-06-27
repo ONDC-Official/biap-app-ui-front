@@ -9,14 +9,14 @@ import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
-import { buttonTypes } from "../../../utils/button";
+import { buttonTypes } from "../../shared/button/utils";
 import { useHistory } from "react-router-dom";
 import { getCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
 import OrderCard from "./order-card/orderCard";
 import Pagination from "../../shared/pagination/pagination";
-import { toast_actions, toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { ToastContext } from "../../../context/toastContext";
 
 export default function Orders() {
@@ -92,6 +92,7 @@ export default function Orders() {
       });
       setFetchOrderLoading(false);
     }
+    // eslint-disable-next-line
   }, [pagination.currentPage, pagination.postPerPage]);
 
   useEffect(() => {

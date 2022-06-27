@@ -16,14 +16,14 @@ import {
 import { postCall, getCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
-import { buttonTypes } from "../../../utils/button";
+import { buttonTypes } from "../../shared/button/utils";
 import Navbar from "../../shared/navbar/navbar";
 import AddressDetailsCard from "../checkout/address-details/addressDetailsCard";
 import OrderConfirmationCard from "../checkout/order-confirmation/orderConfirmationCard";
 import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
-import { toast_actions, toast_types } from "../../../utils/toast";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { getValueFromCookie } from "../../../utils/cookies";
-import { constructQouteObject } from "../../../utils/constructRequestObject";
+import { constructQouteObject } from "../../../api/utils/constructRequestObject";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
 import { ToastContext } from "../../../context/toastContext";

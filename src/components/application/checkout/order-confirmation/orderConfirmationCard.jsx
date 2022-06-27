@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { buttonTypes } from "../../../../utils/button";
+import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/cart/cartView.module.scss";
 // import cartItemStyles from "../../../../styles/products/cartItemsOrderSummary.module.scss";
 import Button from "../../../shared/button/button";
@@ -21,8 +21,8 @@ import CrossIcon from "../../../shared/svg/cross-icon";
 import ProductCard from "../../product-list/product-card/productCard";
 import { getCall, postCall } from "../../../../api/axios";
 import Cookies from "js-cookie";
-import { constructQouteObject } from "../../../../utils/constructRequestObject";
-import { toast_actions, toast_types } from "../../../../utils/toast";
+import { constructQouteObject } from "../../../../api/utils/constructRequestObject";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { AddCookie } from "../../../../utils/cookies";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import Loading from "../../../shared/loading/loading";

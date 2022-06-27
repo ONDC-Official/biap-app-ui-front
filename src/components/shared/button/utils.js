@@ -1,4 +1,4 @@
-import { ONDC_COLORS } from "../components/shared/colors";
+import { ONDC_COLORS } from "../colors";
 
 export const buttonSize = {
   small: "small",

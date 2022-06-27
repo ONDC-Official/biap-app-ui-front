@@ -14,7 +14,7 @@ import CrossIcon from "../../../shared/svg/cross-icon";
 import MMI_LOGO from "../../../../assets/images/mmi_logo.svg";
 import LocationSvg from "../../../shared/svg/location";
 import Dropdown from "../../../shared/dropdown/dropdown";
-import { toast_actions, toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
 
 export default function SearchBanner({ onSearch, location }) {

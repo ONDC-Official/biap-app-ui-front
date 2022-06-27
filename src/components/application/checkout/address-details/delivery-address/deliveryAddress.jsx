@@ -6,7 +6,7 @@ import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
 import { AddCookie } from "../../../../../utils/cookies";
-import { restoreToDefault } from "../../../../../utils/restoreDefaultAddress";
+import { restoreToDefault } from "../../../add-address-modal/utils/restoreDefaultAddress";
 
 export default function DeliveryAddress(props) {
   const { deliveryAddresses, setDeliveryAddresses } = props;

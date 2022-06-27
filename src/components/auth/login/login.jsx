@@ -6,14 +6,14 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import styles from "../../../styles/auth/auth.module.scss";
-import { buttonTypes } from "../../../utils/button";
+import { buttonTypes } from "../../shared/button/utils";
 import Button from "../../shared/button/button";
 import AuthActionCard from "../auth-action-card/authActionCard";
 import { Link, useHistory } from "react-router-dom";
 import Input from "../../shared/input/input";
 import ErrorMessage from "../../shared/error-message/errorMessage";
-import { toast_actions, toast_types } from "../../../utils/toast";
-import { getErrorMessage } from "../../../utils/mapFirebaseError";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import { getErrorMessage } from "../../../api/utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
 

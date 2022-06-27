@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { buttonTypes } from "../../../../utils/button";
+import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
 import { checkout_steps } from "../../../../constants/checkout-steps";
@@ -13,8 +13,8 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import AddressRadioButton from "../address-details/address-radio-button/addressRadioButton";
 import { CartContext } from "../../../../context/cartContext";
 import { getCall, postCall } from "../../../../api/axios";
-import { constructQouteObject } from "../../../../utils/constructRequestObject";
-import { toast_actions, toast_types } from "../../../../utils/toast";
+import { constructQouteObject } from "../../../../api/utils/constructRequestObject";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import CrossIcon from "../../../shared/svg/cross-icon";

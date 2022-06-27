@@ -2,11 +2,11 @@ import React, { useContext, useState } from "react";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Button from "../../../shared/button/button";
-import { buttonTypes } from "../../../../utils/button";
+import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import Input from "../../../shared/input/input";
-import { toast_actions, toast_types } from "../../../../utils/toast";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import axios from "axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { ToastContext } from "../../../../context/toastContext";
@@ -19,6 +19,7 @@ export default function CustomerPhoneCard({
   const token = getValueFromCookie("token");
   //eslint-disable-next-line
   const PHONE_REGEXP =
+    // eslint-disable-next-line
     /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
   const [inlineError, setInlineError] = useState({
     phone_number_error: "",

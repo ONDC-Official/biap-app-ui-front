@@ -2,8 +2,8 @@ import React, { Fragment, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
 import styles from "../../../styles/cart/cartView.module.scss";
-import { buttonTypes } from "../../../utils/button";
-import { getSubTotal } from "../../../utils/getSubTotal";
+import { buttonTypes } from "../../shared/button/utils";
+import { getSubTotal } from "./utils/getSubTotal";
 import Button from "../../shared/button/button";
 import { ONDC_COLORS } from "../../shared/colors";
 import Navbar from "../../shared/navbar/navbar";
@@ -72,7 +72,9 @@ export default function Cart() {
                           <ProductCard
                             product={product}
                             price={product?.price}
-                            bpp_provider_descriptor={{ name: product?.provider_details?.descriptor?.name }}
+                            bpp_provider_descriptor={{
+                              name: product?.provider_details?.descriptor?.name,
+                            }}
                             bpp_id={bpp_id}
                             location_id={locations ? locations[0] : ""}
                             bpp_provider_id={provider?.id}

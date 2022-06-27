@@ -1,6 +1,6 @@
 import React, { createContext, useReducer } from "react";
 import Toast from "../components/shared/toast/toast";
-import { toast_actions } from "../utils/toast";
+import { toast_actions } from "../components/shared/toast/utils/toast";
 
 export const ToastContext = createContext([]);
 

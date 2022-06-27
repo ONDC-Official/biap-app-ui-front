@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { toast_types } from "../../../utils/toast";
+import { toast_types } from "./utils/toast";
 import { ONDC_COLORS } from "../colors";
 import CrossIcon from "../svg/cross-icon";
 import ToastError from "../svg/toast-error";
