@@ -1,19 +1,22 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
-import ToastProvider from './context/toastContext';
+import ToastProvider from "./context/toastContext";
+import ErrorBoundary from "./components/shared/error-boundary/errorBoundary";
 
 ReactDOM.render(
   <React.StrictMode>
-     <ToastProvider>
-      <App />
-     </ToastProvider>
+    <ToastProvider>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </ToastProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function
