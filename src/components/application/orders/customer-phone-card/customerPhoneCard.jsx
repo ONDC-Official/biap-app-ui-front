@@ -10,6 +10,7 @@ import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import axios from "axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { ToastContext } from "../../../../context/toastContext";
+import validator from "validator";
 
 export default function CustomerPhoneCard({
   supportOrderDetails,
@@ -17,48 +18,62 @@ export default function CustomerPhoneCard({
   onSuccess,
 }) {
   const token = getValueFromCookie("token");
-  //eslint-disable-next-line
-  const PHONE_REGEXP =
-    // eslint-disable-next-line
-    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
   const [inlineError, setInlineError] = useState({
     phone_number_error: "",
   });
   const [loading, setLoading] = useState(false);
   const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
   const dispatch = useContext(ToastContext);
+
+  // use this function to check the user entered phone number
   function checkPhoneNumber() {
-    if (!customerPhoneNumber) {
-      setInlineError({
-        phone_number_error: "Phone Number is required",
-      });
+    if (validator.isEmpty(customerPhoneNumber)) {
+      setInlineError((error) => ({
+        ...error,
+        phone_number_error: "Please enter a phone number",
+      }));
       return false;
     }
-    if (!PHONE_REGEXP.test(customerPhoneNumber)) {
-      setInlineError({
+    if (!validator.isMobilePhone(customerPhoneNumber, "en-IN")) {
+      setInlineError((error) => ({
+        ...error,
         phone_number_error: "Please enter a valid phone number",
-      });
+      }));
       return false;
     }
     return true;
   }
+
   async function contactSupport() {
     if (!checkPhoneNumber()) {
       return;
     }
     setLoading(true);
     try {
-      const { status } = await axios.post(
+      const { data } = await axios.post(
         "knowlarity/api/call-patron",
         {
           customer_phone_number: `+91${customerPhoneNumber.trim()}`,
-          seller_phone_number: supportOrderDetails?.phone,
+          seller_phone_number: supportOrderDetails?.phone?.includes("+91")
+            ? supportOrderDetails?.phone
+            : `+91${supportOrderDetails?.phone}`,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      if (status === 200) {
+      if (data?.error) {
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: data?.error?.message || "Something went wrong!",
+          },
+        });
+        return;
+      }
+      if (data?.success) {
         onSuccess();
         return;
       }
@@ -106,14 +121,19 @@ export default function CustomerPhoneCard({
             id="phone_number"
             has_error={inlineError.phone_number_error}
             onBlur={checkPhoneNumber}
+            maxlength="10"
+            value={customerPhoneNumber}
             onChange={(event) => {
               const phone_number = event.target.value;
+              const regexp = /^[0-9]+$/;
+              if (!regexp.test(phone_number) && phone_number !== "") return;
               setCustomerPhoneNumber(phone_number);
               setInlineError((inlineError) => ({
                 ...inlineError,
                 phone_number_error: "",
               }));
             }}
+            required
           />
           {inlineError.phone_number_error && (
             <ErrorMessage>{inlineError.phone_number_error}</ErrorMessage>

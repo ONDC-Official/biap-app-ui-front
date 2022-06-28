@@ -193,6 +193,7 @@ export default function OrderCard(props) {
           message: err?.message,
         },
       });
+      setSupportOrderLoading(false);
     }
   }
 
@@ -231,7 +232,7 @@ export default function OrderCard(props) {
 
   // use this function to call on get quote call multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 3;
+    let counter = 5;
     support_order_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setToggleCustomerPhoneCard(true);
@@ -256,7 +257,7 @@ export default function OrderCard(props) {
               type: toast_actions.ADD_TOAST,
               payload: {
                 id: Math.floor(Math.random() * 100),
-                type: toast_types.error,
+                type: toast_types.success,
                 message: "Call successfully placed",
               },
             });

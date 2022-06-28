@@ -3,10 +3,10 @@ import { address_types } from "../../../../../constants/address-types";
 import { AddressContext } from "../../../../../context/addressContext";
 import styles from "../../../../../styles/cart/cartView.module.scss";
 import Add from "../../../../shared/svg/add";
-import AddAddressModal from "../../../add-address-modal/addAddressModal";
+import AddAddressModal from "../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
 import { AddCookie } from "../../../../../utils/cookies";
-import { restoreToDefault } from "../../../add-address-modal/utils/restoreDefaultAddress";
+import { restoreToDefault } from "../../add-address-modal/utils/restoreDefaultAddress";
 
 export default function BillingAddress(props) {
   const { billingAddresses, setBillingAddresses } = props;
