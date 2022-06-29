@@ -21,7 +21,6 @@ export default function AddressDetailsCard(props) {
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  console.log(deliveryAddress);
   const dispatch = useContext(ToastContext);
   const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
     useState();

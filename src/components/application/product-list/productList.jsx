@@ -6,8 +6,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../../../styles/products/productList.module.scss";
+import productCardStyles from "../../../styles/products/productCard.module.scss";
 import Navbar from "../../shared/navbar/navbar";
-import search_empty_illustration from "../../../assets/images/search_prod_illustration.svg";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import { getCall } from "../../../api/axios";
 import { ONDC_COLORS } from "../../shared/colors";
@@ -24,6 +24,12 @@ import { buttonTypes } from "../../shared/button/utils";
 import Pagination from "../../shared/pagination/pagination";
 import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
+import beautyIllustration from "../../../assets/images/beauty.png";
+import electronicsIllustration from "../../../assets/images/electronics.png";
+import fashionIllustration from "../../../assets/images/fashion.jpg";
+import foodIllustration from "../../../assets/images/food.jpg";
+import fruitsIllustration from "../../../assets/images/fruits.png";
+import homeDecoreIllustration from "../../../assets/images/homeDecore.jpg";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -252,23 +258,83 @@ export default function ProductList() {
 
   // empty state if user havent searhed anything
   const search_empty_state = (
-    <div
-      className={"d-flex align-items-center justify-content-center"}
-      style={{ height: "85%" }}
-    >
-      <div className="text-center">
-        <div className="py-2">
-          <img
-            src={search_empty_illustration}
-            alt="empty_search"
-            style={{ height: "150px" }}
-          />
-        </div>
-        <div className="py-2">
-          <p className={styles.illustration_header}>Looking for Something</p>
-          <p className={styles.illustration_body}>
-            Search what you are looking on the top search bar
-          </p>
+    <div className="mx-auto p-4" style={{ height: "85%", width: "80%" }}>
+      <div className={productCardStyles.product_card_background}>
+        <div className="container">
+          <div className="row">
+            <div className="col-md-6 col-lg-4 py-4">
+              <div className="d-flex justify-content-center">
+                <div className="text-center">
+                  <img
+                    src={beautyIllustration}
+                    alt="beauty_and_personal_care"
+                    style={{ height: "80px" }}
+                  />
+                  <p className="py-3">Beauty and personal care</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4 py-4">
+              <div className="d-flex justify-content-center">
+                <div className="text-center">
+                  <img
+                    src={foodIllustration}
+                    alt="food_and_beverage"
+                    style={{ height: "80px" }}
+                  />
+                  <p className="py-3">Food and Beverages</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4 py-4">
+              <div className="d-flex justify-content-center">
+                <div className="text-center">
+                  <img
+                    src={fruitsIllustration}
+                    alt="fruits_and_vegitables"
+                    style={{ height: "80px" }}
+                  />
+                  <p className="py-3">Fresh fruits and vegitables</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4 py-4">
+              <div className="d-flex justify-content-center">
+                <div className="text-center">
+                  <img
+                    src={fashionIllustration}
+                    alt="fashion"
+                    style={{ height: "80px" }}
+                  />
+                  <p className="py-3">Fashion</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4 py-4">
+              <div className="d-flex justify-content-center">
+                <div className="text-center">
+                  <img
+                    src={electronicsIllustration}
+                    alt="electronics"
+                    style={{ height: "80px" }}
+                  />
+                  <p className="py-3">Electronics</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-6 col-lg-4 py-4">
+              <div className="d-flex justify-content-center">
+                <div className="text-center">
+                  <img
+                    src={homeDecoreIllustration}
+                    alt="home_decore"
+                    style={{ height: "80px" }}
+                  />
+                  <p className="py-3">Home Decore</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
