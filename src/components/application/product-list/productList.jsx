@@ -6,7 +6,7 @@ import React, {
   useState,
 } from "react";
 import styles from "../../../styles/products/productList.module.scss";
-import productCardStyles from "../../../styles/products/productCard.module.scss";
+// import productCardStyles from "../../../styles/products/productCard.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import { getCall } from "../../../api/axios";
@@ -24,12 +24,13 @@ import { buttonTypes } from "../../shared/button/utils";
 import Pagination from "../../shared/pagination/pagination";
 import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
-import beautyIllustration from "../../../assets/images/beauty.png";
-import electronicsIllustration from "../../../assets/images/electronics.png";
-import fashionIllustration from "../../../assets/images/fashion.jpg";
-import foodIllustration from "../../../assets/images/food.jpg";
-import fruitsIllustration from "../../../assets/images/fruits.png";
-import homeDecoreIllustration from "../../../assets/images/homeDecore.jpg";
+import EmptySearchCategory from "../../../assets/images/empty_search_category.jpg";
+// import beautyIllustration from "../../../assets/images/beauty.png";
+// import electronicsIllustration from "../../../assets/images/electronics.png";
+// import fashionIllustration from "../../../assets/images/fashion.jpg";
+// import foodIllustration from "../../../assets/images/food.jpg";
+// import fruitsIllustration from "../../../assets/images/fruits.png";
+// import homeDecoreIllustration from "../../../assets/images/homeDecore.jpg";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -258,8 +259,11 @@ export default function ProductList() {
 
   // empty state if user havent searhed anything
   const search_empty_state = (
-    <div className="mx-auto p-4" style={{ height: "85%", width: "80%" }}>
-      <div className={productCardStyles.product_card_background}>
+    <div
+      className="d-flex align-items-center justify-content-center p-4"
+      style={{ height: "85%", width: "100%", overflow: "auto" }}
+    >
+      {/* <div className={productCardStyles.product_card_background}>
         <div className="container">
           <div className="row">
             <div className="col-md-6 col-lg-4 py-4">
@@ -336,6 +340,13 @@ export default function ProductList() {
             </div>
           </div>
         </div>
+      </div> */}
+      <div className="py-4">
+        <img
+          src={EmptySearchCategory}
+          alt="empty_search_category"
+          style={{ width: "350px" }}
+        />
       </div>
     </div>
   );
@@ -387,7 +398,15 @@ export default function ProductList() {
           />
         </div>
       )}
-      <div className={styles.playground_height}>
+      <div
+        className={styles.playground_height}
+        style={{
+          background:
+            !searchedProduct || !searchedLocation
+              ? ONDC_COLORS.WHITE
+              : ONDC_COLORS.BACKGROUNDCOLOR,
+        }}
+      >
         {/* change search banner html  */}
         <SearchBanner
           location={searchedLocation}

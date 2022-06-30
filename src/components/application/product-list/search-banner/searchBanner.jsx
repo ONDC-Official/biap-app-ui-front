@@ -228,7 +228,10 @@ export default function SearchBanner({ onSearch, location }) {
   );
 
   return (
-    <div className={bannerStyles.searched_history_banner}>
+    <div
+      className={bannerStyles.searched_history_banner}
+      style={{ boxShadow: "0 5px 10px 0 rgba(0,0,0,0.15)" }}
+    >
       <div className="container">
         <div className="row">
           <div
