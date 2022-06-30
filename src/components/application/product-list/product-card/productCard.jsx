@@ -79,7 +79,11 @@ export default function ProductCard(props) {
             <div className="pe-2">
               <IndianRupee width="10" height="14" />
             </div>
-            <p className={styles.product_price}>{Math.round(price.value)}</p>
+            <p className={styles.product_price}>
+              {Number.isInteger(price.value)
+                ? price.value
+                : price.value.toFixed(2)}
+            </p>
           </div>
           <div className="ms-auto">
             {toggleAddToCart && quantityCount > 0 ? (

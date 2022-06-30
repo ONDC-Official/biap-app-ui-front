@@ -128,7 +128,10 @@ export default function ProductDetails() {
                 {/* PRICE  */}
                 <div className="pb-2">
                   <p className={styles.product_price}>
-                    ₹ {Math.round(price.value)}
+                    ₹{" "}
+                    {Number.isInteger(price.value)
+                      ? price.value
+                      : price.value.toFixed(2)}
                   </p>
                 </div>
                 {/* DIVIDER  */}
