@@ -254,7 +254,7 @@ export default function PaymentConfirmationCard(props) {
       };
 
       const { data } = await axios.post(
-        `https://buyer-app.ondc.org/clientApis/payment/signPayload`,
+        `${process.env.REACT_APP_BASE_URL}/clientApis/payment/signPayload`,
         {
           payload: JSON.stringify(initiatePayloadObj),
         },
@@ -307,7 +307,7 @@ export default function PaymentConfirmationCard(props) {
         return_url: String(window.location.href),
       };
       const { data } = await axios.post(
-        `https://buyer-app.ondc.org/clientApis/payment/signPayload`,
+        `${process.env.REACT_APP_BASE_URL}/clientApis/payment/signPayload`,
         {
           payload: JSON.stringify(processPayloadObj),
         },

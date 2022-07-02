@@ -104,12 +104,19 @@ export default function SearchBanner({ onSearch, location }) {
       const { data } = await axios.get(
         `${process.env.REACT_APP_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
       );
-      setSearchedLocation({
-        ...searchedLocation,
-        name: location?.name,
-        lat: data?.latitude,
-        lng: data?.longitude,
-      });
+      if (data?.latitude && data?.longitude) {
+        setSearchedLocation({
+          ...searchedLocation,
+          name: location?.name,
+          lat: data?.latitude,
+          lng: data?.longitude,
+        });
+      } else {
+        setInlineError((error) => ({
+          ...error,
+          location_error: "Unable to get location, Please try again!",
+        }));
+      }
       setToggleLocationListCard(false);
     } catch (err) {
       dispatch({

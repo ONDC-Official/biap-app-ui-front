@@ -139,7 +139,7 @@ export default function ProductList() {
   function callApiMultipleTimes(message_id) {
     setNewSearchedProduct(true);
     setFetchFilterLoading(true);
-    let counter = 6;
+    let counter = 8;
     search_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         // fetch filters for that.
@@ -151,7 +151,7 @@ export default function ProductList() {
       await onSearchPolling(message_id).finally(() => {
         counter -= 1;
       });
-    }, 2000);
+    }, 3000);
   }
 
   // use this api to fetch the filters.
