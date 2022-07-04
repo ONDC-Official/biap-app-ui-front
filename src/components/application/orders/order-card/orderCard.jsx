@@ -34,7 +34,9 @@ export default function OrderCard(props) {
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const trackOrderRef = useRef(null);
+  const onTrackOrderRef = useRef(null);
   const support_order_timer = useRef();
+  const track_order_timer = useRef();
   const dispatch = useContext(ToastContext);
 
   // use this api to cancel an order
@@ -115,7 +117,7 @@ export default function OrderCard(props) {
           },
         },
       ]);
-      onTrackOrder(data[0]?.context?.message_id);
+      callApiMultipleTimesTrack(data[0]?.context?.message_id);
     } catch (err) {
       setTrackOrderLoading(false);
       dispatch({
@@ -135,22 +137,7 @@ export default function OrderCard(props) {
       const data = await getCall(
         `/clientApis/v2/on_track?messageIds=${array_of_id}`
       );
-      if (data[0]?.message?.tracking?.url === "" || data[0]?.error?.message) {
-        dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-            id: Math.floor(Math.random() * 100),
-            type: toast_types.error,
-            message: "Tracking information not available for this product",
-          },
-        });
-        setTrackOrderLoading(false);
-        return;
-      }
-      trackOrderRef.current.href = data[0]?.message?.tracking?.url;
-      trackOrderRef.current.target = "_blank";
-      trackOrderRef.current.click();
-      setTrackOrderLoading(false);
+      onTrackOrderRef.current = data;
     } catch (err) {
       setTrackOrderLoading(false);
       dispatch({
@@ -230,7 +217,7 @@ export default function OrderCard(props) {
     }
   }
 
-  // use this function to call on get quote call multiple times
+  // use this function to call on support call multiple times
   function callApiMultipleTimes(message_ids) {
     let counter = 8;
     support_order_timer.current = setInterval(async () => {
@@ -241,6 +228,39 @@ export default function OrderCard(props) {
         return;
       }
       await onSupportOrder(message_ids).finally(() => {
+        counter -= 1;
+      });
+    }, 3000);
+  }
+
+  // use this function to call on track order multiple times
+  function callApiMultipleTimesTrack(message_ids) {
+    let counter = 8;
+    track_order_timer.current = setInterval(async () => {
+      if (counter <= 0) {
+        if (
+          onTrackOrderRef.current[0]?.message?.tracking?.url === "" ||
+          onTrackOrderRef.current[0]?.error?.message
+        ) {
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Tracking information not available for this product",
+            },
+          });
+          setTrackOrderLoading(false);
+          return;
+        }
+        trackOrderRef.current.href = onTrackOrderRef[0]?.message?.tracking?.url;
+        trackOrderRef.current.target = "_blank";
+        trackOrderRef.current.click();
+        setTrackOrderLoading(false);
+        clearInterval(track_order_timer.current);
+        return;
+      }
+      await onTrackOrder(message_ids).finally(() => {
         counter -= 1;
       });
     }, 3000);
