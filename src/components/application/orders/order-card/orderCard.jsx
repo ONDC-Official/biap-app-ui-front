@@ -232,7 +232,7 @@ export default function OrderCard(props) {
 
   // use this function to call on get quote call multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 5;
+    let counter = 8;
     support_order_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setToggleCustomerPhoneCard(true);
@@ -243,7 +243,7 @@ export default function OrderCard(props) {
       await onSupportOrder(message_ids).finally(() => {
         counter -= 1;
       });
-    }, 2000);
+    }, 3000);
   }
 
   return (
