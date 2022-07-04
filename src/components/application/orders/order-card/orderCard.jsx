@@ -251,6 +251,7 @@ export default function OrderCard(props) {
             },
           });
           setTrackOrderLoading(false);
+          clearInterval(track_order_timer.current);
           return;
         }
         trackOrderRef.current.href = onTrackOrderRef[0]?.message?.tracking?.url;
