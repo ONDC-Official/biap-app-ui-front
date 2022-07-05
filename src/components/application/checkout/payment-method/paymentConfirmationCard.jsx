@@ -167,7 +167,7 @@ export default function PaymentConfirmationCard(props) {
 
   // use this function to call confirm order multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 5;
+    let counter = 8;
     confirm_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setConfirmOrderLoading(false);
@@ -201,7 +201,7 @@ export default function PaymentConfirmationCard(props) {
       await onConfirmOrder(message_ids).finally(() => {
         counter -= 1;
       });
-    }, 2000);
+    }, 3000);
   }
 
   // function to get the current active step

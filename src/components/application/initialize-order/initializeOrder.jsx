@@ -154,7 +154,7 @@ export default function InitializeOrder() {
 
   // use this function to call on get quote call multiple times
   function callApiMultipleTimes(message_ids) {
-    let counter = 5;
+    let counter = 8;
     quote_polling_timer.current = setInterval(async () => {
       if (counter <= 0) {
         setGetQuoteLoading(false);
@@ -228,7 +228,7 @@ export default function InitializeOrder() {
       await onGetQuote(message_ids).finally(() => {
         counter -= 1;
       });
-    }, 2000);
+    }, 3000);
   }
 
   const loadingSpin = (
