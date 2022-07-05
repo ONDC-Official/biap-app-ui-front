@@ -68,6 +68,28 @@ export default function ProductList() {
   const dispatch = useContext(ToastContext);
 
   useEffect(() => {
+
+    var eventSourceInitDict = { headers: { 'Authorization': 'test=test' } };
+    var es = new window.EventSourcePolyfill('http://localhost:3001/clientApis/events', eventSourceInitDict);
+
+    console.log(es);
+
+    // es.onopen(() => {
+    //   console.log('open')
+    // });
+
+    // es.onerror(() => {
+    //   console.log('closed');
+    // })
+
+    es.addEventListener('message', (data) => {
+      console.log('message', data);
+
+      if (data.data == '0') {
+        es.close();
+      }
+    });
+
     if (!search_context?.message_id) {
       clearInterval(search_polling_timer.current);
       return;
@@ -100,6 +122,8 @@ export default function ProductList() {
       clearInterval(search_polling_timer.current);
     };
     // eslint-disable-next-line
+
+
   }, []);
 
   // on search Api
@@ -426,11 +450,10 @@ export default function ProductList() {
           search_empty_state
         ) : (
           <div
-            className={`py-2 ${
-              cartItems.length > 0
-                ? styles.product_list_with_summary_wrapper
-                : styles.product_list_without_summary_wrapper
-            }`}
+            className={`py-2 ${cartItems.length > 0
+              ? styles.product_list_with_summary_wrapper
+              : styles.product_list_without_summary_wrapper
+              }`}
           >
             {newSearchedProduct ? (
               loadingSpin("100%", "100%")
