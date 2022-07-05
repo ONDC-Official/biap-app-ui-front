@@ -31,6 +31,7 @@ import EmptySearchCategory from "../../../assets/images/empty_search_category.jp
 // import foodIllustration from "../../../assets/images/food.jpg";
 // import fruitsIllustration from "../../../assets/images/fruits.png";
 // import homeDecoreIllustration from "../../../assets/images/homeDecore.jpg";
+import Cookies from "js-cookie";
 
 export default function ProductList() {
   const { cartItems } = useContext(CartContext);
@@ -67,28 +68,27 @@ export default function ProductList() {
   const [selectedFilters, setSelectedFilters] = useState({});
   const dispatch = useContext(ToastContext);
 
+  useEffect(()=>{
+    if(messageId && messageId.length) {
+      const token = Cookies.get("token");
+
+      let header = { 
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }) 
+        }
+      };
+
+      let es = new window.EventSourcePolyfill(`http://localhost:3001/clientApis/events?messageId=${messageId}`, header);
+
+      es.addEventListener('on_search', (e) => {
+        console.log('on_search', e);
+      });
+    }
+  }, [messageId]);
+
   useEffect(() => {
 
-    var eventSourceInitDict = { headers: { 'Authorization': 'test=test' } };
-    var es = new window.EventSourcePolyfill('http://localhost:3001/clientApis/events', eventSourceInitDict);
-
-    console.log(es);
-
-    // es.onopen(() => {
-    //   console.log('open')
-    // });
-
-    // es.onerror(() => {
-    //   console.log('closed');
-    // })
-
-    es.addEventListener('message', (data) => {
-      console.log('message', data);
-
-      if (data.data == '0') {
-        es.close();
-      }
-    });
+   
 
     if (!search_context?.message_id) {
       clearInterval(search_polling_timer.current);
