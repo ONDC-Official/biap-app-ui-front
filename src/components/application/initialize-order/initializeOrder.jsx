@@ -2,8 +2,8 @@ import React, {
   useContext,
   useState,
   useEffect,
-  Fragment,
   useRef,
+  Fragment,
   useCallback,
 } from "react";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
@@ -27,12 +27,14 @@ import { constructQouteObject } from "../../../api/utils/constructRequestObject"
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
 import { ToastContext } from "../../../context/toastContext";
+import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 
 export default function InitializeOrder() {
-  const { cartItems, setCartItems } = useContext(CartContext);
-  const dispatch = useContext(ToastContext);
+  // CONSTANTS
   const transaction_id = getValueFromCookie("transaction_id");
   const history = useHistory();
+
+  // STATES
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
   const [updateCartLoading, setUpdateCartLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
@@ -43,12 +45,64 @@ export default function InitializeOrder() {
   const [currentActiveStep, setCurrentActiveStep] = useState(
     get_current_step(checkout_steps.SELECT_ADDRESS)
   );
-  const quote_polling_timer = useRef(0);
-  const onGotQuote = useRef();
-  const bpps_with_error = useRef([]);
+  const [eventData, setEventData] = useState([]);
+  const [errorMessageTimeOut, setErrorMessageTimeOut] = useState(
+    "Fetching details for this product"
+  );
+  const [toggleInit, setToggleInit] = useState(false);
+
+  // REFS
+  const responseRef = useRef([]);
+
+  // CONTEXT
+  const { cartItems } = useContext(CartContext);
+  const dispatch = useContext(ToastContext);
+
+  // use this function to dispatch error
+  function dispatchToast(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
+  }
+
+  // use this function to fetch products quote
+  function onFetchQuote(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    message_id.forEach((id) => {
+      let es = new window.EventSourcePolyfill(
+        `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${id}`,
+        header
+      );
+      es.addEventListener("on_select", (e) => {
+        const { messageId } = JSON.parse(e.data);
+        onGetQuote(messageId);
+      });
+      setTimeout(() => {
+        es.close();
+        const request_object = constructQouteObject(cartItems);
+        if (responseRef.current.length !== request_object.length) {
+          setErrorMessageTimeOut("Cannot fetch details for this product");
+        }
+        setToggleInit(true);
+      }, SSE_TIMEOUT);
+    });
+  }
 
   // use this function to get the quote of the items
   const getQuote = useCallback(async (items) => {
+    responseRef.current = [];
     try {
       const data = await postCall(
         "/clientApis/v2/get_quote",
@@ -63,56 +117,73 @@ export default function InitializeOrder() {
           },
         }))
       );
-      const array_of_ids = data?.map((d) => {
-        if (d.error) {
-          return {
-            error_reason: d.error.message,
-            message_id: d.context.message_id,
-          };
-        }
-        return {
-          error_reason: "",
-          message_id: d.context.message_id,
-        };
-      });
-      // check here if the response returned error or not
-      const isContainingError = array_of_ids.find(
-        (idObj) => idObj.error_reason !== ""
-      );
-
-      // If error than show toast
-      if (isContainingError) {
-        dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-            id: Math.floor(Math.random() * 100),
-            type: toast_types.error,
-            message: isContainingError.error_reason,
-          },
-        });
-        if (
-          array_of_ids.filter((idObj) => idObj.error_reason === "").length <= 0
-        ) {
-          setGetQuoteLoading(false);
-        }
-        return;
-      }
-      callApiMultipleTimes(
-        array_of_ids.filter((idObj) => idObj.error_reason === "")
+      // fetch through events
+      onFetchQuote(
+        data?.map((txn) => {
+          const { context } = txn;
+          return context?.message_id;
+        })
       );
     } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.response?.data?.error,
-        },
-      });
+      dispatchToast(err?.response?.data?.error);
       setGetQuoteLoading(false);
     }
     // eslint-disable-next-line
   }, []);
+
+  // on get quote Api
+  const onGetQuote = useCallback(async (message_id) => {
+    try {
+      const data = await getCall(
+        `/clientApis/v2/on_get_quote?messageIds=${message_id}`
+      );
+      responseRef.current = [...responseRef.current, data[0]];
+      setEventData((eventData) => [...eventData, data[0]]);
+    } catch (err) {
+      dispatchToast(err.message);
+      setGetQuoteLoading(false);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    if (eventData.length > 0) {
+      // fetch request object length and compare it with the response length
+      const requestObject = constructQouteObject(cartItems);
+      if (requestObject.length === responseRef.current.length) {
+        setToggleInit(true);
+      }
+      // check if any one order contains error
+      let total_payable = 0;
+      const quotes = responseRef.current?.map((item, index) => {
+        const { message } = item;
+        // else generate quote of it
+        if (message) {
+          total_payable += Number(message?.quote?.quote?.price?.value);
+          const breakup = message?.quote?.quote?.breakup;
+          const provided_by = message?.quote?.provider?.descriptor?.name;
+          const product = breakup?.map((break_up_item) => ({
+            title: break_up_item?.title,
+            price: message?.quote?.quote?.price?.value,
+            provided_by,
+          }));
+          return product;
+        }
+        return {
+          title: "",
+          price: "",
+          provided_by: "",
+        };
+      });
+      setGetQuoteLoading(false);
+      setUpdateCartLoading(false);
+      setProductsQoute({
+        products: quotes.flat(),
+        total_payable: total_payable.toFixed(2),
+      });
+    }
+    // eslint-disable-next-line
+  }, [eventData]);
 
   useEffect(() => {
     // this check is so that when cart is empty we do not call the
@@ -121,115 +192,8 @@ export default function InitializeOrder() {
       const request_object = constructQouteObject(cartItems);
       getQuote(request_object);
     }
-
-    // cleanup function
-    return () => {
-      clearInterval(quote_polling_timer.current);
-    };
     // eslint-disable-next-line
   }, []);
-
-  // on get quote Api
-  async function onGetQuote(array_of_ids) {
-    try {
-      const data = await getCall(
-        `/clientApis/v2/on_get_quote?messageIds=${array_of_ids
-          .filter((txn) => txn.error_reason === "")
-          .map((txn) => txn.message_id)}`
-      );
-      onGotQuote.current = data;
-    } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err.message,
-        },
-      });
-      clearInterval(quote_polling_timer.current);
-      setGetQuoteLoading(false);
-    }
-  }
-
-  // use this function to call on get quote call multiple times
-  function callApiMultipleTimes(message_ids) {
-    let counter = 8;
-    quote_polling_timer.current = setInterval(async () => {
-      if (counter <= 0) {
-        setGetQuoteLoading(false);
-        setUpdateCartLoading(false);
-        // check if all orders does not contain error object
-        const allNonValidOrder = onGotQuote.current.every(
-          (data) => data?.error
-        );
-        // if all orders contains error than throw back to listing page
-        if (allNonValidOrder) {
-          dispatch({
-            type: toast_actions.ADD_TOAST,
-            payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: onGotQuote.current[0].error.message,
-            },
-          });
-          history.push("/application/");
-        } else {
-          // check if any one order contains error
-          let total_payable = 0;
-          const quotes = onGotQuote.current?.map((item, index) => {
-            const { message, error = {} } = item;
-            // if order contains error than filter that order
-            if (Object.keys(error).length > 0) {
-              const cartItemWithError = cartItems[index]?.provider?.id;
-              bpps_with_error.current = [
-                ...bpps_with_error.current,
-                cartItemWithError,
-              ];
-              dispatch({
-                type: toast_actions.ADD_TOAST,
-                payload: {
-                  id: Math.floor(Math.random() * 100),
-                  type: toast_types.error,
-                  message: error?.message,
-                },
-              });
-              setCartItems(
-                cartItems.filter(
-                  (cart_item) =>
-                    !bpps_with_error.current.includes(cart_item?.provider?.id)
-                )
-              );
-            }
-            // else generate quote of it
-            if (message) {
-              total_payable += Number(message?.quote?.quote?.price?.value);
-              const breakup = message?.quote?.quote?.breakup;
-              const provided_by = message?.quote?.provider?.descriptor?.name;
-              const product = breakup?.map((break_up_item) => ({
-                title: break_up_item?.title,
-                price: Math.round(break_up_item?.price?.value),
-                provided_by,
-              }));
-              return product;
-            }
-            return {
-              title: "",
-              price: "",
-              provided_by: "",
-            };
-          });
-          setProductsQoute({ products: quotes.flat(), total_payable });
-        }
-
-        clearInterval(quote_polling_timer.current);
-        return;
-      }
-      await onGetQuote(message_ids).finally(() => {
-        counter -= 1;
-      });
-    }, 3000);
-  }
 
   const loadingSpin = (
     <div
@@ -300,6 +264,11 @@ export default function InitializeOrder() {
                     </div>
                     <div className="col-12 pb-3">
                       <OrderConfirmationCard
+                        responseReceivedIds={responseRef.current.map((item) => {
+                          const { message } = item;
+                          return message?.quote?.provider?.id.toString();
+                        })}
+                        responseText={errorMessageTimeOut}
                         currentActiveStep={currentActiveStep}
                         setCurrentActiveStep={(value) =>
                           setCurrentActiveStep(value)
@@ -308,11 +277,11 @@ export default function InitializeOrder() {
                         updateCartLoading={updateCartLoading}
                         fetchUpdatedQuote={() => {
                           setUpdateCartLoading(true);
-                          clearInterval(quote_polling_timer.current);
                           const request_object =
                             constructQouteObject(cartItems);
                           getQuote(request_object);
                         }}
+                        toggleInit={toggleInit}
                       />
                     </div>
                   </div>

@@ -78,7 +78,7 @@ export default function PaymentConfirmationCard(props) {
   useEffect(() => {
     if (orderStatus === "CHARGED") {
       const parsedCartItems = JSON.parse(
-        getValueFromCookie("cartItems") || "{}"
+        localStorage.getItem("cartItems") || "{}"
       );
       setConfirmOrderLoading(true);
       const request_object = constructQouteObject(parsedCartItems);
@@ -96,7 +96,7 @@ export default function PaymentConfirmationCard(props) {
   async function confirmOrder(items, method) {
     try {
       const data = await postCall(
-        "/clientApis/v2/confirm_order",
+        "clientApis/v2/confirm_order",
         items.map((item, index) => ({
           // pass the map of parent order id and transaction id
           context: parentOrderIDMap.get(item[0]?.provider?.id),
@@ -147,7 +147,7 @@ export default function PaymentConfirmationCard(props) {
   async function onConfirmOrder(array_of_ids) {
     try {
       const data = await getCall(
-        `/clientApis/v2/on_confirm_order?messageIds=${array_of_ids
+        `clientApis/v2/on_confirm_order?messageIds=${array_of_ids
           .filter((txn) => txn.error_reason === "")
           .map((txn) => txn.message_id)}`
       );
@@ -183,6 +183,8 @@ export default function PaymentConfirmationCard(props) {
           removeCookie("cartItems");
           removeCookie("delivery_address");
           removeCookie("billing_address");
+          removeCookie("checkout_details");
+          removeCookie("parent_and_transaction_id_map");
           setCartItems([]);
           history.replace("/application/orders");
         } else {
@@ -254,7 +256,7 @@ export default function PaymentConfirmationCard(props) {
       };
 
       const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/clientApis/payment/signPayload`,
+        `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
         {
           payload: JSON.stringify(initiatePayloadObj),
         },
@@ -307,7 +309,7 @@ export default function PaymentConfirmationCard(props) {
         return_url: String(window.location.href),
       };
       const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/clientApis/payment/signPayload`,
+        `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
         {
           payload: JSON.stringify(processPayloadObj),
         },

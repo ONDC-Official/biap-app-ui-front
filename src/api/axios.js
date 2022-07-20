@@ -6,6 +6,8 @@ axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
 function unAuthorizedResponse() {
   deleteAllCookies();
+  localStorage.removeItem("product_list");
+  localStorage.removeItem("cartItems");
   window.location.pathname = "/";
 }
 
