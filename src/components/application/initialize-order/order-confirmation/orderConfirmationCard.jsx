@@ -29,6 +29,7 @@ import Loading from "../../../shared/loading/loading";
 import { ToastContext } from "../../../../context/toastContext";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function OrderConfirmationCard(props) {
   const {
@@ -57,7 +58,11 @@ export default function OrderConfirmationCard(props) {
 
   // REFS
   const responseRef = useRef([]);
+  const eventTimeOutRef = useRef([]);
   const updateCartCounter = useRef(0);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   // use this function to dispatch error
   function dispatchToast(type = "toast_types.error", message) {
@@ -124,6 +129,7 @@ export default function OrderConfirmationCard(props) {
 
   // use this function to initialize the order
   function onInit(message_id) {
+    eventTimeOutRef.current = [];
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -141,8 +147,11 @@ export default function OrderConfirmationCard(props) {
         const { messageId } = JSON.parse(e.data);
         onInitializeOrder(messageId);
       });
-      setTimeout(() => {
-        es.close();
+      const timer = setTimeout(() => {
+        eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+          eventSource.close();
+          clearTimeout(timer);
+        });
         // check if all the orders got cancled
         if (responseRef.current.length <= 0) {
           setInitializeOrderLoading(false);
@@ -163,6 +172,14 @@ export default function OrderConfirmationCard(props) {
           navigatoToCheckout();
         }
       }, SSE_TIMEOUT);
+
+      eventTimeOutRef.current = [
+        ...eventTimeOutRef.current,
+        {
+          eventSource: es,
+          timer,
+        },
+      ];
     });
   }
 
@@ -170,29 +187,31 @@ export default function OrderConfirmationCard(props) {
     async (items) => {
       responseRef.current = [];
       try {
-        const data = await postCall(
-          "/clientApis/v2/initialize_order",
-          items.map((item) => ({
-            context: {
-              transaction_id,
-            },
-            message: {
-              items: item,
-              billing_info: {
-                address: billingAddress?.address,
-                phone: billingAddress?.phone,
-                name: billingAddress?.name,
-                email: billingAddress?.email,
+        const data = await cancellablePromise(
+          postCall(
+            "/clientApis/v2/initialize_order",
+            items.map((item) => ({
+              context: {
+                transaction_id,
               },
-              delivery_info: {
-                type: "HOME-DELIVERY",
-                name: deliveryAddress?.name,
-                email: deliveryAddress?.email,
-                phone: deliveryAddress?.phone,
-                location: deliveryAddress?.location,
+              message: {
+                items: item,
+                billing_info: {
+                  address: billingAddress?.address,
+                  phone: billingAddress?.phone,
+                  name: billingAddress?.name,
+                  email: billingAddress?.email,
+                },
+                delivery_info: {
+                  type: "HOME-DELIVERY",
+                  name: deliveryAddress?.name,
+                  email: deliveryAddress?.email,
+                  phone: deliveryAddress?.phone,
+                  location: deliveryAddress?.location,
+                },
               },
-            },
-          }))
+            }))
+          )
         );
         const parentTransactionIdMap = new Map();
         data.map((data) => {
@@ -228,8 +247,8 @@ export default function OrderConfirmationCard(props) {
   // on initialize order Api
   const onInitializeOrder = useCallback(async (message_id) => {
     try {
-      const data = await getCall(
-        `/clientApis/v2/on_initialize_order?messageIds=${message_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_initialize_order?messageIds=${message_id}`)
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
@@ -263,6 +282,15 @@ export default function OrderConfirmationCard(props) {
     }
     // eslint-disable-next-line
   }, [updateCartCounter.current]);
+
+  useEffect(() => {
+    return () => {
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    };
+  }, []);
 
   return (
     <div className={styles.price_summary_card}>

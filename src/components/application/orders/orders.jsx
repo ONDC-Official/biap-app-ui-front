@@ -18,9 +18,13 @@ import OrderCard from "./order-card/orderCard";
 import Pagination from "../../shared/pagination/pagination";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { ToastContext } from "../../../context/toastContext";
+import useCancellablePromise from "../../../api/cancelRequest";
 
 export default function Orders() {
+  // HISTORY
   const history = useHistory();
+
+  // STATES
   const [orders, setOrders] = useState([]);
   const [fetchOrderLoading, setFetchOrderLoading] = useState(false);
   const [supportOrderLoading, setSupportOrderLoading] = useState(false);
@@ -29,13 +33,21 @@ export default function Orders() {
     totalCount: 0,
     postPerPage: 10,
   });
-  const dispatch = useContext(ToastContext);
   const [currentSelectedAccordion, setCurrentSelectedAccordion] = useState("");
+
+  // CONTEXT
+  const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
+
   const getAllOrders = useCallback(async () => {
     setFetchOrderLoading(true);
     try {
-      const { totalCount, orders } = await getCall(
-        `/clientApis/v1/orders?pageNumber=${pagination.currentPage}&limit=${pagination.postPerPage}`
+      const { totalCount, orders } = await cancellablePromise(
+        getCall(
+          `/clientApis/v1/orders?pageNumber=${pagination.currentPage}&limit=${pagination.postPerPage}`
+        )
       );
       const formated_orders = orders.map((order) => {
         const {

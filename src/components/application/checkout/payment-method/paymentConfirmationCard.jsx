@@ -24,6 +24,7 @@ import { removeCookie, getValueFromCookie } from "../../../../utils/cookies";
 import Loading from "../../../shared/loading/loading";
 import { ToastContext } from "../../../../context/toastContext";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function PaymentConfirmationCard(props) {
   const {
@@ -60,6 +61,7 @@ export default function PaymentConfirmationCard(props) {
 
   //REFS
   const responseRef = useRef([]);
+  const eventTimeOutRef = useRef([]);
   const sdkPayload = useRef({
     action: "initiate",
     clientId: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
@@ -89,6 +91,9 @@ export default function PaymentConfirmationCard(props) {
   // CONTEXT
   const { cartItems, setCartItems } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   // function to dispatch error
   function dispatchError(message) {
@@ -154,14 +159,16 @@ export default function PaymentConfirmationCard(props) {
         timestamp: String(new Date().getTime()),
       };
 
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
-        {
-          payload: JSON.stringify(initiatePayloadObj),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const { data } = await cancellablePromise(
+        axios.post(
+          `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
+          {
+            payload: JSON.stringify(initiatePayloadObj),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
       );
       sdkPayload.current = {
         ...sdkPayload.current,
@@ -208,14 +215,16 @@ export default function PaymentConfirmationCard(props) {
         timestamp: String(new Date().getTime()),
         return_url: String(window.location.href),
       };
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
-        {
-          payload: JSON.stringify(processPayloadObj),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const { data } = await cancellablePromise(
+        axios.post(
+          `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
+          {
+            payload: JSON.stringify(processPayloadObj),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
       );
       processPayload.current = {
         ...processPayload.current,
@@ -251,6 +260,7 @@ export default function PaymentConfirmationCard(props) {
 
   // use this function to confirm the order
   function onConfirm(message_id) {
+    eventTimeOutRef.current = [];
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -268,8 +278,11 @@ export default function PaymentConfirmationCard(props) {
         const { messageId } = JSON.parse(e.data);
         onConfirmOrder(messageId);
       });
-      setTimeout(() => {
-        es.close();
+      const timer = setTimeout(() => {
+        eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+          eventSource.close();
+          clearTimeout(timer);
+        });
         // check if all the orders got cancled
         if (responseRef.current.length <= 0) {
           setConfirmOrderLoading(false);
@@ -279,29 +292,39 @@ export default function PaymentConfirmationCard(props) {
           return;
         }
       }, SSE_TIMEOUT);
+
+      eventTimeOutRef.current = [
+        ...eventTimeOutRef.current,
+        {
+          eventSource: es,
+          timer,
+        },
+      ];
     });
   }
 
   const confirmOrder = useCallback(async (items, method) => {
     responseRef.current = [];
     try {
-      const data = await postCall(
-        "clientApis/v2/confirm_order",
-        items.map((item, index) => ({
-          // pass the map of parent order id and transaction id
-          context: parentOrderIDMap.get(item[0]?.provider?.id),
-          message: {
-            payment: {
-              paid_amount: Number(productsQuote[index]?.price?.value),
-              type:
-                method === payment_methods.COD
-                  ? "POST-FULFILLMENT"
-                  : "ON-ORDER",
-              transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
-                .transaction_id,
+      const data = await cancellablePromise(
+        postCall(
+          "clientApis/v2/confirm_order",
+          items.map((item, index) => ({
+            // pass the map of parent order id and transaction id
+            context: parentOrderIDMap.get(item[0]?.provider?.id),
+            message: {
+              payment: {
+                paid_amount: Number(productsQuote[index]?.price?.value),
+                type:
+                  method === payment_methods.COD
+                    ? "POST-FULFILLMENT"
+                    : "ON-ORDER",
+                transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
+                  .transaction_id,
+              },
             },
-          },
-        }))
+          }))
+        )
       );
       onConfirm(
         data?.map((txn) => {
@@ -319,8 +342,8 @@ export default function PaymentConfirmationCard(props) {
   // on confirm order Api
   const onConfirmOrder = useCallback(async (message_id) => {
     try {
-      const data = await getCall(
-        `clientApis/v2/on_confirm_order?messageIds=${message_id}`
+      const data = await cancellablePromise(
+        getCall(`clientApis/v2/on_confirm_order?messageIds=${message_id}`)
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
@@ -375,6 +398,15 @@ export default function PaymentConfirmationCard(props) {
     }
     // eslint-disable-next-line
   }, [eventData]);
+
+  useEffect(() => {
+    return () => {
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    };
+  }, []);
 
   return (
     <div className={styles.price_summary_card}>

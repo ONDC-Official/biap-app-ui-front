@@ -18,8 +18,10 @@ import Pagination from "../../shared/pagination/pagination";
 import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
 import EmptySearchCategory from "../../../assets/images/empty_search_category.jpg";
+import { useRef } from "react";
+import useCancellablePromise from "../../../api/cancelRequest";
 export default function ProductList() {
-  const { cartItems } = useContext(CartContext);
+  // CONSTANTS
   const search_context = JSON.parse(
     getValueFromCookie("search_context") || "{}"
   );
@@ -30,6 +32,8 @@ export default function ProductList() {
   const selected_sort_options = JSON.parse(
     getValueFromCookie("sort_options") || "{}"
   );
+
+  // STATES
   const [eventData, setEventData] = useState();
   const [products, setProducts] = useState([]);
   const [messageId, setMessageId] = useState("");
@@ -51,7 +55,16 @@ export default function ProductList() {
   const [toggleFiltersOnMobile, setToggleFiltersOnMobile] = useState(false);
   const [sortType, setSortType] = useState({});
   const [selectedFilters, setSelectedFilters] = useState({});
+
+  // CONTEXT
+  const { cartItems } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
+
+  // REF
+  const eventSourceRef = useRef(null);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   // use this function to fetch products
   function fetchProducts(message_id) {
@@ -65,14 +78,20 @@ export default function ProductList() {
         }),
       },
     };
-    let es = new window.EventSourcePolyfill(
+    eventSourceRef.current = new window.EventSourcePolyfill(
       `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
       header
     );
-    es.addEventListener("on_search", (e) => {
+    eventSourceRef.current.addEventListener("on_search", (e) => {
       setEventData(() => JSON.parse(e.data));
     });
   }
+
+  useEffect(() => {
+    return () => {
+      eventSourceRef.current?.close();
+    };
+  }, []);
 
   useEffect(() => {
     if (!search_context?.message_id) {
@@ -119,8 +138,10 @@ export default function ProductList() {
   // on search Api
   async function onSearch(message_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
+      const data = await cancellablePromise(
+        getCall(
+          `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
+        )
       );
       localStorage.setItem(
         "product_list",
@@ -143,8 +164,8 @@ export default function ProductList() {
   // use this api to fetch the filters.
   async function fetchAllFilters(messageId) {
     try {
-      const data = await getCall(
-        `/clientApis/v1/getFilterParams?messageId=${messageId}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v1/getFilterParams?messageId=${messageId}`)
       );
       setFilters(data);
     } catch (err) {
@@ -211,7 +232,9 @@ export default function ProductList() {
       page_number
     );
     try {
-      const { message } = await getCall(`/clientApis/v1/on_search${query}`);
+      const { message } = await cancellablePromise(
+        getCall(`/clientApis/v1/on_search${query}`)
+      );
       setPagination((prev) => ({
         ...prev,
         totalCount: message?.count,

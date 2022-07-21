@@ -12,6 +12,7 @@ import { restoreToDefault } from "./utils/restoreDefaultAddress";
 import { ToastContext } from "../../../../context/toastContext";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import validator from "validator";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function AddAddressModal(props) {
   const {
@@ -22,6 +23,8 @@ export default function AddAddressModal(props) {
     onAddAddress,
     onUpdateAddress,
   } = props;
+
+  // STATES
   const [addAddressLoading, setAddAddressLoading] = useState(false);
   const [address, setAddress] = useState(selectedAddress);
   const [error, setError] = useState({
@@ -34,7 +37,12 @@ export default function AddAddressModal(props) {
     state_name_error: "",
     street_name_error: "",
   });
+
+  // CONTEXT
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   function checkName() {
     if (validator.isEmpty(address?.name)) {
@@ -162,9 +170,8 @@ export default function AddAddressModal(props) {
     }
     setAddAddressLoading(true);
     try {
-      const data = await postCall(
-        `/clientApis/v1/update_billing_details/${address.id}`,
-        {
+      const data = await cancellablePromise(
+        postCall(`/clientApis/v1/update_billing_details/${address.id}`, {
           name: address.name.trim(),
           address: {
             areaCode: address.areaCode.trim(),
@@ -177,7 +184,7 @@ export default function AddAddressModal(props) {
           },
           email: address.email.trim(),
           phone: address.phone.trim(),
-        }
+        })
       );
       onUpdateAddress(data);
     } catch (err) {
@@ -211,20 +218,22 @@ export default function AddAddressModal(props) {
     }
     setAddAddressLoading(true);
     try {
-      const data = await postCall("/clientApis/v1/billing_details", {
-        name: address.name.trim(),
-        address: {
-          areaCode: address.areaCode.trim(),
-          building: address.door.trim(),
-          city: address.city.trim(),
-          country: "IND",
-          door: address.door.trim(),
-          state: address.state.trim(),
-          street: address.street.trim(),
-        },
-        email: address.email.trim(),
-        phone: address.phone.trim(),
-      });
+      const data = await cancellablePromise(
+        postCall("/clientApis/v1/billing_details", {
+          name: address.name.trim(),
+          address: {
+            areaCode: address.areaCode.trim(),
+            building: address.door.trim(),
+            city: address.city.trim(),
+            country: "IND",
+            door: address.door.trim(),
+            state: address.state.trim(),
+            street: address.street.trim(),
+          },
+          email: address.email.trim(),
+          phone: address.phone.trim(),
+        })
+      );
       onAddAddress(data);
     } catch (err) {
       dispatch({
@@ -257,9 +266,8 @@ export default function AddAddressModal(props) {
     }
     setAddAddressLoading(true);
     try {
-      const data = await postCall(
-        `/clientApis/v1/update_delivery_address/${address.id}`,
-        {
+      const data = await cancellablePromise(
+        postCall(`/clientApis/v1/update_delivery_address/${address.id}`, {
           descriptor: {
             name: address.name.trim(),
             email: address.email.trim(),
@@ -274,7 +282,7 @@ export default function AddAddressModal(props) {
             state: address.state.trim(),
             street: address.street.trim(),
           },
-        }
+        })
       );
       onUpdateAddress(data);
     } catch (err) {
@@ -308,22 +316,24 @@ export default function AddAddressModal(props) {
     }
     setAddAddressLoading(true);
     try {
-      const data = await postCall("/clientApis/v1/delivery_address", {
-        descriptor: {
-          name: address.name.trim(),
-          email: address.email.trim(),
-          phone: address.phone.trim(),
-        },
-        address: {
-          areaCode: address.areaCode.trim(),
-          building: address.door.trim(),
-          city: address.city.trim(),
-          country: "IND",
-          door: address.door.trim(),
-          state: address.state.trim(),
-          street: address.street.trim(),
-        },
-      });
+      const data = await cancellablePromise(
+        postCall("/clientApis/v1/delivery_address", {
+          descriptor: {
+            name: address.name.trim(),
+            email: address.email.trim(),
+            phone: address.phone.trim(),
+          },
+          address: {
+            areaCode: address.areaCode.trim(),
+            building: address.door.trim(),
+            city: address.city.trim(),
+            country: "IND",
+            door: address.door.trim(),
+            state: address.state.trim(),
+            street: address.street.trim(),
+          },
+        })
+      );
       onAddAddress(data);
     } catch (err) {
       dispatch({

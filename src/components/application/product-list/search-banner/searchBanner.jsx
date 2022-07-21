@@ -16,8 +16,10 @@ import LocationSvg from "../../../shared/svg/location";
 import Dropdown from "../../../shared/dropdown/dropdown";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function SearchBanner({ onSearch, location }) {
+  // STATES
   const [inlineError, setInlineError] = useState({
     location_error: "",
     search_error: "",
@@ -37,7 +39,12 @@ export default function SearchBanner({ onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
+
+  // CONTEXT
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   useEffect(() => {
     setSearchedLocation(location);
@@ -75,8 +82,10 @@ export default function SearchBanner({ onSearch, location }) {
   // get all the suggested location api
   async function getAllLocations(query) {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_query?query=${query}`
+      const { data } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_query?query=${query}`
+        )
       );
       const formattedLocations = data.map((location) => ({
         place_id: location?.eLoc,
@@ -101,8 +110,10 @@ export default function SearchBanner({ onSearch, location }) {
   // get the lat and long of a place
   async function getPlaceFromPlaceId(location) {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
+      const { data } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
+        )
       );
       if (data?.latitude && data?.longitude) {
         setSearchedLocation({
@@ -138,12 +149,14 @@ export default function SearchBanner({ onSearch, location }) {
     }
     setSearchProductLoading(true);
     try {
-      const { context } = await postCall("/clientApis/v1/search", {
-        context: {},
-        message: {
-          criteria: criteria.current,
-        },
-      });
+      const { context } = await cancellablePromise(
+        postCall("/clientApis/v1/search", {
+          context: {},
+          message: {
+            criteria: criteria.current,
+          },
+        })
+      );
       // generating context for search
       const search_context = {
         search,

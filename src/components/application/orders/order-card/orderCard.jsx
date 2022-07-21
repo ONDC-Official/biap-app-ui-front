@@ -10,6 +10,7 @@ import DropdownSvg from "../../../shared/svg/dropdonw";
 import CallSvg from "../../../shared/svg/callSvg";
 import CustomerPhoneCard from "../customer-phone-card/customerPhoneCard";
 import { ToastContext } from "../../../../context/toastContext";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function OrderCard(props) {
   const {
@@ -28,31 +29,44 @@ export default function OrderCard(props) {
     supportOrderLoading,
     setSupportOrderLoading,
   } = props;
+
+  // HELPERS
   const current_order_status = getOrderStatus(status);
+
+  // STATES
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
+
+  // REFS
   const trackOrderRef = useRef(null);
   const onTrackOrderRef = useRef(null);
   const support_order_timer = useRef();
   const track_order_timer = useRef();
+
+  // CONTEXT
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   // use this api to cancel an order
   async function handleCancelOrder() {
     setCancelOrderLoading(true);
     try {
-      const { context } = await postCall("/clientApis/v1/cancel_order", {
-        context: {
-          bpp_id,
-          transaction_id,
-        },
-        message: {
-          order_id,
-          cancellation_reason_id: "item",
-        },
-      });
+      const { context } = await cancellablePromise(
+        postCall("/clientApis/v1/cancel_order", {
+          context: {
+            bpp_id,
+            transaction_id,
+          },
+          message: {
+            order_id,
+            cancellation_reason_id: "item",
+          },
+        })
+      );
       onCancelOrder(context.message_id);
     } catch (err) {
       setCancelOrderLoading(false);
@@ -70,8 +84,8 @@ export default function OrderCard(props) {
   // on cancel Api
   async function onCancelOrder(array_of_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v1/on_cancel_order?messageId=${array_of_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v1/on_cancel_order?messageId=${array_of_id}`)
       );
       if (data[0]?.error) {
         const err = data[0]?.error;
@@ -106,17 +120,19 @@ export default function OrderCard(props) {
   async function handleTrackOrder() {
     setTrackOrderLoading(true);
     try {
-      const data = await postCall("/clientApis/v2/track", [
-        {
-          context: {
-            transaction_id,
-            bpp_id,
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/track", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              order_id,
+            },
           },
-          message: {
-            order_id,
-          },
-        },
-      ]);
+        ])
+      );
       callApiMultipleTimesTrack(data[0]?.context?.message_id);
     } catch (err) {
       setTrackOrderLoading(false);
@@ -134,8 +150,8 @@ export default function OrderCard(props) {
   // on track order
   async function onTrackOrder(array_of_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v2/on_track?messageIds=${array_of_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_track?messageIds=${array_of_id}`)
       );
       onTrackOrderRef.current = data;
     } catch (err) {
@@ -159,17 +175,19 @@ export default function OrderCard(props) {
     }
     setSupportOrderLoading(true);
     try {
-      const data = await postCall("/clientApis/v2/get_support", [
-        {
-          context: {
-            transaction_id,
-            bpp_id,
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/get_support", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              ref_id: order_id,
+            },
           },
-          message: {
-            ref_id: order_id,
-          },
-        },
-      ]);
+        ])
+      );
       callApiMultipleTimes(data[0]?.context?.message_id);
     } catch (err) {
       dispatch({
@@ -187,8 +205,8 @@ export default function OrderCard(props) {
   // on support order
   async function onSupportOrder(array_of_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v2/on_support?messageIds=${array_of_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_support?messageIds=${array_of_id}`)
       );
       if (data[0]?.error) {
         dispatch({

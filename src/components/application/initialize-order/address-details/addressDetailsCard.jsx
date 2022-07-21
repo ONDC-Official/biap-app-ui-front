@@ -15,17 +15,25 @@ import DeliveryAddress from "./delivery-address/deliveryAddress";
 import BillingAddress from "./billing-address/billingAddress";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function AddressDetailsCard(props) {
   const { currentActiveStep, setCurrentActiveStep, initLoading } = props;
+
+  // STATES
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
-  const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  const dispatch = useContext(ToastContext);
   const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
     useState();
   const [fetchBillingAddressLoading, setFetchBillingAddressLoading] =
     useState();
+
+  // CONTEXT
+  const { deliveryAddress, billingAddress } = useContext(AddressContext);
+  const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   // function to check whether step is completed or not
   function isStepCompleted() {
@@ -58,7 +66,9 @@ export default function AddressDetailsCard(props) {
     async function fetchDeliveryAddress() {
       setFetchDeliveryAddressLoading(true);
       try {
-        const data = await getCall("/clientApis/v1/delivery_address");
+        const data = await cancellablePromise(
+          getCall("/clientApis/v1/delivery_address")
+        );
         setDeliveryAddresses(data);
       } catch (err) {
         if (err.response.data.length > 0) {
@@ -87,7 +97,9 @@ export default function AddressDetailsCard(props) {
     async function fetchBillingAddress() {
       setFetchBillingAddressLoading(true);
       try {
-        const data = await getCall("/clientApis/v1/billing_details");
+        const data = await cancellablePromise(
+          getCall("/clientApis/v1/billing_details")
+        );
         setBillingAddresses(data);
       } catch (err) {
         if (err.response.data.length > 0) {

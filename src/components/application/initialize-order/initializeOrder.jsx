@@ -28,6 +28,7 @@ import no_result_empty_illustration from "../../../assets/images/empty-state-ill
 import Button from "../../shared/button/button";
 import { ToastContext } from "../../../context/toastContext";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
+import useCancellablePromise from "../../../api/cancelRequest";
 
 export default function InitializeOrder() {
   // CONSTANTS
@@ -53,10 +54,13 @@ export default function InitializeOrder() {
 
   // REFS
   const responseRef = useRef([]);
+  const eventTimeOutRef = useRef([]);
 
   // CONTEXT
   const { cartItems } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
+
+  const { cancellablePromise } = useCancellablePromise();
 
   // use this function to dispatch error
   function dispatchToast(message) {
@@ -72,6 +76,7 @@ export default function InitializeOrder() {
 
   // use this function to fetch products quote
   function onFetchQuote(message_id) {
+    eventTimeOutRef.current = [];
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -89,8 +94,11 @@ export default function InitializeOrder() {
         const { messageId } = JSON.parse(e.data);
         onGetQuote(messageId);
       });
-      setTimeout(() => {
-        es.close();
+      const timer = setTimeout(() => {
+        eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+          eventSource.close();
+          clearTimeout(timer);
+        });
         if (responseRef.current.length <= 0) {
           setGetQuoteLoading(false);
           dispatchToast("Cannot fetch details for this product");
@@ -106,6 +114,14 @@ export default function InitializeOrder() {
         }
         setToggleInit(true);
       }, SSE_TIMEOUT);
+
+      eventTimeOutRef.current = [
+        ...eventTimeOutRef.current,
+        {
+          eventSource: es,
+          timer,
+        },
+      ];
     });
   }
 
@@ -113,18 +129,20 @@ export default function InitializeOrder() {
   const getQuote = useCallback(async (items) => {
     responseRef.current = [];
     try {
-      const data = await postCall(
-        "/clientApis/v2/get_quote",
-        items.map((item) => ({
-          context: {
-            transaction_id,
-          },
-          message: {
-            cart: {
-              items: item,
+      const data = await cancellablePromise(
+        postCall(
+          "/clientApis/v2/get_quote",
+          items.map((item) => ({
+            context: {
+              transaction_id,
             },
-          },
-        }))
+            message: {
+              cart: {
+                items: item,
+              },
+            },
+          }))
+        )
       );
       // fetch through events
       onFetchQuote(
@@ -144,8 +162,8 @@ export default function InitializeOrder() {
   // on get quote Api
   const onGetQuote = useCallback(async (message_id) => {
     try {
-      const data = await getCall(
-        `/clientApis/v2/on_get_quote?messageIds=${message_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_get_quote?messageIds=${message_id}`)
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
@@ -203,6 +221,15 @@ export default function InitializeOrder() {
       getQuote(request_object);
     }
     // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    };
   }, []);
 
   const loadingSpin = (
