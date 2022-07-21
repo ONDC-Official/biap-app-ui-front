@@ -298,7 +298,7 @@ export default function OrderCard(props) {
         }}
         style={{ cursor: "pointer" }}
       >
-        <div>
+        <div className="flex-grow-1">
           <p className={styles.card_header_title}>{order_id ?? "NA"}</p>
           <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
             Ordered on
@@ -307,7 +307,7 @@ export default function OrderCard(props) {
             </span>
           </p>
         </div>
-        <div className="ms-auto px-3">
+        <div className="px-3" style={{ width: "18%" }}>
           <p className={styles.status_label}>Status:</p>
           <div className="pt-1">
             <div
@@ -326,7 +326,7 @@ export default function OrderCard(props) {
             </div>
           </div>
         </div>
-        <div className="px-2">
+        <div className="px-2" style={{ width: "7%" }}>
           <div
             style={
               currentSelectedAccordion === accoodion_id

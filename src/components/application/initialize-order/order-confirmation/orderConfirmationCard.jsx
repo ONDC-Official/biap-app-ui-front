@@ -143,6 +143,15 @@ export default function OrderConfirmationCard(props) {
       });
       setTimeout(() => {
         es.close();
+        // check if all the orders got cancled
+        if (responseRef.current.length <= 0) {
+          setInitializeOrderLoading(false);
+          dispatchToast(
+            toast_types.error,
+            "Cannot fetch details for this product Please try again!"
+          );
+          return;
+        }
         // tale action to redirect them.
         const requestObject = constructQouteObject(
           cartItems.filter(({ provider }) =>
@@ -207,7 +216,7 @@ export default function OrderConfirmationCard(props) {
           })
         );
       } catch (err) {
-        dispatchToast(toast_types.error, "Something went wrong!");
+        dispatchToast(toast_types.error, err.message);
         setInitializeOrderLoading(false);
         updateInitLoading(false);
       }
@@ -225,7 +234,7 @@ export default function OrderConfirmationCard(props) {
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
     } catch (err) {
-      dispatchToast(toast_types.error, "Something went wrong!");
+      dispatchToast(toast_types.error, err.message);
       setInitializeOrderLoading(false);
       updateInitLoading(false);
     }

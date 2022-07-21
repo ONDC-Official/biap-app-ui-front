@@ -123,15 +123,10 @@ export default function Checkout() {
                                       {!successOrderIds.includes(
                                         provider_id.toString()
                                       ) && (
-                                        <>
-                                          <ErrorMessage>
-                                            Cannot fetch details for this
-                                            product
-                                          </ErrorMessage>
-                                          <div
-                                            className={styles.product_disabled}
-                                          />
-                                        </>
+                                        <div
+                                          className={styles.product_disabled}
+                                          style={{ height: "100%" }}
+                                        />
                                       )}
                                     </div>
                                   </div>
@@ -154,6 +149,7 @@ export default function Checkout() {
                       setActivePaymentMethod={(value) =>
                         setActivePaymentMethod(value)
                       }
+                      successOrderIds={successOrderIds}
                     />
                   </div>
                 </div>

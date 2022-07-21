@@ -91,8 +91,17 @@ export default function InitializeOrder() {
       });
       setTimeout(() => {
         es.close();
+        if (responseRef.current.length <= 0) {
+          setGetQuoteLoading(false);
+          dispatchToast("Cannot fetch details for this product");
+          history.replace("/application/products");
+          return;
+        }
         const request_object = constructQouteObject(cartItems);
         if (responseRef.current.length !== request_object.length) {
+          dispatchToast(
+            "Cannot fetch details for some product those products will be ignored!"
+          );
           setErrorMessageTimeOut("Cannot fetch details for this product");
         }
         setToggleInit(true);
@@ -125,8 +134,9 @@ export default function InitializeOrder() {
         })
       );
     } catch (err) {
-      dispatchToast(err?.response?.data?.error);
+      dispatchToast(err?.response?.data?.error?.message);
       setGetQuoteLoading(false);
+      history.replace("/application/products");
     }
     // eslint-disable-next-line
   }, []);
