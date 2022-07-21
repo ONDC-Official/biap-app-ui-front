@@ -313,6 +313,7 @@ export default function PaymentConfirmationCard(props) {
       dispatchError(err.message);
       setConfirmOrderLoading(false);
     }
+    // eslint-disable-next-line
   }, []);
 
   // on confirm order Api
@@ -327,6 +328,7 @@ export default function PaymentConfirmationCard(props) {
       dispatchError(err.message);
       setConfirmOrderLoading(false);
     }
+    // eslint-disable-next-line
   }, []);
 
   // use this effect to handle callback from juspay and calling the confirm api.
@@ -371,6 +373,7 @@ export default function PaymentConfirmationCard(props) {
         history.replace("/application/orders");
       }
     }
+    // eslint-disable-next-line
   }, [eventData]);
 
   return (

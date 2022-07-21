@@ -10,7 +10,6 @@ import {
 } from "../../../constants/checkout-steps";
 import { payment_methods } from "../../../constants/payment-methods";
 import { CartContext } from "../../../context/cartContext";
-import ErrorMessage from "../../shared/error-message/errorMessage";
 import ProductCard from "../product-list/product-card/productCard";
 import { getValueFromCookie } from "../../../utils/cookies";
 
