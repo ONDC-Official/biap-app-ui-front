@@ -70,6 +70,14 @@ export default function ProductList() {
   function fetchProducts(message_id) {
     setLoading(true);
     setFetchFilterLoading(true);
+    setFilters({
+      categories: [],
+      fulfillment: [],
+      maxPrice: 0,
+      minPrice: 1000,
+      providers: [],
+    });
+    setProducts([]);
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -79,7 +87,7 @@ export default function ProductList() {
       },
     };
     eventSourceRef.current = new window.EventSourcePolyfill(
-      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      `${process.env.REACT_APP_BASE_URL}/clientApis/events?messageId=${message_id}`,
       header
     );
     eventSourceRef.current.addEventListener("on_search", (e) => {
@@ -123,6 +131,24 @@ export default function ProductList() {
   }, []);
 
   useEffect(() => {
+    if (eventData?.filters && Object.keys(eventData?.filters).length > 0) {
+      const filterSet = eventData?.filters;
+      setFilters((filters) => ({
+        ...filters,
+        categories: [...filters?.categories, ...filterSet?.categories],
+        fulfillment: [...filters?.fulfillment, ...filterSet?.fulfillment],
+        maxPrice:
+          filters?.maxPrice > filterSet?.maxPrice
+            ? filters?.maxPrice
+            : filterSet?.maxPrice,
+        minPrice:
+          filters?.minPrice < filterSet?.minPrice
+            ? filters?.minPrice
+            : filterSet?.minPrice,
+        providers: [...filters?.providers, ...filterSet?.providers],
+      }));
+      setFetchFilterLoading(false);
+    }
     if (eventData?.messageId) {
       setPagination((prev) => ({
         ...prev,
@@ -130,7 +156,6 @@ export default function ProductList() {
         currentPage: 1,
       }));
       onSearch(eventData?.messageId);
-      fetchAllFilters(eventData?.messageId);
     }
     // eslint-disable-next-line
   }, [eventData]);

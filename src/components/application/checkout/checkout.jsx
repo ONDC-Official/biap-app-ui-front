@@ -51,12 +51,12 @@ export default function Checkout() {
     let products = [];
     let total_payable = 0;
     productQuotes?.forEach((data) => {
-      data?.breakup?.forEach((productsQuote) => {
+      data?.breakup?.forEach((quote) => {
         products = [
           ...products,
           {
-            title: productsQuote.title,
-            price: productsQuote.price.value.toFixed(2),
+            title: quote?.title,
+            price: Number(quote?.price?.value)?.toFixed(2),
           },
         ];
       });
