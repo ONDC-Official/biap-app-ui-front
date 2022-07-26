@@ -203,11 +203,12 @@ export default function Orders() {
                           bpp_id={bpp_id}
                           accoodion_id={`order_id_${index}`}
                           onFetchUpdatedOrder={() => {
+                            setCurrentSelectedAccordion("");
                             dispatch({
                               type: toast_actions.ADD_TOAST,
                               payload: {
                                 id: Math.floor(Math.random() * 100),
-                                type: toast_types.error,
+                                type: toast_types.success,
                                 message: "Order status updated successfully!",
                               },
                             });

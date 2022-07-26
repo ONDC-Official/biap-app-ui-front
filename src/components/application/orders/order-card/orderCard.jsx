@@ -36,16 +36,19 @@ export default function OrderCard(props) {
   // STATES
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
 
   // REFS
   const trackOrderRef = useRef(null);
   const onTrackOrderRef = useRef(null);
+  const onStatusOrderRef = useRef(null);
   const support_order_timer = useRef();
   const track_order_timer = useRef();
 
   // CONTEXT
+  const status_timer = useRef();
   const dispatch = useContext(ToastContext);
 
   // HOOKS
@@ -156,6 +159,55 @@ export default function OrderCard(props) {
       onTrackOrderRef.current = data;
     } catch (err) {
       setTrackOrderLoading(false);
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
+    }
+  }
+
+  // use this api to get updated status of the order
+  async function handleGetStatus() {
+    setStatusLoading(true);
+    try {
+      const data = await postCall("/clientApis/v2/order_status", [
+        {
+          context: {
+            transaction_id,
+            bpp_id,
+          },
+          message: {
+            order_id,
+          },
+        },
+      ]);
+      callApiMultipleTimesStatus(data[0]?.context?.message_id);
+    } catch (err) {
+      setStatusLoading(false);
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
+    }
+  }
+
+  // on status
+  async function onStatus(array_of_id) {
+    try {
+      const data = await getCall(
+        `/clientApis/v2/on_order_status?messageIds=${array_of_id}`
+      );
+      onStatusOrderRef.current = data;
+    } catch (err) {
+      setStatusLoading(false);
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -280,6 +332,38 @@ export default function OrderCard(props) {
         return;
       }
       await onTrackOrder(message_ids).finally(() => {
+        counter -= 1;
+      });
+    }, 3000);
+  }
+
+  // use this function to call on track order multiple times
+  function callApiMultipleTimesStatus(message_ids) {
+    let counter = 8;
+    status_timer.current = setInterval(async () => {
+      if (counter <= 0) {
+        const { message, error = {} } = onStatusOrderRef.current[0];
+        if (error?.message) {
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Cannot get status for this product",
+            },
+          });
+          setStatusLoading(false);
+          clearInterval(status_timer.current);
+          return;
+        }
+        if (message?.order) {
+          onFetchUpdatedOrder();
+        }
+        setStatusLoading(false);
+        clearInterval(status_timer.current);
+        return;
+      }
+      await onStatus(message_ids).finally(() => {
         counter -= 1;
       });
     }, 3000);
@@ -452,12 +536,12 @@ export default function OrderCard(props) {
         >
           {supportOrderLoading ? (
             <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
-          ) : (
+          ) : !cancelOrderLoading && !trackOrderLoading && !statusLoading ? (
             <CallSvg
               style={{ cursor: "pointer" }}
               click={handleSupportForOrder}
             />
-          )}
+          ) : null}
           <div className="ms-auto">
             {/* IF ORDER STATUS IS NOT CANCEL  */}
             {current_order_status.status !== "Cancled" && (
@@ -467,6 +551,29 @@ export default function OrderCard(props) {
                     disabled={
                       trackOrderLoading ||
                       cancelOrderLoading ||
+                      statusLoading ||
+                      supportOrderLoading
+                    }
+                    className={
+                      statusLoading
+                        ? styles.secondary_action_loading
+                        : styles.secondary_action
+                    }
+                    onClick={() => handleGetStatus()}
+                  >
+                    {statusLoading ? (
+                      <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                    ) : (
+                      "Get Status"
+                    )}
+                  </button>
+                </div>
+                <div className="pe-3 py-1">
+                  <button
+                    disabled={
+                      trackOrderLoading ||
+                      cancelOrderLoading ||
+                      statusLoading ||
                       supportOrderLoading
                     }
                     className={
@@ -488,6 +595,7 @@ export default function OrderCard(props) {
                     disabled={
                       cancelOrderLoading ||
                       trackOrderLoading ||
+                      statusLoading ||
                       supportOrderLoading
                     }
                     className={
