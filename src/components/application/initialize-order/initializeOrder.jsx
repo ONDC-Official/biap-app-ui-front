@@ -192,7 +192,7 @@ export default function InitializeOrder() {
           const provided_by = message?.quote?.provider?.descriptor?.name;
           const product = breakup?.map((break_up_item) => ({
             title: break_up_item?.title,
-            price: message?.quote?.quote?.price?.value,
+            price: Number(message?.quote?.quote?.price?.value)?.toFixed(2),
             provided_by,
           }));
           return product;

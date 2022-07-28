@@ -373,7 +373,6 @@ export default function PaymentConfirmationCard(props) {
 
   useEffect(() => {
     if (responseRef.current.length > 0) {
-      console.log(responseRef.current);
       setConfirmOrderLoading(false);
       // fetch request object length and compare it with the response length
       const requestObject = constructQouteObject(
