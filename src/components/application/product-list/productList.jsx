@@ -87,7 +87,7 @@ export default function ProductList() {
       },
     };
     eventSourceRef.current = new window.EventSourcePolyfill(
-      `${process.env.REACT_APP_BASE_URL}/clientApis/events?messageId=${message_id}`,
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
       header
     );
     eventSourceRef.current.addEventListener("on_search", (e) => {

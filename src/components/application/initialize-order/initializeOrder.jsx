@@ -87,7 +87,7 @@ export default function InitializeOrder() {
     };
     message_id.forEach((id) => {
       let es = new window.EventSourcePolyfill(
-        `${process.env.REACT_APP_BASE_URL}/clientApis/events?messageId=${id}`,
+        `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${id}`,
         header
       );
       es.addEventListener("on_select", (e) => {
