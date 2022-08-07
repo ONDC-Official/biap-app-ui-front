@@ -29,6 +29,7 @@ import Button from "../../shared/button/button";
 import { ToastContext } from "../../../context/toastContext";
 
 export default function InitializeOrder() {
+  const { location } = JSON.parse(getValueFromCookie("search_context") || "{}");
   const { cartItems, setCartItems } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
   const transaction_id = getValueFromCookie("transaction_id");
@@ -60,6 +61,18 @@ export default function InitializeOrder() {
             cart: {
               items: item,
             },
+            fulfillments: [
+              {
+                end: {
+                  location: {
+                    gps: `${location?.lat}, ${location?.lng}`,
+                    address: {
+                      area_code: `${location?.pincode}`,
+                    },
+                  },
+                },
+              },
+            ],
           },
         }))
       );

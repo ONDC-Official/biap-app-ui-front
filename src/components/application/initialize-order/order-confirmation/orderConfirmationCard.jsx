@@ -37,6 +37,7 @@ export default function OrderConfirmationCard(props) {
     updateCartLoading,
   } = props;
   const transaction_id = Cookies.get("transaction_id");
+  const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
   const history = useHistory();
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
   const { cartItems, onRemoveProduct } = useContext(CartContext);
@@ -82,6 +83,18 @@ export default function OrderConfirmationCard(props) {
               phone: deliveryAddress?.phone,
               location: deliveryAddress?.location,
             },
+            fulfillments: [
+              {
+                end: {
+                  location: {
+                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                    address: {
+                      area_code: `${deliveryAddress?.location?.address?.areaCode}`,
+                    },
+                  },
+                },
+              },
+            ],
           },
         }))
       );

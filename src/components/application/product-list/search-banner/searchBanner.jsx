@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { search_types } from "../../../../constants/searchTypes";
 import axios from "axios";
-import { postCall } from "../../../../api/axios";
+import { getCall, postCall } from "../../../../api/axios";
 import { AddCookie } from "../../../../utils/cookies";
 import { debounce } from "../../../../utils/search";
 import Loading from "../../../shared/loading/loading";
@@ -18,6 +18,7 @@ import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
 
 export default function SearchBanner({ onSearch, location }) {
+  // STATES
   const [inlineError, setInlineError] = useState({
     location_error: "",
     search_error: "",
@@ -37,6 +38,8 @@ export default function SearchBanner({ onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
+
+  // CONTEXT
   const dispatch = useContext(ToastContext);
 
   useEffect(() => {
@@ -72,11 +75,23 @@ export default function SearchBanner({ onSearch, location }) {
     // eslint-disable-next-line
   }, [search]);
 
+  // use this function to dispatch errors
+  function dispatchError(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
+  }
+
   // get all the suggested location api
   async function getAllLocations(query) {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}mmi/api/mmi_query?query=${query}`
+        `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_query?query=${query}`
       );
       const formattedLocations = data.map((location) => ({
         place_id: location?.eLoc,
@@ -85,14 +100,7 @@ export default function SearchBanner({ onSearch, location }) {
       }));
       setLocations(formattedLocations);
     } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchError(err?.message);
     } finally {
       setSearchLocationLoading(false);
     }
@@ -102,14 +110,13 @@ export default function SearchBanner({ onSearch, location }) {
   async function getPlaceFromPlaceId(location) {
     try {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
+        `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
       );
       if (data?.latitude && data?.longitude) {
-        setSearchedLocation({
-          ...searchedLocation,
+        getAreadCodeFromLatLong({
           name: location?.name,
           lat: data?.latitude,
-          lng: data?.longitude,
+          long: data?.longitude,
         });
       } else {
         setInlineError((error) => ({
@@ -117,16 +124,28 @@ export default function SearchBanner({ onSearch, location }) {
           location_error: "Unable to get location, Please try again!",
         }));
       }
+    } catch (err) {
+      dispatchError(err?.message);
+    }
+  }
+
+  // get the area code of the location selected
+  async function getAreadCodeFromLatLong(location) {
+    try {
+      const { results } = await getCall(
+        `/mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
+      );
+      const { lat, lng, pincode } = results[0];
+      setSearchedLocation({
+        ...searchedLocation,
+        name: location?.name,
+        lat,
+        lng,
+        pincode,
+      });
       setToggleLocationListCard(false);
     } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchError(err?.message);
     }
   }
 
@@ -155,14 +174,7 @@ export default function SearchBanner({ onSearch, location }) {
       AddCookie("search_context", JSON.stringify(search_context));
       onSearch(search_context);
     } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchError(err?.message);
     } finally {
       setSearchProductLoading(false);
     }

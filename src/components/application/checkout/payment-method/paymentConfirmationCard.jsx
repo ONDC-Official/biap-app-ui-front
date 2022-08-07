@@ -32,12 +32,16 @@ export default function PaymentConfirmationCard(props) {
     activePaymentMethod,
   } = props;
   const token = getValueFromCookie("token");
+  const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo") || "{}");
   const user = JSON.parse(getValueFromCookie("user"));
   const parent_order_id = getValueFromCookie("parent_order_id");
   const hyperServiceObject = new window.HyperServices();
   const history = useHistory();
   const billingAddress = JSON.parse(
     getValueFromCookie("billing_address") || "{}"
+  );
+  const deliveryAddress = JSON.parse(
+    getValueFromCookie("delivery_address") || "{}"
   );
   const parentOrderIDMap = new Map(
     JSON.parse(getValueFromCookie("parent_and_transaction_id_map"))
@@ -110,6 +114,18 @@ export default function PaymentConfirmationCard(props) {
               transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                 .transaction_id,
             },
+            fulfillments: [
+              {
+                end: {
+                  location: {
+                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                    address: {
+                      area_code: `${deliveryAddress?.location?.address?.areaCode}`,
+                    },
+                  },
+                },
+              },
+            ],
           },
         }))
       );
@@ -183,6 +199,7 @@ export default function PaymentConfirmationCard(props) {
           removeCookie("cartItems");
           removeCookie("delivery_address");
           removeCookie("billing_address");
+          removeCookie("LatLongInfo");
           setCartItems([]);
           history.replace("/application/orders");
         } else {
