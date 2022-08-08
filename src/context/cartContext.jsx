@@ -1,5 +1,4 @@
 import { createContext, useState, useEffect } from "react";
-import { getValueFromCookie, AddCookie } from "../utils/cookies";
 
 export const CartContext = createContext({
   cartItems: [],
@@ -11,13 +10,13 @@ export const CartContext = createContext({
 });
 
 export function CartContextProvider({ children }) {
-  const parsedCartItems = JSON.parse(getValueFromCookie("cartItems") || "{}");
+  const parsedCartItems = JSON.parse(localStorage.getItem("cartItems") || "{}");
   const [cartItems, setCartItems] = useState(
     parsedCartItems.length > 0 ? parsedCartItems : []
   );
 
   useEffect(() => {
-    AddCookie("cartItems", JSON.stringify(cartItems));
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
   // use this function to remove the product from cart

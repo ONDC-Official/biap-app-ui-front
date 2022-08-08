@@ -15,6 +15,7 @@ export default function ProductCard(props) {
     location_id,
     bpp_provider_id,
     bpp_provider_descriptor,
+    show_quantity_button = true,
     onUpdateCart = () => {},
   } = props;
   const { id, descriptor } = product;
@@ -85,60 +86,66 @@ export default function ProductCard(props) {
                 : price.value.toFixed(2)}
             </p>
           </div>
-          <div className="ms-auto">
-            {toggleAddToCart && quantityCount > 0 ? (
-              <div className={styles.quantity_count_wrapper}>
-                <div
-                  className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
-                  onClick={() => {
-                    setQuantityCount(quantityCount - 1);
-                    onReduceQuantity(id);
-                    if (quantityCount - 1 === 0) {
-                      setToggleAddToCart(false);
-                      return;
-                    }
-                    onUpdateCart();
-                  }}
-                >
-                  <Subtract width="13" classes={styles.subtract_svg_color} />
+          {show_quantity_button && (
+            <div className="ms-auto">
+              {toggleAddToCart && quantityCount > 0 ? (
+                <div className={styles.quantity_count_wrapper}>
+                  <div
+                    className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
+                    onClick={() => {
+                      setQuantityCount(quantityCount - 1);
+                      onReduceQuantity(id);
+                      if (quantityCount - 1 === 0) {
+                        setToggleAddToCart(false);
+                        return;
+                      }
+                      onUpdateCart();
+                    }}
+                  >
+                    <Subtract width="13" classes={styles.subtract_svg_color} />
+                  </div>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <p className={styles.quantity_count}>{quantityCount}</p>
+                  </div>
+                  <div
+                    className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
+                    onClick={() => {
+                      setQuantityCount((quantityCount) => quantityCount + 1);
+                      onAddQuantity(id);
+                      onUpdateCart();
+                    }}
+                  >
+                    <Add
+                      width="13"
+                      height="13"
+                      classes={styles.add_svg_color}
+                    />
+                  </div>
                 </div>
-                <div className="d-flex align-items-center justify-content-center">
-                  <p className={styles.quantity_count}>{quantityCount}</p>
-                </div>
-                <div
-                  className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
+              ) : (
+                <button
+                  className={styles.add_to_cart_button}
                   onClick={() => {
+                    setToggleAddToCart(true);
                     setQuantityCount((quantityCount) => quantityCount + 1);
-                    onAddQuantity(id);
+                    onAddProduct({
+                      id,
+                      quantity: { count: quantityCount + 1 },
+                      bpp_id,
+                      provider: {
+                        id: bpp_provider_id,
+                        locations: [location_id],
+                      },
+                      product,
+                    });
                     onUpdateCart();
                   }}
                 >
-                  <Add width="13" height="13" classes={styles.add_svg_color} />
-                </div>
-              </div>
-            ) : (
-              <button
-                className={styles.add_to_cart_button}
-                onClick={() => {
-                  setToggleAddToCart(true);
-                  setQuantityCount((quantityCount) => quantityCount + 1);
-                  onAddProduct({
-                    id,
-                    quantity: { count: quantityCount + 1 },
-                    bpp_id,
-                    provider: {
-                      id: bpp_provider_id,
-                      locations: [location_id],
-                    },
-                    product,
-                  });
-                  onUpdateCart();
-                }}
-              >
-                Add
-              </button>
-            )}
-          </div>
+                  Add
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

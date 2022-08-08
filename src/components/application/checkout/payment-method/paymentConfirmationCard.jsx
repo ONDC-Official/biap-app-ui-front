@@ -1,5 +1,6 @@
 import React, {
   Fragment,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -22,6 +23,8 @@ import { payment_methods } from "../../../../constants/payment-methods";
 import { removeCookie, getValueFromCookie } from "../../../../utils/cookies";
 import Loading from "../../../shared/loading/loading";
 import { ToastContext } from "../../../../context/toastContext";
+import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function PaymentConfirmationCard(props) {
   const {
@@ -30,13 +33,14 @@ export default function PaymentConfirmationCard(props) {
     orderStatus,
     setActivePaymentMethod,
     activePaymentMethod,
+    successOrderIds = [],
   } = props;
+
+  // CONSTANTS
   const token = getValueFromCookie("token");
   const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo") || "{}");
   const user = JSON.parse(getValueFromCookie("user"));
   const parent_order_id = getValueFromCookie("parent_order_id");
-  const hyperServiceObject = new window.HyperServices();
-  const history = useHistory();
   const billingAddress = JSON.parse(
     getValueFromCookie("billing_address") || "{}"
   );
@@ -46,13 +50,22 @@ export default function PaymentConfirmationCard(props) {
   const parentOrderIDMap = new Map(
     JSON.parse(getValueFromCookie("parent_and_transaction_id_map"))
   );
-  const { cartItems, setCartItems } = useContext(CartContext);
-  const dispatch = useContext(ToastContext);
+
+  // JUSPAY SDK
+  const hyperServiceObject = new window.HyperServices();
+
+  // HISTORY
+  const history = useHistory();
+
+  // STATES
   const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
   const [togglePaymentGateway, setTogglePaymentGateway] = useState(false);
   const [loadingSdkForPayment, setLoadingSdkForPayment] = useState(false);
-  const confirm_polling_timer = useRef(0);
-  const onConfirmed = useRef();
+  const [eventData, setEventData] = useState([]);
+
+  //REFS
+  const responseRef = useRef([]);
+  const eventTimeOutRef = useRef([]);
   const sdkPayload = useRef({
     action: "initiate",
     clientId: process.env.REACT_APP_JUSTPAY_CLIENT_AND_MERCHANT_KEY,
@@ -79,146 +92,23 @@ export default function PaymentConfirmationCard(props) {
     environment: process.env.REACT_APP_PAYMENT_SDK_ENV,
   });
 
-  useEffect(() => {
-    if (orderStatus === "CHARGED") {
-      const parsedCartItems = JSON.parse(
-        getValueFromCookie("cartItems") || "{}"
-      );
-      setConfirmOrderLoading(true);
-      const request_object = constructQouteObject(parsedCartItems);
-      confirmOrder(request_object, payment_methods.JUSPAY);
-    }
-    // eslint-disable-next-line
-  }, [orderStatus]);
+  // CONTEXT
+  const { cartItems, setCartItems } = useContext(CartContext);
+  const dispatch = useContext(ToastContext);
 
-  useEffect(() => {
-    return () => {
-      clearInterval(confirm_polling_timer.current);
-    };
-  }, []);
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
-  async function confirmOrder(items, method) {
-    try {
-      const data = await postCall(
-        "/clientApis/v2/confirm_order",
-        items.map((item, index) => ({
-          // pass the map of parent order id and transaction id
-          context: parentOrderIDMap.get(item[0]?.provider?.id),
-          message: {
-            payment: {
-              paid_amount: Number(productsQuote[index]?.price?.value),
-              type:
-                method === payment_methods.COD
-                  ? "POST-FULFILLMENT"
-                  : "ON-ORDER",
-              transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
-                .transaction_id,
-            },
-            fulfillments: [
-              {
-                end: {
-                  location: {
-                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
-                    address: {
-                      area_code: `${deliveryAddress?.location?.address?.areaCode}`,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-        }))
-      );
-      const array_of_ids = data.map((d) => {
-        if (d.error) {
-          return {
-            error_reason: d.error.message,
-            message_id: d.context.message_id,
-          };
-        }
-        return {
-          error_reason: "",
-          message_id: d.context.message_id,
-        };
-      });
-      // TODO: add a check to validate that all Order are success
-      // than call on_confirm_order
-
-      // TODO: else push notification
-      callApiMultipleTimes(array_of_ids);
-    } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err.message,
-        },
-      });
-      setConfirmOrderLoading(false);
-    }
-  }
-
-  // on confirm order Api
-  async function onConfirmOrder(array_of_ids) {
-    try {
-      const data = await getCall(
-        `/clientApis/v2/on_confirm_order?messageIds=${array_of_ids
-          .filter((txn) => txn.error_reason === "")
-          .map((txn) => txn.message_id)}`
-      );
-      onConfirmed.current = data;
-    } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: "Something went wrong!",
-        },
-      });
-      setConfirmOrderLoading(false);
-    }
-  }
-
-  // use this function to call confirm order multiple times
-  function callApiMultipleTimes(message_ids) {
-    let counter = 8;
-    confirm_polling_timer.current = setInterval(async () => {
-      if (counter <= 0) {
-        setConfirmOrderLoading(false);
-        const allOrderConfirmed = onConfirmed.current.every(
-          (data) => data?.message?.order
-        );
-        if (allOrderConfirmed) {
-          // redirect to order listing page.
-          // remove parent_order_id, search_context from cookies
-          removeCookie("transaction_id");
-          removeCookie("parent_order_id");
-          removeCookie("search_context");
-          removeCookie("cartItems");
-          removeCookie("delivery_address");
-          removeCookie("billing_address");
-          removeCookie("LatLongInfo");
-          setCartItems([]);
-          history.replace("/application/orders");
-        } else {
-          dispatch({
-            type: toast_actions.ADD_TOAST,
-            payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: "Something went wrong!",
-            },
-          });
-        }
-        clearInterval(confirm_polling_timer.current);
-        return;
-      }
-      await onConfirmOrder(message_ids).finally(() => {
-        counter -= 1;
-      });
-    }, 3000);
+  // function to dispatch error
+  function dispatchError(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
   }
 
   // function to get the current active step
@@ -232,6 +122,8 @@ export default function PaymentConfirmationCard(props) {
     return false;
   }
 
+  // JUSPAY SDK METHODS
+  // CALLBACK HANDLER
   function hyperCallbackHandler(eventData) {
     try {
       if (eventData) {
@@ -260,6 +152,7 @@ export default function PaymentConfirmationCard(props) {
     }
   }
 
+  // INIT SDK METHOD
   async function initiateSDK() {
     try {
       const initiatePayloadObj = {
@@ -270,14 +163,16 @@ export default function PaymentConfirmationCard(props) {
         timestamp: String(new Date().getTime()),
       };
 
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/clientApis/payment/signPayload`,
-        {
-          payload: JSON.stringify(initiatePayloadObj),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const { data } = await cancellablePromise(
+        axios.post(
+          `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
+          {
+            payload: JSON.stringify(initiatePayloadObj),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
       );
       sdkPayload.current = {
         ...sdkPayload.current,
@@ -305,6 +200,7 @@ export default function PaymentConfirmationCard(props) {
     }
   }
 
+  // PROCESS SDK METHOD
   async function processPayment() {
     try {
       if (!hyperServiceObject.isInitialised()) {
@@ -323,14 +219,16 @@ export default function PaymentConfirmationCard(props) {
         timestamp: String(new Date().getTime()),
         return_url: String(window.location.href),
       };
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/clientApis/payment/signPayload`,
-        {
-          payload: JSON.stringify(processPayloadObj),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const { data } = await cancellablePromise(
+        axios.post(
+          `${process.env.REACT_APP_BASE_URL}clientApis/payment/signPayload`,
+          {
+            payload: JSON.stringify(processPayloadObj),
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
       );
       processPayload.current = {
         ...processPayload.current,
@@ -363,6 +261,167 @@ export default function PaymentConfirmationCard(props) {
       });
     }
   }
+
+  // use this function to confirm the order
+  function onConfirm(message_id) {
+    eventTimeOutRef.current = [];
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    message_id.forEach((id) => {
+      let es = new window.EventSourcePolyfill(
+        `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${id}`,
+        header
+      );
+      es.addEventListener("on_confirm", (e) => {
+        const { messageId } = JSON.parse(e.data);
+        onConfirmOrder(messageId);
+      });
+      const timer = setTimeout(() => {
+        eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+          eventSource.close();
+          clearTimeout(timer);
+        });
+        // check if all the orders got cancled
+        if (responseRef.current.length <= 0) {
+          setConfirmOrderLoading(false);
+          dispatchError(
+            "Cannot fetch details for this product Please try again!"
+          );
+          return;
+        }
+      }, SSE_TIMEOUT);
+
+      eventTimeOutRef.current = [
+        ...eventTimeOutRef.current,
+        {
+          eventSource: es,
+          timer,
+        },
+      ];
+    });
+  }
+
+  const confirmOrder = useCallback(async (items, method) => {
+    responseRef.current = [];
+    try {
+      const data = await cancellablePromise(
+        postCall(
+          "clientApis/v2/confirm_order",
+          items.map((item, index) => ({
+            // pass the map of parent order id and transaction id
+            context: parentOrderIDMap.get(item[0]?.provider?.id),
+            message: {
+              payment: {
+                paid_amount: Number(productsQuote[index]?.price?.value),
+                type:
+                  method === payment_methods.COD
+                    ? "POST-FULFILLMENT"
+                    : "ON-ORDER",
+                transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
+                  .transaction_id,
+              },
+              fulfillments: [
+                {
+                  end: {
+                    location: {
+                      gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                      address: {
+                        area_code: `${deliveryAddress?.location?.address?.areaCode}`,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          }))
+        )
+      );
+      onConfirm(
+        data?.map((txn) => {
+          const { context } = txn;
+          return context?.message_id;
+        })
+      );
+    } catch (err) {
+      dispatchError(err.message);
+      setConfirmOrderLoading(false);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // on confirm order Api
+  const onConfirmOrder = useCallback(async (message_id) => {
+    try {
+      const data = await cancellablePromise(
+        getCall(`clientApis/v2/on_confirm_order?messageIds=${message_id}`)
+      );
+      responseRef.current = [...responseRef.current, data[0]];
+      setEventData((eventData) => [...eventData, data[0]]);
+    } catch (err) {
+      dispatchError(err.message);
+      setConfirmOrderLoading(false);
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // use this effect to handle callback from juspay and calling the confirm api.
+  useEffect(() => {
+    if (orderStatus === "CHARGED") {
+      const parsedCartItems = JSON.parse(
+        localStorage.getItem("cartItems") || "{}"
+      );
+      setConfirmOrderLoading(true);
+      const request_object = constructQouteObject(
+        parsedCartItems.filter(({ provider }) =>
+          successOrderIds.includes(provider.id.toString())
+        )
+      );
+      confirmOrder(request_object, payment_methods.JUSPAY);
+    }
+    // eslint-disable-next-line
+  }, [orderStatus]);
+
+  useEffect(() => {
+    if (responseRef.current.length > 0) {
+      setConfirmOrderLoading(false);
+      // fetch request object length and compare it with the response length
+      const requestObject = constructQouteObject(
+        cartItems.filter(({ provider }) =>
+          successOrderIds.includes(provider.id.toString())
+        )
+      );
+      if (responseRef.current.length === requestObject.length) {
+        // redirect to order listing page.
+        // remove parent_order_id, search_context from cookies
+        removeCookie("transaction_id");
+        removeCookie("parent_order_id");
+        removeCookie("search_context");
+        removeCookie("delivery_address");
+        removeCookie("billing_address");
+        removeCookie("checkout_details");
+        removeCookie("parent_and_transaction_id_map");
+        removeCookie("LatLongInfo");
+        setCartItems([]);
+        history.replace("/application/orders");
+      }
+    }
+    // eslint-disable-next-line
+  }, [eventData]);
+
+  useEffect(() => {
+    return () => {
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    };
+  }, []);
 
   return (
     <div className={styles.price_summary_card}>
@@ -466,7 +525,11 @@ export default function PaymentConfirmationCard(props) {
               button_text="Place Order"
               onClick={() => {
                 setConfirmOrderLoading(true);
-                const request_object = constructQouteObject(cartItems);
+                const request_object = constructQouteObject(
+                  cartItems.filter(({ provider }) =>
+                    successOrderIds.includes(provider.id.toString())
+                  )
+                );
                 confirmOrder(request_object, payment_methods.COD);
               }}
             />

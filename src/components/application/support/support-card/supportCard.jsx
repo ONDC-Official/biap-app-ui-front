@@ -4,7 +4,12 @@ import styles from "../../../../styles/support/support.module.scss";
 export default function SupportCard({ link, img, header, description }) {
   return (
     <div className="text-center">
-      <a href={link} target="_blank" className={styles.support_card_background}>
+      <a
+        href={link}
+        rel="noreferrer"
+        target="_blank"
+        className={styles.support_card_background}
+      >
         <div>
           <div className={styles.img_container}>{img}</div>
           <p className={`mb-0 ${styles.support_link_header}`}>{header}</p>

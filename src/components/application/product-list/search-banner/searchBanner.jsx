@@ -16,6 +16,7 @@ import LocationSvg from "../../../shared/svg/location";
 import Dropdown from "../../../shared/dropdown/dropdown";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function SearchBanner({ onSearch, location }) {
   // STATES
@@ -41,6 +42,9 @@ export default function SearchBanner({ onSearch, location }) {
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   useEffect(() => {
     setSearchedLocation(location);
@@ -90,8 +94,10 @@ export default function SearchBanner({ onSearch, location }) {
   // get all the suggested location api
   async function getAllLocations(query) {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_query?query=${query}`
+      const { data } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_query?query=${query}`
+        )
       );
       const formattedLocations = data.map((location) => ({
         place_id: location?.eLoc,
@@ -109,8 +115,10 @@ export default function SearchBanner({ onSearch, location }) {
   // get the lat and long of a place
   async function getPlaceFromPlaceId(location) {
     try {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
+      const { data } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
+        )
       );
       if (data?.latitude && data?.longitude) {
         getAreadCodeFromLatLong({
@@ -132,8 +140,10 @@ export default function SearchBanner({ onSearch, location }) {
   // get the area code of the location selected
   async function getAreadCodeFromLatLong(location) {
     try {
-      const { results } = await getCall(
-        `/mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
+      const { results } = await cancellablePromise(
+        getCall(
+          `/mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
+        )
       );
       const { lat, lng, pincode } = results[0];
       setSearchedLocation({
@@ -157,12 +167,14 @@ export default function SearchBanner({ onSearch, location }) {
     }
     setSearchProductLoading(true);
     try {
-      const { context } = await postCall("/clientApis/v1/search", {
-        context: {},
-        message: {
-          criteria: criteria.current,
-        },
-      });
+      const { context } = await cancellablePromise(
+        postCall("/clientApis/v1/search", {
+          context: {},
+          message: {
+            criteria: criteria.current,
+          },
+        })
+      );
       // generating context for search
       const search_context = {
         search,
