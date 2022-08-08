@@ -45,6 +45,7 @@ export default function OrderConfirmationCard(props) {
 
   // CONSTANTS
   const transaction_id = Cookies.get("transaction_id");
+  const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
   const history = useHistory();
 
   // STATES
@@ -209,6 +210,18 @@ export default function OrderConfirmationCard(props) {
                   phone: deliveryAddress?.phone,
                   location: deliveryAddress?.location,
                 },
+                fulfillments: [
+                  {
+                    end: {
+                      location: {
+                        gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                        address: {
+                          area_code: `${deliveryAddress?.location?.address?.areaCode}`,
+                        },
+                      },
+                    },
+                  },
+                ],
               },
             }))
           )

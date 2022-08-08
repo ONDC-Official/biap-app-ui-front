@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { postCall } from "../../../../api/axios";
+import { getCall, postCall } from "../../../../api/axios";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import { buttonTypes } from "../../../shared/button/utils";
 import Button from "../../../shared/button/button";
@@ -25,6 +25,7 @@ export default function AddAddressModal(props) {
   } = props;
 
   // STATES
+  const [fetchCityStateLoading, setCityStateLoading] = useState(false);
   const [addAddressLoading, setAddAddressLoading] = useState(false);
   const [address, setAddress] = useState(selectedAddress);
   const [error, setError] = useState({
@@ -349,6 +350,47 @@ export default function AddAddressModal(props) {
     }
   }
 
+  // use this function to fetch city and pincode
+  async function fetchCityAndStateOnAreacode(areaCode) {
+    setCityStateLoading(true);
+    try {
+      const { copResults } = await getCall(
+        `/mmi/api/mmi_pin_info?pincode=${areaCode}`
+      );
+      const cityName = copResults?.city
+        ? copResults?.city
+        : copResults?.district;
+      const stateName = copResults?.state;
+      setAddress((address) => ({
+        ...address,
+        city: cityName,
+        state: stateName,
+      }));
+      setError((error) => ({
+        ...error,
+        city_name_error: "",
+        state_name_error: "",
+      }));
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
+      setAddress((address) => ({
+        ...address,
+        areaCode: "",
+        city: "",
+        state: "",
+      }));
+    } finally {
+      setCityStateLoading(false);
+    }
+  }
+
   return (
     <div className={styles.overlay}>
       <div className={styles.popup_card}>
@@ -500,54 +542,6 @@ export default function AddAddressModal(props) {
                 <div className="col-md-6 col-sm-12">
                   <Input
                     type="text"
-                    placeholder="Enter City"
-                    id="city"
-                    label_name="City"
-                    value={address?.city}
-                    has_error={error.city_name_error}
-                    onChange={(event) => {
-                      const name = event.target.value;
-                      setAddress((address) => ({
-                        ...address,
-                        city: name,
-                      }));
-                      setError((error) => ({
-                        ...error,
-                        city_name_error: "",
-                      }));
-                    }}
-                    onBlur={checkCity}
-                    required
-                  />
-                  <ErrorMessage>{error.city_name_error}</ErrorMessage>
-                </div>
-                <div className="col-md-6 col-sm-12">
-                  <Input
-                    type="text"
-                    placeholder="Enter State"
-                    id="state"
-                    label_name="State"
-                    has_error={error.state_name_error}
-                    value={address?.state}
-                    onChange={(event) => {
-                      const name = event.target.value;
-                      setAddress((address) => ({
-                        ...address,
-                        state: name,
-                      }));
-                      setError((error) => ({
-                        ...error,
-                        state_name_error: "",
-                      }));
-                    }}
-                    onBlur={checkState}
-                    required
-                  />
-                  <ErrorMessage>{error.state_name_error}</ErrorMessage>
-                </div>
-                <div className="col-md-6 col-sm-12">
-                  <Input
-                    type="text"
                     pattern="\d*"
                     maxlength="6"
                     placeholder="Enter Pin code"
@@ -562,10 +556,14 @@ export default function AddAddressModal(props) {
                         event.target.value !== ""
                       )
                         return;
-                      const name = event.target.value;
+                      const areaCode = event.target.value;
+                      // if the length is 6 than call the city and state fetch call
+                      if (areaCode.length === 6) {
+                        fetchCityAndStateOnAreacode(areaCode);
+                      }
                       setAddress((address) => ({
                         ...address,
-                        areaCode: name,
+                        areaCode: areaCode,
                       }));
                       setError((error) => ({
                         ...error,
@@ -577,6 +575,32 @@ export default function AddAddressModal(props) {
                   />
                   <ErrorMessage>{error.areaCode_error}</ErrorMessage>
                 </div>
+                <div className="col-md-6 col-sm-12">
+                  <Input
+                    type="text"
+                    placeholder="Enter City"
+                    id="city"
+                    label_name="City"
+                    value={address?.city}
+                    has_error={error.city_name_error}
+                    required
+                    disabled
+                  />
+                  <ErrorMessage>{error.city_name_error}</ErrorMessage>
+                </div>
+                <div className="col-md-6 col-sm-12">
+                  <Input
+                    type="text"
+                    placeholder="Enter State"
+                    id="state"
+                    label_name="State"
+                    has_error={error.state_name_error}
+                    value={address?.state}
+                    required
+                    disabled
+                  />
+                  <ErrorMessage>{error.state_name_error}</ErrorMessage>
+                </div>
               </div>
             </div>
           </div>
@@ -587,6 +611,7 @@ export default function AddAddressModal(props) {
           {action_type === "edit" ? (
             <Button
               isloading={addAddressLoading ? 1 : 0}
+              disabled={addAddressLoading || fetchCityStateLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Update Address"
@@ -599,6 +624,7 @@ export default function AddAddressModal(props) {
           ) : (
             <Button
               isloading={addAddressLoading ? 1 : 0}
+              disabled={addAddressLoading || fetchCityStateLoading}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Add Address"

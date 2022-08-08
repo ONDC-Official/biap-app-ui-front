@@ -7,6 +7,12 @@ import AddAddressModal from "../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
 import { AddCookie } from "../../../../../utils/cookies";
 import { restoreToDefault } from "../../add-address-modal/utils/restoreDefaultAddress";
+import { ToastContext } from "../../../../../context/toastContext";
+import { getCall } from "../../../../../api/axios";
+import {
+  toast_actions,
+  toast_types,
+} from "../../../../shared/toast/utils/toast";
 
 export default function DeliveryAddress(props) {
   const { deliveryAddresses, setDeliveryAddresses } = props;
@@ -17,7 +23,10 @@ export default function DeliveryAddress(props) {
     address: restoreToDefault(),
   });
 
+  const dispatch = useContext(ToastContext);
+
   const onSetDeliveryAddress = (id, descriptor, address) => {
+    fetchLatLongFromEloc(address?.areaCode);
     return {
       id,
       name: descriptor?.name || "",
@@ -28,6 +37,38 @@ export default function DeliveryAddress(props) {
       },
     };
   };
+
+  // use this function to fetch lat and long from eloc
+  async function fetchLatLongFromEloc(eloc) {
+    try {
+      const { latitude, longitude } = await getCall(
+        `/mmi/api/mmi_place_info?eloc=${eloc}`
+      );
+      if (latitude && longitude) {
+        AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
+      } else {
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message:
+              "Cannot get latitude and longitude info for this pincode Please update the Address",
+          },
+        });
+        setDeliveryAddress({});
+      }
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
+    }
+  }
 
   return (
     <Fragment>

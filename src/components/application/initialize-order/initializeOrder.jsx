@@ -32,6 +32,7 @@ import useCancellablePromise from "../../../api/cancelRequest";
 
 export default function InitializeOrder() {
   // CONSTANTS
+  const { location } = JSON.parse(getValueFromCookie("search_context") || "{}");
   const transaction_id = getValueFromCookie("transaction_id");
   const history = useHistory();
 
@@ -140,6 +141,18 @@ export default function InitializeOrder() {
               cart: {
                 items: item,
               },
+              fulfillments: [
+                {
+                  end: {
+                    location: {
+                      gps: `${location?.lat}, ${location?.lng}`,
+                      address: {
+                        area_code: `${location?.pincode}`,
+                      },
+                    },
+                  },
+                },
+              ],
             },
           }))
         )
