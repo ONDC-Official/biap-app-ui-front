@@ -326,18 +326,7 @@ export default function PaymentConfirmationCard(props) {
                 transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                   .transaction_id,
               },
-              fulfillments: [
-                {
-                  end: {
-                    location: {
-                      gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
-                      address: {
-                        area_code: `${deliveryAddress?.location?.address?.areaCode}`,
-                      },
-                    },
-                  },
-                },
-              ],
+              quote: productsQuote,
             },
           }))
         )

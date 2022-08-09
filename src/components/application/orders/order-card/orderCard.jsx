@@ -123,7 +123,7 @@ export default function OrderCard(props) {
           },
           message: {
             order_id,
-            cancellation_reason_id: "item",
+            cancellation_reason_id: "1",
           },
         })
       );

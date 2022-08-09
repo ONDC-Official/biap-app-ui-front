@@ -204,24 +204,18 @@ export default function OrderConfirmationCard(props) {
                   email: billingAddress?.email,
                 },
                 delivery_info: {
-                  type: "HOME-DELIVERY",
+                  type: "Delivery",
                   name: deliveryAddress?.name,
                   email: deliveryAddress?.email,
                   phone: deliveryAddress?.phone,
-                  location: deliveryAddress?.location,
-                },
-                fulfillments: [
-                  {
-                    end: {
-                      location: {
-                        gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
-                        address: {
-                          area_code: `${deliveryAddress?.location?.address?.areaCode}`,
-                        },
-                      },
-                    },
+                  location: {
+                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                    ...deliveryAddress?.location,
                   },
-                ],
+                },
+                payment: {
+                  type: "POST-FULFILLMENT",
+                },
               },
             }))
           )

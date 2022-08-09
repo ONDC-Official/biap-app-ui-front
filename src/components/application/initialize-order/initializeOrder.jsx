@@ -132,7 +132,7 @@ export default function InitializeOrder() {
     try {
       const data = await cancellablePromise(
         postCall(
-          "/clientApis/v2/get_quote",
+          "/clientApis/v2/select",
           items.map((item) => ({
             context: {
               transaction_id,
@@ -176,7 +176,7 @@ export default function InitializeOrder() {
   const onGetQuote = useCallback(async (message_id) => {
     try {
       const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_get_quote?messageIds=${message_id}`)
+        getCall(`/clientApis/v2/on_select?messageIds=${message_id}`)
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
