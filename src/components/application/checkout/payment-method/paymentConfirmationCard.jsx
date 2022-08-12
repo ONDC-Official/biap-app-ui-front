@@ -326,7 +326,7 @@ export default function PaymentConfirmationCard(props) {
                 transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                   .transaction_id,
               },
-              quote: productsQuote,
+              quote: productsQuote?.[0],
             },
           }))
         )
