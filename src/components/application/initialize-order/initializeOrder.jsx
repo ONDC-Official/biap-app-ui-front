@@ -93,6 +93,10 @@ export default function InitializeOrder() {
       );
       es.addEventListener("on_select", (e) => {
         const { messageId } = JSON.parse(e.data);
+        
+        console.log("messageId", messageId);
+        console.log("event data", e.data);
+
         onGetQuote(messageId);
       });
       const timer = setTimeout(() => {
