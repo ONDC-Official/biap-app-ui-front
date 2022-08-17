@@ -35,7 +35,7 @@ export default function PriceDetailsCard(props) {
                     className="py-2 d-flex align-items-center"
                     key={`quote-item-${index}`}
                   >
-                    <div className="pe-2">
+                    <div className="pe-2 flex-grow-1">
                       {quote?.title && (
                         <p className={styles.product_name}>{quote?.title}</p>
                       )}

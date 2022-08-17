@@ -102,12 +102,12 @@
 }
 
 .product_name {
-  width: 100%;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 70%;
+  // display: -webkit-box;
+  // -webkit-line-clamp: 1;
+  // -webkit-box-orient: vertical;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
   word-break: break-all;
   font-size: $font-14;
   font-weight: $medium;
@@ -204,8 +204,41 @@
 .juspay_card {
   height: 80%;
   position: fixed;
+  z-index: 4;
   top: 10%;
   left: 30%;
   right: 30%;
   background: $white;
+}
+
+.remove_item {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.product_disabled {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  z-index: 1;
+  bottom: 0;
+  width: 100%;
+  height: 85%;
+  border-radius: 10px;
+  background: rgba($error, $alpha: 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.disabled_text {
+  margin: 0;
+  font-size: 20px;
+  width: 70%;
+  text-align: center;
+  color: $error;
 }

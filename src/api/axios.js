@@ -6,6 +6,8 @@ axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
 function unAuthorizedResponse() {
   deleteAllCookies();
+  localStorage.removeItem("product_list");
+  localStorage.removeItem("cartItems");
   window.location.pathname = "/";
 }
 
@@ -39,4 +41,20 @@ export function postCall(url, params) {
       return reject(err);
     }
   });
+}
+
+export function makeCancelable(promise) {
+  let isCanceled = false;
+  const wrappedPromise = new Promise((resolve, reject) => {
+    // Suppress resolution and rejection if canceled
+    promise
+      .then((val) => !isCanceled && resolve(val))
+      .catch((error) => !isCanceled && reject(error));
+  });
+  return {
+    promise: wrappedPromise,
+    cancel() {
+      isCanceled = true;
+    },
+  };
 }

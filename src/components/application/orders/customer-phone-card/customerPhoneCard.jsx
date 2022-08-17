@@ -11,19 +11,28 @@ import axios from "axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { ToastContext } from "../../../../context/toastContext";
 import validator from "validator";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function CustomerPhoneCard({
   supportOrderDetails,
   onClose,
   onSuccess,
 }) {
+  // CONSTANTS
   const token = getValueFromCookie("token");
+
+  // STATES
   const [inlineError, setInlineError] = useState({
     phone_number_error: "",
   });
   const [loading, setLoading] = useState(false);
   const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
+
+  // CONTEXt
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   // use this function to check the user entered phone number
   function checkPhoneNumber() {
@@ -50,17 +59,19 @@ export default function CustomerPhoneCard({
     }
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        "knowlarity/api/call-patron",
-        {
-          customer_phone_number: `+91${customerPhoneNumber.trim()}`,
-          seller_phone_number: supportOrderDetails?.phone?.includes("+91")
-            ? supportOrderDetails?.phone
-            : `+91${supportOrderDetails?.phone}`,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const { data } = await cancellablePromise(
+        axios.post(
+          "knowlarity/api/call-patron",
+          {
+            customer_phone_number: `+91${customerPhoneNumber.trim()}`,
+            seller_phone_number: supportOrderDetails?.phone?.includes("+91")
+              ? supportOrderDetails?.phone
+              : `+91${supportOrderDetails?.phone}`,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
       );
       if (data?.error) {
         dispatch({

@@ -1,6 +1,9 @@
-import React, { useState, useRef, useContext } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import moment from "moment";
-import { getOrderStatus } from "../../../../constants/order-status";
+import {
+  getOrderStatus,
+  order_statuses,
+} from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
 import { ONDC_COLORS } from "../../../shared/colors";
 import { postCall, getCall } from "../../../../api/axios";
@@ -10,6 +13,9 @@ import DropdownSvg from "../../../shared/svg/dropdonw";
 import CallSvg from "../../../shared/svg/callSvg";
 import CustomerPhoneCard from "../customer-phone-card/customerPhoneCard";
 import { ToastContext } from "../../../../context/toastContext";
+import useCancellablePromise from "../../../../api/cancelRequest";
+import { getValueFromCookie } from "../../../../utils/cookies";
+import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 
 export default function OrderCard(props) {
   const {
@@ -25,331 +31,423 @@ export default function OrderCard(props) {
     accoodion_id,
     currentSelectedAccordion,
     setCurrentSelectedAccordion,
-    supportOrderLoading,
-    setSupportOrderLoading,
   } = props;
+
+  // HELPERS
   const current_order_status = getOrderStatus(status);
+
+  // STATES
   const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
+
+  // REFS
   const trackOrderRef = useRef(null);
-  const onTrackOrderRef = useRef(null);
-  const onStatusOrderRef = useRef(null);
-  const support_order_timer = useRef();
-  const track_order_timer = useRef();
-  const status_timer = useRef();
+  const cancelEventSourceResponseRef = useRef(null);
+  const trackEventSourceResponseRef = useRef(null);
+  const supportEventSourceResponseRef = useRef(null);
+  const statusEventSourceResponseRef = useRef(null);
+  const eventTimeOutRef = useRef([]);
+
+  // CONTEXT
   const dispatch = useContext(ToastContext);
 
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
+
+  // use this function to dispatch error
+  function dispatchToast(message, type) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type,
+        message,
+      },
+    });
+  }
+
+  // CANCEL APIS
+  // use this function to fetch cancel product through events
+  function fetchCancelOrderDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_cancel", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getCancelOrderDetails(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (cancelEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
+        setCancelOrderLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
   // use this api to cancel an order
-  async function handleCancelOrder() {
+  async function handleFetchCancelOrderDetails() {
+    cancelEventSourceResponseRef.current = [];
     setCancelOrderLoading(true);
     try {
-      const { context } = await postCall("/clientApis/v1/cancel_order", {
-        context: {
-          bpp_id,
-          transaction_id,
-        },
-        message: {
-          order_id,
-          cancellation_reason_id: "item",
-        },
-      });
-      onCancelOrder(context.message_id);
+      const { context } = await cancellablePromise(
+        postCall("/clientApis/v1/cancel_order", {
+          context: {
+            bpp_id,
+            transaction_id,
+          },
+          message: {
+            order_id,
+            cancellation_reason_id: "1",
+          },
+        })
+      );
+      fetchCancelOrderDataThroughEvents(context.message_id);
     } catch (err) {
       setCancelOrderLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
   // on cancel Api
-  async function onCancelOrder(array_of_id) {
+  async function getCancelOrderDetails(message_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v1/on_cancel_order?messageId=${array_of_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v1/on_cancel_order?messageId=${message_id}`)
       );
-      if (data[0]?.error) {
-        const err = data[0]?.error;
-        dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-            id: Math.floor(Math.random() * 100),
-            type: toast_types.error,
-            message: err?.message,
-          },
-        });
-        setCancelOrderLoading(false);
-        return;
-      }
+      cancelEventSourceResponseRef.current = [
+        ...cancelEventSourceResponseRef.current,
+        data,
+      ];
       setCancelOrderLoading(false);
-      setCurrentSelectedAccordion("");
-      onFetchUpdatedOrder();
+      if (data?.message) {
+        setCurrentSelectedAccordion("");
+        onFetchUpdatedOrder();
+      } else {
+        dispatchToast(
+          "Something went wrong!, product status cannot be updated",
+          toast_types.error
+        );
+      }
     } catch (err) {
       setCancelOrderLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
+  // TRACK APIS
+  // use this function to fetch tracking info through events
+  function fetchTrackingDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_track", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getTrackOrderDetails(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (trackEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
+        setTrackOrderLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
   // use this api to track and order
-  async function handleTrackOrder() {
+  async function handleFetchTrackOrderDetails() {
+    trackEventSourceResponseRef.current = [];
     setTrackOrderLoading(true);
     try {
-      const data = await postCall("/clientApis/v2/track", [
-        {
-          context: {
-            transaction_id,
-            bpp_id,
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/track", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              order_id,
+            },
           },
-          message: {
-            order_id,
-          },
-        },
-      ]);
-      callApiMultipleTimesTrack(data[0]?.context?.message_id);
+        ])
+      );
+      fetchTrackingDataThroughEvents(data[0]?.context?.message_id);
     } catch (err) {
       setTrackOrderLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
   // on track order
-  async function onTrackOrder(array_of_id) {
+  async function getTrackOrderDetails(message_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v2/on_track?messageIds=${array_of_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_track?messageIds=${message_id}`)
       );
-      onTrackOrderRef.current = data;
+      trackEventSourceResponseRef.current = [
+        ...trackEventSourceResponseRef.current,
+        data[0],
+      ];
+      const { message } = data[0];
+      if (message?.tracking?.url === "") {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information not available for this product",
+          toast_types.error
+        );
+        return;
+      }
+      setTrackOrderLoading(false);
+      trackOrderRef.current.href = message?.tracking?.url;
+      trackOrderRef.current.target = "_blank";
+      trackOrderRef.current.click();
     } catch (err) {
       setTrackOrderLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
-  // use this api to get updated status of the order
-  async function handleGetStatus() {
-    setStatusLoading(true);
-    try {
-      const data = await postCall("/clientApis/v2/order_status", [
-        {
-          context: {
-            transaction_id,
-            bpp_id,
-          },
-          message: {
-            order_id,
-          },
-        },
-      ]);
-      callApiMultipleTimesStatus(data[0]?.context?.message_id);
-    } catch (err) {
-      setStatusLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
-    }
-  }
+  // SUPPORT APIS
+  // use this function to fetch support info through events
+  function fetchSupportDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_support", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getSupportOrderDetails(messageId);
+    });
 
-  // on status
-  async function onStatus(array_of_id) {
-    try {
-      const data = await getCall(
-        `/clientApis/v2/on_order_status?messageIds=${array_of_id}`
-      );
-      onStatusOrderRef.current = data;
-    } catch (err) {
-      setStatusLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
-    }
+    const timer = setTimeout(() => {
+      es.close();
+      if (supportEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
+        setSupportOrderLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
   }
 
   // use this api to call support
-  async function handleSupportForOrder() {
+  async function handleFetchSupportOrderDetails() {
     if (supportOrderDetails) {
       setToggleCustomerPhoneCard(true);
       return;
     }
+    supportEventSourceResponseRef.current = [];
     setSupportOrderLoading(true);
     try {
-      const data = await postCall("/clientApis/v2/get_support", [
-        {
-          context: {
-            transaction_id,
-            bpp_id,
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/get_support", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              ref_id: order_id,
+            },
           },
-          message: {
-            ref_id: order_id,
-          },
-        },
-      ]);
-      callApiMultipleTimes(data[0]?.context?.message_id);
+        ])
+      );
+      fetchSupportDataThroughEvents(data[0]?.context?.message_id);
     } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
       setSupportOrderLoading(false);
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
   // on support order
-  async function onSupportOrder(array_of_id) {
+  async function getSupportOrderDetails(message_id) {
     try {
-      const data = await getCall(
-        `/clientApis/v2/on_support?messageIds=${array_of_id}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_support?messageIds=${message_id}`)
       );
-      if (data[0]?.error) {
-        dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-            id: Math.floor(Math.random() * 100),
-            type: toast_types.error,
-            message: "Could not get data for this order!",
-          },
-        });
+      supportEventSourceResponseRef.current = [
+        ...supportEventSourceResponseRef.current,
+        data[0],
+      ];
+      const { message } = data[0];
+
+      if (message) {
+        setToggleCustomerPhoneCard(true);
         setSupportOrderLoading(false);
-        clearInterval(support_order_timer.current);
-        return;
+        setSupportOrderDetails(message);
+      } else {
+        dispatchToast("Could not get data for this order!", toast_types.error);
+        setSupportOrderLoading(false);
       }
-      setSupportOrderDetails(data[0]?.message);
     } catch (err) {
       setSupportOrderLoading(false);
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.message,
-        },
-      });
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
-  // use this function to call on support call multiple times
-  function callApiMultipleTimes(message_ids) {
-    let counter = 8;
-    support_order_timer.current = setInterval(async () => {
-      if (counter <= 0) {
-        setToggleCustomerPhoneCard(true);
-        setSupportOrderLoading(false);
-        clearInterval(support_order_timer.current);
-        return;
-      }
-      await onSupportOrder(message_ids).finally(() => {
-        counter -= 1;
-      });
-    }, 3000);
-  }
+  // STATUS APIS
+  // use this function to fetch support info through events
+  function fetchStatusDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_status", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getUpdatedStatus(messageId);
+    });
 
-  // use this function to call on track order multiple times
-  function callApiMultipleTimesTrack(message_ids) {
-    let counter = 8;
-    track_order_timer.current = setInterval(async () => {
-      if (counter <= 0) {
-        if (
-          onTrackOrderRef.current[0]?.message?.tracking?.url === "" ||
-          onTrackOrderRef.current[0]?.error?.message
-        ) {
-          dispatch({
-            type: toast_actions.ADD_TOAST,
-            payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: "Tracking information not available for this product",
-            },
-          });
-          setTrackOrderLoading(false);
-          clearInterval(track_order_timer.current);
-          return;
-        }
-        trackOrderRef.current.href = onTrackOrderRef[0]?.message?.tracking?.url;
-        trackOrderRef.current.target = "_blank";
-        trackOrderRef.current.click();
-        setTrackOrderLoading(false);
-        clearInterval(track_order_timer.current);
-        return;
-      }
-      await onTrackOrder(message_ids).finally(() => {
-        counter -= 1;
-      });
-    }, 3000);
-  }
-
-  // use this function to call on track order multiple times
-  function callApiMultipleTimesStatus(message_ids) {
-    let counter = 8;
-    status_timer.current = setInterval(async () => {
-      if (counter <= 0) {
-        const { message, error = {} } = onStatusOrderRef.current[0];
-        if (error?.message) {
-          dispatch({
-            type: toast_actions.ADD_TOAST,
-            payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: "Cannot get status for this product",
-            },
-          });
-          setStatusLoading(false);
-          clearInterval(status_timer.current);
-          return;
-        }
-        if (message?.order) {
-          onFetchUpdatedOrder();
-        }
+    const timer = setTimeout(() => {
+      es.close();
+      if (statusEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
         setStatusLoading(false);
-        clearInterval(status_timer.current);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
+  // use this api to get updated status of the order
+  async function handleFetchUpdatedStatus() {
+    statusEventSourceResponseRef.current = [];
+    setStatusLoading(true);
+    try {
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/order_status", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              order_id,
+            },
+          },
+        ])
+      );
+      fetchStatusDataThroughEvents(data[0]?.context?.message_id);
+    } catch (err) {
+      setStatusLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  }
+
+  // on status
+  async function getUpdatedStatus(message_id) {
+    try {
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`)
+      );
+      statusEventSourceResponseRef.current = [
+        ...statusEventSourceResponseRef.current,
+        data[0],
+      ];
+      const { message, error = {} } = data[0];
+      if (error?.message) {
+        dispatchToast("Cannot get status for this product", toast_types.error);
+        setStatusLoading(false);
         return;
       }
-      await onStatus(message_ids).finally(() => {
-        counter -= 1;
-      });
-    }, 3000);
+      if (message?.order) {
+        onFetchUpdatedOrder();
+      }
+      setStatusLoading(false);
+    } catch (err) {
+      setStatusLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
   }
+
+  useEffect(() => {
+    return () => {
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    };
+  }, []);
 
   return (
     <div className={styles.orders_card}>
@@ -358,14 +456,7 @@ export default function OrderCard(props) {
           supportOrderDetails={supportOrderDetails}
           onClose={() => setToggleCustomerPhoneCard(false)}
           onSuccess={() => {
-            dispatch({
-              type: toast_actions.ADD_TOAST,
-              payload: {
-                id: Math.floor(Math.random() * 100),
-                type: toast_types.success,
-                message: "Call successfully placed",
-              },
-            });
+            dispatchToast("Call successfully placed", toast_types.success);
             setSupportOrderDetails();
             setToggleCustomerPhoneCard(false);
           }}
@@ -382,7 +473,7 @@ export default function OrderCard(props) {
         }}
         style={{ cursor: "pointer" }}
       >
-        <div>
+        <div className="flex-grow-1">
           <p className={styles.card_header_title}>{order_id ?? "NA"}</p>
           <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
             Ordered on
@@ -391,26 +482,32 @@ export default function OrderCard(props) {
             </span>
           </p>
         </div>
-        <div className="ms-auto px-3">
+        <div className="px-3" style={{ width: "18%" }}>
           <p className={styles.status_label}>Status:</p>
           <div className="pt-1">
-            <div
-              className={styles.status_chip}
-              style={{
-                background: `rgba(${current_order_status.color}, 0.05)`,
-                border: `1px solid ${current_order_status.border}`,
-              }}
-            >
-              <p
-                className={styles.status_text}
-                style={{ color: current_order_status.border }}
+            {current_order_status ? (
+              <div
+                className={styles.status_chip}
+                style={{
+                  background: `rgba(${current_order_status?.color}, 0.05)`,
+                  border: `1px solid ${current_order_status?.border}`,
+                }}
               >
-                {current_order_status.status}
+                <p
+                  className={styles.status_text}
+                  style={{ color: current_order_status?.border }}
+                >
+                  {current_order_status?.status}
+                </p>
+              </div>
+            ) : (
+              <p className={styles.status_text} style={{ textAlign: "left" }}>
+                NA
               </p>
-            </div>
+            )}
           </div>
         </div>
-        <div className="px-2">
+        <div className="px-2" style={{ width: "7%" }}>
           <div
             style={
               currentSelectedAccordion === accoodion_id
@@ -458,7 +555,12 @@ export default function OrderCard(props) {
                   </div>
                 </div>
                 <div className="ms-auto">
-                  <p className={styles.product_price}>₹ {price}</p>
+                  <p
+                    className={styles.product_price}
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    ₹ {Number(price)?.toFixed(2)}
+                  </p>
                 </div>
               </div>
             );
@@ -518,15 +620,24 @@ export default function OrderCard(props) {
         >
           {supportOrderLoading ? (
             <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
-          ) : !cancelOrderLoading && !trackOrderLoading && !statusLoading ? (
-            <CallSvg
-              style={{ cursor: "pointer" }}
-              click={handleSupportForOrder}
-            />
-          ) : null}
+          ) : (
+            <button
+              className="border-0 p-0"
+              style={{ background: "transparent" }}
+              onClick={handleFetchSupportOrderDetails}
+              disabled={
+                trackOrderLoading ||
+                cancelOrderLoading ||
+                statusLoading ||
+                supportOrderLoading
+              }
+            >
+              <CallSvg />
+            </button>
+          )}
           <div className="ms-auto">
             {/* IF ORDER STATUS IS NOT CANCEL  */}
-            {current_order_status.status !== "Cancled" && (
+            {current_order_status?.status !== order_statuses.cancelled && (
               <div className="d-flex align-items-center justify-content-center flex-wrap">
                 <div className="pe-3 py-1">
                   <button
@@ -541,7 +652,7 @@ export default function OrderCard(props) {
                         ? styles.secondary_action_loading
                         : styles.secondary_action
                     }
-                    onClick={() => handleGetStatus()}
+                    onClick={() => handleFetchUpdatedStatus()}
                   >
                     {statusLoading ? (
                       <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
@@ -563,7 +674,7 @@ export default function OrderCard(props) {
                         ? styles.secondary_action_loading
                         : styles.secondary_action
                     }
-                    onClick={() => handleTrackOrder()}
+                    onClick={() => handleFetchTrackOrderDetails()}
                   >
                     {trackOrderLoading ? (
                       <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
@@ -585,7 +696,7 @@ export default function OrderCard(props) {
                         ? styles.primary_action_loading
                         : styles.primary_action
                     }
-                    onClick={() => handleCancelOrder()}
+                    onClick={() => handleFetchCancelOrderDetails()}
                   >
                     {cancelOrderLoading ? (
                       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />

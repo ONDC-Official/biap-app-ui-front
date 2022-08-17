@@ -1,12 +1,5 @@
-import React, {
-  Fragment,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import styles from "../../../styles/products/productList.module.scss";
-// import productCardStyles from "../../../styles/products/productCard.module.scss";
 import Navbar from "../../shared/navbar/navbar";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import { getCall } from "../../../api/axios";
@@ -25,15 +18,10 @@ import Pagination from "../../shared/pagination/pagination";
 import { getValueFromCookie, AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
 import EmptySearchCategory from "../../../assets/images/empty_search_category.jpg";
-// import beautyIllustration from "../../../assets/images/beauty.png";
-// import electronicsIllustration from "../../../assets/images/electronics.png";
-// import fashionIllustration from "../../../assets/images/fashion.jpg";
-// import foodIllustration from "../../../assets/images/food.jpg";
-// import fruitsIllustration from "../../../assets/images/fruits.png";
-// import homeDecoreIllustration from "../../../assets/images/homeDecore.jpg";
-
+import { useRef } from "react";
+import useCancellablePromise from "../../../api/cancelRequest";
 export default function ProductList() {
-  const { cartItems } = useContext(CartContext);
+  // CONSTANTS
   const search_context = JSON.parse(
     getValueFromCookie("search_context") || "{}"
   );
@@ -44,6 +32,9 @@ export default function ProductList() {
   const selected_sort_options = JSON.parse(
     getValueFromCookie("sort_options") || "{}"
   );
+
+  // STATES
+  const [eventData, setEventData] = useState();
   const [products, setProducts] = useState([]);
   const [messageId, setMessageId] = useState("");
   const [pagination, setPagination] = useState({
@@ -56,33 +47,73 @@ export default function ProductList() {
     lat: "",
     lng: "",
   });
-  const [newSearchedProduct, setNewSearchedProduct] = useState();
+  const [loading, setLoading] = useState();
   const [searchedProduct, setSearchedProduct] = useState();
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [fetchFilterLoading, setFetchFilterLoading] = useState(false);
   const [filters, setFilters] = useState();
   const [toggleFiltersOnMobile, setToggleFiltersOnMobile] = useState(false);
-  const search_polling_timer = useRef(0);
   const [sortType, setSortType] = useState({});
   const [selectedFilters, setSelectedFilters] = useState({});
+
+  // CONTEXT
+  const { cartItems } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
+
+  // REF
+  const eventSourceRef = useRef(null);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
+
+  // use this function to fetch products
+  function fetchProducts(message_id) {
+    setLoading(true);
+    setFetchFilterLoading(true);
+    setFilters({
+      categories: [],
+      fulfillment: [],
+      maxPrice: 0,
+      minPrice: 1000,
+      providers: [],
+    });
+    setProducts([]);
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    eventSourceRef.current = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    eventSourceRef.current.addEventListener("on_search", (e) => {
+      setEventData(() => JSON.parse(e.data));
+    });
+  }
+
+  useEffect(() => {
+    return () => {
+      eventSourceRef.current?.close();
+    };
+  }, []);
 
   useEffect(() => {
     if (!search_context?.message_id) {
-      clearInterval(search_polling_timer.current);
       return;
     }
     if (Object.keys(search_context).length > 0) {
       setMessageId(search_context?.message_id);
       setSearchedProduct(search_context?.search?.value);
       setSearchedLocation(search_context?.location);
-      callApiMultipleTimes(search_context?.message_id);
     }
     if (Object.keys(product_list).length > 0) {
       setProducts(product_list);
-      setNewSearchedProduct(false);
+      setLoading(false);
       fetchAllFilters(search_context?.message_id);
-      clearInterval(search_polling_timer.current);
     }
     if (Object.keys(selected_filters).length > 0) {
       setSelectedFilters(selected_filters);
@@ -96,34 +127,55 @@ export default function ProductList() {
       selected_sort_options,
       1
     );
-    return () => {
-      clearInterval(search_polling_timer.current);
-    };
     // eslint-disable-next-line
   }, []);
 
-  // on search Api
-  async function onSearchPolling(message_id) {
-    try {
-      const data = await getCall(
-        `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
-      );
+  useEffect(() => {
+    if (eventData?.filters && Object.keys(eventData?.filters).length > 0) {
+      const filterSet = eventData?.filters;
+      setFilters((filters) => ({
+        ...filters,
+        categories: [...filters?.categories, ...filterSet?.categories],
+        fulfillment: [...filters?.fulfillment, ...filterSet?.fulfillment],
+        maxPrice:
+          filters?.maxPrice > filterSet?.maxPrice
+            ? filters?.maxPrice
+            : filterSet?.maxPrice,
+        minPrice:
+          filters?.minPrice < filterSet?.minPrice
+            ? filters?.minPrice
+            : filterSet?.minPrice,
+        providers: [...filters?.providers, ...filterSet?.providers],
+      }));
+      setFetchFilterLoading(false);
+    }
+    if (eventData?.messageId) {
       setPagination((prev) => ({
         ...prev,
-        totalCount: data?.message?.count,
+        totalCount: eventData?.count,
         currentPage: 1,
       }));
+      onSearch(eventData?.messageId);
+    }
+    // eslint-disable-next-line
+  }, [eventData]);
+
+  // on search Api
+  async function onSearch(message_id) {
+    try {
+      const data = await cancellablePromise(
+        getCall(
+          `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
+        )
+      );
       localStorage.setItem(
         "product_list",
         JSON.stringify(data?.message?.catalogs)
       );
-      if (data?.message?.catalogs?.length > 0) {
-        setNewSearchedProduct(false);
-      }
+      setLoading(false);
       setProducts(data?.message?.catalogs);
     } catch (err) {
-      setNewSearchedProduct(false);
-      clearInterval(search_polling_timer.current);
+      setLoading(false);
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -134,31 +186,11 @@ export default function ProductList() {
       });
     }
   }
-
-  // use this to poll for multiple times
-  function callApiMultipleTimes(message_id) {
-    setNewSearchedProduct(true);
-    setFetchFilterLoading(true);
-    let counter = 8;
-    search_polling_timer.current = setInterval(async () => {
-      if (counter <= 0) {
-        // fetch filters for that.
-        fetchAllFilters(message_id);
-        setNewSearchedProduct(false);
-        clearInterval(search_polling_timer.current);
-        return;
-      }
-      await onSearchPolling(message_id).finally(() => {
-        counter -= 1;
-      });
-    }, 3000);
-  }
-
   // use this api to fetch the filters.
   async function fetchAllFilters(messageId) {
     try {
-      const data = await getCall(
-        `/clientApis/v1/getFilterParams?messageId=${messageId}`
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v1/getFilterParams?messageId=${messageId}`)
       );
       setFilters(data);
     } catch (err) {
@@ -183,11 +215,9 @@ export default function ProductList() {
     page_number
   ) {
     let query = `?messageId=${message_id}&limit=10`;
-
     if (page_number) {
       query += `&pageNumber=${page_number}`;
     }
-
     if (!isNaN(applied_filters.minPrice) && !isNaN(applied_filters.maxPrice)) {
       query += `&priceMin=${applied_filters.minPrice}&priceMax=${applied_filters.maxPrice}`;
     }
@@ -227,11 +257,14 @@ export default function ProductList() {
       page_number
     );
     try {
-      const { message } = await getCall(`/clientApis/v1/on_search${query}`);
+      const { message } = await cancellablePromise(
+        getCall(`/clientApis/v1/on_search${query}`)
+      );
       setPagination((prev) => ({
         ...prev,
         totalCount: message?.count,
       }));
+      localStorage.setItem("product_list", JSON.stringify(message?.catalogs));
       setProducts(message?.catalogs);
     } catch (err) {
       dispatch({
@@ -263,84 +296,6 @@ export default function ProductList() {
       className="d-flex align-items-center justify-content-center p-4"
       style={{ height: "85%", width: "100%", overflow: "auto" }}
     >
-      {/* <div className={productCardStyles.product_card_background}>
-        <div className="container">
-          <div className="row">
-            <div className="col-md-6 col-lg-4 py-4">
-              <div className="d-flex justify-content-center">
-                <div className="text-center">
-                  <img
-                    src={beautyIllustration}
-                    alt="beauty_and_personal_care"
-                    style={{ height: "80px" }}
-                  />
-                  <p className="py-3">Beauty and personal care</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4 py-4">
-              <div className="d-flex justify-content-center">
-                <div className="text-center">
-                  <img
-                    src={foodIllustration}
-                    alt="food_and_beverage"
-                    style={{ height: "80px" }}
-                  />
-                  <p className="py-3">Food and Beverages</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4 py-4">
-              <div className="d-flex justify-content-center">
-                <div className="text-center">
-                  <img
-                    src={fruitsIllustration}
-                    alt="fruits_and_vegitables"
-                    style={{ height: "80px" }}
-                  />
-                  <p className="py-3">Fresh fruits and vegitables</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4 py-4">
-              <div className="d-flex justify-content-center">
-                <div className="text-center">
-                  <img
-                    src={fashionIllustration}
-                    alt="fashion"
-                    style={{ height: "80px" }}
-                  />
-                  <p className="py-3">Fashion</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4 py-4">
-              <div className="d-flex justify-content-center">
-                <div className="text-center">
-                  <img
-                    src={electronicsIllustration}
-                    alt="electronics"
-                    style={{ height: "80px" }}
-                  />
-                  <p className="py-3">Electronics</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4 py-4">
-              <div className="d-flex justify-content-center">
-                <div className="text-center">
-                  <img
-                    src={homeDecoreIllustration}
-                    alt="home_decore"
-                    style={{ height: "80px" }}
-                  />
-                  <p className="py-3">Home Decore</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
       <div className="py-4">
         <img
           src={EmptySearchCategory}
@@ -411,14 +366,13 @@ export default function ProductList() {
         <SearchBanner
           location={searchedLocation}
           onSearch={({ search, location, message_id }) => {
-            clearInterval(search_polling_timer.current);
             setSelectedFilters({});
             setSortType({});
             setSearchedProduct(search?.value);
             setSearchedLocation(location);
             setMessageId(message_id);
             // call On Search api
-            callApiMultipleTimes(message_id);
+            fetchProducts(message_id);
           }}
         />
         {/* list of product view  */}
@@ -432,7 +386,7 @@ export default function ProductList() {
                 : styles.product_list_without_summary_wrapper
             }`}
           >
-            {newSearchedProduct ? (
+            {loading ? (
               loadingSpin("100%", "100%")
             ) : (
               <div className="d-flex h-100 px-2">
@@ -501,7 +455,7 @@ export default function ProductList() {
                         )}
                       </div>
                     </div>
-                    <div className="container-fluid">
+                    <div className="container">
                       <div className="row pe-2">
                         {products.map((product) => {
                           return (
