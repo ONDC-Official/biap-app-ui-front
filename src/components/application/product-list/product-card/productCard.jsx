@@ -81,9 +81,9 @@ export default function ProductCard(props) {
               <IndianRupee width="10" height="14" />
             </div>
             <p className={styles.product_price}>
-              {Number.isInteger(price.value)
-                ? price.value
-                : price.value.toFixed(2)}
+              {Number.isInteger(Number(price?.value))
+                ? Number(price?.value)
+                : Number(price?.value).toFixed(2)}
             </p>
           </div>
           {show_quantity_button && (
