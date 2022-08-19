@@ -93,7 +93,7 @@ export default function InitializeOrder() {
       );
       es.addEventListener("on_select", (e) => {
         const { messageId } = JSON.parse(e.data);
-        
+
         onGetQuote(messageId);
       });
       const timer = setTimeout(() => {
@@ -206,7 +206,7 @@ export default function InitializeOrder() {
           const provided_by = message?.quote?.provider?.descriptor?.name;
           const product = breakup?.map((break_up_item) => ({
             title: break_up_item?.title,
-            price: Number(message?.quote?.quote?.price?.value)?.toFixed(2),
+            price: Number(break_up_item.price?.value)?.toFixed(2),
             provided_by,
           }));
           return product;
