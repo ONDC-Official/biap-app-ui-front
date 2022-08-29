@@ -141,8 +141,8 @@ export default function SearchBanner({ onSearch, location }) {
   async function getAreadCodeFromLatLong(location) {
     try {
       const { results } = await cancellablePromise(
-        getCall(
-          `/mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
         )
       );
       const { lat, lng, pincode } = results[0];
