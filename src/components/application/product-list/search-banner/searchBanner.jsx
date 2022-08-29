@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { search_types } from "../../../../constants/searchTypes";
 import axios from "axios";
-import { getCall, postCall } from "../../../../api/axios";
+import { search_types } from "../../../../constants/searchTypes";
+import { postCall } from "../../../../api/axios";
 import { AddCookie } from "../../../../utils/cookies";
 import { debounce } from "../../../../utils/search";
 import Loading from "../../../shared/loading/loading";
@@ -140,12 +140,12 @@ export default function SearchBanner({ onSearch, location }) {
   // get the area code of the location selected
   async function getAreadCodeFromLatLong(location) {
     try {
-      const { results } = await cancellablePromise(
+      const { data } = await cancellablePromise(
         axios.get(
-          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
         )
       );
-      const { lat, lng, pincode } = results[0];
+      const { lat, lng, pincode } = data?.results?.[0];
       setSearchedLocation({
         ...searchedLocation,
         name: location?.name,

@@ -1,4 +1,5 @@
 import React, { Fragment, useContext, useState } from "react";
+import axios from "axios";
 import { address_types } from "../../../../../constants/address-types";
 import { AddressContext } from "../../../../../context/addressContext";
 import styles from "../../../../../styles/cart/cartView.module.scss";
@@ -8,7 +9,7 @@ import AddressRadioButton from "../address-radio-button/addressRadioButton";
 import { AddCookie } from "../../../../../utils/cookies";
 import { restoreToDefault } from "../../add-address-modal/utils/restoreDefaultAddress";
 import { ToastContext } from "../../../../../context/toastContext";
-import { getCall } from "../../../../../api/axios";
+import useCancellablePromise from "../../../../../api/cancelRequest";
 import {
   toast_actions,
   toast_types,
@@ -24,6 +25,9 @@ export default function DeliveryAddress(props) {
   });
 
   const dispatch = useContext(ToastContext);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
 
   const onSetDeliveryAddress = (id, descriptor, address) => {
     fetchLatLongFromEloc(address?.areaCode);
@@ -41,8 +45,10 @@ export default function DeliveryAddress(props) {
   // use this function to fetch lat and long from eloc
   async function fetchLatLongFromEloc(eloc) {
     try {
-      const { latitude, longitude } = await getCall(
-        `/mmi/api/mmi_place_info?eloc=${eloc}`
+      const { latitude, longitude } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${eloc}`
+        )
       );
       if (latitude && longitude) {
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));

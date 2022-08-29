@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
-import { getCall, postCall } from "../../../../api/axios";
+import axios from "axios";
+import { postCall } from "../../../../api/axios";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import { buttonTypes } from "../../../shared/button/utils";
 import Button from "../../../shared/button/button";
@@ -354,8 +355,10 @@ export default function AddAddressModal(props) {
   async function fetchCityAndStateOnAreacode(areaCode) {
     setCityStateLoading(true);
     try {
-      const { copResults } = await getCall(
-        `/mmi/api/mmi_pin_info?pincode=${areaCode}`
+      const { copResults } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_pin_info?pincode=${areaCode}`
+        )
       );
       const cityName = copResults?.city
         ? copResults?.city
