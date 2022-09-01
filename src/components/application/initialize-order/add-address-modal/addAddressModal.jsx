@@ -355,15 +355,15 @@ export default function AddAddressModal(props) {
   async function fetchCityAndStateOnAreacode(areaCode) {
     setCityStateLoading(true);
     try {
-      const { copResults } = await cancellablePromise(
+      const { data } = await cancellablePromise(
         axios.get(
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_pin_info?pincode=${areaCode}`
         )
       );
-      const cityName = copResults?.city
-        ? copResults?.city
-        : copResults?.district;
-      const stateName = copResults?.state;
+      const cityName = data?.copResults?.city
+        ? data?.copResults?.city
+        : data?.copResults?.district;
+      const stateName = data?.copResults?.state;
       setAddress((address) => ({
         ...address,
         city: cityName,

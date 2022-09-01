@@ -45,11 +45,12 @@ export default function DeliveryAddress(props) {
   // use this function to fetch lat and long from eloc
   async function fetchLatLongFromEloc(eloc) {
     try {
-      const { latitude, longitude } = await cancellablePromise(
+      const { data } = await cancellablePromise(
         axios.get(
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${eloc}`
         )
       );
+      const { latitude, longitude } = data;
       if (latitude && longitude) {
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
       } else {
