@@ -25,7 +25,7 @@ export default function Navbar() {
   };
   const more_options_dropdown_options = [
     {
-      img: <ProductList />,
+      img: <ProductList width="19" />,
       value: dropdown_links.PRODUCTS,
     },
     {

@@ -3,10 +3,15 @@ import styles from "./checkbox.module.scss";
 import Checkmark from "../svg/checkmark";
 import { ONDC_COLORS } from "../colors";
 
-export default function Checkbox({ checked, ...props }) {
+export default function Checkbox({
+  checked,
+  boxBasis = "20%",
+  nameBasis = "80%",
+  ...props
+}) {
   return (
     <button className={`${styles.checkbox_wrapper} my-1`} {...props}>
-      <div className={styles.box_basis}>
+      <div className={styles.box_basis} style={{ flexBasis: boxBasis }}>
         <div className={styles.checkbox_background}>
           <div className={checked ? styles.active : ""}>
             {checked && (
@@ -15,7 +20,9 @@ export default function Checkbox({ checked, ...props }) {
           </div>
         </div>
       </div>
-      <div className={styles.name_basis}>{props.children}</div>
+      <div className={styles.name_basis} style={{ flexBasis: nameBasis }}>
+        {props.children}
+      </div>
     </button>
   );
 }

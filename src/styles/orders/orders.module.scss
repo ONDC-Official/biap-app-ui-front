@@ -178,6 +178,21 @@ button:disabled {
   opacity: 0.5;
 }
 
+.label_chip {
+  padding: 4px 8px;
+  background-color: #EFEFEF;
+  border: 0.5px solid #ddd;
+  border-radius: 36px;
+}
+
+.label_chip_text {
+  margin: 0;
+  font-size: $font-12;
+  line-height: normal;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 @media screen and (max-width: 767px) {
   .order_list_wrapper {
     width: 100%;

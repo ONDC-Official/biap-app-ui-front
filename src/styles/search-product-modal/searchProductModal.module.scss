@@ -19,7 +19,7 @@
   max-width: 70%;
   background-color: $white;
   border-radius: 10px;
-  max-height: 80%;
+  max-height: 95%;
   overflow: auto;
   opacity: 1;
   animation: slide 0.5s ease forwards;
@@ -231,6 +231,32 @@
 .search_type_text {
   font-size: $font-14;
   color: $white;
+  margin: 0;
+}
+
+.cancel_dropdown_wrapper {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 10px 15px;
+  background-color: transparent;
+  border: 1px solid $secondaryColor;
+  border-radius: 10px;
+}
+
+.cancel_dropdown_label_text {
+  font-size: $font-14;
+  font-weight: $medium;
+  text-align: left;
+  color: $primaryColor;
+  margin: 5px;
+}
+
+.cancel_dropdown_text {
+  font-size: $font-14;
+  font-weight: 400;
+  line-height: 1.5;
+  color: $primaryColor;
   margin: 0;
 }
 
