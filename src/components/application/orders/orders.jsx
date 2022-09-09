@@ -63,9 +63,12 @@ export default function Orders() {
         return {
           product: items?.map(({ id, quantity }, index) => ({
             id,
-            name: quote?.breakup[index]?.title,
-            quantity: quantity?.count,
-            price: quote?.breakup[index]?.price?.value,
+            name: quote?.breakup[index]?.title ?? "NA",
+            quantity: quantity?.count ?? 0,
+            cancellation_status: items?.[index]?.cancellation_status ?? "",
+            return_status: items?.[index]?.return_status ?? "",
+            fulfillment_status: items?.[index]?.fulfillment_status ?? "",
+            ...items?.[index]?.product,
           })),
           billing_address: {
             name: billing?.name,

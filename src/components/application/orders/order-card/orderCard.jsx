@@ -16,6 +16,7 @@ import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
+import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
 
 export default function OrderCard(props) {
   const {
@@ -37,16 +38,15 @@ export default function OrderCard(props) {
   const current_order_status = getOrderStatus(status);
 
   // STATES
-  const [cancelOrderLoading, setCancelOrderLoading] = useState(false);
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
+  const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
 
   // REFS
   const trackOrderRef = useRef(null);
-  const cancelEventSourceResponseRef = useRef(null);
   const trackEventSourceResponseRef = useRef(null);
   const supportEventSourceResponseRef = useRef(null);
   const statusEventSourceResponseRef = useRef(null);
@@ -68,96 +68,6 @@ export default function OrderCard(props) {
         message,
       },
     });
-  }
-
-  // CANCEL APIS
-  // use this function to fetch cancel product through events
-  function fetchCancelOrderDataThroughEvents(message_id) {
-    const token = getValueFromCookie("token");
-    let header = {
-      headers: {
-        ...(token && {
-          Authorization: `Bearer ${token}`,
-        }),
-      },
-    };
-    let es = new window.EventSourcePolyfill(
-      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
-      header
-    );
-    es.addEventListener("on_cancel", (e) => {
-      const { messageId } = JSON.parse(e?.data);
-      getCancelOrderDetails(messageId);
-    });
-
-    const timer = setTimeout(() => {
-      es.close();
-      if (cancelEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
-        setCancelOrderLoading(false);
-      }
-    }, SSE_TIMEOUT);
-
-    eventTimeOutRef.current = [
-      ...eventTimeOutRef.current,
-      {
-        eventSource: es,
-        timer,
-      },
-    ];
-  }
-
-  // use this api to cancel an order
-  async function handleFetchCancelOrderDetails() {
-    cancelEventSourceResponseRef.current = [];
-    setCancelOrderLoading(true);
-    try {
-      const { context } = await cancellablePromise(
-        postCall("/clientApis/v1/cancel_order", {
-          context: {
-            bpp_id,
-            transaction_id,
-          },
-          message: {
-            order_id,
-            cancellation_reason_id: "1",
-          },
-        })
-      );
-      fetchCancelOrderDataThroughEvents(context.message_id);
-    } catch (err) {
-      setCancelOrderLoading(false);
-      dispatchToast(err?.message, toast_types.error);
-    }
-  }
-
-  // on cancel Api
-  async function getCancelOrderDetails(message_id) {
-    try {
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v1/on_cancel_order?messageId=${message_id}`)
-      );
-      cancelEventSourceResponseRef.current = [
-        ...cancelEventSourceResponseRef.current,
-        data,
-      ];
-      setCancelOrderLoading(false);
-      if (data?.message) {
-        setCurrentSelectedAccordion("");
-        onFetchUpdatedOrder();
-      } else {
-        dispatchToast(
-          "Something went wrong!, product status cannot be updated",
-          toast_types.error
-        );
-      }
-    } catch (err) {
-      setCancelOrderLoading(false);
-      dispatchToast(err?.message, toast_types.error);
-    }
   }
 
   // TRACK APIS
@@ -251,6 +161,10 @@ export default function OrderCard(props) {
     } catch (err) {
       setTrackOrderLoading(false);
       dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
     }
   }
 
@@ -346,6 +260,10 @@ export default function OrderCard(props) {
     } catch (err) {
       setSupportOrderLoading(false);
       dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
     }
   }
 
@@ -437,6 +355,10 @@ export default function OrderCard(props) {
     } catch (err) {
       setStatusLoading(false);
       dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
     }
   }
 
@@ -460,6 +382,23 @@ export default function OrderCard(props) {
             setSupportOrderDetails();
             setToggleCustomerPhoneCard(false);
           }}
+        />
+      )}
+      {toggleCancelOrderModal && (
+        <CancelOrderModal
+          onClose={() => setToggleCancelOrderModal(false)}
+          onSuccess={() => {
+            setToggleCancelOrderModal(false);
+            setCurrentSelectedAccordion("");
+            onFetchUpdatedOrder();
+          }}
+          partailsCancelProductList={product?.filter(
+            (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
+          )}
+          order_status={status}
+          bpp_id={bpp_id}
+          transaction_id={transaction_id}
+          order_id={order_id}
         />
       )}
       <div
@@ -537,34 +476,102 @@ export default function OrderCard(props) {
       >
         {/* LIST OF PRODUCT OF AN ORDER  */}
         <div className="py-2" style={{ borderTop: "1px solid #ddd" }}>
-          {product.map(({ id, name, price, quantity }) => {
-            return (
-              <div key={id} className="d-flex align-items-start py-2">
-                <div style={{ width: "90%" }}>
-                  <p
-                    className={styles.product_name}
-                    title={name}
-                    style={{ fontSize: "16px" }}
-                  >
-                    {name}
-                  </p>
-                  <div className="pt-1">
-                    <p className={styles.quantity_count}>
-                      QTY: {quantity ?? "0"}
+          {product?.map(
+            (
+              {
+                id,
+                name,
+                price,
+                quantity,
+                cancellation_status,
+                return_status,
+                fulfillment_status,
+              },
+              index
+            ) => {
+              return (
+                <div key={id} className="d-flex align-items-center pt-3">
+                  <div style={{ width: "90%" }}>
+                    <p
+                      className={styles.product_name}
+                      title={name}
+                      style={{ fontSize: "16px" }}
+                    >
+                      {name}
+                    </p>
+                    <div className="pt-1">
+                      <p className={styles.quantity_count}>
+                        QTY: {quantity ?? "0"}
+                      </p>
+                    </div>
+                    <div className="pt-2 d-flex align-items-center">
+                      {cancellation_status ? (
+                        <div className="me-3">
+                          <div className={styles.label_chip}>
+                            <p className={styles.label_chip_text}>
+                              {cancellation_status}
+                            </p>
+                          </div>
+                        </div>
+                      ) : return_status ? (
+                        <div className="me-3">
+                          <div className={styles.label_chip}>
+                            <p className={styles.label_chip_text}>
+                              {return_status}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="me-3">
+                            <div className={styles.label_chip}>
+                              <p className={styles.label_chip_text}>
+                                {product?.[index]?.["@ondc/org/returnable"]
+                                  ? "returnable"
+                                  : "non returnable"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="me-3">
+                            <div className={styles.label_chip}>
+                              <p className={styles.label_chip_text}>
+                                {product?.[index]?.["@ondc/org/cancellable"]
+                                  ? "cancelable"
+                                  : "non cancelable"}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {fulfillment_status && (
+                        <div className="me-3">
+                          <div className={styles.label_chip}>
+                            <p className={styles.label_chip_text}>
+                              {fulfillment_status}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {product?.length - 1 !== index && (
+                      <hr
+                        className="mt-3 mb-0"
+                        style={{ border: "1px solid #ddd" }}
+                      />
+                    )}
+                  </div>
+                  <div className="ms-auto">
+                    <p
+                      className={styles.product_price}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      ₹ {Number(price?.value)?.toFixed(2)}
                     </p>
                   </div>
                 </div>
-                <div className="ms-auto">
-                  <p
-                    className={styles.product_price}
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    ₹ {Number(price)?.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
         </div>
         {/* BILLING AND S+DELIVERY ADDRESS  */}
         <div className="container py-2 px-0">
@@ -626,10 +633,7 @@ export default function OrderCard(props) {
               style={{ background: "transparent" }}
               onClick={handleFetchSupportOrderDetails}
               disabled={
-                trackOrderLoading ||
-                cancelOrderLoading ||
-                statusLoading ||
-                supportOrderLoading
+                trackOrderLoading || statusLoading || supportOrderLoading
               }
             >
               <CallSvg />
@@ -642,10 +646,7 @@ export default function OrderCard(props) {
                 <div className="pe-3 py-1">
                   <button
                     disabled={
-                      trackOrderLoading ||
-                      cancelOrderLoading ||
-                      statusLoading ||
-                      supportOrderLoading
+                      trackOrderLoading || statusLoading || supportOrderLoading
                     }
                     className={
                       statusLoading
@@ -664,10 +665,7 @@ export default function OrderCard(props) {
                 <div className="pe-3 py-1">
                   <button
                     disabled={
-                      trackOrderLoading ||
-                      cancelOrderLoading ||
-                      statusLoading ||
-                      supportOrderLoading
+                      trackOrderLoading || statusLoading || supportOrderLoading
                     }
                     className={
                       trackOrderLoading
@@ -686,23 +684,12 @@ export default function OrderCard(props) {
                 <div className="py-1">
                   <button
                     disabled={
-                      cancelOrderLoading ||
-                      trackOrderLoading ||
-                      statusLoading ||
-                      supportOrderLoading
+                      trackOrderLoading || statusLoading || supportOrderLoading
                     }
-                    className={
-                      cancelOrderLoading
-                        ? styles.primary_action_loading
-                        : styles.primary_action
-                    }
-                    onClick={() => handleFetchCancelOrderDetails()}
+                    className={styles.primary_action}
+                    onClick={() => setToggleCancelOrderModal(true)}
                   >
-                    {cancelOrderLoading ? (
-                      <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
-                    ) : (
-                      "Cancel"
-                    )}
+                    Cancel
                   </button>
                 </div>
               </div>
