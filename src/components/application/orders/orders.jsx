@@ -61,15 +61,17 @@ export default function Orders() {
           items,
         } = order;
         return {
-          product: items?.map(({ id, quantity }, index) => ({
-            id,
-            name: quote?.breakup[index]?.title ?? "NA",
-            quantity: quantity?.count ?? 0,
-            cancellation_status: items?.[index]?.cancellation_status ?? "",
-            return_status: items?.[index]?.return_status ?? "",
-            fulfillment_status: items?.[index]?.fulfillment_status ?? "",
-            ...items?.[index]?.product,
-          })),
+          product: items?.map(({ id }, index) => {
+            return {
+              id,
+              name: quote?.breakup[index]?.title ?? "NA",
+              cancellation_status: items?.[index]?.cancellation_status ?? "",
+              return_status: items?.[index]?.return_status ?? "",
+              fulfillment_status: items?.[index]?.fulfillment_status ?? "",
+              ...items?.[index]?.product,
+            };
+          }),
+          quantity: items?.map(({ quantity }) => quantity),
           billing_address: {
             name: billing?.name,
             email: billing?.email,
@@ -178,6 +180,7 @@ export default function Orders() {
                   (
                     {
                       product,
+                      quantity,
                       billing_address,
                       delivery_address,
                       status,
@@ -192,6 +195,7 @@ export default function Orders() {
                       <div className="py-2" key={`order_id_${index}`}>
                         <OrderCard
                           product={product}
+                          quantity={quantity}
                           billing_address={billing_address}
                           delivery_address={delivery_address}
                           status={status}

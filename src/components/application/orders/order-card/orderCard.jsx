@@ -21,6 +21,7 @@ import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
 export default function OrderCard(props) {
   const {
     product = [],
+    quantity = [],
     billing_address,
     delivery_address,
     status,
@@ -482,7 +483,6 @@ export default function OrderCard(props) {
                 id,
                 name,
                 price,
-                quantity,
                 cancellation_status,
                 return_status,
                 fulfillment_status,
@@ -501,7 +501,7 @@ export default function OrderCard(props) {
                     </p>
                     <div className="pt-1">
                       <p className={styles.quantity_count}>
-                        QTY: {quantity ?? "0"}
+                        QTY: {quantity?.[index]?.count ?? "0"}
                       </p>
                     </div>
                     <div className="pt-2 d-flex align-items-center">
