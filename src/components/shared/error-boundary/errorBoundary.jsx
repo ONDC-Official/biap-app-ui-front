@@ -16,7 +16,10 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    this.setState({ error: error, errorInfo: errorInfo });
+    this.setState({
+      error: error,
+      errorInfo: errorInfo,
+    });
   }
 
   static getDerivedStateFromError() {
@@ -24,10 +27,13 @@ class ErrorBoundary extends Component {
       hasError: true,
     };
   }
+
   render() {
     if (this.state.hasError) {
       const subject = `UI error report`;
-      const body = `${this.state.error}%0D%0A${JSON.stringify(
+      const body = `PATH = ${window.location.pathname} %0D%0A env = ${
+        process.env.REACT_APP_MMI_BASE_URL
+      } %0D%0A ERROR = ${this.state.error} %0D%0A ERROR INFO = ${JSON.stringify(
         this.state.errorInfo
       )}`;
       return (
