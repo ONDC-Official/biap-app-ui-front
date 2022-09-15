@@ -1,14 +1,14 @@
-import React, { Fragment, useState, useEffect } from "react";
-import styles from "../../../../styles/products/productDetails.module.scss";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
-import no_image_found from "../../../../assets/images/no_image_found.png";
-import Navbar from "../../../shared/navbar/navbar";
-import OrderSummary from "../../cart/order-summary/orderSummary";
-import { useContext } from "react";
-import { CartContext } from "../../../../context/cartContext";
-import Subtract from "../../../shared/svg/subtract";
-import Add from "../../../shared/svg/add";
+import React, { Fragment, useState, useEffect } from 'react';
+import styles from '../../../../styles/products/productDetails.module.scss';
+import { Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
+import no_image_found from '../../../../assets/images/no_image_found.png';
+import Navbar from '../../../shared/navbar/navbar';
+import OrderSummary from '../../cart/order-summary/orderSummary';
+import { useContext } from 'react';
+import { CartContext } from '../../../../context/cartContext';
+import Subtract from '../../../shared/svg/subtract';
+import Add from '../../../shared/svg/add';
 
 export default function ProductDetails() {
   const location = useLocation();
@@ -39,27 +39,27 @@ export default function ProductDetails() {
   }, [cartItems, id]);
 
   const renderProductDetails = (detail) => {
-    const obj = product?.["@ondc/org/statutory_reqs_packaged_commodities"];
+    const obj = product?.['@ondc/org/statutory_reqs_packaged_commodities'];
     switch (detail) {
-      case "manufacturer_or_packer_name":
+      case 'manufacturer_or_packer_name':
         return {
-          key: "Manufacturer Name:",
-          value: obj?.["manufacturer_or_packer_name"],
+          key: 'Manufacturer Name:',
+          value: obj?.['manufacturer_or_packer_name'],
         };
-      case "net_quantity_or_measure_of_commodity_in_pkg":
+      case 'net_quantity_or_measure_of_commodity_in_pkg':
         return {
-          key: "Net Quantity:",
-          value: obj?.["net_quantity_or_measure_of_commodity_in_pkg"],
+          key: 'Net Quantity:',
+          value: obj?.['net_quantity_or_measure_of_commodity_in_pkg'],
         };
-      case "month_year_of_manufacture_packing_import":
+      case 'month_year_of_manufacture_packing_import':
         return {
-          key: "Manufacturing Date:",
-          value: obj?.["month_year_of_manufacture_packing_import"],
+          key: 'Manufacturing Date:',
+          value: obj?.['month_year_of_manufacture_packing_import'],
         };
-      case "imported_product_country_of_origin":
+      case 'imported_product_country_of_origin':
         return {
-          key: "Country of Origin:",
-          value: obj?.["imported_product_country_of_origin"],
+          key: 'Country of Origin:',
+          value: obj?.['imported_product_country_of_origin'],
         };
       default:
         return {
@@ -84,7 +84,7 @@ export default function ProductDetails() {
           <div className="container">
             <div className="row py-3 px-2">
               <div className="d-inline-flex">
-                <Link to={{ pathname: "/application/products" }}>
+                <Link to={{ pathname: '/application/products' }}>
                   <p className={styles.back_text}>back</p>
                 </Link>
               </div>
@@ -113,7 +113,7 @@ export default function ProductDetails() {
                     {product_name}
                   </p>
                   <p className={styles.ordered_from}>
-                    Ordering from{" "}
+                    Ordering from{' '}
                     <span className={styles.bold}>{provider_name}</span>
                   </p>
                 </div>
@@ -128,15 +128,12 @@ export default function ProductDetails() {
                 {/* PRICE  */}
                 <div className="pb-2">
                   <p className={styles.product_price}>
-                    ₹{" "}
-                    {Number.isInteger(price.value)
-                      ? price.value
-                      : price.value.toFixed(2)}
+                    ₹ {Number(price.value).toFixed(2)}
                   </p>
                 </div>
                 {/* DIVIDER  */}
                 <div className={styles.width}>
-                  <hr style={{ border: "1px solid #aaa" }} />
+                  <hr style={{ border: '1px solid #aaa' }} />
                   {/* AVAILABLE QUANTITY  */}
                   {Number(product?.AvailableQuantity > 0) ? (
                     <div className="d-flex align-items-center py-1">
@@ -149,45 +146,45 @@ export default function ProductDetails() {
                     </div>
                   ) : null}
                   {/* RETURNABLE  */}
-                  {typeof product?.["@ondc/org/returnable"] !== "undefined" ? (
+                  {typeof product?.['@ondc/org/returnable'] !== 'undefined' ? (
                     <div className="d-flex align-items-center py-1">
                       <p className={styles.prodcut_details_key}>Returnable:</p>
                       <p className={styles.prodcut_details_value}>
-                        {product?.["@ondc/org/returnable"] == true
-                          ? "Yes"
-                          : "No"}
+                        {product?.['@ondc/org/returnable'] == true
+                          ? 'Yes'
+                          : 'No'}
                       </p>
                     </div>
                   ) : null}
                   {/* CANCELABLE  */}
-                  {typeof product?.["@ondc/org/cancellable"] !== "undefined" ? (
+                  {typeof product?.['@ondc/org/cancellable'] !== 'undefined' ? (
                     <div className="d-flex align-items-center py-1">
                       <p className={styles.prodcut_details_key}>Cancelable:</p>
                       <p className={styles.prodcut_details_value}>
-                        {product?.["@ondc/org/cancellable"] == true
-                          ? "Yes"
-                          : "No"}
+                        {product?.['@ondc/org/cancellable'] == true
+                          ? 'Yes'
+                          : 'No'}
                       </p>
                     </div>
                   ) : null}
                   {/* COD  */}
-                  {typeof product?.["@ondc/org/available_on_cod"] !==
-                  "undefined" ? (
+                  {typeof product?.['@ondc/org/available_on_cod'] !==
+                  'undefined' ? (
                     <div className="d-flex align-items-center py-1">
                       <p className={styles.prodcut_details_key}>
                         Cash On Delivery:
                       </p>
                       <p className={styles.prodcut_details_value}>
-                        {product?.["@ondc/org/available_on_cod"] == true
-                          ? "Yes"
-                          : "No"}
+                        {product?.['@ondc/org/available_on_cod'] == true
+                          ? 'Yes'
+                          : 'No'}
                       </p>
                     </div>
                   ) : null}
                 </div>
                 {/* PRODUCT DETAILS  */}
                 {Object.keys(
-                  product?.["@ondc/org/statutory_reqs_packaged_commodities"] ||
+                  product?.['@ondc/org/statutory_reqs_packaged_commodities'] ||
                     {}
                 ).length > 0 && (
                   <div className="pt-4 pb-2">
@@ -197,7 +194,7 @@ export default function ProductDetails() {
                     <div className={`${styles.width} pt-2`}>
                       {Object.keys(
                         product?.[
-                          "@ondc/org/statutory_reqs_packaged_commodities"
+                          '@ondc/org/statutory_reqs_packaged_commodities'
                         ]
                       ).map((commodity, index) => {
                         const { key, value } = renderProductDetails(commodity);
