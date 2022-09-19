@@ -347,9 +347,6 @@ export default function ProductList() {
     </div>
   );
 
-  {
-    console.log("=====<ProductFilters />", selectedFilters);
-  }
   return (
     <Fragment>
       <Navbar />
