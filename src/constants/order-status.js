@@ -3,6 +3,9 @@ import { ONDC_COLORS } from "../components/shared/colors";
 export const order_statuses = {
   created: "Created",
   shipped: "Shipped",
+  accepted: "Accepted",
+  inprogress: "In-progress",
+  completed: "Completed",
   delivered: "Delivered",
   cancelled: "Cancelled",
   updated: "Updated",
@@ -19,19 +22,19 @@ export function getOrderStatus(status) {
         color: "28, 117, 188",
         border: ONDC_COLORS.ACCENTCOLOR,
       };
-    case order_statuses.shipped:
+    case order_statuses.accepted:
       return {
         status: "Accepted",
         color: "249, 193, 50",
         border: ONDC_COLORS.WARNING,
       };
-    case order_statuses.delivered:
+    case order_statuses.inprogress:
       return {
         status: "In-progress",
         color: "46, 176, 134",
         border: ONDC_COLORS.SUCCESS,
       };
-    case order_statuses.Active:
+    case order_statuses.completed:
       return {
         status: "Completed",
         color: "46, 176, 134",
