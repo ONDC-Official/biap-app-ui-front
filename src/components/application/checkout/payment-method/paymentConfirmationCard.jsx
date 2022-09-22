@@ -311,6 +311,12 @@ export default function PaymentConfirmationCard(props) {
           "clientApis/v2/confirm_order",
           items.map((item, index) => ({
             // pass the map of parent order id and transaction id
+            context: {
+              parent_order_id: parentOrderIDMap.get(item[0]?.provider?.id)
+                .parent_order_id,
+              transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
+                .parent_order_id,
+            },
             context: parentOrderIDMap.get(item[0]?.provider?.id),
             message: {
               payment: {
