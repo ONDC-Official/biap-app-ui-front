@@ -10,6 +10,7 @@ export const order_statuses = {
   replaced: "Replaced",
   Active: "Active",
 };
+
 export function getOrderStatus(status) {
   switch (status) {
     case order_statuses.created:
@@ -20,19 +21,19 @@ export function getOrderStatus(status) {
       };
     case order_statuses.shipped:
       return {
-        status: "Shipped",
+        status: "Accepted",
         color: "249, 193, 50",
         border: ONDC_COLORS.WARNING,
       };
     case order_statuses.delivered:
       return {
-        status: "Delivered",
+        status: "In-progress",
         color: "46, 176, 134",
         border: ONDC_COLORS.SUCCESS,
       };
     case order_statuses.Active:
       return {
-        status: "Active",
+        status: "Completed",
         color: "46, 176, 134",
         border: ONDC_COLORS.SUCCESS,
       };
