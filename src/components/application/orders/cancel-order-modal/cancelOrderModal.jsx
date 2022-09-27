@@ -450,7 +450,7 @@ export default function CancelOrderModal({
                             </p>
                             <div className="pt-1">
                               <p className={productStyles.quantity_count}>
-                                QTY: {product?.quantity ?? "0"}
+                                QTY: {product?.quantity?.count ?? "0"}
                               </p>
                             </div>
                           </Checkbox>
