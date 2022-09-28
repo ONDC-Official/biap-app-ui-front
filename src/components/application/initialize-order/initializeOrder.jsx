@@ -131,12 +131,15 @@ export default function InitializeOrder() {
   const getQuote = useCallback(async (items) => {
     responseRef.current = [];
     try {
+      const search_context = JSON.parse(getValueFromCookie("search_context"));
       const data = await cancellablePromise(
         postCall(
           "/clientApis/v2/select",
           items.map((item) => ({
             context: {
               transaction_id,
+              city: search_context.location.name,
+              state: search_context.location.state,
             },
             message: {
               cart: {
@@ -229,7 +232,7 @@ export default function InitializeOrder() {
 
   useEffect(() => {
     // this check is so that when cart is empty we do not call the
-    // and when the payment is not maid
+    // and when the payment is not made
     if (cartItems.length > 0) {
       const request_object = constructQouteObject(cartItems);
       getQuote(request_object);

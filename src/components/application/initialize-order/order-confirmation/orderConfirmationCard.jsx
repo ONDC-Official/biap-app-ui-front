@@ -188,12 +188,15 @@ export default function OrderConfirmationCard(props) {
     async (items) => {
       responseRef.current = [];
       try {
+        const search_context = JSON.parse(getValueFromCookie("search_context"));
         const data = await cancellablePromise(
           postCall(
             "/clientApis/v2/initialize_order",
             items.map((item) => ({
               context: {
                 transaction_id,
+                city: search_context.location.name,
+                state: search_context.location.state,
               },
               message: {
                 items: item,
