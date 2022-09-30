@@ -168,7 +168,7 @@ export default function Login() {
             type="submit"
           />
         </div>
-        <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
+        {/* <hr style={{ margin: "5px 0", border: "1px solid #ddd" }} />
         <div className="py-3 text-center">
           <Button
             isloading={signInUsingGoogleloading ? 1 : 0}
@@ -180,7 +180,7 @@ export default function Login() {
             button_text="Login with google"
             onClick={handleLoginWithGoogle}
           />
-        </div>
+        </div> */}
       </form>
     </div>
   );
@@ -192,7 +192,5 @@ export default function Login() {
       </Link>
     </div>
   );
-  return (
-    <AuthActionCard action_form={loginForm} navigation_link={navigation_link} />
-  );
+  return <AuthActionCard action_form={loginForm} navigation_link={null} />;
 }
