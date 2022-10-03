@@ -305,19 +305,22 @@ export default function PaymentConfirmationCard(props) {
 
   const confirmOrder = useCallback(async (items, method) => {
     responseRef.current = [];
+    console.log("clientApis/v2/confirm_order", items);
     try {
+      const search_context = JSON.parse(getValueFromCookie("search_context"));
       const data = await cancellablePromise(
         postCall(
           "clientApis/v2/confirm_order",
           items.map((item, index) => ({
             // pass the map of parent order id and transaction id
             context: {
+              city: search_context.location.name,
+              state: search_context.location.state,
               parent_order_id: parentOrderIDMap.get(item[0]?.provider?.id)
                 .parent_order_id,
               transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
-                .parent_order_id,
+                .transaction_id,
             },
-            context: parentOrderIDMap.get(item[0]?.provider?.id),
             message: {
               payment: {
                 paid_amount: Number(productsQuote[index]?.price?.value),

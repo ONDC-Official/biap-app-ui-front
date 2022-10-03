@@ -1,39 +1,39 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import axios from 'axios';
-import { search_types } from '../../../../constants/searchTypes';
-import { postCall } from '../../../../api/axios';
-import { AddCookie, getValueFromCookie } from '../../../../utils/cookies';
-import { debounce } from '../../../../utils/search';
-import Loading from '../../../shared/loading/loading';
-import { ONDC_COLORS } from '../../../shared/colors';
-import styles from '../../../../styles/search-product-modal/searchProductModal.module.scss';
-import bannerStyles from '../../../../styles/products/productList.module.scss';
-import ErrorMessage from '../../../shared/error-message/errorMessage';
-import DropdownSvg from '../../../shared/svg/dropdonw';
-import CrossIcon from '../../../shared/svg/cross-icon';
-import MMI_LOGO from '../../../../assets/images/mmi_logo.svg';
-import LocationSvg from '../../../shared/svg/location';
-import Dropdown from '../../../shared/dropdown/dropdown';
-import { toast_actions, toast_types } from '../../../shared/toast/utils/toast';
-import { ToastContext } from '../../../../context/toastContext';
-import useCancellablePromise from '../../../../api/cancelRequest';
+import React, { useState, useEffect, useRef, useContext } from "react";
+import axios from "axios";
+import { search_types } from "../../../../constants/searchTypes";
+import { postCall } from "../../../../api/axios";
+import { AddCookie, getValueFromCookie } from "../../../../utils/cookies";
+import { debounce } from "../../../../utils/search";
+import Loading from "../../../shared/loading/loading";
+import { ONDC_COLORS } from "../../../shared/colors";
+import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
+import bannerStyles from "../../../../styles/products/productList.module.scss";
+import ErrorMessage from "../../../shared/error-message/errorMessage";
+import DropdownSvg from "../../../shared/svg/dropdonw";
+import CrossIcon from "../../../shared/svg/cross-icon";
+import MMI_LOGO from "../../../../assets/images/mmi_logo.svg";
+import LocationSvg from "../../../shared/svg/location";
+import Dropdown from "../../../shared/dropdown/dropdown";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
+import { ToastContext } from "../../../../context/toastContext";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function SearchBanner({ onSearch, location }) {
   // STATES
   const [inlineError, setInlineError] = useState({
-    location_error: '',
-    search_error: '',
+    location_error: "",
+    search_error: "",
   });
 
   const [searchedLocation, setSearchedLocation] = useState({
-    name: '',
-    lat: '',
-    lng: '',
+    name: "",
+    lat: "",
+    lng: "",
   });
   const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
   const [search, setSearch] = useState({
     type: search_types.PRODUCT,
-    value: '',
+    value: "",
   });
   const criteria = useRef();
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
@@ -82,7 +82,7 @@ export default function SearchBanner({ onSearch, location }) {
 
   //   use this function to get last entered values
   function getLastEnteredValues() {
-    let search_context = getValueFromCookie('search_context');
+    let search_context = getValueFromCookie("search_context");
     if (search_context) {
       search_context = JSON.parse(search_context);
       setSearch(() => ({
@@ -141,7 +141,7 @@ export default function SearchBanner({ onSearch, location }) {
       } else {
         setInlineError((error) => ({
           ...error,
-          location_error: 'Unable to get location, Please try again!',
+          location_error: "Unable to get location, Please try again!",
         }));
       }
     } catch (err) {
@@ -157,13 +157,14 @@ export default function SearchBanner({ onSearch, location }) {
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
         )
       );
-      const { lat, lng, pincode } = data?.results?.[0];
+      const { lat, lng, pincode, state } = data?.results?.[0];
       setSearchedLocation({
         ...searchedLocation,
         name: location?.name,
         lat,
         lng,
         pincode,
+        state,
       });
       setToggleLocationListCard(false);
     } catch (err) {
@@ -180,8 +181,11 @@ export default function SearchBanner({ onSearch, location }) {
     setSearchProductLoading(true);
     try {
       const { context } = await cancellablePromise(
-        postCall('/clientApis/v1/search', {
-          context: {},
+        postCall("/clientApis/v1/search", {
+          context: {
+            city: searchedLocation.name,
+            state: searchedLocation.state,
+          },
           message: {
             criteria: criteria.current,
           },
@@ -194,8 +198,8 @@ export default function SearchBanner({ onSearch, location }) {
         message_id: context.message_id,
       };
       // stroing transaction_id in cookie;
-      AddCookie('transaction_id', context.transaction_id);
-      AddCookie('search_context', JSON.stringify(search_context));
+      AddCookie("transaction_id", context.transaction_id);
+      AddCookie("search_context", JSON.stringify(search_context));
       onSearch(search_context);
     } catch (err) {
       dispatchError(err?.message);
@@ -214,7 +218,7 @@ export default function SearchBanner({ onSearch, location }) {
     });
     setInlineError((inlineError) => ({
       ...inlineError,
-      location_error: '',
+      location_error: "",
     }));
     setSearchLocationLoading(true);
     debounce(() => {
@@ -234,7 +238,7 @@ export default function SearchBanner({ onSearch, location }) {
     if (!searchedLocation?.name) {
       setInlineError((error) => ({
         ...error,
-        location_error: 'Location cannot be empty',
+        location_error: "Location cannot be empty",
       }));
       return false;
     }
@@ -255,16 +259,16 @@ export default function SearchBanner({ onSearch, location }) {
 
   function clearSearch() {
     setSearchedLocation({
-      name: '',
-      lat: '',
-      lng: '',
+      name: "",
+      lat: "",
+      lng: "",
     });
   }
 
   const loadingSpin = (
     <div
       className="d-flex align-items-center justify-content-center"
-      style={{ height: '100px' }}
+      style={{ height: "100px" }}
     >
       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
     </div>
@@ -273,13 +277,13 @@ export default function SearchBanner({ onSearch, location }) {
   return (
     <div
       className={bannerStyles.searched_history_banner}
-      style={{ boxShadow: '0 5px 10px 0 rgba(0,0,0,0.15)' }}
+      style={{ boxShadow: "0 5px 10px 0 rgba(0,0,0,0.15)" }}
     >
       <div className="container">
         <div className="row">
           <div
             className="col-md-6 col-lg-3 col-xl-3 px-4 py-1"
-            style={{ position: 'relative' }}
+            style={{ position: "relative" }}
           >
             <div
               className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
@@ -297,15 +301,15 @@ export default function SearchBanner({ onSearch, location }) {
                 onChange={(event) => onChange(event)}
                 onBlur={checkLocation}
                 className={styles.formControl}
-                style={{ padding: '8px 10px' }}
+                style={{ padding: "8px 10px" }}
               />
               <div className="px-2">
-                {searchedLocation?.name !== '' ? (
+                {searchedLocation?.name !== "" ? (
                   <CrossIcon
                     width="20"
                     height="20"
                     color={ONDC_COLORS.SECONDARYCOLOR}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                     onClick={clearSearch}
                   />
                 ) : (
@@ -319,22 +323,22 @@ export default function SearchBanner({ onSearch, location }) {
               <p
                 className="px-2 py-1"
                 style={{
-                  color: '#ddd',
-                  fontSize: '12px',
+                  color: "#ddd",
+                  fontSize: "12px",
                   margin: 0,
                 }}
               >
-                powered by{' '}
+                powered by{" "}
                 <span>
                   <img
                     src={MMI_LOGO}
                     alt="MMI_LOGO"
-                    style={{ height: '15px' }}
+                    style={{ height: "15px" }}
                   />
                 </span>
               </p>
             )}
-            {toggleLocationListCard && searchedLocation?.name !== '' && (
+            {toggleLocationListCard && searchedLocation?.name !== "" && (
               <div className={styles.location_list_wrapper}>
                 {searchedLocationLoading ? (
                   loadingSpin
@@ -361,7 +365,7 @@ export default function SearchBanner({ onSearch, location }) {
                   })
                 ) : (
                   <div
-                    style={{ height: '100px' }}
+                    style={{ height: "100px" }}
                     className="d-flex align-items-center justify-content-center"
                   >
                     <p className={styles.empty_state_text}>
@@ -399,7 +403,7 @@ export default function SearchBanner({ onSearch, location }) {
                     setSearch((search) => ({
                       ...search,
                       type: search_type,
-                      value: '',
+                      value: "",
                     }));
                   }}
                   options={Object.values(search_types).map((type) => ({
@@ -424,7 +428,7 @@ export default function SearchBanner({ onSearch, location }) {
                       }));
                       setInlineError((inlineError) => ({
                         ...inlineError,
-                        search_error: '',
+                        search_error: "",
                       }));
                     }}
                     className={styles.formControl}
@@ -446,7 +450,7 @@ export default function SearchBanner({ onSearch, location }) {
                     onClick={() => {
                       setSearch((search) => ({
                         ...search,
-                        value: '',
+                        value: "",
                       }));
                       clearSearch();
                     }}
@@ -472,7 +476,7 @@ export default function SearchBanner({ onSearch, location }) {
                     {searchProductLoading ? (
                       <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
                     ) : (
-                      'Search'
+                      "Search"
                     )}
                   </button>
                 </div>

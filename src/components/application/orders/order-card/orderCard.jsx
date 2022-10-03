@@ -147,7 +147,14 @@ export default function OrderCard(props) {
         data[0],
       ];
       const { message } = data[0];
-      if (message?.tracking?.url === "") {
+      if (message.tracking.status === "active" && message.tracking.url === "") {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
+      } else if (message?.tracking?.url === "") {
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information not available for this product",

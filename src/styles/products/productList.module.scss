@@ -144,10 +144,13 @@
   display: none;
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 1000px) {
   .searched_history_banner {
-    height: 20%;
+    height: 28%;
   }
+}
+
+@media screen and (max-width: 700px) {
   .product_list_without_summary_wrapper {
     height: 80%;
   }

@@ -70,6 +70,7 @@ export default function ProductList() {
   function fetchProducts(message_id) {
     setLoading(true);
     setFetchFilterLoading(true);
+    //  removeCookie("product_filters");
     setFilters({
       categories: [],
       fulfillment: [],
@@ -192,7 +193,23 @@ export default function ProductList() {
       const data = await cancellablePromise(
         getCall(`/clientApis/v1/getFilterParams?messageId=${messageId}`)
       );
-      setFilters(data);
+      setFilters((filters) => ({
+        ...filters,
+        minPrice: selected_filters.minPrice
+          ? selected_filters?.minPrice
+          : data.minPrice,
+        maxPrice: selected_filters?.maxPrice
+          ? selected_filters?.maxPrice
+          : data.maxPrice,
+        categories:
+          selected_filters?.categories?.length > 0
+            ? selected_filters?.categories
+            : data?.categories,
+        providers:
+          selected_filters?.providers?.length > 0
+            ? selected_filters?.providers
+            : data?.providers,
+      }));
     } catch (err) {
       dispatch({
         type: toast_actions.ADD_TOAST,
