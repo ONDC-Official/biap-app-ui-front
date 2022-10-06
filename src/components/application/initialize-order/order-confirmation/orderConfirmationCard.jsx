@@ -30,6 +30,7 @@ import { ToastContext } from "../../../../context/toastContext";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import useCancellablePromise from "../../../../api/cancelRequest";
+import { removeNullValues } from "../../../../utils/helper";
 
 export default function OrderConfirmationCard(props) {
   const {
@@ -201,7 +202,7 @@ export default function OrderConfirmationCard(props) {
               message: {
                 items: item,
                 billing_info: {
-                  address: billingAddress?.address,
+                  address: removeNullValues(billingAddress?.address),
                   phone: billingAddress?.phone,
                   name: billingAddress?.name,
                   email: billingAddress?.email,
