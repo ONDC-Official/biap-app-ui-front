@@ -22,7 +22,7 @@ import AddressDetailsCard from "./address-details/addressDetailsCard";
 import OrderConfirmationCard from "./order-confirmation/orderConfirmationCard";
 import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
-import { getValueFromCookie } from "../../../utils/cookies";
+import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
 import { constructQouteObject } from "../../../api/utils/constructRequestObject";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
@@ -127,6 +127,8 @@ export default function InitializeOrder() {
     });
   }
 
+  //   console.log(items);
+
   // use this function to get the quote of the items
   const getQuote = useCallback(async (items) => {
     responseRef.current = [];
@@ -230,12 +232,25 @@ export default function InitializeOrder() {
     // eslint-disable-next-line
   }, [eventData]);
 
+  const getProviderIds = (request_object) => {
+    let providers = [];
+    request_object.map((cartItem) => {
+      cartItem.map((item) => {
+        providers.push(item.provider.id);
+      });
+    });
+    const ids = [...new Set(providers)];
+    AddCookie("providerIds", ids);
+    return ids;
+  };
+
   useEffect(() => {
     // this check is so that when cart is empty we do not call the
     // and when the payment is not made
     if (cartItems.length > 0) {
       const request_object = constructQouteObject(cartItems);
       getQuote(request_object);
+      getProviderIds(request_object);
     }
     // eslint-disable-next-line
   }, []);
