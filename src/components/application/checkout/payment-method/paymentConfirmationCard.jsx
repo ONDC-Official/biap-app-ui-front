@@ -303,9 +303,29 @@ export default function PaymentConfirmationCard(props) {
     });
   }
 
+  const parsedCartItems = JSON.parse(localStorage.getItem("cartItems") || "{}");
+  const request_object = constructQouteObject(
+    parsedCartItems.filter(({ provider }) =>
+      successOrderIds.includes(provider.id.toString())
+    )
+  );
+
+  const getItemProviderId = (cartItems) => {
+    const providers = getValueFromCookie("providerIds").split(",");
+    let provider = {};
+    cartItems.map((item) => {
+      if (providers.includes(item.provider.id)) {
+        provider = item.provider;
+      }
+    });
+
+    return provider;
+  };
+
+  console.log(getItemProviderId(cartItems));
+
   const confirmOrder = useCallback(async (items, method) => {
     responseRef.current = [];
-    console.log("clientApis/v2/confirm_order", items);
     try {
       const search_context = JSON.parse(getValueFromCookie("search_context"));
       const data = await cancellablePromise(
@@ -332,6 +352,7 @@ export default function PaymentConfirmationCard(props) {
                   .transaction_id,
               },
               quote: productsQuote?.[0],
+              providers: getItemProviderId(item),
             },
           }))
         )
