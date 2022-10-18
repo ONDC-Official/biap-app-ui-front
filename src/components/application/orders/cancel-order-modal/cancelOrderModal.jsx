@@ -27,6 +27,7 @@ export default function CancelOrderModal({
   partailsCancelProductList = [],
   onClose,
   onSuccess,
+  quantity,
 }) {
   // CONSTANTS
   const CANCEL_ORDER_TYPES = {
@@ -230,7 +231,7 @@ export default function CancelOrderModal({
     const payload = selectedIds?.map((item) => ({
       id: item?.id,
       quantity: {
-        count: item?.quantity,
+        count: quantity[0]?.count,
       },
       tags: {
         update_type: "cancel",
@@ -417,6 +418,7 @@ export default function CancelOrderModal({
               selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
                 <div className="px-1 py-2">
                   {partailsCancelProductList?.map((product) => {
+                    console.log(product);
                     return (
                       <div
                         key={product?.id}
@@ -450,7 +452,7 @@ export default function CancelOrderModal({
                             </p>
                             <div className="pt-1">
                               <p className={productStyles.quantity_count}>
-                                QTY: {product?.quantity?.count ?? "0"}
+                                QTY: {quantity[0]?.count ?? "0"}
                               </p>
                             </div>
                           </Checkbox>

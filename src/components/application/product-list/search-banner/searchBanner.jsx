@@ -59,6 +59,18 @@ export default function SearchBanner({ onSearch, location }) {
   }, []);
 
   useEffect(() => {
+    setCriteriaLatLng();
+  }, [search]);
+
+  function setCriteriaLatLng() {
+    if (getValueFromCookie("search_context")) {
+      let sc = JSON.parse(getValueFromCookie("search_context") || {});
+      setSearchedLocation({
+        name: sc.location.name,
+        lat: sc.location.lat,
+        lng: sc.location.lng,
+      });
+    }
     if (search.type === search_types.PRODUCT) {
       criteria.current = {
         search_string: search.value.trim(),
@@ -77,10 +89,9 @@ export default function SearchBanner({ onSearch, location }) {
         delivery_location: `${searchedLocation?.lat},${searchedLocation?.lng}`,
       };
     }
-    // eslint-disable-next-line
-  }, [search]);
+  }
 
-  //   use this function to get last entered values
+  // use this function to get last entered values
   function getLastEnteredValues() {
     let search_context = getValueFromCookie("search_context");
     if (search_context) {
@@ -173,6 +184,7 @@ export default function SearchBanner({ onSearch, location }) {
   }
 
   async function searchProduct(e) {
+    setCriteriaLatLng();
     e.preventDefault();
     const allCheckPassed = [checkLocation(), checkSearch()].every(Boolean);
     if (!allCheckPassed) {
