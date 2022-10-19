@@ -233,7 +233,7 @@ export default function OrderCard(props) {
               bpp_id,
             },
             message: {
-              ref_id: order_id,
+              ref_id: transaction_id,
             },
           },
         ])
