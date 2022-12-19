@@ -350,10 +350,10 @@ export default function PaymentConfirmationCard(props) {
                   .transaction_id,
               },
               quote: {
-                ...productsQuote[0],
+                ...productsQuote[index],
                 price: {
-                  currency: productsQuote[0].price.currency,
-                  value: String(productsQuote[0].price.value),
+                  currency: productsQuote[index].price.currency,
+                  value: String(productsQuote[index].price.value),
                 },
               },
               providers: getItemProviderId(item),

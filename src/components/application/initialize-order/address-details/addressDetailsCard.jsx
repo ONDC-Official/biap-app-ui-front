@@ -29,7 +29,8 @@ export default function AddressDetailsCard(props) {
     useState();
 
   // CONTEXT
-  const { deliveryAddress, billingAddress } = useContext(AddressContext);
+  const { deliveryAddress, billingAddress, setDeliveryAddress } =
+    useContext(AddressContext);
   const dispatch = useContext(ToastContext);
 
   // HOOKS
@@ -89,8 +90,26 @@ export default function AddressDetailsCard(props) {
     }
 
     fetchDeliveryAddress();
+
+    const updatedDeliveryAddress = deliveryAddresses.filter(
+      (da) => da.id === deliveryAddress.id
+    )[0];
+    if (updatedDeliveryAddress) {
+      const { id, descriptor, address } = updatedDeliveryAddress;
+      let formattedUpdatedAddress = {
+        id,
+        name: descriptor?.name || "",
+        email: descriptor?.email || "",
+        phone: descriptor?.phone || "",
+        location: {
+          address,
+        },
+      };
+
+      setDeliveryAddress(formattedUpdatedAddress);
+    }
     // eslint-disable-next-line
-  }, []);
+  }, [currentActiveStep]);
 
   useEffect(() => {
     // use this function to fetch existing address of the user
@@ -120,8 +139,9 @@ export default function AddressDetailsCard(props) {
     }
 
     fetchBillingAddress();
+
     // eslint-disable-next-line
-  }, []);
+  }, [currentActiveStep.current_active_step_number]);
 
   const in_card_loading = (
     <div
