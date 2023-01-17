@@ -28,7 +28,7 @@ export default function ProductDetails() {
     useContext(CartContext);
 
   useEffect(() => {
-    const isProductPresent = cartItems.find(({ product }) => product.id === id);
+    const isProductPresent = cartItems.find(({ product }) => product.id === id && provider_details.id === product.provider_details.id);
     if (isProductPresent) {
       setToggleAddToCart(true);
       setQuantityCount(isProductPresent.quantity.count);
@@ -75,11 +75,10 @@ export default function ProductDetails() {
 
       <div className={styles.playground_height}>
         <div
-          className={`py-2 ${
-            cartItems.length > 0
+          className={`py-2 ${cartItems.length > 0
               ? styles.product_list_with_summary_wrapper
               : styles.product_list_without_summary_wrapper
-          }`}
+            }`}
         >
           <div className="container">
             <div className="row py-3 px-2">
@@ -169,7 +168,7 @@ export default function ProductDetails() {
                   ) : null}
                   {/* COD  */}
                   {typeof product?.['@ondc/org/available_on_cod'] !==
-                  'undefined' ? (
+                    'undefined' ? (
                     <div className="d-flex align-items-center py-1">
                       <p className={styles.prodcut_details_key}>
                         Cash On Delivery:
@@ -185,39 +184,39 @@ export default function ProductDetails() {
                 {/* PRODUCT DETAILS  */}
                 {Object.keys(
                   product?.['@ondc/org/statutory_reqs_packaged_commodities'] ||
-                    {}
+                  {}
                 ).length > 0 && (
-                  <div className="pt-4 pb-2">
-                    <p className={styles.product_details_header}>
-                      Product Details
-                    </p>
-                    <div className={`${styles.width} pt-2`}>
-                      {Object.keys(
-                        product?.[
+                    <div className="pt-4 pb-2">
+                      <p className={styles.product_details_header}>
+                        Product Details
+                      </p>
+                      <div className={`${styles.width} pt-2`}>
+                        {Object.keys(
+                          product?.[
                           '@ondc/org/statutory_reqs_packaged_commodities'
-                        ]
-                      ).map((commodity, index) => {
-                        const { key, value } = renderProductDetails(commodity);
-                        if (key && value) {
-                          return (
-                            <div
-                              className="d-flex align-items-center py-1"
-                              key={`id-${index}`}
-                            >
-                              <p className={styles.prodcut_details_key}>
-                                {key}
-                              </p>
-                              <p className={styles.prodcut_details_value}>
-                                {value}
-                              </p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })}
+                          ]
+                        ).map((commodity, index) => {
+                          const { key, value } = renderProductDetails(commodity);
+                          if (key && value) {
+                            return (
+                              <div
+                                className="d-flex align-items-center py-1"
+                                key={`id-${index}`}
+                              >
+                                <p className={styles.prodcut_details_key}>
+                                  {key}
+                                </p>
+                                <p className={styles.prodcut_details_value}>
+                                  {value}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
                 {/* ADD TO CART BUTTON  */}
                 <div className="py-3">
                   {toggleAddToCart && quantityCount > 0 ? (
