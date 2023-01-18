@@ -2,11 +2,11 @@ import { createContext, useState, useEffect } from "react";
 
 export const CartContext = createContext({
   cartItems: [],
-  setCartItems: () => {},
-  onRemoveProduct: () => {},
-  onReduceQuantity: () => {},
-  onAddQuantity: () => {},
-  onAddProduct: () => {},
+  setCartItems: () => { },
+  onRemoveProduct: () => { },
+  onReduceQuantity: () => { },
+  onAddQuantity: () => { },
+  onAddProduct: () => { },
 });
 
 export function CartContextProvider({ children }) {

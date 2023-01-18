@@ -288,10 +288,7 @@ export default function OrderConfirmationCard(props) {
   }, [eventData]);
 
   useEffect(() => {
-    if (updateCartCounter.current > 0) {
-      fetchUpdatedQuote();
-    }
-    // eslint-disable-next-line
+    fetchUpdatedQuote();
   }, [updateCartCounter.current]);
 
   useEffect(() => {
@@ -306,22 +303,21 @@ export default function OrderConfirmationCard(props) {
   return (
     <div className={styles.price_summary_card}>
       <div
-        className={`${
-          isStepCompleted()
-            ? styles.step_completed_card_header
-            : styles.card_header
-        } d-flex align-items-center`}
+        className={`${isStepCompleted()
+          ? styles.step_completed_card_header
+          : styles.card_header
+          } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
-                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-                borderBottomRightRadius: 0,
-                borderBottomLeftRadius: 0,
-              }
+              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+              borderBottomRightRadius: 0,
+              borderBottomLeftRadius: 0,
+            }
             : {
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }
+              borderBottomRightRadius: "10px",
+              borderBottomLeftRadius: "10px",
+            }
         }
       >
         <p className={styles.card_header_title}>Update Cart</p>
@@ -396,11 +392,11 @@ export default function OrderConfirmationCard(props) {
                           {!responseReceivedIds.includes(
                             provider_id.toString()
                           ) && (
-                            <>
-                              <ErrorMessage>{responseText}</ErrorMessage>
-                              <div className={styles.product_disabled} />
-                            </>
-                          )}
+                              <>
+                                <ErrorMessage>{responseText}</ErrorMessage>
+                                <div className={styles.product_disabled} />
+                              </>
+                            )}
                         </div>
                       </div>
                     );

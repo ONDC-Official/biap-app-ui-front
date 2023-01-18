@@ -133,7 +133,8 @@ export default function ProductList() {
 
   useEffect(() => {
     if (eventData?.filters && Object.keys(eventData?.filters).length > 0) {
-      const filterSet = eventData?.filters;
+      let filterSet = eventData?.filters;
+      filterSet.providers = filterSet.providers.filter((item) => item.name !== "" && item.name !== null);
       setFilters((filters) => ({
         ...filters,
         categories: [...filters?.categories, ...filterSet?.categories],
@@ -190,9 +191,10 @@ export default function ProductList() {
   // use this api to fetch the filters.
   async function fetchAllFilters(messageId) {
     try {
-      const data = await cancellablePromise(
+      let data = await cancellablePromise(
         getCall(`/clientApis/v1/getFilterParams?messageId=${messageId}`)
       );
+      data.providers = data.providers.filter((item) => item.name !== "" && item.name !== null);
       setFilters((filters) => ({
         ...filters,
         minPrice: selected_filters.minPrice
@@ -397,11 +399,10 @@ export default function ProductList() {
           search_empty_state
         ) : (
           <div
-            className={`py-2 ${
-              cartItems.length > 0
-                ? styles.product_list_with_summary_wrapper
-                : styles.product_list_without_summary_wrapper
-            }`}
+            className={`py-2 ${cartItems.length > 0
+              ? styles.product_list_with_summary_wrapper
+              : styles.product_list_without_summary_wrapper
+              }`}
           >
             {loading ? (
               loadingSpin("100%", "100%")

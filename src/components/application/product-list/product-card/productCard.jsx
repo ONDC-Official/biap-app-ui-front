@@ -16,17 +16,17 @@ export default function ProductCard(props) {
     bpp_provider_id,
     bpp_provider_descriptor,
     show_quantity_button = true,
-    onUpdateCart = () => {},
+    onUpdateCart = () => { },
   } = props;
-  const { id, descriptor } = product;
-  const { cartItems, onAddProduct, onAddQuantity, onReduceQuantity } =
+  const { id, descriptor, provider_details } = product;
+  const { cartItems, onAddProduct, onAddQuantity, onRemoveProduct, onReduceQuantity } =
     useContext(CartContext);
   const { name: provider_name } = bpp_provider_descriptor;
   const { name: product_name, images } = descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
   const [toggleAddToCart, setToggleAddToCart] = useState();
   useEffect(() => {
-    const isProductPresent = cartItems.find(({ product }) => product.id === id);
+    const isProductPresent = cartItems.find(({ product }) => product.id === id && provider_details.id === product.provider_details.id);
     if (isProductPresent) {
       setToggleAddToCart(true);
       setQuantityCount(isProductPresent.quantity.count);
@@ -97,7 +97,6 @@ export default function ProductCard(props) {
                       onReduceQuantity(id);
                       if (quantityCount - 1 === 0) {
                         setToggleAddToCart(false);
-                        return;
                       }
                       onUpdateCart();
                     }}
