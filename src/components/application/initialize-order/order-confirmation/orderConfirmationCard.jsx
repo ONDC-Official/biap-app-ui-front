@@ -288,10 +288,7 @@ export default function OrderConfirmationCard(props) {
   }, [eventData]);
 
   useEffect(() => {
-    // if (updateCartCounter.current > 0) {
     fetchUpdatedQuote();
-    // }
-    // eslint-disable-next-line
   }, [updateCartCounter.current]);
 
   useEffect(() => {
@@ -307,8 +304,8 @@ export default function OrderConfirmationCard(props) {
     <div className={styles.price_summary_card}>
       <div
         className={`${isStepCompleted()
-            ? styles.step_completed_card_header
-            : styles.card_header
+          ? styles.step_completed_card_header
+          : styles.card_header
           } d-flex align-items-center`}
         style={
           isCurrentStep()
