@@ -233,7 +233,7 @@ export default function OrderCard(props) {
               bpp_id,
             },
             message: {
-              ref_id: order_id,
+              ref_id: transaction_id,
             },
           },
         ])
@@ -400,6 +400,7 @@ export default function OrderCard(props) {
             setCurrentSelectedAccordion("");
             onFetchUpdatedOrder();
           }}
+          quantity={quantity}
           partailsCancelProductList={product?.filter(
             (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
           )}
@@ -508,7 +509,7 @@ export default function OrderCard(props) {
                     </p>
                     <div className="pt-1">
                       <p className={styles.quantity_count}>
-                        QTY: {quantity?.[index]?.count ?? "0"}
+                        QTY: {quantity[0]?.count ?? "0"}
                       </p>
                     </div>
                     <div className="pt-2 d-flex align-items-center">

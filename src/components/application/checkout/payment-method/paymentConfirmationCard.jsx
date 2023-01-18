@@ -322,8 +322,6 @@ export default function PaymentConfirmationCard(props) {
     return provider;
   };
 
-  console.log(getItemProviderId(cartItems));
-
   const confirmOrder = useCallback(async (items, method) => {
     responseRef.current = [];
     try {
@@ -351,7 +349,13 @@ export default function PaymentConfirmationCard(props) {
                 transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                   .transaction_id,
               },
-              quote: productsQuote?.[0],
+              quote: {
+                ...productsQuote[index],
+                price: {
+                  currency: productsQuote[index].price.currency,
+                  value: String(productsQuote[index].price.value),
+                },
+              },
               providers: getItemProviderId(item),
             },
           }))

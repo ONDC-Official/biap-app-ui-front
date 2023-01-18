@@ -193,35 +193,38 @@ export default function OrderConfirmationCard(props) {
         const data = await cancellablePromise(
           postCall(
             "/clientApis/v2/initialize_order",
-            items.map((item) => ({
-              context: {
-                transaction_id,
-                city: search_context.location.name,
-                state: search_context.location.state,
-              },
-              message: {
-                items: item,
-                billing_info: {
-                  address: removeNullValues(billingAddress?.address),
-                  phone: billingAddress?.phone,
-                  name: billingAddress?.name,
-                  email: billingAddress?.email,
+            items.map((item) => {
+              console.log(item);
+              return {
+                context: {
+                  transaction_id,
+                  city: search_context.location.name,
+                  state: search_context.location.state,
                 },
-                delivery_info: {
-                  type: "Delivery",
-                  name: deliveryAddress?.name,
-                  email: deliveryAddress?.email,
-                  phone: deliveryAddress?.phone,
-                  location: {
-                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
-                    ...deliveryAddress?.location,
+                message: {
+                  items: item,
+                  billing_info: {
+                    address: removeNullValues(billingAddress?.address),
+                    phone: billingAddress?.phone,
+                    name: billingAddress?.name,
+                    email: billingAddress?.email,
+                  },
+                  delivery_info: {
+                    type: "Delivery",
+                    name: deliveryAddress?.name,
+                    email: deliveryAddress?.email,
+                    phone: deliveryAddress?.phone,
+                    location: {
+                      gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                      ...deliveryAddress?.location,
+                    },
+                  },
+                  payment: {
+                    type: "POST-FULFILLMENT",
                   },
                 },
-                payment: {
-                  type: "POST-FULFILLMENT",
-                },
-              },
-            }))
+              };
+            })
           )
         );
         const parentTransactionIdMap = new Map();

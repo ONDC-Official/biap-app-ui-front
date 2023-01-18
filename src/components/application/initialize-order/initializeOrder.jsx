@@ -127,8 +127,6 @@ export default function InitializeOrder() {
     });
   }
 
-  //   console.log(items);
-
   // use this function to get the quote of the items
   const getQuote = useCallback(async (items) => {
     responseRef.current = [];
@@ -137,30 +135,33 @@ export default function InitializeOrder() {
       const data = await cancellablePromise(
         postCall(
           "/clientApis/v2/select",
-          items.map((item) => ({
-            context: {
-              transaction_id,
-              city: search_context.location.name,
-              state: search_context.location.state,
-            },
-            message: {
-              cart: {
-                items: item,
+          items.map((item) => {
+            delete item[0].product.context;
+            return {
+              context: {
+                transaction_id,
+                city: search_context.location.name,
+                state: search_context.location.state,
               },
-              fulfillments: [
-                {
-                  end: {
-                    location: {
-                      gps: `${location?.lat}, ${location?.lng}`,
-                      address: {
-                        area_code: `${location?.pincode}`,
+              message: {
+                cart: {
+                  items: item,
+                },
+                fulfillments: [
+                  {
+                    end: {
+                      location: {
+                        gps: `${location?.lat}, ${location?.lng}`,
+                        address: {
+                          area_code: `${location?.pincode}`,
+                        },
                       },
                     },
                   },
-                },
-              ],
-            },
-          }))
+                ],
+              },
+            };
+          })
         )
       );
       // fetch through events
