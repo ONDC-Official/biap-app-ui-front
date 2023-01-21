@@ -291,7 +291,9 @@ export default function OrderConfirmationCard(props) {
   }, [eventData]);
 
   useEffect(() => {
-    fetchUpdatedQuote();
+    if (updateCartCounter.current > 0) {
+      fetchUpdatedQuote();
+    }
   }, [updateCartCounter.current]);
 
   useEffect(() => {
