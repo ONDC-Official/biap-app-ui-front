@@ -186,7 +186,8 @@ export default function SearchBanner({ onSearch, location }) {
   async function searchProduct(e) {
     setCriteriaLatLng();
     e.preventDefault();
-    const allCheckPassed = [checkLocation(), checkSearch()].every(Boolean);
+    // const allCheckPassed = [checkLocation(), checkSearch()].every(Boolean);
+    const allCheckPassed = [checkLocation()].every(Boolean);
     if (!allCheckPassed) {
       return;
     }
@@ -259,13 +260,13 @@ export default function SearchBanner({ onSearch, location }) {
 
   // use this function to validate the search value
   function checkSearch() {
-    if (!search?.value) {
-      setInlineError((error) => ({
-        ...error,
-        search_error: `${search?.type} cannot be empty`,
-      }));
-      return false;
-    }
+    // if (!search?.value) {
+    //   setInlineError((error) => ({
+    //     ...error,
+    //     search_error: `${search?.type} cannot be empty`,
+    //   }));
+    //   return false;
+    // }
     return true;
   }
 
@@ -355,36 +356,36 @@ export default function SearchBanner({ onSearch, location }) {
                 {searchedLocationLoading ? (
                   loadingSpin
                 ) : // loop thorugh location here }
-                locations.length > 0 ? (
-                  locations.map((location) => {
-                    return (
-                      <div
-                        className={styles.dropdown_link_wrapper}
-                        key={location.place_id}
-                        onClick={() => {
-                          getPlaceFromPlaceId(location);
-                        }}
-                      >
-                        <p className={styles.dropdown_link}>{location.name}</p>
-                        <p
-                          className={styles.location_description}
-                          style={{ color: ONDC_COLORS.SECONDARYCOLOR }}
+                  locations.length > 0 ? (
+                    locations.map((location) => {
+                      return (
+                        <div
+                          className={styles.dropdown_link_wrapper}
+                          key={location.place_id}
+                          onClick={() => {
+                            getPlaceFromPlaceId(location);
+                          }}
                         >
-                          {location.description}
-                        </p>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div
-                    style={{ height: "100px" }}
-                    className="d-flex align-items-center justify-content-center"
-                  >
-                    <p className={styles.empty_state_text}>
-                      No Location found <br /> Please double check your search
-                    </p>
-                  </div>
-                )}
+                          <p className={styles.dropdown_link}>{location.name}</p>
+                          <p
+                            className={styles.location_description}
+                            style={{ color: ONDC_COLORS.SECONDARYCOLOR }}
+                          >
+                            {location.description}
+                          </p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div
+                      style={{ height: "100px" }}
+                      className="d-flex align-items-center justify-content-center"
+                    >
+                      <p className={styles.empty_state_text}>
+                        No Location found <br /> Please double check your search
+                      </p>
+                    </div>
+                  )}
               </div>
             )}
           </div>
@@ -474,7 +475,7 @@ export default function SearchBanner({ onSearch, location }) {
                   <button
                     disabled={
                       !searchedLocation?.name ||
-                      !search?.value ||
+                      // !search?.value ||
                       searchProductLoading
                     }
                     className={
