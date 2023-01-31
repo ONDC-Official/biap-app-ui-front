@@ -430,7 +430,7 @@ export default function CancelOrderModal({
           </div>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
             {areProductsToBeCancled() &&
-              selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
+              (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders || selectedCancelType === CANCEL_ORDER_TYPES.returnOrders) && (
                 <div className="px-1 py-2">
                   {partailsCancelProductList?.map((product, idx) => {
                     return (
