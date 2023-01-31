@@ -235,7 +235,7 @@ export default function CancelOrderModal({
         count: quantity[0]?.count,
       },
       tags: {
-        update_type: "cancel",
+        update_type: selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? "return" : "cancel",
         reason_code: selectedCancelReasonId?.key,
         ttl_approval: item?.["@ondc/org/return_window"]
           ? item?.["@ondc/org/return_window"]
