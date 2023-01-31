@@ -244,7 +244,7 @@ export default function PaymentConfirmationCard(props) {
           requestId: parent_order_id,
           payload: processPayload.current,
         },
-        () => {}
+        () => { }
       );
     } catch (err) {
       dispatch({
@@ -344,7 +344,7 @@ export default function PaymentConfirmationCard(props) {
                 paid_amount: Number(productsQuote[index]?.price?.value),
                 type:
                   method === payment_methods.COD
-                    ? "POST-FULFILLMENT"
+                    ? "ON-FULFILLMENT"
                     : "ON-ORDER",
                 transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                   .transaction_id,
@@ -471,14 +471,14 @@ export default function PaymentConfirmationCard(props) {
         style={
           isCurrentStep()
             ? {
-                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-                borderBottomRightRadius: 0,
-                borderBottomLeftRadius: 0,
-              }
+              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+              borderBottomRightRadius: 0,
+              borderBottomLeftRadius: 0,
+            }
             : {
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }
+              borderBottomRightRadius: "10px",
+              borderBottomLeftRadius: "10px",
+            }
         }
       >
         <p className={styles.card_header_title}>
