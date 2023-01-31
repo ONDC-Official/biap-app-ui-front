@@ -17,7 +17,7 @@ import AddressRadioButton from "../../initialize-order/address-details/address-r
 import Checkbox from "../../../shared/checkbox/checkbox";
 import Dropdown from "../../../shared/dropdown/dropdown";
 import DropdownSvg from "../../../shared/svg/dropdonw";
-import { CANCELATION_REASONS } from "../../../../constants/cancelation-reasons";
+import { CANCELATION_REASONS, RETURN_REASONS } from "../../../../constants/cancelation-reasons";
 
 export default function CancelOrderModal({
   bpp_id,
@@ -33,6 +33,7 @@ export default function CancelOrderModal({
   const CANCEL_ORDER_TYPES = {
     allOrder: "ALL_ORDERS",
     partialOrders: "PARTIAL_ORDERS",
+    returnOrders: "RETURN_ORDERS",
   };
 
   // STATES
@@ -234,7 +235,7 @@ export default function CancelOrderModal({
         count: quantity[0]?.count,
       },
       tags: {
-        update_type: "cancel",
+        update_type: selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? "return" : "cancel",
         reason_code: selectedCancelReasonId?.key,
         ttl_approval: item?.["@ondc/org/return_window"]
           ? item?.["@ondc/org/return_window"]
@@ -412,10 +413,24 @@ export default function CancelOrderModal({
                 </p>
               </div>
             </AddressRadioButton>
+
+            <AddressRadioButton
+              disabled={loading || !areProductsToBeCancled()}
+              checked={selectedCancelType === CANCEL_ORDER_TYPES.returnOrders}
+              onClick={() => {
+                setSelectedCancelType(CANCEL_ORDER_TYPES.returnOrders);
+              }}
+            >
+              <div className="px-3">
+                <p className={cancelRadioStyles.address_name_and_phone}>
+                  Return
+                </p>
+              </div>
+            </AddressRadioButton>
           </div>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
             {areProductsToBeCancled() &&
-              selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
+              (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders || selectedCancelType === CANCEL_ORDER_TYPES.returnOrders) && (
                 <div className="px-1 py-2">
                   {partailsCancelProductList?.map((product, idx) => {
                     return (
@@ -501,7 +516,8 @@ export default function CancelOrderModal({
               body_classes="dropdown-menu-right"
               style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
               click={(reasonValue) => {
-                const type = CANCELATION_REASONS.find(
+                const REASONS = selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? RETURN_REASONS : CANCELATION_REASONS
+                const type = REASONS.find(
                   ({ value }) =>
                     value.toLowerCase() === reasonValue.toLowerCase()
                 );
@@ -511,7 +527,9 @@ export default function CancelOrderModal({
                   reason_error: "",
                 }));
               }}
-              options={CANCELATION_REASONS.map(({ value }) => ({
+              options={selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? RETURN_REASONS.map(({ value }) => ({
+                value,
+              })) : CANCELATION_REASONS.map(({ value }) => ({
                 value,
               }))}
               show_icons={false}

@@ -57,3 +57,26 @@ export const CANCELATION_REASONS = [
     value: "Delivery pin code not serviceable",
   },
 ];
+
+export const RETURN_REASONS = [
+  {
+    key: "001",
+    value: "Buyer does not want product any more",
+  },
+  {
+    key: "002",
+    value: "Product available at lower than order price",
+  },
+  {
+    key: "003",
+    value: "Product damaged or not in usable state",
+  },
+  {
+    key: "004",
+    value: "Product is of incorrect quantity or size",
+  },
+  {
+    key: "005",
+    value: "Product delivered is different from what was shown and ordered",
+  }
+]

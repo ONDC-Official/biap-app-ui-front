@@ -194,7 +194,8 @@ export default function OrderConfirmationCard(props) {
           postCall(
             "/clientApis/v2/initialize_order",
             items.map((item) => {
-              console.log(item);
+              const fulfillments = item[0].fulfillments;
+              delete item[0].fulfillments;
               return {
                 context: {
                   transaction_id,
@@ -203,6 +204,7 @@ export default function OrderConfirmationCard(props) {
                 },
                 message: {
                   items: item,
+                  fulfillments: fulfillments,
                   billing_info: {
                     address: removeNullValues(billingAddress?.address),
                     phone: billingAddress?.phone,
@@ -220,7 +222,7 @@ export default function OrderConfirmationCard(props) {
                     },
                   },
                   payment: {
-                    type: "POST-FULFILLMENT",
+                    type: "ON-FULFILLMENT",
                   },
                 },
               };

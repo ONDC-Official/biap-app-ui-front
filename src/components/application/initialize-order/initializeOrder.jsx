@@ -58,7 +58,7 @@ export default function InitializeOrder() {
   const eventTimeOutRef = useRef([]);
 
   // CONTEXT
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, onUpdateProduct } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
 
   const { cancellablePromise } = useCancellablePromise();
@@ -169,7 +169,8 @@ export default function InitializeOrder() {
         data?.map((txn) => {
           const { context } = txn;
           return context?.message_id;
-        })
+        }),
+
       );
     } catch (err) {
       dispatchToast(err?.response?.data?.error?.message);
@@ -187,6 +188,7 @@ export default function InitializeOrder() {
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
+      onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments)
     } catch (err) {
       dispatchToast(err.message);
       setGetQuoteLoading(false);

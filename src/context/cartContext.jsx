@@ -7,6 +7,7 @@ export const CartContext = createContext({
   onReduceQuantity: () => { },
   onAddQuantity: () => { },
   onAddProduct: () => { },
+  onUpdateProduct: () => { }
 });
 
 export function CartContextProvider({ children }) {
@@ -57,6 +58,18 @@ export function CartContextProvider({ children }) {
   function onAddProductsToCart(value) {
     setCartItems([...cartItems, value]);
   }
+
+  function onUpdateProductToCart(items, fulfillments) {
+    const updatedProducts = cartItems.map((item) => {
+      if (item.id === items[0].id) {
+        item.fulfillment_id = items[0].fulfillment_id;
+        item.fulfillments = fulfillments;
+        return item;;
+      }
+      return { ...item };
+    });
+    setCartItems(updatedProducts);
+  }
   return (
     <CartContext.Provider
       value={{
@@ -66,6 +79,7 @@ export function CartContextProvider({ children }) {
         onReduceQuantity: reduceQuantityOfProduct,
         onAddQuantity: addQuantityOfProduct,
         onAddProduct: onAddProductsToCart,
+        onUpdateProduct: onUpdateProductToCart
       }}
     >
       {children}

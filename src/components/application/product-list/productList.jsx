@@ -395,142 +395,144 @@ export default function ProductList() {
           }}
         />
         {/* list of product view  */}
-        {!searchedProduct || !searchedLocation ? (
-          search_empty_state
-        ) : (
-          <div
-            className={`py-2 ${cartItems.length > 0
-              ? styles.product_list_with_summary_wrapper
-              : styles.product_list_without_summary_wrapper
-              }`}
-          >
-            {loading ? (
-              loadingSpin("100%", "100%")
-            ) : (
-              <div className="d-flex h-100 px-2">
-                <div
-                  className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
-                >
-                  <ProductFilters
-                    selectedFilters={selectedFilters}
-                    messageId={messageId}
-                    fetchFilterLoading={fetchFilterLoading}
-                    filters={filters}
-                    onUpdateFilters={(applied_filters) => {
-                      setPagination((prev) => ({
-                        ...prev,
-                        currentPage: 1,
-                      }));
-                      setSelectedFilters(applied_filters);
-                      onSearchBasedOnFilter(
-                        applied_filters,
-                        messageId,
-                        sortType,
-                        1
-                      );
-                    }}
-                  />
-                </div>
-                {searchProductLoading ? (
-                  loadingSpin("", "100%")
-                ) : products.length <= 0 ? (
-                  no_prodcut_found_empty_state
-                ) : (
-                  <div className={`${styles.product_list_container_width}`}>
-                    <div className="py-2 px-3 d-flex align-items-center">
-                      <div className="d-sm-block d-lg-none">
-                        <Button
-                          button_type={buttonTypes.primary}
-                          button_hover_type={buttonTypes.primary_hover}
-                          button_text="Filters"
-                          onClick={() => setToggleFiltersOnMobile(true)}
-                        />
+        {
+          // !searchedProduct || !searchedLocation ? (
+          !searchedLocation?.name ? (
+            search_empty_state
+          ) : (
+            <div
+              className={`py-2 ${cartItems.length > 0
+                ? styles.product_list_with_summary_wrapper
+                : styles.product_list_without_summary_wrapper
+                }`}
+            >
+              {loading ? (
+                loadingSpin("100%", "100%")
+              ) : (
+                <div className="d-flex h-100 px-2">
+                  <div
+                    className={`${styles.filter_container_width} p-2 d-none d-lg-block`}
+                  >
+                    <ProductFilters
+                      selectedFilters={selectedFilters}
+                      messageId={messageId}
+                      fetchFilterLoading={fetchFilterLoading}
+                      filters={filters}
+                      onUpdateFilters={(applied_filters) => {
+                        setPagination((prev) => ({
+                          ...prev,
+                          currentPage: 1,
+                        }));
+                        setSelectedFilters(applied_filters);
+                        onSearchBasedOnFilter(
+                          applied_filters,
+                          messageId,
+                          sortType,
+                          1
+                        );
+                      }}
+                    />
+                  </div>
+                  {searchProductLoading ? (
+                    loadingSpin("", "100%")
+                  ) : products.length <= 0 ? (
+                    no_prodcut_found_empty_state
+                  ) : (
+                    <div className={`${styles.product_list_container_width}`}>
+                      <div className="py-2 px-3 d-flex align-items-center">
+                        <div className="d-sm-block d-lg-none">
+                          <Button
+                            button_type={buttonTypes.primary}
+                            button_hover_type={buttonTypes.primary_hover}
+                            button_text="Filters"
+                            onClick={() => setToggleFiltersOnMobile(true)}
+                          />
+                        </div>
+                        <div className="ms-auto">
+                          {fetchFilterLoading ? (
+                            <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+                          ) : (
+                            <ProductSort
+                              sortType={sortType?.name}
+                              onUpdateSortType={(sort_type) => {
+                                AddCookie(
+                                  "sort_options",
+                                  JSON.stringify(sort_type)
+                                );
+                                setPagination((prev) => ({
+                                  ...prev,
+                                  currentPage: 1,
+                                }));
+                                setSortType(sort_type);
+                                onSearchBasedOnFilter(
+                                  selectedFilters,
+                                  messageId,
+                                  sort_type,
+                                  1
+                                );
+                              }}
+                            />
+                          )}
+                        </div>
                       </div>
-                      <div className="ms-auto">
-                        {fetchFilterLoading ? (
-                          <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
-                        ) : (
-                          <ProductSort
-                            sortType={sortType?.name}
-                            onUpdateSortType={(sort_type) => {
-                              AddCookie(
-                                "sort_options",
-                                JSON.stringify(sort_type)
-                              );
+                      <div className="container">
+                        <div className="row pe-2">
+                          {products.map((product) => {
+                            return (
+                              <div
+                                key={product?.id}
+                                className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
+                              >
+                                <ProductCard
+                                  product={product}
+                                  price={product?.price}
+                                  bpp_provider_descriptor={
+                                    product?.provider_details?.descriptor
+                                  }
+                                  bpp_id={product?.bpp_details?.bpp_id}
+                                  location_id={
+                                    product?.location_details
+                                      ? product.location_details?.id
+                                      : ""
+                                  }
+                                  bpp_provider_id={product?.provider_details?.id}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      {!fetchFilterLoading && (
+                        <div
+                          className="d-flex align-items-center justify-content-center"
+                          style={{ height: "60px" }}
+                        >
+                          <Pagination
+                            className="m-0"
+                            currentPage={pagination.currentPage}
+                            totalCount={pagination.totalCount}
+                            pageSize={pagination.postPerPage}
+                            onPageChange={(page) => {
                               setPagination((prev) => ({
                                 ...prev,
-                                currentPage: 1,
+                                currentPage: page,
                               }));
-                              setSortType(sort_type);
                               onSearchBasedOnFilter(
                                 selectedFilters,
                                 messageId,
-                                sort_type,
-                                1
+                                sortType,
+                                page
                               );
                             }}
                           />
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="container">
-                      <div className="row pe-2">
-                        {products.map((product) => {
-                          return (
-                            <div
-                              key={product?.id}
-                              className="col-xl-4 col-lg-6 col-md-6 col-sm-6 p-2"
-                            >
-                              <ProductCard
-                                product={product}
-                                price={product?.price}
-                                bpp_provider_descriptor={
-                                  product?.provider_details?.descriptor
-                                }
-                                bpp_id={product?.bpp_details?.bpp_id}
-                                location_id={
-                                  product?.location_details
-                                    ? product.location_details?.id
-                                    : ""
-                                }
-                                bpp_provider_id={product?.provider_details?.id}
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {!fetchFilterLoading && (
-                      <div
-                        className="d-flex align-items-center justify-content-center"
-                        style={{ height: "60px" }}
-                      >
-                        <Pagination
-                          className="m-0"
-                          currentPage={pagination.currentPage}
-                          totalCount={pagination.totalCount}
-                          pageSize={pagination.postPerPage}
-                          onPageChange={(page) => {
-                            setPagination((prev) => ({
-                              ...prev,
-                              currentPage: page,
-                            }));
-                            onSearchBasedOnFilter(
-                              selectedFilters,
-                              messageId,
-                              sortType,
-                              page
-                            );
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         {cartItems.length > 0 && <OrderSummary />}
       </div>
     </Fragment>
