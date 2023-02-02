@@ -272,7 +272,7 @@ export default function CancelOrderModal({
       //Error handling workflow eg, NACK
       if (data[0].error && data[0].message.ack.status === "NACK") {
         setLoading(false);
-        dispatchToast(data[0].error.message);
+        dispatchToast(data[0].error.message, toast_types.error);
       } else {
         fetchCancelPartialOrderDataThroughEvents(
           data?.map((txn) => {

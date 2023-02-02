@@ -231,7 +231,7 @@ export default function OrderConfirmationCard(props) {
         );
         //Error handling workflow eg, NACK
         if (data[0].error && data[0].message.ack.status === "NACK") {
-          dispatchToast(data[0].error.message);
+          dispatchToast(toast_types.error, data[0].error.message);
           setInitializeOrderLoading(false);
           updateInitLoading(false);
         } else {

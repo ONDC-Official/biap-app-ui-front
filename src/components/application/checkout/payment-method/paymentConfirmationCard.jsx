@@ -361,7 +361,6 @@ export default function PaymentConfirmationCard(props) {
           }))
         )
       );
-      console.log("data=====>", data);
       //Error handling workflow eg, NACK
       if (data[0].error && data[0].message.ack.status === "NACK") {
         dispatchError(data[0].error.message)

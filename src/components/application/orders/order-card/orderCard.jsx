@@ -1,56 +1,54 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
-import moment from "moment";
-import {
-  getOrderStatus,
-  order_statuses,
-} from "../../../../constants/order-status";
-import styles from "../../../../styles/orders/orders.module.scss";
+import React, { useContext, useRef, useState, useEffect } from "react";
+import CrossIcon from "../../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../../shared/colors";
-import { postCall, getCall } from "../../../../api/axios";
-import Loading from "../../../shared/loading/loading";
+import Button from "../../../shared/button/button";
+import { buttonTypes } from "../../../shared/button/utils";
+import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
+import cancelRadioStyles from "../../../../styles/cart/cartView.module.scss";
+import productStyles from "../../../../styles/orders/orders.module.scss";
+import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
-import DropdownSvg from "../../../shared/svg/dropdonw";
-import CallSvg from "../../../shared/svg/callSvg";
-import CustomerPhoneCard from "../customer-phone-card/customerPhoneCard";
+import { getValueFromCookie } from "../../../../utils/cookies";
 import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
-import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
+import { postCall, getCall } from "../../../../api/axios";
+import AddressRadioButton from "../../initialize-order/address-details/address-radio-button/addressRadioButton";
+import Checkbox from "../../../shared/checkbox/checkbox";
+import Dropdown from "../../../shared/dropdown/dropdown";
+import DropdownSvg from "../../../shared/svg/dropdonw";
+import { CANCELATION_REASONS, RETURN_REASONS } from "../../../../constants/cancelation-reasons";
 
-export default function OrderCard(props) {
-  const {
-    product = [],
-    quantity = [],
-    billing_address,
-    delivery_address,
-    status,
-    created_at,
-    order_id,
-    transaction_id,
-    bpp_id,
-    onFetchUpdatedOrder,
-    accoodion_id,
-    currentSelectedAccordion,
-    setCurrentSelectedAccordion,
-  } = props;
-
-  // HELPERS
-  const current_order_status = getOrderStatus(status);
+export default function CancelOrderModal({
+  bpp_id,
+  transaction_id,
+  order_id,
+  order_status,
+  partailsCancelProductList = [],
+  onClose,
+  onSuccess,
+  quantity,
+}) {
+  // CONSTANTS
+  const CANCEL_ORDER_TYPES = {
+    allOrder: "ALL_ORDERS",
+    partialOrders: "PARTIAL_ORDERS",
+    returnOrders: "RETURN_ORDERS",
+  };
 
   // STATES
-  const [trackOrderLoading, setTrackOrderLoading] = useState(false);
-  const [statusLoading, setStatusLoading] = useState(false);
-  const [supportOrderLoading, setSupportOrderLoading] = useState(false);
-  const [supportOrderDetails, setSupportOrderDetails] = useState();
-  const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
-  const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
+  const [inlineError, setInlineError] = useState({
+    selected_id_error: "",
+    reason_error: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [selectedCancelType, setSelectedCancelType] = useState();
+  const [selectedCancelReasonId, setSelectedCancelReasonId] = useState({});
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // REFS
-  const trackOrderRef = useRef(null);
-  const trackEventSourceResponseRef = useRef(null);
-  const supportEventSourceResponseRef = useRef(null);
-  const statusEventSourceResponseRef = useRef(null);
+  const cancelEventSourceResponseRef = useRef(null);
+  const cancelPartialEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
 
   // CONTEXT
@@ -58,6 +56,12 @@ export default function OrderCard(props) {
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
+
+  // use this function to check if the list exist or not for partial products
+  // to be cancled
+  function areProductsToBeCancled() {
+    return partailsCancelProductList?.length > 0;
+  }
 
   // use this function to dispatch error
   function dispatchToast(message, type) {
@@ -71,9 +75,9 @@ export default function OrderCard(props) {
     });
   }
 
-  // TRACK APIS
-  // use this function to fetch tracking info through events
-  function fetchTrackingDataThroughEvents(message_id) {
+  // CANCEL APIS
+  // use this function to fetch cancel product through events
+  function fetchCancelOrderDataThroughEvents(message_id) {
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -86,19 +90,19 @@ export default function OrderCard(props) {
       `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
       header
     );
-    es.addEventListener("on_track", (e) => {
+    es.addEventListener("on_cancel", (e) => {
       const { messageId } = JSON.parse(e?.data);
-      getTrackOrderDetails(messageId);
+      getCancelOrderDetails(messageId);
     });
 
     const timer = setTimeout(() => {
       es.close();
-      if (trackEventSourceResponseRef.current.length <= 0) {
+      if (cancelEventSourceResponseRef.current.length <= 0) {
         dispatchToast(
           "Cannot proceed with you request now! Please try again",
           toast_types.error
         );
-        setTrackOrderLoading(false);
+        setLoading(false);
       }
     }, SSE_TIMEOUT);
 
@@ -111,162 +115,54 @@ export default function OrderCard(props) {
     ];
   }
 
-  // use this api to track and order
-  async function handleFetchTrackOrderDetails() {
-    trackEventSourceResponseRef.current = [];
-    setTrackOrderLoading(true);
+  // use this api to cancel an order
+  async function handleFetchCancelOrderDetails() {
+    const allCheckPassed = [checkReason()].every(Boolean);
+    if (!allCheckPassed) return;
+
+    cancelEventSourceResponseRef.current = [];
+    setLoading(true);
     try {
-      const data = await cancellablePromise(
-        postCall("/clientApis/v2/track", [
-          {
-            context: {
-              transaction_id,
-              bpp_id,
-            },
-            message: {
-              order_id,
-            },
+      const { context } = await cancellablePromise(
+        postCall("/clientApis/v1/cancel_order", {
+          context: {
+            bpp_id,
+            transaction_id,
           },
-        ])
-      );
-      fetchTrackingDataThroughEvents(data[0]?.context?.message_id);
-    } catch (err) {
-      setTrackOrderLoading(false);
-      dispatchToast(err?.message, toast_types.error);
-    }
-  }
-
-  // on track order
-  async function getTrackOrderDetails(message_id) {
-    try {
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_track?messageIds=${message_id}`)
-      );
-      trackEventSourceResponseRef.current = [
-        ...trackEventSourceResponseRef.current,
-        data[0],
-      ];
-      const { message } = data[0];
-      if (message.tracking.status === "active" && message.tracking.url === "") {
-        setTrackOrderLoading(false);
-        dispatchToast(
-          "Tracking information is not provided by the provider.",
-          toast_types.error
-        );
-        return;
-      } else if (message?.tracking?.url === "") {
-        setTrackOrderLoading(false);
-        dispatchToast(
-          "Tracking information not available for this product",
-          toast_types.error
-        );
-        return;
-      }
-      setTrackOrderLoading(false);
-      trackOrderRef.current.href = message?.tracking?.url;
-      trackOrderRef.current.target = "_blank";
-      trackOrderRef.current.click();
-    } catch (err) {
-      setTrackOrderLoading(false);
-      dispatchToast(err?.message, toast_types.error);
-      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
-        eventSource.close();
-        clearTimeout(timer);
-      });
-    }
-  }
-
-  // SUPPORT APIS
-  // use this function to fetch support info through events
-  function fetchSupportDataThroughEvents(message_id) {
-    const token = getValueFromCookie("token");
-    let header = {
-      headers: {
-        ...(token && {
-          Authorization: `Bearer ${token}`,
-        }),
-      },
-    };
-    let es = new window.EventSourcePolyfill(
-      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
-      header
-    );
-    es.addEventListener("on_support", (e) => {
-      const { messageId } = JSON.parse(e?.data);
-      getSupportOrderDetails(messageId);
-    });
-
-    const timer = setTimeout(() => {
-      es.close();
-      if (supportEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
-        setSupportOrderLoading(false);
-      }
-    }, SSE_TIMEOUT);
-
-    eventTimeOutRef.current = [
-      ...eventTimeOutRef.current,
-      {
-        eventSource: es,
-        timer,
-      },
-    ];
-  }
-
-  // use this api to call support
-  async function handleFetchSupportOrderDetails() {
-    if (supportOrderDetails) {
-      setToggleCustomerPhoneCard(true);
-      return;
-    }
-    supportEventSourceResponseRef.current = [];
-    setSupportOrderLoading(true);
-    try {
-      const data = await cancellablePromise(
-        postCall("/clientApis/v2/get_support", [
-          {
-            context: {
-              transaction_id,
-              bpp_id,
-            },
-            message: {
-              ref_id: transaction_id,
-            },
+          message: {
+            order_id,
+            cancellation_reason_id: "1",
           },
-        ])
+        })
       );
-      fetchSupportDataThroughEvents(data[0]?.context?.message_id);
+      fetchCancelOrderDataThroughEvents(context.message_id);
     } catch (err) {
-      setSupportOrderLoading(false);
+      setLoading(false);
       dispatchToast(err?.message, toast_types.error);
     }
   }
 
-  // on support order
-  async function getSupportOrderDetails(message_id) {
+  // on cancel Api
+  async function getCancelOrderDetails(message_id) {
     try {
       const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_support?messageIds=${message_id}`)
+        getCall(`/clientApis/v1/on_cancel_order?messageId=${message_id}`)
       );
-      supportEventSourceResponseRef.current = [
-        ...supportEventSourceResponseRef.current,
-        data[0],
+      cancelEventSourceResponseRef.current = [
+        ...cancelEventSourceResponseRef.current,
+        data,
       ];
-      const { message } = data[0];
-
-      if (message) {
-        setToggleCustomerPhoneCard(true);
-        setSupportOrderLoading(false);
-        setSupportOrderDetails(message);
+      setLoading(false);
+      if (data?.message) {
+        onSuccess();
       } else {
-        dispatchToast("Could not get data for this order!", toast_types.error);
-        setSupportOrderLoading(false);
+        dispatchToast(
+          "Something went wrong!, product status cannot be updated",
+          toast_types.error
+        );
       }
     } catch (err) {
-      setSupportOrderLoading(false);
+      setLoading(false);
       dispatchToast(err?.message, toast_types.error);
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
         eventSource.close();
@@ -275,9 +171,9 @@ export default function OrderCard(props) {
     }
   }
 
-  // STATUS APIS
-  // use this function to fetch support info through events
-  function fetchStatusDataThroughEvents(message_id) {
+  // PARTIAL CANCEL APIS
+  // use this function to fetch cancel product through events
+  function fetchCancelPartialOrderDataThroughEvents(message_id) {
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -290,19 +186,19 @@ export default function OrderCard(props) {
       `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
       header
     );
-    es.addEventListener("on_status", (e) => {
+    es.addEventListener("on_update", (e) => {
       const { messageId } = JSON.parse(e?.data);
-      getUpdatedStatus(messageId);
+      getPartialCancelOrderDetails(messageId);
     });
 
     const timer = setTimeout(() => {
       es.close();
-      if (statusEventSourceResponseRef.current.length <= 0) {
+      if (cancelPartialEventSourceResponseRef.current.length <= 0) {
         dispatchToast(
           "Cannot proceed with you request now! Please try again",
           toast_types.error
         );
-        setStatusLoading(false);
+        setLoading(false);
       }
     }, SSE_TIMEOUT);
 
@@ -315,65 +211,150 @@ export default function OrderCard(props) {
     ];
   }
 
-  // use this api to get updated status of the order
-  async function handleFetchUpdatedStatus() {
-    statusEventSourceResponseRef.current = [];
-    setStatusLoading(true);
+  // use this api to partial update orders
+  async function handlePartialOrderCancel() {
+    const allCheckPassed = [checkReason(), checkIsOrderSelected()].every(
+      Boolean
+    );
+    if (!allCheckPassed) return;
+
+    cancelPartialEventSourceResponseRef.current = [];
+    setLoading(true);
+    const map = new Map();
+    selectedIds.map((item) => {
+      const provider_id = item?.provider_details?.id;
+      if (map.get(provider_id)) {
+        return map.set(provider_id, [...map.get(provider_id), item]);
+      }
+      return map.set(provider_id, [item]);
+    });
+    const requestObject = Array.from(map.values());
+    const payload = selectedIds?.map((item) => ({
+      id: item?.id,
+      quantity: {
+        count: quantity[0]?.count,
+      },
+      tags: {
+        update_type: selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? "return" : "cancel",
+        reason_code: selectedCancelReasonId?.key,
+        ttl_approval: item?.["@ondc/org/return_window"]
+          ? item?.["@ondc/org/return_window"]
+          : "",
+        ttl_reverseqc: "P3D",
+        image: "",
+      },
+    }));
     try {
       const data = await cancellablePromise(
-        postCall("/clientApis/v2/order_status", [
-          {
-            context: {
-              transaction_id,
-              bpp_id,
-            },
-            message: {
-              order_id,
-            },
-          },
-        ])
+        postCall(
+          "clientApis/v1/update",
+          requestObject?.map((item, index) => {
+            return {
+              context: {
+                bpp_id,
+                transaction_id,
+              },
+              message: {
+                update_target: "item",
+                order: {
+                  id: order_id,
+                  state: order_status,
+                  provider: {
+                    id: item?.[index]?.provider_details?.id,
+                  },
+                  items: payload,
+                },
+              },
+            };
+          })
+        )
       );
       //Error handling workflow eg, NACK
       if (data[0].error && data[0].message.ack.status === "NACK") {
-        setStatusLoading(false);
-        dispatchToast(data[0].error.message);
+        setLoading(false);
+        dispatchToast(data[0].error.message, toast_types.error);
       } else {
-        fetchStatusDataThroughEvents(data[0]?.context?.message_id);
+        fetchCancelPartialOrderDataThroughEvents(
+          data?.map((txn) => {
+            const { context } = txn;
+            return context?.message_id;
+          })
+        );
       }
     } catch (err) {
-      setStatusLoading(false);
+      setLoading(false);
       dispatchToast(err?.message, toast_types.error);
     }
   }
 
-  // on status
-  async function getUpdatedStatus(message_id) {
+  // on Update api
+  async function getPartialCancelOrderDetails(message_id) {
     try {
       const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`)
+        getCall(`/clientApis/v2/on_update?messageId=${message_id}`)
       );
-      statusEventSourceResponseRef.current = [
-        ...statusEventSourceResponseRef.current,
-        data[0],
+      cancelPartialEventSourceResponseRef.current = [
+        ...cancelPartialEventSourceResponseRef.current,
+        data,
       ];
-      const { message, error = {} } = data[0];
-      if (error?.message) {
-        dispatchToast("Cannot get status for this product", toast_types.error);
-        setStatusLoading(false);
-        return;
+      setLoading(false);
+      if (data?.message) {
+        onSuccess();
+      } else {
+        dispatchToast(
+          "Something went wrong!, product status cannot be updated",
+          toast_types.error
+        );
       }
-      if (message?.order) {
-        onFetchUpdatedOrder();
-      }
-      setStatusLoading(false);
     } catch (err) {
-      setStatusLoading(false);
+      setLoading(false);
       dispatchToast(err?.message, toast_types.error);
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
         eventSource.close();
         clearTimeout(timer);
       });
     }
+  }
+
+  // use this function to check if any order is selected
+  function checkIsOrderSelected() {
+    if (selectedIds.length <= 0) {
+      setInlineError((error) => ({
+        ...error,
+        selected_id_error: "Please select a product to cancel",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  // use this function to check if any reason is selected
+  function checkReason() {
+    if (Object.keys(selectedCancelReasonId).length <= 0) {
+      setInlineError((error) => ({
+        ...error,
+        reason_error: "Please Select Reason",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  // use this function to check if the provider is already selected
+  function isProductSelected(id) {
+    return (
+      selectedIds.filter(({ id: provider_id }) => provider_id === id).length > 0
+    );
+  }
+
+  // use this function to add attribute in filter list
+  function addProductToCancel(attribute) {
+    setSelectedIds([...selectedIds, attribute]);
+  }
+
+  // use this function to remove the selected attribute from filter
+  function removeProductToCancel(attribute) {
+    setSelectedIds(selectedIds.filter(({ id }) => id !== attribute.id));
   }
 
   useEffect(() => {
@@ -385,337 +366,215 @@ export default function OrderCard(props) {
     };
   }, []);
 
+  // use this effect to promatically navigate between the radio button
+  useEffect(() => {
+    if (areProductsToBeCancled()) {
+      setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
+      return;
+    }
+    setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
+    // eslint-disable-next-line
+  }, []);
+
   return (
-    <div className={styles.orders_card}>
-      {toggleCustomerPhoneCard && (
-        <CustomerPhoneCard
-          supportOrderDetails={supportOrderDetails}
-          onClose={() => setToggleCustomerPhoneCard(false)}
-          onSuccess={() => {
-            dispatchToast("Call successfully placed", toast_types.success);
-            setSupportOrderDetails();
-            setToggleCustomerPhoneCard(false);
-          }}
-        />
-      )}
-      {toggleCancelOrderModal && (
-        <CancelOrderModal
-          onClose={() => setToggleCancelOrderModal(false)}
-          onSuccess={() => {
-            setToggleCancelOrderModal(false);
-            setCurrentSelectedAccordion("");
-            onFetchUpdatedOrder();
-          }}
-          quantity={quantity}
-          partailsCancelProductList={product?.filter(
-            (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
-          )}
-          order_status={status}
-          bpp_id={bpp_id}
-          transaction_id={transaction_id}
-          order_id={order_id}
-        />
-      )}
-      <div
-        className={`d-flex align-items-center ${styles.padding_20}`}
-        data-bs-toggle="collapse"
-        data-bs-target={`#${accoodion_id}`}
-        aria-expanded="true"
-        aria-controls={accoodion_id}
-        onClick={() => {
-          setCurrentSelectedAccordion(accoodion_id);
-        }}
-        style={{ cursor: "pointer" }}
-      >
-        <div className="flex-grow-1">
-          <p className={styles.card_header_title}>{order_id ?? "NA"}</p>
-          <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
-            Ordered on
-            <span style={{ fontWeight: "500", padding: "0 5px" }}>
-              {created_at ? moment(created_at).format("MMMM Do, YYYY") : "NA"}
-            </span>
-          </p>
-        </div>
-        <div className="px-3" style={{ width: "18%" }}>
-          <p className={styles.status_label}>Status:</p>
-          <div className="pt-1">
-            {current_order_status ? (
-              <div
-                className={styles.status_chip}
-                style={{
-                  background: `rgba(${current_order_status?.color}, 0.05)`,
-                  border: `1px solid ${current_order_status?.border}`,
-                }}
-              >
-                <p
-                  className={styles.status_text}
-                  style={{ color: current_order_status?.border }}
-                >
-                  {current_order_status?.status}
-                </p>
-              </div>
-            ) : (
-              <p className={styles.status_text} style={{ textAlign: "left" }}>
-                NA
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="px-2" style={{ width: "7%" }}>
-          <div
-            style={
-              currentSelectedAccordion === accoodion_id
-                ? {
-                  transform: "rotate(180deg)",
-                  transition: "all 0.7s",
-                }
-                : { transform: "rotate(0)", transition: "all 0.7s" }
-            }
-          >
-            <DropdownSvg
-              color={
-                currentSelectedAccordion === accoodion_id
-                  ? ONDC_COLORS.ACCENTCOLOR
-                  : "#ddd"
-              }
+    <div className={styles.overlay}>
+      <div className={styles.popup_card} style={{ width: "700px" }}>
+        <div className={`${styles.card_header} d-flex align-items-center`}>
+          <p className={styles.card_header_title}>Cancel Order</p>
+          <div className="ms-auto">
+            <CrossIcon
+              width="20"
+              height="20"
+              color={ONDC_COLORS.SECONDARYCOLOR}
+              style={{ cursor: "pointer" }}
+              onClick={onClose}
             />
           </div>
         </div>
-      </div>
-      <div
-        id={accoodion_id}
-        className={`accordion-collapse collapse ${styles.padding_20}`}
-        aria-labelledby={accoodion_id}
-        data-bs-parent="#ordersAccordion"
-        style={{ padding: "0 20px 20px" }}
-      >
-        {/* LIST OF PRODUCT OF AN ORDER  */}
-        <div className="py-2" style={{ borderTop: "1px solid #ddd" }}>
-          {product?.map(
-            (
-              {
-                id,
-                name,
-                price,
-                cancellation_status,
-                return_status,
-                fulfillment_status,
-              },
-              index
-            ) => {
-              return (
-                <div key={id} className="d-flex align-items-center pt-3">
-                  <div style={{ width: "90%" }}>
-                    <p
-                      className={styles.product_name}
-                      title={name}
-                      style={{ fontSize: "16px" }}
-                    >
-                      {name}
-                    </p>
-                    <div className="pt-1">
-                      <p className={styles.quantity_count}>
-                        QTY: {quantity[index]?.count ?? "0"}
-                      </p>
-                    </div>
-                    <div className="pt-2 d-flex align-items-center">
-                      {cancellation_status ? (
-                        <div className="me-3">
-                          <div className={styles.label_chip}>
-                            <p className={styles.label_chip_text}>
-                              {cancellation_status}
-                            </p>
-                          </div>
-                        </div>
-                      ) : return_status ? (
-                        <div className="me-3">
-                          <div className={styles.label_chip}>
-                            <p className={styles.label_chip_text}>
-                              {return_status}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="me-3">
-                            <div className={styles.label_chip}>
-                              <p className={styles.label_chip_text}>
-                                {product?.[index]?.["@ondc/org/returnable"]
-                                  ? "returnable"
-                                  : "non returnable"}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="me-3">
-                            <div className={styles.label_chip}>
-                              <p className={styles.label_chip_text}>
-                                {product?.[index]?.["@ondc/org/cancellable"]
-                                  ? "cancelable"
-                                  : "non cancelable"}
-                              </p>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                      {fulfillment_status && (
-                        <div className="me-3">
-                          <div className={styles.label_chip}>
-                            <p className={styles.label_chip_text}>
-                              {fulfillment_status}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {product?.length - 1 !== index && (
-                      <hr
-                        className="mt-3 mb-0"
-                        style={{ border: "1px solid #ddd" }}
-                      />
-                    )}
-                  </div>
-                  <div className="ms-auto">
-                    <p
-                      className={styles.product_price}
-                      style={{ whiteSpace: "nowrap" }}
-                    >
-                      ₹ {Number(price?.value)?.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              );
-            }
-          )}
-        </div>
-        {/* BILLING AND S+DELIVERY ADDRESS  */}
-        <div className="container py-2 px-0">
-          <div className="row">
-            <div className="col-md-6 py-2">
-              {/* DELIVERY ADDRESS  */}
-              <p className={styles.address_type_label}>Shipped to:</p>
-              <p className={styles.address_name_and_phone}>
-                {delivery_address?.name ?? "NA"}
-              </p>
-              <p className={`${styles.address_line_2} pb-2`}>
-                {delivery_address?.email ?? "NA"} -{" "}
-                {delivery_address?.phone ?? "NA"}
-              </p>
-              <p className={styles.address_line_1}>
-                {delivery_address?.location?.street
-                  ? delivery_address.location.street
-                  : delivery_address?.location?.door ?? "NA"}
-                , {delivery_address?.location?.city ?? "NA"}
-              </p>
-              <p className={styles.address_line_2}>
-                {delivery_address?.location?.state ?? "NA"},{" "}
-                {delivery_address?.location?.areaCode ?? "NA"}
-              </p>
-            </div>
-            <div className="col-md-6 py-2">
-              {/* SHIPPING ADDRESS  */}
-              <p className={styles.address_type_label}>Billed to:</p>
-              <p className={styles.address_name_and_phone}>
-                {billing_address?.name ?? "NA"}
-              </p>
-              <p className={`${styles.address_line_2} pb-2`}>
-                {billing_address?.email ?? "NA"} -{" "}
-                {billing_address?.phone ?? "NA"}
-              </p>
-              <p className={styles.address_line_1}>
-                {billing_address?.location?.street
-                  ? billing_address.location.street
-                  : billing_address?.location?.door ?? "NA"}
-                , {billing_address?.location?.city ?? "NA"}
-              </p>
-              <p className={styles.address_line_2}>
-                {billing_address?.location?.state ?? "NA"},{" "}
-                {billing_address?.location?.areaCode ?? "NA"}
-              </p>
-            </div>
-          </div>
-        </div>
-        {/* ACTIONS FOR AN ORDER  */}
-        <div
-          className="d-flex align-items-center mt-3 pt-3"
-          style={{ borderTop: "1px solid #ddd" }}
-        >
-          {supportOrderLoading ? (
-            <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
-          ) : (
-            <button
-              className="border-0 p-0"
-              style={{ background: "transparent" }}
-              onClick={handleFetchSupportOrderDetails}
-              disabled={
-                trackOrderLoading || statusLoading || supportOrderLoading
-              }
+        <div className={styles.card_body}>
+          <div className="py-2 d-flex align-items-center">
+            <AddressRadioButton
+              disabled={loading}
+              checked={selectedCancelType === CANCEL_ORDER_TYPES.allOrder}
+              onClick={() => {
+                setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
+              }}
             >
-              <CallSvg />
-            </button>
-          )}
-          <div className="ms-auto">
-            {/* IF ORDER STATUS IS NOT CANCEL  */}
-            {current_order_status?.status !== order_statuses.cancelled && (
-              <div className="d-flex align-items-center justify-content-center flex-wrap">
-                <div className="pe-3 py-1">
-                  <button
-                    disabled={
-                      trackOrderLoading || statusLoading || supportOrderLoading
-                    }
-                    className={
-                      statusLoading
-                        ? styles.secondary_action_loading
-                        : styles.secondary_action
-                    }
-                    onClick={() => handleFetchUpdatedStatus()}
-                  >
-                    {statusLoading ? (
-                      <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
-                    ) : (
-                      "Get Status"
-                    )}
-                  </button>
-                </div>
-                <div className="pe-3 py-1">
-                  <button
-                    disabled={
-                      trackOrderLoading || statusLoading || supportOrderLoading
-                    }
-                    className={
-                      trackOrderLoading
-                        ? styles.secondary_action_loading
-                        : styles.secondary_action
-                    }
-                    onClick={() => handleFetchTrackOrderDetails()}
-                  >
-                    {trackOrderLoading ? (
-                      <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
-                    ) : (
-                      "Track"
-                    )}
-                  </button>
-                </div>
-                <div className="py-1">
-                  <button
-                    disabled={
-                      trackOrderLoading || statusLoading || supportOrderLoading
-                    }
-                    className={styles.primary_action}
-                    onClick={() => setToggleCancelOrderModal(true)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+              <div className="px-3">
+                <p className={cancelRadioStyles.address_name_and_phone}>
+                  Cancel Complete Orders
+                </p>
               </div>
+            </AddressRadioButton>
+            <AddressRadioButton
+              disabled={loading || !areProductsToBeCancled()}
+              checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
+              onClick={() => {
+                setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
+              }}
+            >
+              <div className="px-3">
+                <p className={cancelRadioStyles.address_name_and_phone}>
+                  Cancel Selected
+                </p>
+              </div>
+            </AddressRadioButton>
+
+            <AddressRadioButton
+              disabled={loading || !areProductsToBeCancled()}
+              checked={selectedCancelType === CANCEL_ORDER_TYPES.returnOrders}
+              onClick={() => {
+                setSelectedCancelType(CANCEL_ORDER_TYPES.returnOrders);
+              }}
+            >
+              <div className="px-3">
+                <p className={cancelRadioStyles.address_name_and_phone}>
+                  Return
+                </p>
+              </div>
+            </AddressRadioButton>
+          </div>
+          <div style={{ maxHeight: "250px", overflow: "auto" }}>
+            {areProductsToBeCancled() &&
+              (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders || selectedCancelType === CANCEL_ORDER_TYPES.returnOrders) && (
+                <div className="px-1 py-2">
+                  {partailsCancelProductList?.map((product, idx) => {
+                    return (
+                      <div
+                        key={product?.id}
+                        className="d-flex align-items-center"
+                      >
+                        <div style={{ width: "90%" }}>
+                          <Checkbox
+                            id={product?.id}
+                            checked={isProductSelected(product?.id)}
+                            disabled={loading}
+                            boxBasis="8%"
+                            nameBasis="92%"
+                            onClick={() => {
+                              setInlineError((error) => ({
+                                ...error,
+                                selected_id_error: "",
+                              }));
+                              if (isProductSelected(product?.id)) {
+                                removeProductToCancel(product);
+                                return;
+                              }
+                              addProductToCancel(product);
+                            }}
+                          >
+                            <p
+                              className={productStyles.product_name}
+                              title={product?.name}
+                              style={{ fontSize: "16px", textAlign: "left" }}
+                            >
+                              {product?.name}
+                            </p>
+                            <div className="pt-1">
+                              <p className={productStyles.quantity_count}>
+                                QTY: {quantity[idx]?.count ?? "0"}
+                              </p>
+                            </div>
+                          </Checkbox>
+                        </div>
+                        <div className="ms-auto">
+                          <p
+                            className={productStyles.product_price}
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            ₹ {Number(product?.price?.value)?.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+          </div>
+          {inlineError.selected_id_error && (
+            <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>
+          )}
+          <div className="px-2">
+            <p className={styles.cancel_dropdown_label_text}>
+              Select your Reason
+            </p>
+            <Dropdown
+              header={
+                <div
+                  className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
+                >
+                  <div className="px-2">
+                    <p className={styles.cancel_dropdown_text}>
+                      {selectedCancelReasonId?.value
+                        ? selectedCancelReasonId?.value
+                        : "Select reason for cancelation"}
+                    </p>
+                  </div>
+                  <div className="px-2 ms-auto">
+                    <DropdownSvg
+                      width="15"
+                      height="10"
+                      color={ONDC_COLORS.ACCENTCOLOR}
+                    />
+                  </div>
+                </div>
+              }
+              body_classes="dropdown-menu-right"
+              style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
+              click={(reasonValue) => {
+                const REASONS = selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? RETURN_REASONS : CANCELATION_REASONS
+                const type = REASONS.find(
+                  ({ value }) =>
+                    value.toLowerCase() === reasonValue.toLowerCase()
+                );
+                setSelectedCancelReasonId(type);
+                setInlineError((error) => ({
+                  ...error,
+                  reason_error: "",
+                }));
+              }}
+              options={selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? RETURN_REASONS.map(({ value }) => ({
+                value,
+              })) : CANCELATION_REASONS.map(({ value }) => ({
+                value,
+              }))}
+              show_icons={false}
+            />
+            {inlineError.reason_error && (
+              <ErrorMessage>{inlineError.reason_error}</ErrorMessage>
             )}
           </div>
-          {/* eslint-disable-next-line */}
-          <a
-            ref={trackOrderRef}
-            style={{ visibility: "hidden", display: "none" }}
-          >
-            navigate
-          </a>
+        </div>
+        <div
+          className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
+        >
+          <div className="px-3">
+            <Button
+              disabled={loading}
+              button_type={buttonTypes.secondary}
+              button_hover_type={buttonTypes.secondary_hover}
+              button_text="Cancel"
+              onClick={() => {
+                onClose();
+              }}
+            />
+          </div>
+          <div className="px-3">
+            <Button
+              isloading={loading ? 1 : 0}
+              disabled={loading}
+              button_type={buttonTypes.primary}
+              button_hover_type={buttonTypes.primary_hover}
+              button_text="Confirm"
+              onClick={() => {
+                if (selectedCancelType === CANCEL_ORDER_TYPES.allOrder) {
+                  handleFetchCancelOrderDetails();
+                } else {
+                  handlePartialOrderCancel();
+                }
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
