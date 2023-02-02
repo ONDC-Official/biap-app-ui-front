@@ -164,14 +164,19 @@ export default function InitializeOrder() {
           })
         )
       );
-      // fetch through events
-      onFetchQuote(
-        data?.map((txn) => {
-          const { context } = txn;
-          return context?.message_id;
-        }),
-
-      );
+      //Error handling workflow eg, NACK
+      if (data[0].error && data[0].message.ack.status === "NACK") {
+        dispatchToast(data[0].error.message);
+        setGetQuoteLoading(false);
+      } else {
+        // fetch through events
+        onFetchQuote(
+          data?.map((txn) => {
+            const { context } = txn;
+            return context?.message_id;
+          }),
+        );
+      }
     } catch (err) {
       dispatchToast(err?.response?.data?.error?.message);
       setGetQuoteLoading(false);
