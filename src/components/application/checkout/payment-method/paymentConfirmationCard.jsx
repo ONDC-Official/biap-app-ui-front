@@ -361,12 +361,19 @@ export default function PaymentConfirmationCard(props) {
           }))
         )
       );
-      onConfirm(
-        data?.map((txn) => {
-          const { context } = txn;
-          return context?.message_id;
-        })
-      );
+      console.log("data=====>", data);
+      //Error handling workflow eg, NACK
+      if (data[0].error && data[0].message.ack.status === "NACK") {
+        dispatchError(data[0].error.message)
+        setConfirmOrderLoading(false);
+      } else {
+        onConfirm(
+          data?.map((txn) => {
+            const { context } = txn;
+            return context?.message_id;
+          })
+        );
+      }
     } catch (err) {
       dispatchError(err.message);
       setConfirmOrderLoading(false);
