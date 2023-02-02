@@ -460,9 +460,9 @@ export default function OrderCard(props) {
             style={
               currentSelectedAccordion === accoodion_id
                 ? {
-                    transform: "rotate(180deg)",
-                    transition: "all 0.7s",
-                  }
+                  transform: "rotate(180deg)",
+                  transition: "all 0.7s",
+                }
                 : { transform: "rotate(0)", transition: "all 0.7s" }
             }
           >
@@ -509,7 +509,7 @@ export default function OrderCard(props) {
                     </p>
                     <div className="pt-1">
                       <p className={styles.quantity_count}>
-                        QTY: {quantity[0]?.count ?? "0"}
+                        QTY: {quantity[index]?.count ?? "0"}
                       </p>
                     </div>
                     <div className="pt-2 d-flex align-items-center">

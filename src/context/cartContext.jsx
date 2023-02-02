@@ -60,9 +60,9 @@ export function CartContextProvider({ children }) {
   }
 
   function onUpdateProductToCart(items, fulfillments) {
-    const updatedProducts = cartItems.map((item) => {
-      if (item.id === items[0].id) {
-        item.fulfillment_id = items[0].fulfillment_id;
+    const updatedProducts = cartItems.map((item, ind) => {
+      if (item.id === items[ind].id) {
+        item.fulfillment_id = items[ind].fulfillment_id;
         item.fulfillments = fulfillments;
         return item;;
       }
