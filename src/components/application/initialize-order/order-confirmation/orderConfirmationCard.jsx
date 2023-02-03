@@ -230,8 +230,9 @@ export default function OrderConfirmationCard(props) {
           )
         );
         //Error handling workflow eg, NACK
-        if (data[0].error && data[0].message.ack.status === "NACK") {
-          dispatchToast(toast_types.error, data[0].error.message);
+        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+        if (isNACK) {
+          dispatchToast(toast_types.error, isNACK.error.message);
           setInitializeOrderLoading(false);
           updateInitLoading(false);
         } else {

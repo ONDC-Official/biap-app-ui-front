@@ -165,8 +165,9 @@ export default function InitializeOrder() {
         )
       );
       //Error handling workflow eg, NACK
-      if (data[0].error && data[0].message.ack.status === "NACK") {
-        dispatchToast(data[0].error.message);
+      const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+      if (isNACK) {
+        dispatchToast(isNACK.error.message);
         setGetQuoteLoading(false);
       } else {
         // fetch through events

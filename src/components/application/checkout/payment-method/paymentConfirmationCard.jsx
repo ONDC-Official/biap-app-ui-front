@@ -362,8 +362,9 @@ export default function PaymentConfirmationCard(props) {
         )
       );
       //Error handling workflow eg, NACK
-      if (data[0].error && data[0].message.ack.status === "NACK") {
-        dispatchError(data[0].error.message)
+      const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+      if (isNACK) {
+        dispatchError(isNACK.error.message);
         setConfirmOrderLoading(false);
       } else {
         onConfirm(
