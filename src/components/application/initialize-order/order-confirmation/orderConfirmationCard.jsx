@@ -125,7 +125,8 @@ export default function OrderConfirmationCard(props) {
         ],
       };
     });
-    AddCookie("checkout_details", JSON.stringify(checkoutObj));
+    // AddCookie("checkout_details", JSON.stringify(checkoutObj));
+    localStorage.setItem("checkout_details", JSON.stringify(checkoutObj));
     history.replace("/application/checkout");
   }
 
