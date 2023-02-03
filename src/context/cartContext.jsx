@@ -60,13 +60,13 @@ export function CartContextProvider({ children }) {
   }
 
   function onUpdateProductToCart(items, fulfillments) {
-    const updatedProducts = cartItems.map((item, ind) => {
-      if (item.id === items[ind].id) {
-        item.fulfillment_id = items[ind].fulfillment_id;
-        item.fulfillments = fulfillments;
-        return item;;
+    let updatedProducts = Object.assign([], cartItems);
+    items.forEach(item => {
+      const findItemIndexFromCart = updatedProducts.findIndex((prod) => prod.id === item.id);
+      if (findItemIndexFromCart > -1) {
+        updatedProducts[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
+        updatedProducts[findItemIndexFromCart].fulfillments = fulfillments;
       }
-      return { ...item };
     });
     setCartItems(updatedProducts);
   }
