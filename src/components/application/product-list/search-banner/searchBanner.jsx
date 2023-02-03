@@ -168,13 +168,14 @@ export default function SearchBanner({ onSearch, location }) {
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
         )
       );
-      const { lat, lng, pincode, state } = data?.results?.[0];
+      const { lat, lng, pincode, city, state } = data?.results?.[0];
       setSearchedLocation({
         ...searchedLocation,
         name: location?.name,
         lat,
         lng,
         pincode,
+        city,
         state,
       });
       setToggleLocationListCard(false);
@@ -196,7 +197,7 @@ export default function SearchBanner({ onSearch, location }) {
       const { context } = await cancellablePromise(
         postCall("/clientApis/v1/search", {
           context: {
-            city: searchedLocation.name,
+            city: searchedLocation.city,
             state: searchedLocation.state,
           },
           message: {
