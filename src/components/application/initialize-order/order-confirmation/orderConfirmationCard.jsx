@@ -125,7 +125,8 @@ export default function OrderConfirmationCard(props) {
         ],
       };
     });
-    AddCookie("checkout_details", JSON.stringify(checkoutObj));
+    // AddCookie("checkout_details", JSON.stringify(checkoutObj));
+    localStorage.setItem("checkout_details", JSON.stringify(checkoutObj));
     history.replace("/application/checkout");
   }
 
@@ -229,27 +230,35 @@ export default function OrderConfirmationCard(props) {
             })
           )
         );
-        const parentTransactionIdMap = new Map();
-        data.map((data) => {
-          const provider_id = data?.context?.provider_id;
-          return parentTransactionIdMap.set(provider_id, {
-            parent_order_id: data?.context?.parent_order_id,
-            transaction_id: data?.context?.transaction_id,
+        //Error handling workflow eg, NACK
+        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+        if (isNACK) {
+          dispatchToast(toast_types.error, isNACK.error.message);
+          setInitializeOrderLoading(false);
+          updateInitLoading(false);
+        } else {
+          const parentTransactionIdMap = new Map();
+          data.map((data) => {
+            const provider_id = data?.context?.provider_id;
+            return parentTransactionIdMap.set(provider_id, {
+              parent_order_id: data?.context?.parent_order_id,
+              transaction_id: data?.context?.transaction_id,
+            });
           });
-        });
-        // store parent order id to cookies
-        AddCookie("parent_order_id", data[0]?.context?.parent_order_id);
-        // store the map into cookies
-        AddCookie(
-          "parent_and_transaction_id_map",
-          JSON.stringify(Array.from(parentTransactionIdMap.entries()))
-        );
-        onInit(
-          data?.map((txn) => {
-            const { context } = txn;
-            return context?.message_id;
-          })
-        );
+          // store parent order id to cookies
+          AddCookie("parent_order_id", data[0]?.context?.parent_order_id);
+          // store the map into cookies
+          AddCookie(
+            "parent_and_transaction_id_map",
+            JSON.stringify(Array.from(parentTransactionIdMap.entries()))
+          );
+          onInit(
+            data?.map((txn) => {
+              const { context } = txn;
+              return context?.message_id;
+            })
+          );
+        }
       } catch (err) {
         dispatchToast(toast_types.error, err.message);
         setInitializeOrderLoading(false);

@@ -19,7 +19,8 @@ export default function Checkout() {
 
   // CONSTANTS
   const { productQuotes, successOrderIds } = JSON.parse(
-    getValueFromCookie("checkout_details") || "{}"
+    // getValueFromCookie("checkout_details") || "{}"
+    localStorage.getItem("checkout_details") || "{}"
   );
 
   // STATES
@@ -122,11 +123,11 @@ export default function Checkout() {
                                       {!successOrderIds.includes(
                                         provider_id.toString()
                                       ) && (
-                                        <div
-                                          className={styles.product_disabled}
-                                          style={{ height: "100%" }}
-                                        />
-                                      )}
+                                          <div
+                                            className={styles.product_disabled}
+                                            style={{ height: "100%" }}
+                                          />
+                                        )}
                                     </div>
                                   </div>
                                 );

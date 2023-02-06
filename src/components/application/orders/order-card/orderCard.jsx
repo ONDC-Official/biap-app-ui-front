@@ -333,7 +333,13 @@ export default function OrderCard(props) {
           },
         ])
       );
-      fetchStatusDataThroughEvents(data[0]?.context?.message_id);
+      //Error handling workflow eg, NACK
+      if (data[0].error && data[0].message.ack.status === "NACK") {
+        setStatusLoading(false);
+        dispatchToast(data[0].error.message, toast_types.error);
+      } else {
+        fetchStatusDataThroughEvents(data[0]?.context?.message_id);
+      }
     } catch (err) {
       setStatusLoading(false);
       dispatchToast(err?.message, toast_types.error);
