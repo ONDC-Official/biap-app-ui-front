@@ -186,15 +186,22 @@ export default function InitializeOrder() {
     // eslint-disable-next-line
   }, []);
 
+  const alertCallBack = () => {
+    history.replace("/application/products");
+  }
   // on get quote Api
   const onGetQuote = useCallback(async (message_id) => {
     try {
       const data = await cancellablePromise(
         getCall(`/clientApis/v2/on_select?messageIds=${message_id}`)
       );
-      responseRef.current = [...responseRef.current, data[0]];
-      setEventData((eventData) => [...eventData, data[0]]);
-      onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments)
+      if (data[0].error) {
+        alert(`${data[0].error.code}:${data[0].error.message}`, alertCallBack())
+      } else {
+        responseRef.current = [...responseRef.current, data[0]];
+        setEventData((eventData) => [...eventData, data[0]]);
+        onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments)
+      }
     } catch (err) {
       dispatchToast(err.message);
       setGetQuoteLoading(false);
