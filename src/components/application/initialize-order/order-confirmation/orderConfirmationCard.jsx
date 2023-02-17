@@ -30,10 +30,10 @@ import { ToastContext } from "../../../../context/toastContext";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import { removeNullValues } from "../../../../utils/helper";
 
 export default function OrderConfirmationCard(props) {
   const {
+    updatedCartItems,
     responseReceivedIds = [],
     responseText = "",
     toggleInit,
@@ -55,7 +55,7 @@ export default function OrderConfirmationCard(props) {
 
   // CONTEXT
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  const { cartItems, onRemoveProduct } = useContext(CartContext);
+  const {onRemoveProduct } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
 
   // REFS
@@ -125,8 +125,7 @@ export default function OrderConfirmationCard(props) {
         ],
       };
     });
-    // AddCookie("checkout_details", JSON.stringify(checkoutObj));
-    localStorage.setItem("checkout_details", JSON.stringify(checkoutObj));
+    AddCookie("checkout_details", JSON.stringify(checkoutObj));
     history.replace("/application/checkout");
   }
 
@@ -166,7 +165,7 @@ export default function OrderConfirmationCard(props) {
         }
         // tale action to redirect them.
         const requestObject = constructQouteObject(
-          cartItems.filter(({ provider }) =>
+          updatedCartItems.filter(({ provider }) =>
             responseReceivedIds.includes(provider.id.toString())
           )
         );
@@ -190,75 +189,59 @@ export default function OrderConfirmationCard(props) {
     async (items) => {
       responseRef.current = [];
       try {
-        const search_context = JSON.parse(getValueFromCookie("search_context"));
         const data = await cancellablePromise(
           postCall(
             "/clientApis/v2/initialize_order",
-            items.map((item) => {
-              const fulfillments = item[0].fulfillments;
-              delete item[0].fulfillments;
-              return {
-                context: {
-                  transaction_id,
-                  city: search_context.location.name,
-                  state: search_context.location.state,
+            items.map((item) => ({
+              context: {
+                transaction_id,
+              },
+              message: {
+                items: item,
+                billing_info: {
+                  address: billingAddress?.address,
+                  phone: billingAddress?.phone,
+                  name: billingAddress?.name,
+                  email: billingAddress?.email,
                 },
-                message: {
-                  items: item,
-                  fulfillments: fulfillments,
-                  billing_info: {
-                    address: removeNullValues(billingAddress?.address),
-                    phone: billingAddress?.phone,
-                    name: billingAddress?.name,
-                    email: billingAddress?.email,
-                  },
-                  delivery_info: {
-                    type: "Delivery",
-                    name: deliveryAddress?.name,
-                    email: deliveryAddress?.email,
-                    phone: deliveryAddress?.phone,
-                    location: {
-                      gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
-                      ...deliveryAddress?.location,
-                    },
-                  },
-                  payment: {
-                    type: "ON-FULFILLMENT",
+                delivery_info: {
+                  type: "Delivery",
+                  name: deliveryAddress?.name,
+                  email: deliveryAddress?.email,
+                  phone: deliveryAddress?.phone,
+                  location: {
+                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                    ...deliveryAddress?.location,
                   },
                 },
-              };
-            })
+                payment: {
+                  type: "POST-FULFILLMENT",
+                },
+              },
+            }))
           )
         );
-        //Error handling workflow eg, NACK
-        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
-        if (isNACK) {
-          dispatchToast(toast_types.error, isNACK.error.message);
-          setInitializeOrderLoading(false);
-          updateInitLoading(false);
-        } else {
-          const parentTransactionIdMap = new Map();
-          data.map((data) => {
-            const provider_id = data?.context?.provider_id;
-            return parentTransactionIdMap.set(provider_id, {
-              parent_order_id: data?.context?.parent_order_id,
-              transaction_id: data?.context?.transaction_id,
-            });
+        const parentTransactionIdMap = new Map();
+        data.map((data) => {
+          const provider_id = data?.context?.provider_id;
+          return parentTransactionIdMap.set(provider_id, {
+            parent_order_id: data?.context?.parent_order_id,
+            transaction_id: data?.context?.transaction_id,
           });
-          // store parent order id to cookies
-          AddCookie("parent_order_id", data[0]?.context?.parent_order_id);
-          // store the map into cookies
-          AddCookie(
-            "parent_and_transaction_id_map",
-            JSON.stringify(Array.from(parentTransactionIdMap.entries()))
-          );
-          onInit(
-            data?.map((txn) => {
-              const { context } = txn;
-              return context?.message_id;
-            })
-          );
-        }
+        });
+        // store parent order id to cookies
+        AddCookie("parent_order_id", data[0]?.context?.parent_order_id);
+        // store the map into cookies
+        AddCookie(
+          "parent_and_transaction_id_map",
+          JSON.stringify(Array.from(parentTransactionIdMap.entries()))
+        );
+        onInit(
+          data?.map((txn) => {
+            const { context } = txn;
+            return context?.message_id;
+          })
+        );
       } catch (err) {
         dispatchToast(toast_types.error, err.message);
         setInitializeOrderLoading(false);
@@ -289,7 +272,7 @@ export default function OrderConfirmationCard(props) {
     if (eventData.length > 0) {
       // fetch request object length and compare it with the response length
       const requestObject = constructQouteObject(
-        cartItems.filter(({ provider }) =>
+        updatedCartItems.filter(({ provider }) =>
           responseReceivedIds.includes(provider.id.toString())
         )
       );
@@ -305,6 +288,7 @@ export default function OrderConfirmationCard(props) {
     if (updateCartCounter.current > 0) {
       fetchUpdatedQuote();
     }
+    // eslint-disable-next-line
   }, [updateCartCounter.current]);
 
   useEffect(() => {
@@ -319,21 +303,22 @@ export default function OrderConfirmationCard(props) {
   return (
     <div className={styles.price_summary_card}>
       <div
-        className={`${isStepCompleted()
-          ? styles.step_completed_card_header
-          : styles.card_header
-          } d-flex align-items-center`}
+        className={`${
+          isStepCompleted()
+            ? styles.step_completed_card_header
+            : styles.card_header
+        } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
-              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
-            }
+                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+              }
             : {
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }
+                borderBottomRightRadius: "10px",
+                borderBottomLeftRadius: "10px",
+              }
         }
       >
         <p className={styles.card_header_title}>Update Cart</p>
@@ -371,7 +356,7 @@ export default function OrderConfirmationCard(props) {
                     <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
                   </div>
                 ) : (
-                  cartItems.map(({ id, bpp_id, product, provider }) => {
+                  updatedCartItems.map(({ id, bpp_id, product, provider }) => {
                     const { id: provider_id, locations } = provider;
                     return (
                       <div className="col-lg-6 col-sm-12 p-2" key={id}>
@@ -408,11 +393,11 @@ export default function OrderConfirmationCard(props) {
                           {!responseReceivedIds.includes(
                             provider_id.toString()
                           ) && (
-                              <>
-                                <ErrorMessage>{responseText}</ErrorMessage>
-                                <div className={styles.product_disabled} />
-                              </>
-                            )}
+                            <>
+                              <ErrorMessage>{responseText}</ErrorMessage>
+                              <div className={styles.product_disabled} />
+                            </>
+                          )}
                         </div>
                       </div>
                     );
@@ -424,25 +409,27 @@ export default function OrderConfirmationCard(props) {
           <div
             className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
           >
-            <Button
-              isloading={initializeOrderLoading ? 1 : 0}
-              disabled={
-                initializeOrderLoading || updateCartLoading || !toggleInit
-              }
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Proceed to pay"
-              onClick={() => {
-                setInitializeOrderLoading(true);
-                updateInitLoading(true);
-                const request_object = constructQouteObject(
-                  cartItems.filter(({ provider }) =>
-                    responseReceivedIds.includes(provider.id.toString())
-                  )
-                );
-                initializeOrder(request_object);
-              }}
-            />
+            {updatedCartItems.length > 0 && (
+              <Button
+                isloading={initializeOrderLoading ? 1 : 0}
+                disabled={
+                  initializeOrderLoading || updateCartLoading || !toggleInit
+                }
+                button_type={buttonTypes.primary}
+                button_hover_type={buttonTypes.primary_hover}
+                button_text="Proceed to pay"
+                onClick={() => {
+                  setInitializeOrderLoading(true);
+                  updateInitLoading(true);
+                  const request_object = constructQouteObject(
+                    updatedCartItems.filter(({ provider }) =>
+                      responseReceivedIds.includes(provider.id.toString())
+                    )
+                  );
+                  initializeOrder(request_object);
+                }}
+              />
+            )}
           </div>
         </Fragment>
       )}
