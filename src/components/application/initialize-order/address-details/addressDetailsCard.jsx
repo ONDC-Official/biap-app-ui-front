@@ -18,19 +18,19 @@ import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function AddressDetailsCard(props) {
-  const { currentActiveStep, setCurrentActiveStep, initLoading } = props;
+  const { currentActiveStep, setCurrentActiveStep, initLoading, updatedCartItems } = props;
 
   // STATES
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
   const [billingAddresses, setBillingAddresses] = useState([]);
   const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
-    useState();
+      useState();
   const [fetchBillingAddressLoading, setFetchBillingAddressLoading] =
-    useState();
+      useState();
 
   // CONTEXT
   const { deliveryAddress, billingAddress, setDeliveryAddress } =
-    useContext(AddressContext);
+      useContext(AddressContext);
   const dispatch = useContext(ToastContext);
 
   // HOOKS
@@ -55,7 +55,7 @@ export default function AddressDetailsCard(props) {
   // function to get the current active step
   function isCurrentStep() {
     if (
-      currentActiveStep.current_active_step_id === checkout_steps.SELECT_ADDRESS
+        currentActiveStep.current_active_step_id === checkout_steps.SELECT_ADDRESS
     ) {
       return true;
     }
@@ -68,7 +68,7 @@ export default function AddressDetailsCard(props) {
       setFetchDeliveryAddressLoading(true);
       try {
         const data = await cancellablePromise(
-          getCall("/clientApis/v1/delivery_address")
+            getCall("/clientApis/v1/delivery_address")
         );
         setDeliveryAddresses(data);
       } catch (err) {
@@ -92,7 +92,7 @@ export default function AddressDetailsCard(props) {
     fetchDeliveryAddress();
 
     const updatedDeliveryAddress = deliveryAddresses.filter(
-      (da) => da.id === deliveryAddress.id
+        (da) => da.id === deliveryAddress.id
     )[0];
     if (updatedDeliveryAddress) {
       const { id, descriptor, address } = updatedDeliveryAddress;
@@ -117,7 +117,7 @@ export default function AddressDetailsCard(props) {
       setFetchBillingAddressLoading(true);
       try {
         const data = await cancellablePromise(
-          getCall("/clientApis/v1/billing_details")
+            getCall("/clientApis/v1/billing_details")
         );
         setBillingAddresses(data);
       } catch (err) {
@@ -144,127 +144,127 @@ export default function AddressDetailsCard(props) {
   }, [currentActiveStep.current_active_step_number]);
 
   const in_card_loading = (
-    <div
-      className="d-flex align-items-center justify-content-center"
-      style={{ height: "100px" }}
-    >
-      <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
-    </div>
+      <div
+          className="d-flex align-items-center justify-content-center"
+          style={{ height: "100px" }}
+      >
+        <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
+      </div>
   );
 
   return (
-    <div className={styles.price_summary_card}>
-      <div
-        className={`${
-          isStepCompleted()
-            ? styles.step_completed_card_header
-            : styles.card_header
-        }`}
-        style={
-          isCurrentStep()
-            ? {
-                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-                borderBottomRightRadius: 0,
-                borderBottomLeftRadius: 0,
-              }
-            : {
-                borderBottomRightRadius: "10px",
-                borderBottomLeftRadius: "10px",
-              }
-        }
-      >
-        <div className="d-flex align-items-center">
-          <p className={styles.card_header_title}>Address</p>
+      <div className={styles.price_summary_card}>
+        <div
+            className={`${
+                isStepCompleted()
+                    ? styles.step_completed_card_header
+                    : styles.card_header
+            }`}
+            style={
+              isCurrentStep()
+                  ? {
+                    borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+                    borderBottomRightRadius: 0,
+                    borderBottomLeftRadius: 0,
+                  }
+                  : {
+                    borderBottomRightRadius: "10px",
+                    borderBottomLeftRadius: "10px",
+                  }
+            }
+        >
+          <div className="d-flex align-items-center">
+            <p className={styles.card_header_title}>Address</p>
+            {isStepCompleted() && (
+                <div className="px-3">
+                  <Checkmark
+                      width="25"
+                      height="16"
+                      style={{ marginBottom: "5px" }}
+                  />
+                </div>
+            )}
+            {isStepCompleted() && toggleChangeButton() && (
+                <div className="ms-auto">
+                  <Button
+                      disabled={initLoading}
+                      button_type={buttonTypes.primary}
+                      button_hover_type={buttonTypes.primary_hover}
+                      button_text="Change"
+                      onClick={() =>
+                          setCurrentActiveStep(
+                              get_current_step(checkout_steps.SELECT_ADDRESS)
+                          )
+                      }
+                  />
+                </div>
+            )}
+          </div>
           {isStepCompleted() && (
-            <div className="px-3">
-              <Checkmark
-                width="25"
-                height="16"
-                style={{ marginBottom: "5px" }}
-              />
-            </div>
-          )}
-          {isStepCompleted() && toggleChangeButton() && (
-            <div className="ms-auto">
-              <Button
-                disabled={initLoading}
-                button_type={buttonTypes.primary}
-                button_hover_type={buttonTypes.primary_hover}
-                button_text="Change"
-                onClick={() =>
-                  setCurrentActiveStep(
-                    get_current_step(checkout_steps.SELECT_ADDRESS)
-                  )
-                }
-              />
-            </div>
+              <div className="py-2">
+                <p
+                    className={styles.address_type_label}
+                    style={{ fontSize: "14px", fontWeight: "normal" }}
+                >
+                  Delivering to:
+                </p>
+                <p className={styles.address_name_and_phone}>
+                  {deliveryAddress?.name}
+                </p>
+                <p className={`${styles.address_line_2} pb-2`}>
+                  {deliveryAddress?.email} - {deliveryAddress?.phone}
+                </p>
+                <p className={styles.address_line_1}>
+                  {deliveryAddress?.location?.address?.street
+                      ? deliveryAddress?.location?.address.street
+                      : deliveryAddress?.location?.address?.door}
+                  , {deliveryAddress?.location?.address?.city}{" "}
+                  {deliveryAddress?.location?.address?.state}
+                </p>
+                <p className={styles.address_line_2}>
+                  {deliveryAddress?.location?.address?.areaCode}
+                </p>
+              </div>
           )}
         </div>
-        {isStepCompleted() && (
-          <div className="py-2">
-            <p
-              className={styles.address_type_label}
-              style={{ fontSize: "14px", fontWeight: "normal" }}
-            >
-              Delivering to:
-            </p>
-            <p className={styles.address_name_and_phone}>
-              {deliveryAddress?.name}
-            </p>
-            <p className={`${styles.address_line_2} pb-2`}>
-              {deliveryAddress?.email} - {deliveryAddress?.phone}
-            </p>
-            <p className={styles.address_line_1}>
-              {deliveryAddress?.location?.address?.street
-                ? deliveryAddress?.location?.address.street
-                : deliveryAddress?.location?.address?.door}
-              , {deliveryAddress?.location?.address?.city}{" "}
-              {deliveryAddress?.location?.address?.state}
-            </p>
-            <p className={styles.address_line_2}>
-              {deliveryAddress?.location?.address?.areaCode}
-            </p>
-          </div>
+        {isCurrentStep() && (
+            <Fragment>
+              <div className={styles.card_body}>
+                {fetchDeliveryAddressLoading ? (
+                    in_card_loading
+                ) : (
+                    <DeliveryAddress
+                        deliveryAddresses={deliveryAddresses}
+                        setDeliveryAddresses={(value) => setDeliveryAddresses(value)}
+                    />
+                )}
+                <hr style={{ background: ONDC_COLORS.SECONDARYCOLOR }} />
+                {fetchBillingAddressLoading ? (
+                    in_card_loading
+                ) : (
+                    <BillingAddress
+                        billingAddresses={billingAddresses}
+                        setBillingAddresses={(value) => setBillingAddresses(value)}
+                    />
+                )}
+              </div>
+              <div
+                  className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
+              >
+                <Button
+                    disabled={!deliveryAddress || !billingAddress || updatedCartItems.length === 0}
+                    button_type={buttonTypes.primary}
+                    button_hover_type={buttonTypes.primary_hover}
+                    button_text="Proceed"
+                    onClick={() =>
+                        setCurrentActiveStep(
+                            get_current_step(checkout_steps.CONFIRM_ORDER)
+                        )
+                    }
+                />
+              </div>
+            </Fragment>
         )}
       </div>
-      {isCurrentStep() && (
-        <Fragment>
-          <div className={styles.card_body}>
-            {fetchDeliveryAddressLoading ? (
-              in_card_loading
-            ) : (
-              <DeliveryAddress
-                deliveryAddresses={deliveryAddresses}
-                setDeliveryAddresses={(value) => setDeliveryAddresses(value)}
-              />
-            )}
-            <hr style={{ background: ONDC_COLORS.SECONDARYCOLOR }} />
-            {fetchBillingAddressLoading ? (
-              in_card_loading
-            ) : (
-              <BillingAddress
-                billingAddresses={billingAddresses}
-                setBillingAddresses={(value) => setBillingAddresses(value)}
-              />
-            )}
-          </div>
-          <div
-            className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
-          >
-            <Button
-              disabled={!deliveryAddress || !billingAddress}
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Proceed"
-              onClick={() =>
-                setCurrentActiveStep(
-                  get_current_step(checkout_steps.CONFIRM_ORDER)
-                )
-              }
-            />
-          </div>
-        </Fragment>
-      )}
-    </div>
   );
 }

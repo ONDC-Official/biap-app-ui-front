@@ -242,3 +242,12 @@
   text-align: center;
   color: $error;
 }
+.error {
+  color: $error;
+  font-size: 12px;
+}
+
+.provider {
+  border-bottom: 1px solid #aaaaaa;
+  margin-bottom: 10px;
+}

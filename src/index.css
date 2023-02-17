@@ -33,3 +33,11 @@ code {
 ::-webkit-scrollbar-thumb:hover {
   background: #333;
 }
+
+.text-error {
+  color: red !important;
+}
+
+.text-amber {
+  color: #FFBF00 !important;
+}

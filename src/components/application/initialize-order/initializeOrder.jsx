@@ -1,33 +1,23 @@
-import React, {
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  Fragment,
-  useCallback,
-} from "react";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import React, {Fragment, useCallback, useContext, useEffect, useRef, useState,} from "react";
+import {useHistory} from "react-router-dom/cjs/react-router-dom.min";
 import styles from "../../../styles/cart/cartView.module.scss";
-import { CartContext } from "../../../context/cartContext";
-import {
-  get_current_step,
-  checkout_steps,
-} from "../../../constants/checkout-steps";
-import { postCall, getCall } from "../../../api/axios";
+import {CartContext} from "../../../context/cartContext";
+import {checkout_steps, get_current_step,} from "../../../constants/checkout-steps";
+import {getCall, postCall} from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
-import { ONDC_COLORS } from "../../shared/colors";
-import { buttonTypes } from "../../shared/button/utils";
+import {ONDC_COLORS} from "../../shared/colors";
+import {buttonTypes} from "../../shared/button/utils";
 import Navbar from "../../shared/navbar/navbar";
 import AddressDetailsCard from "./address-details/addressDetailsCard";
 import OrderConfirmationCard from "./order-confirmation/orderConfirmationCard";
-import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
-import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
-import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
-import { constructQouteObject } from "../../../api/utils/constructRequestObject";
+import PriceDetailsCard from "./price-details-card/priceDetailsCard";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
+import {AddCookie, getValueFromCookie} from "../../../utils/cookies";
+import {constructQouteObject} from "../../../api/utils/constructRequestObject";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
-import { ToastContext } from "../../../context/toastContext";
-import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
+import {ToastContext} from "../../../context/toastContext";
+import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
 import useCancellablePromise from "../../../api/cancelRequest";
 
 export default function InitializeOrder() {
@@ -40,8 +30,9 @@ export default function InitializeOrder() {
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);
   const [updateCartLoading, setUpdateCartLoading] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
-  const [productsQuote, setProductsQoute] = useState({
-    products: [],
+  const updatedCartItems = useRef([]);
+  const [productsQuote, setProductsQuote] = useState({
+    providers: [],
     total_payable: 0,
   });
   const [currentActiveStep, setCurrentActiveStep] = useState(
@@ -194,7 +185,14 @@ export default function InitializeOrder() {
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
-      onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments)
+      // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
+      data[0].message.quote.items.forEach(item => {
+        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.id === item.id);
+        if (findItemIndexFromCart > -1) {
+          updatedCartItems.current[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[findItemIndexFromCart].fulfillments = data[0].message.quote.fulfillments;
+        }
+      });
     } catch (err) {
       dispatchToast(err.message);
       setGetQuoteLoading(false);
@@ -209,36 +207,87 @@ export default function InitializeOrder() {
       if (requestObject.length === responseRef.current.length) {
         setToggleInit(true);
       }
+
+      const cartList = JSON.parse(JSON.stringify(updatedCartItems.current));
       // check if any one order contains error
       let total_payable = 0;
       const quotes = responseRef.current?.map((item, index) => {
-        const { message } = item;
+        const { message, error } = item;
+        let provider_payable = 0;
+        const provider = {
+          products: [],
+          total_payable: 0,
+          name: '',
+          error: null,
+        };
+
         // else generate quote of it
         if (message) {
-          total_payable += Number(message?.quote?.quote?.price?.value);
+          if (message?.quote?.quote?.price?.value) {
+            provider_payable += Number(message?.quote?.quote?.price?.value);
+          }
           const breakup = message?.quote?.quote?.breakup;
           const provided_by = message?.quote?.provider?.descriptor?.name;
-          const product = breakup?.map((break_up_item) => ({
-            title: break_up_item?.title,
-            price: Number(break_up_item.price?.value)?.toFixed(2),
-            provided_by,
-          }));
-          return product;
+          provider.name = provided_by;
+          provider.products = breakup?.map((break_up_item) => {
+            const cartIndex = cartList.findIndex(one => one.id === break_up_item["@ondc/org/item_id"]);
+            const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
+            let cartQuantity = cartItem ? cartItem?.quantity?.count : 0;
+            let quantity = break_up_item['@ondc/org/item_quantity'] ? break_up_item['@ondc/org/item_quantity']['count']: 0;
+            let textClass = '';
+            let quantityMessage = '';
+            if (quantity === 0) {
+              if ( break_up_item['@ondc/org/title_type'] === 'item') {
+                textClass = 'text-error';
+                quantityMessage = 'Out of stock';
+              }
+
+              if (cartIndex > -1) {
+                cartList.splice(cartIndex, 1);
+              }
+            } else if (quantity !== cartQuantity) {
+              textClass = break_up_item['@ondc/org/title_type'] === 'item' ? 'text-amber' : '';
+              quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
+              if (cartItem) {
+                cartItem.quantity.count = quantity;
+              }
+            } else {
+              quantityMessage = `Quantity: ${quantity}`;
+            }
+
+            if (error && error.code === '30009') {
+              cartList.splice(cartIndex, 1);
+            }
+            return {
+              id: break_up_item["@ondc/org/item_id"],
+              title: break_up_item?.title,
+              price: Number(break_up_item.price?.value)?.toFixed(2),
+              cartQuantity,
+              quantity,
+              provided_by,
+              textClass,
+              quantityMessage,
+            };
+          });
         }
-        return {
-          title: "",
-          price: "",
-          provided_by: "",
-        };
+
+        if (error) {
+          provider.error = error.message;
+        }
+
+        total_payable += provider_payable;
+        provider.total_payable = provider_payable;
+        return provider;
       });
+      console.log(cartList);
       setGetQuoteLoading(false);
       setUpdateCartLoading(false);
-      setProductsQoute({
-        products: quotes.flat(),
+      updatedCartItems.current = cartList;
+      setProductsQuote({
+        providers: quotes,
         total_payable: total_payable.toFixed(2),
       });
     }
-    // eslint-disable-next-line
   }, [eventData]);
 
   const getProviderIds = (request_object) => {
@@ -252,6 +301,10 @@ export default function InitializeOrder() {
     AddCookie("providerIds", ids);
     return ids;
   };
+
+  useEffect(() => {
+    updatedCartItems.current = cartItems;
+  }, [cartItems]);
 
   useEffect(() => {
     // this check is so that when cart is empty we do not call the
@@ -333,6 +386,7 @@ export default function InitializeOrder() {
                   <div className="row">
                     <div className="col-12 pb-3">
                       <AddressDetailsCard
+                        updatedCartItems={updatedCartItems.current}
                         currentActiveStep={currentActiveStep}
                         setCurrentActiveStep={(value) =>
                           setCurrentActiveStep(value)
@@ -342,10 +396,12 @@ export default function InitializeOrder() {
                     </div>
                     <div className="col-12 pb-3">
                       <OrderConfirmationCard
+                        updatedCartItems={updatedCartItems.current}
                         responseReceivedIds={responseRef.current.map((item) => {
                           const { message } = item;
                           return message?.quote?.provider?.id.toString();
                         })}
+                        productsQuote={productsQuote}
                         responseText={errorMessageTimeOut}
                         currentActiveStep={currentActiveStep}
                         setCurrentActiveStep={(value) =>

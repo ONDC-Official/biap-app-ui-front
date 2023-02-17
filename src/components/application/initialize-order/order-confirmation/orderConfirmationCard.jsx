@@ -34,6 +34,7 @@ import { removeNullValues } from "../../../../utils/helper";
 
 export default function OrderConfirmationCard(props) {
   const {
+    updatedCartItems,
     responseReceivedIds = [],
     responseText = "",
     toggleInit,
@@ -55,7 +56,7 @@ export default function OrderConfirmationCard(props) {
 
   // CONTEXT
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  const { cartItems, onRemoveProduct } = useContext(CartContext);
+  const {onRemoveProduct } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
 
   // REFS
@@ -166,7 +167,7 @@ export default function OrderConfirmationCard(props) {
         }
         // tale action to redirect them.
         const requestObject = constructQouteObject(
-          cartItems.filter(({ provider }) =>
+          updatedCartItems.filter(({ provider }) =>
             responseReceivedIds.includes(provider.id.toString())
           )
         );
@@ -272,6 +273,7 @@ export default function OrderConfirmationCard(props) {
   // on initialize order Api
   const onInitializeOrder = useCallback(async (message_id) => {
     try {
+      localStorage.setItem("selectedItems", JSON.stringify(updatedCartItems));
       const data = await cancellablePromise(
         getCall(`/clientApis/v2/on_initialize_order?messageIds=${message_id}`)
       );
@@ -289,7 +291,7 @@ export default function OrderConfirmationCard(props) {
     if (eventData.length > 0) {
       // fetch request object length and compare it with the response length
       const requestObject = constructQouteObject(
-        cartItems.filter(({ provider }) =>
+        updatedCartItems.filter(({ provider }) =>
           responseReceivedIds.includes(provider.id.toString())
         )
       );
@@ -322,7 +324,7 @@ export default function OrderConfirmationCard(props) {
         className={`${isStepCompleted()
           ? styles.step_completed_card_header
           : styles.card_header
-          } d-flex align-items-center`}
+        } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
@@ -371,7 +373,7 @@ export default function OrderConfirmationCard(props) {
                     <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
                   </div>
                 ) : (
-                  cartItems.map(({ id, bpp_id, product, provider }) => {
+                  updatedCartItems.map(({ id, bpp_id, product, provider }) => {
                     const { id: provider_id, locations } = provider;
                     return (
                       <div className="col-lg-6 col-sm-12 p-2" key={id}>
@@ -408,11 +410,11 @@ export default function OrderConfirmationCard(props) {
                           {!responseReceivedIds.includes(
                             provider_id.toString()
                           ) && (
-                              <>
-                                <ErrorMessage>{responseText}</ErrorMessage>
-                                <div className={styles.product_disabled} />
-                              </>
-                            )}
+                            <>
+                              <ErrorMessage>{responseText}</ErrorMessage>
+                              <div className={styles.product_disabled} />
+                            </>
+                          )}
                         </div>
                       </div>
                     );
@@ -436,7 +438,7 @@ export default function OrderConfirmationCard(props) {
                 setInitializeOrderLoading(true);
                 updateInitLoading(true);
                 const request_object = constructQouteObject(
-                  cartItems.filter(({ provider }) =>
+                  updatedCartItems.filter(({ provider }) =>
                     responseReceivedIds.includes(provider.id.toString())
                   )
                 );
