@@ -237,13 +237,14 @@ export default function InitializeOrder() {
             let textClass = '';
             let quantityMessage = '';
             if (quantity === 0) {
-              if ( break_up_item['@ondc/org/title_type'] === 'item') {
+              if ( break_up_item['@ondc/org/title_type'] === 'item' ) {
                 textClass = 'text-error';
                 quantityMessage = 'Out of stock';
-              }
 
-              if (cartIndex > -1) {
-                cartList.splice(cartIndex, 1);
+
+                if (cartIndex > -1) {
+                  cartList.splice(cartIndex, 1);
+                }
               }
             } else if (quantity !== cartQuantity) {
               textClass = break_up_item['@ondc/org/title_type'] === 'item' ? 'text-amber' : '';
