@@ -10,7 +10,7 @@ import {buttonTypes} from "../../shared/button/utils";
 import Navbar from "../../shared/navbar/navbar";
 import AddressDetailsCard from "./address-details/addressDetailsCard";
 import OrderConfirmationCard from "./order-confirmation/orderConfirmationCard";
-import PriceDetailsCard from "../checkout/price-details-card/priceDetailsCard";
+import PriceDetailsCard from "./price-details-card/priceDetailsCard";
 import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 import {AddCookie, getValueFromCookie} from "../../../utils/cookies";
 import {constructQouteObject} from "../../../api/utils/constructRequestObject";
@@ -121,8 +121,6 @@ export default function InitializeOrder() {
   // use this function to get the quote of the items
   const getQuote = useCallback(async (items) => {
     responseRef.current = [];
-    updatedCartItems.current = cartItems;
-
     try {
       const search_context = JSON.parse(getValueFromCookie("search_context"));
       const data = await cancellablePromise(
@@ -187,7 +185,14 @@ export default function InitializeOrder() {
       );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
-      onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments)
+      // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
+      data[0].message.quote.items.forEach(item => {
+        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.id === item.id);
+        if (findItemIndexFromCart > -1) {
+          updatedCartItems.current[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[findItemIndexFromCart].fulfillments = data[0].message.quote.fulfillments;
+        }
+      });
     } catch (err) {
       dispatchToast(err.message);
       setGetQuoteLoading(false);
@@ -232,14 +237,17 @@ export default function InitializeOrder() {
             let textClass = '';
             let quantityMessage = '';
             if (quantity === 0) {
-              textClass = break_up_item['@ondc/org/title_type'] === 'item' ? 'text-error' : '';
-              quantityMessage = 'Out of stock';
+              if ( break_up_item['@ondc/org/title_type'] === 'item') {
+                textClass = 'text-error';
+                quantityMessage = 'Out of stock';
+              }
+
               if (cartIndex > -1) {
                 cartList.splice(cartIndex, 1);
               }
             } else if (quantity !== cartQuantity) {
               textClass = break_up_item['@ondc/org/title_type'] === 'item' ? 'text-amber' : '';
-              quantityMessage = `Quantity: ${cartQuantity}/${quantity}`;
+              quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
               if (cartItem) {
                 cartItem.quantity.count = quantity;
               }
@@ -293,6 +301,10 @@ export default function InitializeOrder() {
     AddCookie("providerIds", ids);
     return ids;
   };
+
+  useEffect(() => {
+    updatedCartItems.current = cartItems;
+  }, [cartItems]);
 
   useEffect(() => {
     // this check is so that when cart is empty we do not call the
@@ -374,6 +386,7 @@ export default function InitializeOrder() {
                   <div className="row">
                     <div className="col-12 pb-3">
                       <AddressDetailsCard
+                        updatedCartItems={updatedCartItems.current}
                         currentActiveStep={currentActiveStep}
                         setCurrentActiveStep={(value) =>
                           setCurrentActiveStep(value)

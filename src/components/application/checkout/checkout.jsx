@@ -32,9 +32,8 @@ export default function Checkout() {
     products: [],
     total_payable: 0,
   });
-
+  const [cartItems, setCartItems] = useState([]);
   // CONTEXT
-  const { cartItems } = useContext(CartContext);
 
   // use this effect to handle callback from justpay
   useEffect(() => {
@@ -46,6 +45,13 @@ export default function Checkout() {
     fetchProductQuote();
     // eslint-disable-next-line
   }, [location]);
+
+  useEffect(() => {
+    const items = localStorage.getItem("selectedItems");
+    if (items) {
+      setCartItems(JSON.parse(items));
+    }
+  }, []);
 
   // use this function to fetch the product productsQuote
   function fetchProductQuote() {

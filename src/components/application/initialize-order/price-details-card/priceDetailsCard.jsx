@@ -27,42 +27,42 @@ export default function PriceDetailsCard(props) {
       ) : (
         <>
           <div className={styles.card_body}>
-            {productsQuote?.products
-              .filter((quote) => quote?.title !== "")
-              .map((quote, index) => {
-                return (
-                  <div
-                    className="py-2 d-flex align-items-center"
-                    key={`quote-item-${index}`}
-                  >
-                    <div className="pe-2 flex-grow-1">
-                      {quote?.title && (
-                        <p className={styles.product_name}>{quote?.title}</p>
-                      )}
-                      {show_order_from && quote?.provided_by !== "" && (
-                        <p className={styles.ordered_from}>
-                          Ordering from
-                          <span className={`px-2 ${styles.bold}`}>
-                            {quote?.provided_by}
-                          </span>
+            {productsQuote?.providers
+              .map((provider, index) => (
+                <div className={styles.provider} key={`${provider.name}${index}`}>
+                  <div>{provider.name}</div>
+                  {provider.products.filter((quote) => quote?.title !== "").map((quote, index) => (
+                    <div
+                      className="py-2 d-flex align-items-center"
+                      key={`quote-item-${index}`}
+                    >
+                      <div className="pe-2 flex-grow-1">
+                        {quote?.title && (
+                          <p className={`${styles.product_name} ${quote.textClass}`}>{quote?.title}</p>
+                        )}
+                        <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                          {quote.quantityMessage}
                         </p>
+                      </div>
+                      {quote?.price && (
+                        <div className="ms-auto d-flex align-items-center">
+                          <div className="px-1">
+                            <IndianRupee
+                              width="8"
+                              height="13"
+                              color={ONDC_COLORS.PRIMARYCOLOR}
+                            />
+                          </div>
+                          <p className={`${styles.sub_total_text} ${quote.textClass}`}>{quote?.price}</p>
+                        </div>
                       )}
                     </div>
-                    {quote?.price && (
-                      <div className="ms-auto d-flex align-items-center">
-                        <div className="px-1">
-                          <IndianRupee
-                            width="8"
-                            height="13"
-                            color={ONDC_COLORS.PRIMARYCOLOR}
-                          />
-                        </div>
-                        <p className={styles.sub_total_text}>{quote?.price}</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                  ))}
+                  {provider.error && (
+                    <p className={styles.error}>{provider.error}</p>
+                  )}
+                </div>
+              ))}
           </div>
           <div className={`${styles.card_footer} d-flex align-items-center`}>
             <p className={styles.card_body_text}>{totalLabel}</p>
