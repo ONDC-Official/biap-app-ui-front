@@ -168,6 +168,10 @@
   color: $accentColor;
 }
 
+.cancel_return_button {
+  width: 130px !important
+}
+
 .primary_action:hover {
   background-color: $accentColor;
   color: $white;
