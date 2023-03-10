@@ -56,7 +56,7 @@ export default function OrderConfirmationCard(props) {
 
   // CONTEXT
   const { deliveryAddress, billingAddress } = useContext(AddressContext);
-  const {onRemoveProduct } = useContext(CartContext);
+  const { onRemoveProduct } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
 
   // REFS
@@ -188,7 +188,8 @@ export default function OrderConfirmationCard(props) {
   }
 
   const initializeOrder = useCallback(
-    async (items) => {
+    async (itemsList) => {
+      const items = JSON.parse(JSON.stringify(Object.assign([], itemsList)));
       responseRef.current = [];
       try {
         const search_context = JSON.parse(getValueFromCookie("search_context"));
@@ -324,7 +325,7 @@ export default function OrderConfirmationCard(props) {
         className={`${isStepCompleted()
           ? styles.step_completed_card_header
           : styles.card_header
-        } d-flex align-items-center`}
+          } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
@@ -410,11 +411,11 @@ export default function OrderConfirmationCard(props) {
                           {!responseReceivedIds.includes(
                             provider_id.toString()
                           ) && (
-                            <>
-                              <ErrorMessage>{responseText}</ErrorMessage>
-                              <div className={styles.product_disabled} />
-                            </>
-                          )}
+                              <>
+                                <ErrorMessage>{responseText}</ErrorMessage>
+                                <div className={styles.product_disabled} />
+                              </>
+                            )}
                         </div>
                       </div>
                     );

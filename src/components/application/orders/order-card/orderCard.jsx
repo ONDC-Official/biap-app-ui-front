@@ -700,10 +700,10 @@ export default function OrderCard(props) {
                     disabled={
                       trackOrderLoading || statusLoading || supportOrderLoading
                     }
-                    className={styles.primary_action}
+                    className={`${styles.primary_action} ${styles.cancel_return_button}`}
                     onClick={() => setToggleCancelOrderModal(true)}
                   >
-                    Cancel
+                    Cancel & Return
                   </button>
                 </div>
               </div>

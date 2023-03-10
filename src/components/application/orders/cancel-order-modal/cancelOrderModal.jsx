@@ -232,7 +232,7 @@ export default function CancelOrderModal({
     const payload = selectedIds?.map((item) => ({
       id: item?.id,
       quantity: {
-        count: quantity[0]?.count,
+        count: item.quantity.count,
       },
       tags: {
         update_type: selectedCancelType === CANCEL_ORDER_TYPES.returnOrders ? "return" : "cancel",
@@ -348,8 +348,10 @@ export default function CancelOrderModal({
   }
 
   // use this function to add attribute in filter list
-  function addProductToCancel(attribute) {
-    setSelectedIds([...selectedIds, attribute]);
+  function addProductToCancel(attribute, qty) {
+    let latestAttribute = JSON.parse(JSON.stringify(Object.assign({}, attribute)));
+    latestAttribute.quantity.count = qty;
+    setSelectedIds([...selectedIds, latestAttribute]);
   }
 
   // use this function to remove the selected attribute from filter
@@ -460,7 +462,7 @@ export default function CancelOrderModal({
                                 removeProductToCancel(product);
                                 return;
                               }
-                              addProductToCancel(product);
+                              addProductToCancel(product, quantity[idx]?.count);
                             }}
                           >
                             <p
