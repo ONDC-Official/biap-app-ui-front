@@ -62,9 +62,13 @@ export default function Orders() {
         } = order;
         return {
           product: items?.map(({ id }, index) => {
+            let findQuote = quote?.breakup.find((item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item");
+            if (findQuote) { } else {
+              findQuote = quote?.breakup[index];
+            }
             return {
               id,
-              name: quote?.breakup[index]?.title ?? "NA",
+              name: findQuote?.title ?? "NA",
               cancellation_status: items?.[index]?.cancellation_status ?? "",
               return_status: items?.[index]?.return_status ?? "",
               fulfillment_status: items?.[index]?.fulfillment_status ?? "",
