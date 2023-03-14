@@ -509,7 +509,7 @@ export default function CancelOrderModal({
                     <p className={styles.cancel_dropdown_text}>
                       {selectedCancelReasonId?.value
                         ? selectedCancelReasonId?.value
-                        : "Select reason for cancelation"}
+                        : "Select reason for cancellation"}
                     </p>
                   </div>
                   <div className="px-2 ms-auto">
