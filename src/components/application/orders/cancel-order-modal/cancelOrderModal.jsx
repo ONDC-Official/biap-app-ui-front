@@ -370,7 +370,7 @@ export default function CancelOrderModal({
 
   // use this effect to promatically navigate between the radio button
   useEffect(() => {
-    if (areProductsToBeCancled()) {
+    if (areProductsToBeCancled() && partailsCancelProductList.length !== 1) {
       setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
       return;
     }
@@ -409,7 +409,7 @@ export default function CancelOrderModal({
               </div>
             </AddressRadioButton>
             <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled()}
+              disabled={loading || !areProductsToBeCancled() || partailsCancelProductList.length === 1}
               checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
