@@ -4,6 +4,7 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import Button from "../../../shared/button/button";
 import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
+import productCartStyles from '../../../../styles/products/productCard.module.scss';
 import cancelRadioStyles from "../../../../styles/cart/cartView.module.scss";
 import productStyles from "../../../../styles/orders/orders.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
@@ -17,6 +18,8 @@ import AddressRadioButton from "../../initialize-order/address-details/address-r
 import Checkbox from "../../../shared/checkbox/checkbox";
 import Dropdown from "../../../shared/dropdown/dropdown";
 import DropdownSvg from "../../../shared/svg/dropdonw";
+import Subtract from "../../../shared/svg/subtract";
+import Add from "../../../shared/svg/add";
 import { CANCELATION_REASONS, RETURN_REASONS } from "../../../../constants/cancelation-reasons";
 
 export default function CancelOrderModal({
@@ -25,6 +28,7 @@ export default function CancelOrderModal({
   order_id,
   order_status,
   partailsCancelProductList = [],
+  partailsReturnProductList = [],
   onClose,
   onSuccess,
   quantity,
@@ -45,6 +49,7 @@ export default function CancelOrderModal({
   const [selectedCancelType, setSelectedCancelType] = useState();
   const [selectedCancelReasonId, setSelectedCancelReasonId] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
+  const [orderQty, setOrderQty] = useState([])
 
   // REFS
   const cancelEventSourceResponseRef = useRef(null);
@@ -61,6 +66,12 @@ export default function CancelOrderModal({
   // to be cancled
   function areProductsToBeCancled() {
     return partailsCancelProductList?.length > 0;
+  }
+
+  // use this function to check if the list exist or not for partial products
+  // to be returned
+  function areProductsToBeReturned() {
+    return partailsReturnProductList?.length > 0;
   }
 
   // use this function to dispatch error
@@ -359,6 +370,18 @@ export default function CancelOrderModal({
     setSelectedIds(selectedIds.filter(({ id }) => id !== attribute.id));
   }
 
+  // use this function to update quantity of the selected product
+  function updateQtyForSelectedProduct(pId, qty) {
+    let data = JSON.parse(JSON.stringify(Object.assign([], selectedIds)));
+    data = data.map((item) => {
+      if (item.id === pId) {
+        item.quantity.count = qty;
+      } else { }
+      return item;
+    })
+    setSelectedIds(data);
+  }
+
   useEffect(() => {
     return () => {
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
@@ -370,13 +393,26 @@ export default function CancelOrderModal({
 
   // use this effect to promatically navigate between the radio button
   useEffect(() => {
-    if (areProductsToBeCancled()) {
+    if (areProductsToBeCancled() && partailsCancelProductList.length !== 1) {
       setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
       return;
     }
     setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    if (quantity) {
+      setOrderQty(JSON.parse(JSON.stringify(Object.assign(quantity))));
+    }
+  }, [quantity]);
+
+  const onUpdateQty = (qty, idx, pId) => {
+    let qtyData = Object.assign([], orderQty);
+    qtyData[idx].count = qty;
+    setOrderQty(qtyData);
+    updateQtyForSelectedProduct(pId, qty)
+  };
 
   return (
     <div className={styles.overlay}>
@@ -409,7 +445,7 @@ export default function CancelOrderModal({
               </div>
             </AddressRadioButton>
             <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled()}
+              disabled={loading || !areProductsToBeCancled() || partailsCancelProductList.length === 1}
               checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
@@ -423,7 +459,7 @@ export default function CancelOrderModal({
             </AddressRadioButton>
 
             <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled()}
+              disabled={loading || !areProductsToBeReturned()}
               checked={selectedCancelType === CANCEL_ORDER_TYPES.returnOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.returnOrders);
@@ -438,7 +474,7 @@ export default function CancelOrderModal({
           </div>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
             {areProductsToBeCancled() &&
-              (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders || selectedCancelType === CANCEL_ORDER_TYPES.returnOrders) && (
+              (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders) && (
                 <div className="px-1 py-2">
                   {partailsCancelProductList?.map((product, idx) => {
                     return (
@@ -446,7 +482,7 @@ export default function CancelOrderModal({
                         key={product?.id}
                         className="d-flex align-items-center"
                       >
-                        <div style={{ width: "90%" }}>
+                        <div style={{ width: isProductSelected(product?.id) ? "70%" : "90%" }}>
                           <Checkbox
                             id={product?.id}
                             checked={isProductSelected(product?.id)}
@@ -462,7 +498,7 @@ export default function CancelOrderModal({
                                 removeProductToCancel(product);
                                 return;
                               }
-                              addProductToCancel(product, quantity[idx]?.count);
+                              addProductToCancel(product, orderQty[idx]?.count);
                             }}
                           >
                             <p
@@ -479,6 +515,168 @@ export default function CancelOrderModal({
                             </div>
                           </Checkbox>
                         </div>
+                        {
+                          isProductSelected(product?.id) && (
+                            <div style={{ width: "20%" }}>
+                              <div className={productCartStyles.quantity_count_wrapper}>
+                                <div
+                                  className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
+                                  onClick={() => {
+                                    //   setQuantityCount(quantityCount - 1);
+                                    //   onReduceQuantity(id);
+                                    //   if (quantityCount - 1 === 0) {
+                                    //     setToggleAddToCart(false);
+                                    //   }
+                                    if (orderQty[idx]?.count > 1) {
+                                      onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
+                                    }
+                                  }}
+                                >
+                                  {
+                                    orderQty[idx]?.count > 1 && (
+                                      <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
+                                    )
+                                  }
+                                </div>
+                                <div className="d-flex align-items-center justify-content-center">
+                                  <p className={productCartStyles.quantity_count}>
+                                    {orderQty[idx]?.count ?? "0"}
+                                    {/* {quantityCount} */}
+                                  </p>
+                                </div>
+                                <div
+                                  className={`${orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
+                                  onClick={() => {
+                                    //   setQuantityCount((quantityCount) => quantityCount + 1);
+                                    //   onAddQuantity(id);
+                                    if (orderQty[idx]?.count < quantity[idx]?.count) {
+                                      onUpdateQty(orderQty[idx]?.count + 1, idx, product?.id);
+                                    }
+                                  }}
+                                >
+                                  {
+                                    orderQty[idx]?.count < quantity[idx]?.count && (
+                                      <Add
+                                        width="13"
+                                        height="13"
+                                        classes={productCartStyles.add_svg_color}
+                                      />
+                                    )
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+                        <div className="ms-auto">
+                          <p
+                            className={productStyles.product_price}
+                            style={{ whiteSpace: "nowrap" }}
+                          >
+                            ₹ {Number(product?.price?.value)?.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+            {areProductsToBeReturned() &&
+              (selectedCancelType === CANCEL_ORDER_TYPES.returnOrders) && (
+                <div className="px-1 py-2">
+                  {partailsReturnProductList?.map((product, idx) => {
+                    return (
+                      <div
+                        key={product?.id}
+                        className="d-flex align-items-center"
+                      >
+                        <div style={{ width: isProductSelected(product?.id) ? "70%" : "90%" }}>
+                          <Checkbox
+                            id={product?.id}
+                            checked={isProductSelected(product?.id)}
+                            disabled={loading}
+                            boxBasis="8%"
+                            nameBasis="92%"
+                            onClick={() => {
+                              setInlineError((error) => ({
+                                ...error,
+                                selected_id_error: "",
+                              }));
+                              if (isProductSelected(product?.id)) {
+                                removeProductToCancel(product);
+                                return;
+                              }
+                              addProductToCancel(product, orderQty[idx]?.count);
+                            }}
+                          >
+                            <p
+                              className={productStyles.product_name}
+                              title={product?.name}
+                              style={{ fontSize: "16px", textAlign: "left" }}
+                            >
+                              {product?.name}
+                            </p>
+                            <div className="pt-1">
+                              <p className={productStyles.quantity_count}>
+                                QTY: {quantity[idx]?.count ?? "0"}
+                              </p>
+                            </div>
+                          </Checkbox>
+                        </div>
+                        {
+                          isProductSelected(product?.id) && (
+                            <div style={{ width: "20%" }}>
+                              <div className={productCartStyles.quantity_count_wrapper}>
+                                <div
+                                  className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
+                                  onClick={() => {
+                                    //   setQuantityCount(quantityCount - 1);
+                                    //   onReduceQuantity(id);
+                                    //   if (quantityCount - 1 === 0) {
+                                    //     setToggleAddToCart(false);
+                                    //   }
+                                    if (orderQty[idx]?.count > 1) {
+                                      onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
+                                    }
+                                  }}
+                                >
+                                  {
+                                    orderQty[idx]?.count > 1 && (
+                                      <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
+                                    )
+                                  }
+                                </div>
+                                <div className="d-flex align-items-center justify-content-center">
+                                  <p className={productCartStyles.quantity_count}>
+                                    {orderQty[idx]?.count ?? "0"}
+                                    {/* {quantityCount} */}
+                                  </p>
+                                </div>
+                                <div
+                                  className={`${orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
+                                  onClick={() => {
+                                    //   setQuantityCount((quantityCount) => quantityCount + 1);
+                                    //   onAddQuantity(id);
+                                    if (orderQty[idx]?.count < quantity[idx]?.count) {
+                                      onUpdateQty(orderQty[idx]?.count + 1, idx, product?.id);
+                                    }
+                                  }}
+                                >
+                                  {
+                                    orderQty[idx]?.count < quantity[idx]?.count && (
+                                      <Add
+                                        width="13"
+                                        height="13"
+                                        classes={productCartStyles.add_svg_color}
+                                      />
+                                    )
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
                         <div className="ms-auto">
                           <p
                             className={productStyles.product_price}
@@ -509,7 +707,7 @@ export default function CancelOrderModal({
                     <p className={styles.cancel_dropdown_text}>
                       {selectedCancelReasonId?.value
                         ? selectedCancelReasonId?.value
-                        : "Select reason for cancelation"}
+                        : "Select reason for cancellation"}
                     </p>
                   </div>
                   <div className="px-2 ms-auto">

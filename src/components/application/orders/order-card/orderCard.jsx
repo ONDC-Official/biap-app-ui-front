@@ -410,6 +410,9 @@ export default function OrderCard(props) {
           partailsCancelProductList={product?.filter(
             (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
           )}
+          partailsReturnProductList={product?.filter(
+            (p) => p?.["@ondc/org/returnable"] && p?.return_status === ""
+          )}
           order_status={status}
           bpp_id={bpp_id}
           transaction_id={transaction_id}
