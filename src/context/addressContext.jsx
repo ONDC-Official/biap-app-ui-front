@@ -1,15 +1,20 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useEffect } from "react";
 
 export const AddressContext = createContext({
   deliveryAddress: {},
-  setDeliveryAddress: () => {},
+  setDeliveryAddress: () => { },
   billingAddress: {},
-  setBillingAddress: () => {},
+  setBillingAddress: () => { },
 });
 
 export function AddressContextProvider({ children }) {
   const [deliveryAddress, setDeliveryAddress] = useState();
   const [billingAddress, setBillingAddress] = useState();
+  useEffect(() => {
+    if (deliveryAddress) {
+      setBillingAddress();
+    }
+  }, [deliveryAddress]);
   return (
     <AddressContext.Provider
       value={{
