@@ -109,7 +109,7 @@ export default function DeliveryAddress(props) {
                             onSetDeliveryAddress(id, descriptor, address)
                           )
                         );
-                        setBillingAddress({});
+                        setBillingAddress();
                         removeCookie("billing_address");
                       }}
                       oneditaddress={() =>
