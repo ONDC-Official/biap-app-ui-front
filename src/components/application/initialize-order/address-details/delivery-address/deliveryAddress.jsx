@@ -17,7 +17,7 @@ import {
 
 export default function DeliveryAddress(props) {
   const { deliveryAddresses, setDeliveryAddresses } = props;
-  const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
+  const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
   const [toggleAddressModal, setToggleAddressModal] = useState({
     actionType: "",
     toggle: false,
@@ -109,6 +109,8 @@ export default function DeliveryAddress(props) {
                             onSetDeliveryAddress(id, descriptor, address)
                           )
                         );
+                        setBillingAddress({});
+                        removeCookie("billing_address");
                       }}
                       oneditaddress={() =>
                         setToggleAddressModal({
