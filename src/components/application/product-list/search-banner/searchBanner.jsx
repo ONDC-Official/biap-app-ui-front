@@ -69,6 +69,9 @@ export default function SearchBanner({ onSearch, location }) {
         name: sc.location.name,
         lat: sc.location.lat,
         lng: sc.location.lng,
+        pincode: sc.location.pincode,
+        city: sc.location.city,
+        state: sc.location.state,
       });
     }
     if (search.type === search_types.PRODUCT) {
