@@ -6,7 +6,7 @@ import styles from "../../../../../styles/cart/cartView.module.scss";
 import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
-import { AddCookie } from "../../../../../utils/cookies";
+import { AddCookie, removeCookie } from "../../../../../utils/cookies";
 import { restoreToDefault } from "../../add-address-modal/utils/restoreDefaultAddress";
 import { ToastContext } from "../../../../../context/toastContext";
 import useCancellablePromise from "../../../../../api/cancelRequest";
