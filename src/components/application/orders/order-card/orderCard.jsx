@@ -17,6 +17,7 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
+import ReturnOrderModal from "../return-order-modal/returnOrderModal";
 
 export default function OrderCard(props) {
   const {
@@ -45,6 +46,7 @@ export default function OrderCard(props) {
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
+  const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
 
   // REFS
   const trackOrderRef = useRef(null);
@@ -407,12 +409,29 @@ export default function OrderCard(props) {
             onFetchUpdatedOrder();
           }}
           quantity={quantity}
-          partailsCancelProductList={product?.filter(
-            (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
-          )}
-          partailsReturnProductList={product?.filter(
-            (p) => p?.["@ondc/org/returnable"] && p?.return_status === ""
-          )}
+          partailsCancelProductList={product}
+          // partailsCancelProductList={product?.filter(
+          //   (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
+          // )}
+          order_status={status}
+          bpp_id={bpp_id}
+          transaction_id={transaction_id}
+          order_id={order_id}
+        />
+      )}
+      {toggleReturnOrderModal && (
+        <ReturnOrderModal
+          onClose={() => setToggleReturnOrderModal(false)}
+          onSuccess={() => {
+            setToggleReturnOrderModal(false);
+            setCurrentSelectedAccordion("");
+            onFetchUpdatedOrder();
+          }}
+          quantity={quantity}
+          partailsReturnProductList={product}
+          // partailsReturnProductList={product?.filter(
+          //   (p) => p?.["@ondc/org/returnable"] && p?.return_status === ""
+          // )}
           order_status={status}
           bpp_id={bpp_id}
           transaction_id={transaction_id}
@@ -698,7 +717,7 @@ export default function OrderCard(props) {
                     )}
                   </button>
                 </div>
-                <div className="py-1">
+                <div className="pe-3 py-1">
                   <button
                     disabled={
                       trackOrderLoading || statusLoading || supportOrderLoading
@@ -706,9 +725,24 @@ export default function OrderCard(props) {
                     className={`${styles.primary_action} ${styles.cancel_return_button}`}
                     onClick={() => setToggleCancelOrderModal(true)}
                   >
-                    Cancel & Return
+                    Cancel
                   </button>
                 </div>
+                {
+                  status === "Completed" && (
+                    <div className="py-1">
+                      <button
+                        disabled={
+                          trackOrderLoading || statusLoading || supportOrderLoading
+                        }
+                        className={`${styles.primary_action} ${styles.cancel_return_button}`}
+                        onClick={() => setToggleReturnOrderModal(true)}
+                      >
+                        Return
+                      </button>
+                    </div>
+                  )
+                }
               </div>
             )}
           </div>
