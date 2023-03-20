@@ -191,7 +191,7 @@ export default function Login() {
   );
   const navigation_link = (
     <div className="py-2 text-center">
-      <p className={styles.navigation_link_label}>Do not have an account</p>
+      <p className={styles.navigation_link_label}>Don't have an account?</p>
       <Link to="/sign-up" className={styles.navigation_link}>
         Sign Up
       </Link>

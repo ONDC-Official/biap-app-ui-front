@@ -244,7 +244,7 @@ export default function SignUp() {
   );
   const navigation_link = (
     <div className="py-2 text-center">
-      <p className={styles.navigation_link_label}>Already have an account</p>
+      <p className={styles.navigation_link_label}>Already have an account?</p>
       <Link to="/login" className={styles.navigation_link}>
         Sign In
       </Link>
