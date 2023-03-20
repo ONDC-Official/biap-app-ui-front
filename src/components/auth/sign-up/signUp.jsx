@@ -19,6 +19,8 @@ import { getErrorMessage } from "../../../api/utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
 
+import Google_Logo from "../../../assets/images/google.png";
+
 export default function SignUp() {
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
@@ -232,7 +234,8 @@ export default function SignUp() {
             }
             button_type={buttonTypes.primary}
             button_hover_type={buttonTypes.primary_hover}
-            button_text="Sign up with google"
+            // button_text="Sign up with google"
+            button_text={<><img src={Google_Logo} alt="logo" style={{ height: "20px", marginRight: "10px" }} /> Sign up with google</>}
             onClick={handleSignUpWithGoogle}
           />
         </div>
