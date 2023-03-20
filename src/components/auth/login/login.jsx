@@ -11,6 +11,7 @@ import Button from "../../shared/button/button";
 import AuthActionCard from "../auth-action-card/authActionCard";
 import { Link, useHistory } from "react-router-dom";
 import Input from "../../shared/input/input";
+import PasswordInput from "../../shared/passwordInput/input";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { getErrorMessage } from "../../../api/utils/mapFirebaseError";
@@ -137,10 +138,10 @@ export default function Login() {
         {inlineError.email_error && (
           <ErrorMessage>{inlineError.email_error}</ErrorMessage>
         )}
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
+          // type="password"
           placeholder="Enter Password"
           label_name="Password"
           autoComplete="off"

@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import Button from "../../shared/button/button";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Input from "../../shared/input/input";
+import PasswordInput from "../../shared/passwordInput/input";
 import AuthActionCard from "../auth-action-card/authActionCard";
 import {
   getAuth,
@@ -189,10 +190,10 @@ export default function SignUp() {
         {inlineError.email_error && (
           <ErrorMessage>{inlineError.email_error}</ErrorMessage>
         )}
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
+          // type="password"
           placeholder="Enter Password"
           label_name="Password"
           autoComplete="off"
