@@ -90,15 +90,17 @@ export default function Login() {
         handleRedirect(result.user);
       })
       .catch((error) => {
-        const errorMessage = error.message;
-        dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-            id: Math.floor(Math.random() * 100),
-            type: toast_types.error,
-            message: errorMessage,
-          },
-        });
+        if (error.code !== "auth/popup-closed-by-user") {
+          const errorMessage = error.message;
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: errorMessage,
+            },
+          });
+        }
       })
       .finally(() => setSignInUsingGoogleLoading(false));
   }
