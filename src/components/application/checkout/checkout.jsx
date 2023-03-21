@@ -68,7 +68,7 @@ export default function Checkout() {
         ];
       });
       total_payable = Math.round(
-        total_payable + Number(data?.price?.value)
+        Number(total_payable) + Number(data?.price?.value)
       ).toFixed(2);
     });
     setProductsQoute((prev) => ({
