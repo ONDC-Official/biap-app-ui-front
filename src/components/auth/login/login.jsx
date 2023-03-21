@@ -11,11 +11,14 @@ import Button from "../../shared/button/button";
 import AuthActionCard from "../auth-action-card/authActionCard";
 import { Link, useHistory } from "react-router-dom";
 import Input from "../../shared/input/input";
+import PasswordInput from "../../shared/passwordInput/input";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { getErrorMessage } from "../../../api/utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
+
+import Google_Logo from "../../../assets/images/google.png";
 
 export default function Login() {
   const auth = getAuth();
@@ -90,15 +93,17 @@ export default function Login() {
         handleRedirect(result.user);
       })
       .catch((error) => {
-        const errorMessage = error.message;
-        dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-            id: Math.floor(Math.random() * 100),
-            type: toast_types.error,
-            message: errorMessage,
-          },
-        });
+        if (error.code !== "auth/popup-closed-by-user") {
+          const errorMessage = error.message;
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: errorMessage,
+            },
+          });
+        }
       })
       .finally(() => setSignInUsingGoogleLoading(false));
   }
@@ -135,10 +140,10 @@ export default function Login() {
         {inlineError.email_error && (
           <ErrorMessage>{inlineError.email_error}</ErrorMessage>
         )}
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
+          // type="password"
           placeholder="Enter Password"
           label_name="Password"
           autoComplete="off"
@@ -177,7 +182,7 @@ export default function Login() {
             }
             button_type={buttonTypes.primary}
             button_hover_type={buttonTypes.primary_hover}
-            button_text="Login with google"
+            button_text={<><img src={Google_Logo} alt="logo" style={{ height: "20px", marginRight: "10px" }} />Login with google</>}
             onClick={handleLoginWithGoogle}
           />
         </div>
@@ -186,7 +191,7 @@ export default function Login() {
   );
   const navigation_link = (
     <div className="py-2 text-center">
-      <p className={styles.navigation_link_label}>Do not have an account</p>
+      <p className={styles.navigation_link_label}>Don't have an account?</p>
       <Link to="/sign-up" className={styles.navigation_link}>
         Sign Up
       </Link>

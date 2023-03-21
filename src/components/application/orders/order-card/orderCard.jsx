@@ -17,11 +17,13 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
+import ReturnOrderModal from "../return-order-modal/returnOrderModal";
 
 export default function OrderCard(props) {
   const {
     product = [],
     quantity = [],
+    quote = [],
     billing_address,
     delivery_address,
     status,
@@ -45,6 +47,7 @@ export default function OrderCard(props) {
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
+  const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
 
   // REFS
   const trackOrderRef = useRef(null);
@@ -385,6 +388,7 @@ export default function OrderCard(props) {
     };
   }, []);
 
+
   return (
     <div className={styles.orders_card}>
       {toggleCustomerPhoneCard && (
@@ -407,12 +411,29 @@ export default function OrderCard(props) {
             onFetchUpdatedOrder();
           }}
           quantity={quantity}
-          partailsCancelProductList={product?.filter(
-            (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
-          )}
-          partailsReturnProductList={product?.filter(
-            (p) => p?.["@ondc/org/returnable"] && p?.return_status === ""
-          )}
+          partailsCancelProductList={product}
+          // partailsCancelProductList={product?.filter(
+          //   (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
+          // )}
+          order_status={status}
+          bpp_id={bpp_id}
+          transaction_id={transaction_id}
+          order_id={order_id}
+        />
+      )}
+      {toggleReturnOrderModal && (
+        <ReturnOrderModal
+          onClose={() => setToggleReturnOrderModal(false)}
+          onSuccess={() => {
+            setToggleReturnOrderModal(false);
+            setCurrentSelectedAccordion("");
+            onFetchUpdatedOrder();
+          }}
+          quantity={quantity}
+          partailsReturnProductList={product}
+          // partailsReturnProductList={product?.filter(
+          //   (p) => p?.["@ondc/org/returnable"] && p?.return_status === ""
+          // )}
           order_status={status}
           bpp_id={bpp_id}
           transaction_id={transaction_id}
@@ -506,6 +527,7 @@ export default function OrderCard(props) {
               },
               index
             ) => {
+              const totalPriceOfProduct = Number(price?.value) * Number(quantity[index]?.count);
               return (
                 <div key={id} className="d-flex align-items-center pt-3">
                   <div style={{ width: "90%" }}>
@@ -518,7 +540,8 @@ export default function OrderCard(props) {
                     </p>
                     <div className="pt-1">
                       <p className={styles.quantity_count}>
-                        QTY: {quantity[index]?.count ?? "0"}
+                        {/* QTY: {quantity[index]?.count ?? "0"} */}
+                        {`QTY: ${quantity[index]?.count ?? "0"}  X  ₹ ${Number(price?.value)?.toFixed(2)}`}
                       </p>
                     </div>
                     <div className="pt-2 d-flex align-items-center">
@@ -570,25 +593,81 @@ export default function OrderCard(props) {
                         </div>
                       )}
                     </div>
-                    {product?.length - 1 !== index && (
+                    {/* {product?.length - 1 !== index && (
                       <hr
                         className="mt-3 mb-0"
                         style={{ border: "1px solid #ddd" }}
                       />
-                    )}
+                    )} */}
+                    <hr
+                      className="mt-3 mb-0"
+                      style={{ border: "1px solid #ddd" }}
+                    />
                   </div>
                   <div className="ms-auto">
                     <p
                       className={styles.product_price}
                       style={{ whiteSpace: "nowrap" }}
                     >
-                      ₹ {Number(price?.value)?.toFixed(2)}
+                      ₹ {Number(totalPriceOfProduct)?.toFixed(2)}
                     </p>
                   </div>
                 </div>
               );
             }
           )}
+          {
+            quote && quote?.breakup?.length > 0 && quote?.breakup.map((item) => {
+              return (
+                <div key={item['@ondc/org/item_id']} className="d-flex align-items-center pt-3">
+                  <div style={{ width: "90%" }}>
+                    <p
+                      className={styles.product_name}
+                      title={item.title}
+                      style={{ fontSize: "16px" }}
+                    >
+                      {item.title}
+                    </p>
+                    <hr
+                      className="mt-3 mb-0"
+                      style={{ border: "1px solid #ddd" }}
+                    />
+                  </div>
+                  <div className="ms-auto">
+                    <p
+                      className={styles.product_price}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      ₹ {Number(item?.price?.value)?.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )
+            })
+          }
+          {
+            quote && quote?.price && (
+              <div className="d-flex align-items-center pt-3">
+                <div style={{ width: "90%" }}>
+                  <p
+                    className={styles.product_name}
+                    title="Total Paid"
+                    style={{ fontSize: "16px" }}
+                  >
+                    Total Amount
+                  </p>
+                </div>
+                <div className="ms-auto">
+                  <p
+                    className={styles.product_price}
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    ₹ {Number(quote?.price?.value)?.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            )
+          }
         </div>
         {/* BILLING AND S+DELIVERY ADDRESS  */}
         <div className="container py-2 px-0">
@@ -698,7 +777,7 @@ export default function OrderCard(props) {
                     )}
                   </button>
                 </div>
-                <div className="py-1">
+                <div className="pe-3 py-1">
                   <button
                     disabled={
                       trackOrderLoading || statusLoading || supportOrderLoading
@@ -706,9 +785,24 @@ export default function OrderCard(props) {
                     className={`${styles.primary_action} ${styles.cancel_return_button}`}
                     onClick={() => setToggleCancelOrderModal(true)}
                   >
-                    Cancel & Return
+                    Cancel
                   </button>
                 </div>
+                {
+                  status === "Completed" && (
+                    <div className="py-1">
+                      <button
+                        disabled={
+                          trackOrderLoading || statusLoading || supportOrderLoading
+                        }
+                        className={`${styles.primary_action} ${styles.cancel_return_button}`}
+                        onClick={() => setToggleReturnOrderModal(true)}
+                      >
+                        Return
+                      </button>
+                    </div>
+                  )
+                }
               </div>
             )}
           </div>

@@ -75,6 +75,10 @@ export default function Orders() {
               ...items?.[index]?.product,
             };
           }),
+          quote: {
+            breakup: quote?.breakup.filter((item) => item["@ondc/org/title_type"] !== "item"),
+            price: quote?.price
+          },
           quantity: items?.map(({ quantity }) => quantity),
           billing_address: {
             name: billing?.name,
@@ -192,6 +196,7 @@ export default function Orders() {
                       transaction_id,
                       createdAt,
                       bpp_id,
+                      quote
                     },
                     index
                   ) => {
@@ -200,6 +205,7 @@ export default function Orders() {
                         <OrderCard
                           product={product}
                           quantity={quantity}
+                          quote={quote}
                           billing_address={billing_address}
                           delivery_address={delivery_address}
                           status={status}

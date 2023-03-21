@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import Button from "../../shared/button/button";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import Input from "../../shared/input/input";
+import PasswordInput from "../../shared/passwordInput/input";
 import AuthActionCard from "../auth-action-card/authActionCard";
 import {
   getAuth,
@@ -17,6 +18,8 @@ import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { getErrorMessage } from "../../../api/utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
+
+import Google_Logo from "../../../assets/images/google.png";
 
 export default function SignUp() {
   const auth = getAuth();
@@ -189,10 +192,10 @@ export default function SignUp() {
         {inlineError.email_error && (
           <ErrorMessage>{inlineError.email_error}</ErrorMessage>
         )}
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
+          // type="password"
           placeholder="Enter Password"
           label_name="Password"
           autoComplete="off"
@@ -231,7 +234,8 @@ export default function SignUp() {
             }
             button_type={buttonTypes.primary}
             button_hover_type={buttonTypes.primary_hover}
-            button_text="Sign up with google"
+            // button_text="Sign up with google"
+            button_text={<><img src={Google_Logo} alt="logo" style={{ height: "20px", marginRight: "10px" }} /> Sign up with google</>}
             onClick={handleSignUpWithGoogle}
           />
         </div>
@@ -240,7 +244,7 @@ export default function SignUp() {
   );
   const navigation_link = (
     <div className="py-2 text-center">
-      <p className={styles.navigation_link_label}>Already have an account</p>
+      <p className={styles.navigation_link_label}>Already have an account?</p>
       <Link to="/login" className={styles.navigation_link}>
         Sign In
       </Link>
