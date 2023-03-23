@@ -1,23 +1,23 @@
-import React, {Fragment, useCallback, useContext, useEffect, useRef, useState,} from "react";
-import {useHistory} from "react-router-dom/cjs/react-router-dom.min";
+import React, { Fragment, useCallback, useContext, useEffect, useRef, useState, } from "react";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import styles from "../../../styles/cart/cartView.module.scss";
-import {CartContext} from "../../../context/cartContext";
-import {checkout_steps, get_current_step,} from "../../../constants/checkout-steps";
-import {getCall, postCall} from "../../../api/axios";
+import { CartContext } from "../../../context/cartContext";
+import { checkout_steps, get_current_step, } from "../../../constants/checkout-steps";
+import { getCall, postCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
-import {ONDC_COLORS} from "../../shared/colors";
-import {buttonTypes} from "../../shared/button/utils";
+import { ONDC_COLORS } from "../../shared/colors";
+import { buttonTypes } from "../../shared/button/utils";
 import Navbar from "../../shared/navbar/navbar";
 import AddressDetailsCard from "./address-details/addressDetailsCard";
 import OrderConfirmationCard from "./order-confirmation/orderConfirmationCard";
 import PriceDetailsCard from "./price-details-card/priceDetailsCard";
-import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
-import {AddCookie, getValueFromCookie} from "../../../utils/cookies";
-import {constructQouteObject} from "../../../api/utils/constructRequestObject";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
+import { constructQouteObject } from "../../../api/utils/constructRequestObject";
 import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
 import Button from "../../shared/button/button";
-import {ToastContext} from "../../../context/toastContext";
-import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
+import { ToastContext } from "../../../context/toastContext";
+import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import useCancellablePromise from "../../../api/cancelRequest";
 
 export default function InitializeOrder() {
@@ -119,10 +119,10 @@ export default function InitializeOrder() {
   }
 
   // use this function to get the quote of the items
-  const getQuote = useCallback(async (items) => {
+  const getQuote = useCallback(async (items, searchContextData = null) => {
     responseRef.current = [];
     try {
-      const search_context = JSON.parse(getValueFromCookie("search_context"));
+      const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
       const data = await cancellablePromise(
         postCall(
           "/clientApis/v2/select",
@@ -142,9 +142,9 @@ export default function InitializeOrder() {
                   {
                     end: {
                       location: {
-                        gps: `${location?.lat}, ${location?.lng}`,
+                        gps: `${search_context?.location?.lat}, ${search_context?.location?.lng}`,
                         address: {
-                          area_code: `${location?.pincode}`,
+                          area_code: `${search_context?.location?.pincode}`,
                         },
                       },
                     },
@@ -233,11 +233,11 @@ export default function InitializeOrder() {
             const cartIndex = cartList.findIndex(one => one.id === break_up_item["@ondc/org/item_id"]);
             const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
             let cartQuantity = cartItem ? cartItem?.quantity?.count : 0;
-            let quantity = break_up_item['@ondc/org/item_quantity'] ? break_up_item['@ondc/org/item_quantity']['count']: 0;
+            let quantity = break_up_item['@ondc/org/item_quantity'] ? break_up_item['@ondc/org/item_quantity']['count'] : 0;
             let textClass = '';
             let quantityMessage = '';
             if (quantity === 0) {
-              if ( break_up_item['@ondc/org/title_type'] === 'item' ) {
+              if (break_up_item['@ondc/org/title_type'] === 'item') {
                 textClass = 'text-error';
                 quantityMessage = 'Out of stock';
 
@@ -280,7 +280,6 @@ export default function InitializeOrder() {
         provider.total_payable = provider_payable;
         return provider;
       });
-      console.log(cartList);
       setGetQuoteLoading(false);
       setUpdateCartLoading(false);
       updatedCartItems.current = cartList;
@@ -317,6 +316,17 @@ export default function InitializeOrder() {
     }
     // eslint-disable-next-line
   }, []);
+
+  const updateQuoteBasedOnDeliveryAddress = (searchContextData) => {
+    // this check is so that when cart is empty we do not call the
+    // and when the payment is not made
+    if (cartItems.length > 0) {
+      const request_object = constructQouteObject(cartItems);
+      setGetQuoteLoading(true);
+      getQuote(request_object, searchContextData);
+      getProviderIds(request_object);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -393,6 +403,7 @@ export default function InitializeOrder() {
                           setCurrentActiveStep(value)
                         }
                         initLoading={initLoading || updateCartLoading}
+                        updateQuoteBasedOnDeliveryAddress={updateQuoteBasedOnDeliveryAddress}
                       />
                     </div>
                     <div className="col-12 pb-3">

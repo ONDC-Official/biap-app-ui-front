@@ -18,7 +18,7 @@ import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
 
 export default function AddressDetailsCard(props) {
-  const { currentActiveStep, setCurrentActiveStep, initLoading, updatedCartItems } = props;
+  const { currentActiveStep, setCurrentActiveStep, initLoading, updatedCartItems, updateQuoteBasedOnDeliveryAddress } = props;
 
   // STATES
   const [deliveryAddresses, setDeliveryAddresses] = useState([]);
@@ -235,6 +235,7 @@ export default function AddressDetailsCard(props) {
               <DeliveryAddress
                 deliveryAddresses={deliveryAddresses}
                 setDeliveryAddresses={(value) => setDeliveryAddresses(value)}
+                updateQuoteBasedOnDeliveryAddress={updateQuoteBasedOnDeliveryAddress}
               />
             )}
             <hr style={{ background: ONDC_COLORS.SECONDARYCOLOR }} />
