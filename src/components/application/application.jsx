@@ -16,30 +16,30 @@ export default function Application() {
   return (
     <CartContextProvider>
       <Switch>
-        <Route
-          path={"/application"}
-          exact
-          component={() => <Redirect to={"/application/products"} />}
-        />
-        <PrivateRoute path={"/application/products/:id"}>
-          <ProductDetails />
-        </PrivateRoute>
-        <PrivateRoute path={"/application/products"}>
-          <ProductList />
-        </PrivateRoute>
-        <PrivateRoute path={"/application/cart"}>
-          <Cart />
-        </PrivateRoute>
-        <PrivateRoute path={"/application/orders"}>
-          <Orders />
-        </PrivateRoute>
-        <PrivateRoute path={"/application/profile"}>
-          <Profile />
-        </PrivateRoute>
-        <PrivateRoute path={"/application/support"}>
-          <Support />
-        </PrivateRoute>
         <AddressContextProvider>
+          <Route
+            path={"/application"}
+            exact
+            component={() => <Redirect to={"/application/products"} />}
+          />
+          <PrivateRoute path={"/application/products/:id"}>
+            <ProductDetails />
+          </PrivateRoute>
+          <PrivateRoute path={"/application/products"}>
+            <ProductList />
+          </PrivateRoute>
+          <PrivateRoute path={"/application/cart"}>
+            <Cart />
+          </PrivateRoute>
+          <PrivateRoute path={"/application/orders"}>
+            <Orders />
+          </PrivateRoute>
+          <PrivateRoute path={"/application/profile"}>
+            <Profile />
+          </PrivateRoute>
+          <PrivateRoute path={"/application/support"}>
+            <Support />
+          </PrivateRoute>
           <PrivateRoute path={"/application/initialize"}>
             <InitializeOrder />
           </PrivateRoute>
