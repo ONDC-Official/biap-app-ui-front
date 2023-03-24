@@ -2,18 +2,22 @@ import React, { Fragment, useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../../context/cartContext";
 import styles from "../../../../styles/products/orderSummary.module.scss";
+import modalStyles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import { buttonTypes } from "../../../shared/button/utils";
 import { getSubTotal } from "../utils/getSubTotal";
 import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import IndianRupee from "../../../shared/svg/indian-rupee";
+import CrossIcon from "../../../shared/svg/cross-icon";
 import CartItems from "./cart-items/cartItems";
 
 export default function OrderSummary() {
   const { cartItems, setCartItems } = useContext(CartContext);
   const history = useHistory();
   const [toggleCollapse, setToggleCollapse] = useState(false);
+  const [toggleClearCartModal, setToggleClearCartModal] = useState(false);
+
   return (
     <Fragment>
       <div className={`${styles.order_summary_background}`}>
@@ -81,7 +85,7 @@ export default function OrderSummary() {
                   button_type={buttonTypes.secondary}
                   button_hover_type={buttonTypes.secondary_hover}
                   button_text="Clear Cart"
-                  onClick={() => setCartItems([])}
+                  onClick={() => setToggleClearCartModal(true)}
                 />
               </div>
               <div className="pe-3">
@@ -99,6 +103,50 @@ export default function OrderSummary() {
       {toggleCollapse && (
         <CartItems onClose={() => setToggleCollapse(!toggleCollapse)} />
       )}
+
+      {
+        toggleClearCartModal && (
+          <div className={modalStyles.overlay}>
+            <div className={modalStyles.popup_card} style={{ minWidth: "auto !important" }}>
+              <div className={`${modalStyles.card_header} d-flex align-items-center`}>
+                <p className={modalStyles.card_header_title}>
+                  Clear Cart
+                </p>
+                <div className="ms-auto">
+                  <CrossIcon
+                    width="20"
+                    height="20"
+                    color={ONDC_COLORS.SECONDARYCOLOR}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setToggleClearCartModal(false)}
+                  />
+                </div>
+              </div>
+              <div className={modalStyles.card_body}>
+                <div className={`container-fluid pt-2`}>
+                  <p>Do you really want to clear the cart?</p>
+                </div>
+              </div>
+              <div
+                className={`${modalStyles.card_footer} d-flex align-items-center justify-content-center`}
+              >
+                <Button
+                  button_type={buttonTypes.secondary}
+                  button_hover_type={buttonTypes.secondary_hover}
+                  button_text="Cancel"
+                  onClick={() => setToggleClearCartModal(false)}
+                />
+                <Button
+                  button_type={buttonTypes.primary}
+                  button_hover_type={buttonTypes.primary_hover}
+                  button_text="Clear"
+                  onClick={() => setCartItems([])}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      }
     </Fragment>
   );
 }
