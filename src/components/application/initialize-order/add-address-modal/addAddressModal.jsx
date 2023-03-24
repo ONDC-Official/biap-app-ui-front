@@ -2,12 +2,14 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import { postCall } from "../../../../api/axios";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
+import inputStyles from "../../../shared/input/input.module.scss";
 import { buttonTypes } from "../../../shared/button/utils";
 import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Input from "../../../shared/input/input";
 import CrossIcon from "../../../shared/svg/cross-icon";
-import { address_types } from "../../../../constants/address-types";
+import DropdownSvg from "../../../shared/svg/dropdonw";
+import { address_types, address_tags } from "../../../../constants/address-types";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { restoreToDefault } from "./utils/restoreDefaultAddress";
 import { ToastContext } from "../../../../context/toastContext";
@@ -38,7 +40,9 @@ export default function AddAddressModal(props) {
     door_error: "",
     state_name_error: "",
     street_name_error: "",
+    tag_error: "",
   });
+  const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
@@ -137,6 +141,17 @@ export default function AddAddressModal(props) {
     return true;
   }
 
+  function checkTag() {
+    if (validator.isEmpty(address?.tag)) {
+      setError((error) => ({
+        ...error,
+        tag_error: "State Name cannot be empty",
+      }));
+      return false;
+    }
+    return true;
+  }
+
   function checkPinCode() {
     if (validator.isEmpty(address?.areaCode)) {
       setError((error) => ({
@@ -165,6 +180,7 @@ export default function AddAddressModal(props) {
       checkLandMark(),
       checkCity(),
       checkState(),
+      checkTag(),
       checkPinCode(),
     ].every(Boolean);
     if (!allChecksPassed) {
@@ -183,6 +199,7 @@ export default function AddAddressModal(props) {
             door: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
+            tag: address.tag.trim(),
           },
           email: address.email.trim(),
           phone: address.phone.trim(),
@@ -213,6 +230,7 @@ export default function AddAddressModal(props) {
       checkLandMark(),
       checkCity(),
       checkState(),
+      checkTag(),
       checkPinCode(),
     ].every(Boolean);
     if (!allChecksPassed) {
@@ -231,6 +249,7 @@ export default function AddAddressModal(props) {
             door: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
+            tag: address.tag.trim(),
           },
           email: address.email.trim(),
           phone: address.phone.trim(),
@@ -261,6 +280,7 @@ export default function AddAddressModal(props) {
       checkLandMark(),
       checkCity(),
       checkState(),
+      checkTag(),
       checkPinCode(),
     ].every(Boolean);
     if (!allChecksPassed) {
@@ -283,6 +303,7 @@ export default function AddAddressModal(props) {
             door: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
+            tag: address.tag.trim(),
           },
         })
       );
@@ -311,6 +332,7 @@ export default function AddAddressModal(props) {
       checkLandMark(),
       checkCity(),
       checkState(),
+      checkTag(),
       checkPinCode(),
     ].every(Boolean);
     if (!allChecksPassed) {
@@ -333,6 +355,7 @@ export default function AddAddressModal(props) {
             door: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
+            tag: address.tag.trim(),
           },
         })
       );
@@ -603,6 +626,92 @@ export default function AddAddressModal(props) {
                     disabled
                   />
                   <ErrorMessage>{error.state_name_error}</ErrorMessage>
+                </div>
+                <div className="col-sm-12" style={{ position: 'relative' }}>
+                  <label
+                    htmlFor={"tag"}
+                    className={`${inputStyles.form_label} ${inputStyles.required}`}
+                  >
+                    Tag
+                  </label>
+                  <div
+                    className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
+                  >
+                    <input
+                      id="tag"
+                      name="tag"
+                      type="text"
+                      placeholder="Select Tag"
+                      autoComplete="off"
+                      value={address?.tag}
+                      onClick={() => setToggleLocationListCard(true)}
+                      onBlur={checkTag}
+                      className={styles.formControl}
+                      style={{ padding: "8px 10px" }}
+                      required
+                    />
+                    <div className="px-2">
+                      {address?.tag !== "" ? (
+                        <CrossIcon
+                          width="20"
+                          height="20"
+                          color={ONDC_COLORS.SECONDARYCOLOR}
+                          style={{ cursor: "pointer" }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setAddress((address) => ({
+                              ...address,
+                              tag: '',
+                            }));
+                          }}
+                        />
+                      ) : (
+                        <DropdownSvg width="13" height="8" />
+                      )}
+                    </div>
+                    <ErrorMessage>{error.door_error}</ErrorMessage>
+                    {
+                      toggleLocationListCard && (
+                        <div className={styles.location_list_wrapper_tag}>
+                          {
+                            address_tags.length > 0 ? (
+                              address_tags.map((tag) => {
+                                return (
+                                  <div
+                                    className={styles.dropdown_link_wrapper}
+                                    key={tag}
+                                    onClick={() => {
+                                      setAddress((address) => ({
+                                        ...address,
+                                        tag: tag,
+                                      }));
+                                      setError((error) => ({
+                                        ...error,
+                                        tag_error: "",
+                                      }));
+                                      setToggleLocationListCard(false)
+                                    }}
+                                  >
+                                    <p className={styles.dropdown_link}>{tag}</p>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <div
+                                style={{ height: "100px" }}
+                                className="d-flex align-items-center justify-content-center"
+                              >
+                                <p className={styles.empty_state_text}>
+                                  No tags found
+                                </p>
+                              </div>
+                            )
+                          }
+                        </div>
+                      )
+                    }
+                  </div>
                 </div>
               </div>
             </div>

@@ -139,6 +139,7 @@ export default function DeliveryAddress(props) {
                             door: address?.door,
                             state: address?.state,
                             street: address?.street,
+                            tag: address?.tag,
                           },
                         })
                       }

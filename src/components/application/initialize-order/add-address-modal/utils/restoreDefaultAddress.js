@@ -8,5 +8,6 @@ export const restoreToDefault = () => {
         door: "",
         state: "",
         street: "",
+        tag: ""
     }
 }
