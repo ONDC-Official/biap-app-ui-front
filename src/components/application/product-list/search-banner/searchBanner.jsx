@@ -423,6 +423,7 @@ export default function SearchBanner({ onSearch, location }) {
               onClick={() =>
                 setSelectAddressModal(true)
               }
+              style={{ cursor: 'pointer' }}
             >
               <div className="px-2">
                 <LocationSvg />
@@ -447,7 +448,8 @@ export default function SearchBanner({ onSearch, location }) {
                     onClick={clearSearch}
                   />
                 ) : (
-                  <DropdownSvg width="13" height="8" />
+                  <></>
+                  // <DropdownSvg width="13" height="8" />
                 )}
               </div>
             </div>
