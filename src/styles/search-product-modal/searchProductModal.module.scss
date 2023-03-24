@@ -15,7 +15,7 @@
 }
 
 .popup_card {
-  min-width: 40%;
+  min-width: auto;
   max-width: 70%;
   background-color: $white;
   border-radius: 10px;
@@ -56,6 +56,7 @@
 
 .card_footer {
   padding: 20px 25px;
+
   .card_body_text {
     font-size: $font-14;
     text-align: left;
@@ -264,6 +265,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -274,6 +276,7 @@
     margin-bottom: 50px;
     opacity: 0;
   }
+
   to {
     margin-bottom: 0;
     opacity: 1;

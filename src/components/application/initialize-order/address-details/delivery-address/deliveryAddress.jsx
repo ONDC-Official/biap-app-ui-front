@@ -6,7 +6,7 @@ import styles from "../../../../../styles/cart/cartView.module.scss";
 import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
-import { AddCookie, removeCookie } from "../../../../../utils/cookies";
+import { AddCookie, removeCookie, getValueFromCookie } from "../../../../../utils/cookies";
 import { restoreToDefault } from "../../add-address-modal/utils/restoreDefaultAddress";
 import { ToastContext } from "../../../../../context/toastContext";
 import useCancellablePromise from "../../../../../api/cancelRequest";
@@ -16,7 +16,7 @@ import {
 } from "../../../../shared/toast/utils/toast";
 
 export default function DeliveryAddress(props) {
-  const { deliveryAddresses, setDeliveryAddresses } = props;
+  const { deliveryAddresses, setDeliveryAddresses, updateQuoteBasedOnDeliveryAddress } = props;
   const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
   const [toggleAddressModal, setToggleAddressModal] = useState({
     actionType: "",
@@ -30,7 +30,7 @@ export default function DeliveryAddress(props) {
   const { cancellablePromise } = useCancellablePromise();
 
   const onSetDeliveryAddress = (id, descriptor, address) => {
-    fetchLatLongFromEloc(address?.areaCode);
+    fetchLatLongFromEloc(address?.areaCode, descriptor, address);
     return {
       id,
       name: descriptor?.name || "",
@@ -43,7 +43,7 @@ export default function DeliveryAddress(props) {
   };
 
   // use this function to fetch lat and long from eloc
-  async function fetchLatLongFromEloc(eloc) {
+  async function fetchLatLongFromEloc(eloc, descriptor, address) {
     try {
       const { data } = await cancellablePromise(
         axios.get(
@@ -53,6 +53,19 @@ export default function DeliveryAddress(props) {
       const { latitude, longitude } = data;
       if (latitude && longitude) {
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
+        let search_context = JSON.parse(
+          getValueFromCookie("search_context") || "{}"
+        );
+        // stroing transaction_id in cookie;
+        search_context.location.name = descriptor.name;
+        search_context.location.city = address.city;
+        search_context.location.state = address.state;
+        search_context.location.pincode = address.areaCode;
+        search_context.location.lat = latitude;
+        search_context.location.lng = longitude;
+        // removeCookie("search_context");
+        // AddCookie("search_context", JSON.stringify(search_context));
+        updateQuoteBasedOnDeliveryAddress(search_context);
       } else {
         dispatch({
           type: toast_actions.ADD_TOAST,

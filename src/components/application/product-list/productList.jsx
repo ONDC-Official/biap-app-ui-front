@@ -20,6 +20,8 @@ import { ToastContext } from "../../../context/toastContext";
 import EmptySearchCategory from "../../../assets/images/empty_search_category.jpg";
 import { useRef } from "react";
 import useCancellablePromise from "../../../api/cancelRequest";
+import { AddressContext } from "../../../context/addressContext";
+
 export default function ProductList() {
   // CONSTANTS
   const search_context = JSON.parse(
@@ -55,6 +57,7 @@ export default function ProductList() {
   const [toggleFiltersOnMobile, setToggleFiltersOnMobile] = useState(false);
   const [sortType, setSortType] = useState({});
   const [selectedFilters, setSelectedFilters] = useState({});
+  const { deliveryAddress } = useContext(AddressContext);
 
   // CONTEXT
   const { cartItems } = useContext(CartContext);
@@ -130,6 +133,16 @@ export default function ProductList() {
     );
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    if ((!deliveryAddress || deliveryAddress === undefined) && Object.keys(search_context).length === 0) {
+      setSearchedLocation({
+        name: "",
+        lat: "",
+        lng: "",
+      });
+    }
+  }, [deliveryAddress]);
 
   useEffect(() => {
     if (eventData?.filters && Object.keys(eventData?.filters).length > 0) {

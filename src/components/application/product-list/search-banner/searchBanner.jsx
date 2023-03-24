@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { search_types } from "../../../../constants/searchTypes";
-import { postCall } from "../../../../api/axios";
-import { AddCookie, getValueFromCookie } from "../../../../utils/cookies";
+import { postCall, getCall } from "../../../../api/axios";
+import { AddCookie, removeCookie, getValueFromCookie } from "../../../../utils/cookies";
 import { debounce } from "../../../../utils/search";
 import Loading from "../../../shared/loading/loading";
 import { ONDC_COLORS } from "../../../shared/colors";
@@ -17,6 +17,11 @@ import Dropdown from "../../../shared/dropdown/dropdown";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
+import { restoreToDefault } from "../../initialize-order/add-address-modal/utils/restoreDefaultAddress";
+import SelectAddressModal from "../select-address-modal/selectAddressModal";
+import AddAddressModal from "../../initialize-order/add-address-modal/addAddressModal";
+import { address_types } from "../../../../constants/address-types";
+import { AddressContext } from "../../../../context/addressContext";
 
 export default function SearchBanner({ onSearch, location }) {
   // STATES
@@ -39,6 +44,15 @@ export default function SearchBanner({ onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
+  const [selectAddressModal, setSelectAddressModal] = useState(false)
+  const [toggleAddressModal, setToggleAddressModal] = useState({
+    actionType: "",
+    toggle: false,
+    address: restoreToDefault(),
+  });
+  const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] = useState();
+  const [addressList, setAddressList] = useState([]);
+  const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
@@ -47,11 +61,49 @@ export default function SearchBanner({ onSearch, location }) {
   const { cancellablePromise } = useCancellablePromise();
 
   useEffect(() => {
+    if (getValueFromCookie("delivery_address")) {
+      const address = JSON.parse(getValueFromCookie("delivery_address"));
+      if (address) {
+        setDeliveryAddress(() => address);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     setSearchedLocation(location);
   }, [location]);
 
+  // use this function to fetch existing address of the user
+  async function fetchDeliveryAddress() {
+    setFetchDeliveryAddressLoading(true);
+    try {
+      const data = await cancellablePromise(
+        getCall("/clientApis/v1/delivery_address")
+      );
+      setAddressList(data);
+    } catch (err) {
+      if (err.response.data.length > 0) {
+        setAddressList([]);
+        return;
+      }
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
+      });
+    } finally {
+      setFetchDeliveryAddressLoading(false);
+    }
+  }
+
   useEffect(() => {
     getLastEnteredValues();
+
+    fetchDeliveryAddress();
+
     return () => {
       setSearchLocationLoading(false);
       setSearchProductLoading(false);
@@ -163,6 +215,31 @@ export default function SearchBanner({ onSearch, location }) {
     }
   }
 
+  // get the lat and long of a place
+  async function fetchLatLongFromEloc(locationData) {
+    try {
+      const { data } = await cancellablePromise(
+        axios.get(
+          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${locationData?.location?.address?.areaCode}`
+        )
+      );
+      if (data?.latitude && data?.longitude) {
+        getAreadCodeFromLatLong({
+          name: locationData?.name,
+          lat: data?.latitude,
+          long: data?.longitude,
+        });
+      } else {
+        setInlineError((error) => ({
+          ...error,
+          location_error: "Unable to get location, Please try again!",
+        }));
+      }
+    } catch (err) {
+      dispatchError(err?.message);
+    }
+  }
+
   // get the area code of the location selected
   async function getAreadCodeFromLatLong(location) {
     try {
@@ -252,7 +329,7 @@ export default function SearchBanner({ onSearch, location }) {
 
   // use this function to validate the location value
   function checkLocation() {
-    if (!searchedLocation?.name) {
+    if (!deliveryAddress?.name) {
       setInlineError((error) => ({
         ...error,
         location_error: "Location cannot be empty",
@@ -274,12 +351,19 @@ export default function SearchBanner({ onSearch, location }) {
     return true;
   }
 
-  function clearSearch() {
+  function clearSearch(e) {
+    e.preventDefault();
+    e.stopPropagation();
     setSearchedLocation({
       name: "",
       lat: "",
       lng: "",
     });
+    // setDeliveryAddress();
+    // setBillingAddress();
+    // removeCookie("delivery_address");
+    // removeCookie("billing_address");
+    // removeCookie("search_context");
   }
 
   const loadingSpin = (
@@ -302,7 +386,7 @@ export default function SearchBanner({ onSearch, location }) {
             className="col-md-6 col-lg-3 col-xl-3 px-4 py-1"
             style={{ position: "relative" }}
           >
-            <div
+            {/* <div
               className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
             >
               <div className="px-2">
@@ -333,7 +417,110 @@ export default function SearchBanner({ onSearch, location }) {
                   <DropdownSvg width="13" height="8" />
                 )}
               </div>
+            </div> */}
+            <div
+              className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
+              onClick={() =>
+                setSelectAddressModal(true)
+              }
+            >
+              <div className="px-2">
+                <LocationSvg />
+              </div>
+              <div className={styles.formControl}>
+                {searchedLocation?.name || "Select your address"}
+                {
+                  searchedLocation.name && (
+                    <>
+                      : {searchedLocation?.pincode}
+                    </>
+                  )
+                }
+              </div>
+              <div className="px-2">
+                {searchedLocation?.name !== "" ? (
+                  <CrossIcon
+                    width="20"
+                    height="20"
+                    color={ONDC_COLORS.SECONDARYCOLOR}
+                    style={{ cursor: "pointer" }}
+                    onClick={clearSearch}
+                  />
+                ) : (
+                  <DropdownSvg width="13" height="8" />
+                )}
+              </div>
             </div>
+            {
+              selectAddressModal && (
+                <SelectAddressModal
+                  addresses={addressList}
+                  onSelectAddress={(pin) => {
+                    fetchLatLongFromEloc(pin);
+                  }}
+                  onClose={() =>
+                    setSelectAddressModal(false)
+                  }
+                  setAddAddress={() => {
+                    setSelectAddressModal(false);
+                    setToggleAddressModal({
+                      actionType: "add",
+                      toggle: true,
+                      address: restoreToDefault(),
+                    });
+                  }}
+                  setUpdateAddress={(address) => {
+                    setSelectAddressModal(false);
+                    setToggleAddressModal({
+                      actionType: "edit",
+                      toggle: true,
+                      address: address,
+                    });
+                  }}
+                />
+              )
+            }
+            {
+              toggleAddressModal.toggle && (
+                <AddAddressModal
+                  action_type={toggleAddressModal.actionType}
+                  address_type={address_types.delivery}
+                  selectedAddress={toggleAddressModal.address}
+                  onClose={() => {
+                    setToggleAddressModal({
+                      actionType: "",
+                      toggle: false,
+                      address: restoreToDefault(),
+                    });
+                    setSelectAddressModal(true);
+                  }}
+                  onAddAddress={(address) => {
+                    setToggleAddressModal({
+                      actionType: "",
+                      toggle: false,
+                      address: restoreToDefault(),
+                    });
+                    setAddressList([...addressList, address]);
+                    setSelectAddressModal(true);
+                  }}
+                  onUpdateAddress={(address) => {
+                    const updatedAddress = addressList.map((d) => {
+                      if (d.id === address.id) {
+                        return address;
+                      }
+                      return d;
+                    });
+                    setAddressList(updatedAddress);
+                    setToggleAddressModal({
+                      actionType: "",
+                      toggle: false,
+                      address: restoreToDefault(),
+                    });
+                    setSelectAddressModal(true);
+                  }}
+                />
+              )
+            }
             {inlineError.location_error ? (
               <ErrorMessage>{inlineError.location_error}</ErrorMessage>
             ) : (
@@ -355,7 +542,7 @@ export default function SearchBanner({ onSearch, location }) {
                 </span>
               </p>
             )}
-            {toggleLocationListCard && searchedLocation?.name !== "" && (
+            {/* {toggleLocationListCard && searchedLocation?.name !== "" && (
               <div className={styles.location_list_wrapper}>
                 {searchedLocationLoading ? (
                   loadingSpin
@@ -391,7 +578,7 @@ export default function SearchBanner({ onSearch, location }) {
                     </div>
                   )}
               </div>
-            )}
+            )} */}
           </div>
           <div className="col-md-6 col-lg-6 col-xl-6 px-4 py-1">
             <form onSubmit={searchProduct} className="w-100">
@@ -464,12 +651,12 @@ export default function SearchBanner({ onSearch, location }) {
                   <button
                     disabled={searchProductLoading}
                     className={bannerStyles.secondary_action}
-                    onClick={() => {
+                    onClick={(e) => {
                       setSearch((search) => ({
                         ...search,
                         value: "",
                       }));
-                      clearSearch();
+                      clearSearch(e);
                     }}
                   >
                     Cancel
