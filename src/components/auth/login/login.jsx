@@ -56,6 +56,12 @@ export default function Login() {
         password_error: "password cannot be empty",
       }));
       return false;
+    } else if (password && password.length < 8) {
+      setInlineError((inlineError) => ({
+        ...inlineError,
+        password_error: "Password cannot be less than 8 characters",
+      }));
+      return false;
     }
 
     return true;

@@ -71,6 +71,12 @@ export default function SignUp() {
         password_error: "Password cannot be empty",
       }));
       return false;
+    } else if (password && password.length < 8) {
+      setInlineError((inlineError) => ({
+        ...inlineError,
+        password_error: "Password cannot be less than 8 characters",
+      }));
+      return false;
     }
 
     return true;
@@ -159,7 +165,7 @@ export default function SignUp() {
           autoComplete="off"
           has_error={inlineError.name_error}
           onChange={(event) => {
-            setName(event.target.value);
+            setName((event.target.value).trim());
             setInlineError((inlineError) => ({
               ...inlineError,
               name_error: "",

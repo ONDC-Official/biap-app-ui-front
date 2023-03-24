@@ -110,6 +110,7 @@ export default function BillingAddress(props) {
                             door: address?.door,
                             state: address?.state,
                             street: address?.street,
+                            tag: address?.tag,
                           },
                         })
                       }

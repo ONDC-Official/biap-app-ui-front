@@ -141,6 +141,7 @@ export default function SelectAddressModal(props) {
                                                             door: address?.door,
                                                             state: address?.state,
                                                             street: address?.street,
+                                                            tag: address?.tag,
                                                         })
                                                     }}
                                                 >
@@ -163,20 +164,21 @@ export default function SelectAddressModal(props) {
                                             </div>
                                         );
                                     })}
-                                <div>
-                                    <div
-                                        className={cartStyles.add_address_wrapper}
-                                        onClick={() => setAddAddress()}
-                                    >
-                                        <Add width="15" height="15" classes={cartStyles.add_svg_color} />
-                                        <div className="ps-3 flex-grow-1">
-                                            <p className={cartStyles.add_address_text}>Add Address</p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     )}
+
+                    <div>
+                        <div
+                            className={cartStyles.add_address_wrapper}
+                            onClick={() => setAddAddress()}
+                        >
+                            <Add width="15" height="15" classes={cartStyles.add_svg_color} />
+                            <div className="ps-3 flex-grow-1">
+                                <p className={cartStyles.add_address_text}>Add Address</p>
+                            </div>
+                        </div>
+                    </div>
 
 
                 </div>
