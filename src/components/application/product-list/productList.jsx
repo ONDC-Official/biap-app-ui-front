@@ -224,6 +224,12 @@ export default function ProductList() {
           selected_filters?.providers?.length > 0
             ? selected_filters?.providers
             : data?.providers,
+        fulfillment:
+          selected_filters?.fulfillment?.length > 0
+            ? selected_filters?.fulfillment
+            : data?.fulfillment,
+
+        // fulfillment: [...filters?.fulfillment, ...filterSet?.fulfillment],
       }));
     } catch (err) {
       dispatch({

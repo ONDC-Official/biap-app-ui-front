@@ -55,7 +55,7 @@ export default function MultiAttributeFilter({
                     : styles.provider_name
                 }
               >
-                {attribute.name}
+                {attribute?.name || attribute?.value?.type}
               </p>
             </Checkbox>
           </div>
