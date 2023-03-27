@@ -2,13 +2,13 @@ import React, { useContext, useState } from "react";
 import axios from "axios";
 import { postCall } from "../../../../api/axios";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
+import cancelRadioStyles from "../../../../styles/cart/cartView.module.scss";
 import inputStyles from "../../../shared/input/input.module.scss";
 import { buttonTypes } from "../../../shared/button/utils";
 import Button from "../../../shared/button/button";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Input from "../../../shared/input/input";
 import CrossIcon from "../../../shared/svg/cross-icon";
-import DropdownSvg from "../../../shared/svg/dropdonw";
 import { address_types, address_tags } from "../../../../constants/address-types";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { restoreToDefault } from "./utils/restoreDefaultAddress";
@@ -16,6 +16,7 @@ import { ToastContext } from "../../../../context/toastContext";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import validator from "validator";
 import useCancellablePromise from "../../../../api/cancelRequest";
+import AddressRadioButton from "../../initialize-order/address-details/address-radio-button/addressRadioButton";
 
 export default function AddAddressModal(props) {
   const {
@@ -42,7 +43,6 @@ export default function AddAddressModal(props) {
     street_name_error: "",
     tag_error: "",
   });
-  const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
@@ -634,83 +634,34 @@ export default function AddAddressModal(props) {
                   >
                     Tag
                   </label>
-                  <div
-                    className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
-                  >
-                    <input
-                      id="tag"
-                      name="tag"
-                      type="text"
-                      placeholder="Select Tag"
-                      autoComplete="off"
-                      value={address?.tag}
-                      onClick={() => setToggleLocationListCard(true)}
-                      onBlur={checkTag}
-                      className={styles.formControl}
-                      style={{ padding: "8px 10px" }}
-                      required
-                    />
-                    <div className="px-2">
-                      {address?.tag !== "" ? (
-                        <CrossIcon
-                          width="20"
-                          height="20"
-                          color={ONDC_COLORS.SECONDARYCOLOR}
-                          style={{ cursor: "pointer" }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setAddress((address) => ({
-                              ...address,
-                              tag: '',
-                            }));
-                          }}
-                        />
-                      ) : (
-                        <DropdownSvg width="13" height="8" />
-                      )}
-                    </div>
-                    <ErrorMessage>{error.door_error}</ErrorMessage>
+                  <div className="py-2 d-flex align-items-center">
                     {
-                      toggleLocationListCard && (
-                        <div className={styles.location_list_wrapper_tag}>
-                          {
-                            address_tags.length > 0 ? (
-                              address_tags.map((tag) => {
-                                return (
-                                  <div
-                                    className={styles.dropdown_link_wrapper}
-                                    key={tag}
-                                    onClick={() => {
-                                      setAddress((address) => ({
-                                        ...address,
-                                        tag: tag,
-                                      }));
-                                      setError((error) => ({
-                                        ...error,
-                                        tag_error: "",
-                                      }));
-                                      setToggleLocationListCard(false)
-                                    }}
-                                  >
-                                    <p className={styles.dropdown_link}>{tag}</p>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <div
-                                style={{ height: "100px" }}
-                                className="d-flex align-items-center justify-content-center"
-                              >
-                                <p className={styles.empty_state_text}>
-                                  No tags found
-                                </p>
-                              </div>
-                            )
-                          }
-                        </div>
-                      )
+                      address_tags.length > 0 && address_tags.map((tag) => {
+                        return (
+                          <AddressRadioButton
+                            // disabled={loading}
+                            checked={tag === address?.tag}
+                            onClick={() => {
+                              setAddress((address) => ({
+                                ...address,
+                                tag: tag,
+                              }));
+                              setError((error) => ({
+                                ...error,
+                                tag_error: "",
+                              }));
+                            }}
+                          >
+                            <div className="px-3">
+                              <p className={cancelRadioStyles.address_name_and_phone}>
+                                {tag}
+                              </p>
+                            </div>
+                          </AddressRadioButton>
+                        )
+                      })
                     }
+                    <ErrorMessage>{error.door_error}</ErrorMessage>
                   </div>
                 </div>
               </div>

@@ -5,6 +5,7 @@
   background-color: transparent;
   display: flex;
   align-items: flex-start;
+  flex: 1;
 }
 
 .box_basis {
@@ -57,4 +58,13 @@
   margin: 0;
   background-color: transparent;
   border: 0;
+}
+
+.parent_radio {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.parent_edit_button {
+  width: 30px !important
 }

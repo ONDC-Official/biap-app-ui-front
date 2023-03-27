@@ -67,9 +67,13 @@ export default function AddressDetailsCard(props) {
     async function fetchDeliveryAddress() {
       setFetchDeliveryAddressLoading(true);
       try {
-        const data = await cancellablePromise(
+        let data = await cancellablePromise(
           getCall("/clientApis/v1/delivery_address")
         );
+        if (deliveryAddress) {
+          const findIndex = data.findIndex((item) => item.id === deliveryAddress.id);
+          data.unshift(data.splice(findIndex, 1)[0]);
+        } else { }
         setDeliveryAddresses(data);
       } catch (err) {
         if (err.response.data.length > 0) {
