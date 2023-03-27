@@ -124,6 +124,7 @@ export default function SearchBanner({ onSearch, location }) {
         pincode: sc.location.pincode,
         city: sc.location.city,
         state: sc.location.state,
+        tag: sc.location.tag,
       });
     }
     if (search.type === search_types.PRODUCT) {
@@ -191,31 +192,6 @@ export default function SearchBanner({ onSearch, location }) {
   }
 
   // get the lat and long of a place
-  async function getPlaceFromPlaceId(location) {
-    try {
-      const { data } = await cancellablePromise(
-        axios.get(
-          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${location.place_id}`
-        )
-      );
-      if (data?.latitude && data?.longitude) {
-        getAreadCodeFromLatLong({
-          name: location?.name,
-          lat: data?.latitude,
-          long: data?.longitude,
-        });
-      } else {
-        setInlineError((error) => ({
-          ...error,
-          location_error: "Unable to get location, Please try again!",
-        }));
-      }
-    } catch (err) {
-      dispatchError(err?.message);
-    }
-  }
-
-  // get the lat and long of a place
   async function fetchLatLongFromEloc(locationData) {
     try {
       const { data } = await cancellablePromise(
@@ -228,6 +204,7 @@ export default function SearchBanner({ onSearch, location }) {
           name: locationData?.name,
           lat: data?.latitude,
           long: data?.longitude,
+          tag: locationData?.location?.address?.tag
         });
       } else {
         setInlineError((error) => ({
@@ -257,6 +234,7 @@ export default function SearchBanner({ onSearch, location }) {
         pincode,
         city,
         state,
+        tag: location?.tag,
       });
       setToggleLocationListCard(false);
     } catch (err) {
@@ -386,38 +364,6 @@ export default function SearchBanner({ onSearch, location }) {
             className="col-md-6 col-lg-3 col-xl-3 px-4 py-1"
             style={{ position: "relative" }}
           >
-            {/* <div
-              className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
-            >
-              <div className="px-2">
-                <LocationSvg />
-              </div>
-              <input
-                id="location"
-                name="location"
-                type="text"
-                placeholder="Search Location"
-                autoComplete="off"
-                value={searchedLocation?.name}
-                onChange={(event) => onChange(event)}
-                onBlur={checkLocation}
-                className={styles.formControl}
-                style={{ padding: "8px 10px" }}
-              />
-              <div className="px-2">
-                {searchedLocation?.name !== "" ? (
-                  <CrossIcon
-                    width="20"
-                    height="20"
-                    color={ONDC_COLORS.SECONDARYCOLOR}
-                    style={{ cursor: "pointer" }}
-                    onClick={clearSearch}
-                  />
-                ) : (
-                  <DropdownSvg width="13" height="8" />
-                )}
-              </div>
-            </div> */}
             <div
               className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
               onClick={() =>
@@ -431,7 +377,7 @@ export default function SearchBanner({ onSearch, location }) {
               <div className={styles.formControl}>
                 {searchedLocation?.name || "Select your address"}
                 {
-                  searchedLocation.name && (
+                  searchedLocation.tag && (
                     <>
                       : {searchedLocation?.pincode}
                     </>
@@ -544,43 +490,6 @@ export default function SearchBanner({ onSearch, location }) {
                 </span>
               </p>
             )}
-            {/* {toggleLocationListCard && searchedLocation?.name !== "" && (
-              <div className={styles.location_list_wrapper}>
-                {searchedLocationLoading ? (
-                  loadingSpin
-                ) : // loop thorugh location here }
-                  locations.length > 0 ? (
-                    locations.map((location) => {
-                      return (
-                        <div
-                          className={styles.dropdown_link_wrapper}
-                          key={location.place_id}
-                          onClick={() => {
-                            getPlaceFromPlaceId(location);
-                          }}
-                        >
-                          <p className={styles.dropdown_link}>{location.name}</p>
-                          <p
-                            className={styles.location_description}
-                            style={{ color: ONDC_COLORS.SECONDARYCOLOR }}
-                          >
-                            {location.description}
-                          </p>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div
-                      style={{ height: "100px" }}
-                      className="d-flex align-items-center justify-content-center"
-                    >
-                      <p className={styles.empty_state_text}>
-                        No Location found <br /> Please double check your search
-                      </p>
-                    </div>
-                  )}
-              </div>
-            )} */}
           </div>
           <div className="col-md-6 col-lg-6 col-xl-6 px-4 py-1">
             <form onSubmit={searchProduct} className="w-100">

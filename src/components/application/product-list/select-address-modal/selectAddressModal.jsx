@@ -147,7 +147,7 @@ export default function SelectAddressModal(props) {
                                                 >
                                                     <div className="px-3">
                                                         <p className={cartStyles.address_name_and_phone}>
-                                                            {descriptor?.name}
+                                                            {`${address?.tag} (${descriptor?.name})`}
                                                         </p>
                                                         <p className={`${cartStyles.address_line_2} pb-2`}>
                                                             {descriptor?.email} - {descriptor?.phone}
