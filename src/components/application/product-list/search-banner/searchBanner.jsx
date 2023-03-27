@@ -200,6 +200,8 @@ export default function SearchBanner({ onSearch, location }) {
         )
       );
       if (data?.latitude && data?.longitude) {
+        const { latitude, longitude } = data;
+        AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
         getAreadCodeFromLatLong({
           name: locationData?.name,
           lat: data?.latitude,
@@ -375,7 +377,7 @@ export default function SearchBanner({ onSearch, location }) {
                 <LocationSvg />
               </div>
               <div className={styles.formControl}>
-                {searchedLocation?.name || "Select your address"}
+                {searchedLocation?.tag || "Select your address"}
                 {
                   searchedLocation.tag && (
                     <>
@@ -385,7 +387,7 @@ export default function SearchBanner({ onSearch, location }) {
                 }
               </div>
               <div className="px-2">
-                {searchedLocation?.name !== "" ? (
+                {searchedLocation?.tag !== "" ? (
                   <CrossIcon
                     width="20"
                     height="20"

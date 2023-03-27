@@ -29,7 +29,7 @@ export default function SelectAddressModal(props) {
     const { cancellablePromise } = useCancellablePromise();
 
     const onSetDeliveryAddress = (id, descriptor, address) => {
-        // fetchLatLongFromEloc(address?.areaCode);
+        fetchLatLongFromEloc(address?.areaCode);
         return {
             id,
             name: descriptor?.name || "",
