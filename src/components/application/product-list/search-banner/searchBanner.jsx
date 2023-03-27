@@ -377,9 +377,9 @@ export default function SearchBanner({ onSearch, location }) {
                 <LocationSvg />
               </div>
               <div className={styles.formControl}>
-                {searchedLocation?.tag || "Select your address"}
+                {searchedLocation.tag ? searchedLocation.tag : searchedLocation.name ? searchedLocation.name : "Select your address"}
                 {
-                  searchedLocation.tag && (
+                  (searchedLocation.tag || searchedLocation.name) && (
                     <>
                       : {searchedLocation?.pincode}
                     </>
@@ -387,7 +387,7 @@ export default function SearchBanner({ onSearch, location }) {
                 }
               </div>
               <div className="px-2">
-                {searchedLocation?.tag !== "" ? (
+                {(searchedLocation.tag !== "" || searchedLocation.name !== "") ? (
                   <CrossIcon
                     width="20"
                     height="20"

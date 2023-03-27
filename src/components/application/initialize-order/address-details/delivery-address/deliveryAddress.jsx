@@ -146,7 +146,7 @@ export default function DeliveryAddress(props) {
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>
-                          {descriptor?.name}
+                          {`${address.tag ? address.tag + " (" + descriptor?.name + ")" : descriptor?.name} `}
                         </p>
                         <p className={`${styles.address_line_2} pb-2`}>
                           {descriptor?.email} - {descriptor?.phone}
