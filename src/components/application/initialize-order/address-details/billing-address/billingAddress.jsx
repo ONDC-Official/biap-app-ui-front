@@ -116,7 +116,10 @@ export default function BillingAddress(props) {
                       }
                     >
                       <div className="px-3">
-                        <p className={styles.address_name_and_phone}>{name}</p>
+                        <p className={styles.address_name_and_phone}>
+                          {/* {name} */}
+                          {`${address.tag ? address.tag + " (" + name + ")" : name} `}
+                        </p>
                         <p className={`${styles.address_line_2} pb-2`}>
                           {email} - {phone}
                         </p>
