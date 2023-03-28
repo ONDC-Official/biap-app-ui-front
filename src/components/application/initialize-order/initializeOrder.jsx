@@ -318,6 +318,7 @@ export default function InitializeOrder() {
   }, []);
 
   const updateQuoteBasedOnDeliveryAddress = (searchContextData) => {
+    updatedCartItems.current = cartItems;
     // this check is so that when cart is empty we do not call the
     // and when the payment is not made
     if (cartItems.length > 0) {
