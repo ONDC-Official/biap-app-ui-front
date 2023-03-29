@@ -777,17 +777,21 @@ export default function OrderCard(props) {
                     )}
                   </button>
                 </div>
-                <div className="pe-3 py-1">
-                  <button
-                    disabled={
-                      trackOrderLoading || statusLoading || supportOrderLoading
-                    }
-                    className={`${styles.primary_action} ${styles.cancel_return_button}`}
-                    onClick={() => setToggleCancelOrderModal(true)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+                {
+                  (status === "Accepted" || status === "Created") && (
+                    <div className="pe-3 py-1">
+                      <button
+                        disabled={
+                          trackOrderLoading || statusLoading || supportOrderLoading
+                        }
+                        className={`${styles.primary_action} ${styles.cancel_return_button}`}
+                        onClick={() => setToggleCancelOrderModal(true)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )
+                }
                 {
                   status === "Completed" && (
                     <div className="py-1">
