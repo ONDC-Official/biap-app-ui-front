@@ -31,10 +31,10 @@ export default function PriceDetailsCard(props) {
               .map((provider, index) => (
                 <div className={styles.provider} key={`${provider.name}${index}`}>
                   <div>{provider.name}</div>
-                  {provider.products.filter((quote) => quote?.title !== "").map((quote, index) => (
+                  {provider.products.filter((quote) => quote?.title !== "").map((quote, qIndex) => (
                     <div
-                      className="py-2 d-flex align-items-center"
-                      key={`quote-item-${index}`}
+                      className={`py-2 d-flex align-items-center ${qIndex !== (provider.products.length - 1) ? styles.border_bottom_dotted : ""}`}
+                      key={`quote-item-${qIndex}`}
                     >
                       <div className="pe-2 flex-grow-1">
                         {quote?.title && (
