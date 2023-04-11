@@ -411,7 +411,7 @@ export default function OrderCard(props) {
             onFetchUpdatedOrder();
           }}
           quantity={quantity}
-          partailsCancelProductList={product}
+          partailsCancelProductList={product.filter((p) => p.return_status !== "Cancelled")}
           // partailsCancelProductList={product?.filter(
           //   (p) => p?.["@ondc/org/cancellable"] && p?.cancellation_status === ""
           // )}
