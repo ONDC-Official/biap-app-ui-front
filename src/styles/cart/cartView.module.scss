@@ -60,6 +60,7 @@
 
 .card_footer {
   padding: 20px 25px;
+
   .card_body_text {
     font-size: $font-14;
     text-align: left;
@@ -180,6 +181,7 @@
 .add_address_wrapper:hover {
   background-color: $accentColor;
   transition: all 0.3s;
+
   .add_address_text {
     color: $white;
   }
@@ -242,6 +244,7 @@
   text-align: center;
   color: $error;
 }
+
 .error {
   color: $error;
   font-size: 12px;
@@ -250,4 +253,8 @@
 .provider {
   border-bottom: 1px solid #aaaaaa;
   margin-bottom: 10px;
+}
+
+.border_bottom_dotted {
+  border-bottom: 1px dotted #aaaaaa;
 }
