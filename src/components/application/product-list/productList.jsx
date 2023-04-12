@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useState } from "react";
 import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
-import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
+import Cart from '../../shared/svg/cart';
 import { getCall } from "../../../api/axios";
 import { ONDC_COLORS } from "../../shared/colors";
 import Loading from "../../shared/loading/loading";
@@ -351,14 +351,10 @@ export default function ProductList() {
     >
       <div className="text-center">
         <div className="py-2">
-          <img
-            src={no_result_empty_illustration}
-            alt="empty_search"
-            style={{ height: "120px" }}
-          />
+          <Cart height="120" width="120" />
         </div>
         <div className="py-2">
-          <p className={styles.illustration_header}>Your search is empty</p>
+          <p className={styles.illustration_header}>No results found</p>
           <p className={styles.illustration_body}>
             No products found with the given name. Try searching for something
             else.
