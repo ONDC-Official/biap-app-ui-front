@@ -82,7 +82,7 @@ export default function ProductCard(props) {
             </div>
             <p className={styles.product_price}>
               {Number.isInteger(Number(price?.value))
-                ? Number(price?.value)
+                ? Number(price?.value).toFixed(2)
                 : Number(price?.value).toFixed(2)}
             </p>
           </div>
