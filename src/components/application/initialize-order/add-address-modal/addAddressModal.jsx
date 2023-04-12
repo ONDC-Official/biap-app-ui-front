@@ -398,12 +398,16 @@ export default function AddAddressModal(props) {
         state_name_error: "",
       }));
     } catch (err) {
+      let message = "Please enter valid Pin Code";
+      if (err.response.status !== 500) {
+        message = err.response.data.message;
+      } else { }
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
           id: Math.floor(Math.random() * 100),
           type: toast_types.error,
-          message: err?.message,
+          message: message,
         },
       });
       setAddress((address) => ({
