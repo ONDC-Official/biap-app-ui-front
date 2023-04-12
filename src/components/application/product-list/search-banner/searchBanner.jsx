@@ -22,6 +22,7 @@ import SelectAddressModal from "../select-address-modal/selectAddressModal";
 import AddAddressModal from "../../initialize-order/add-address-modal/addAddressModal";
 import { address_types } from "../../../../constants/address-types";
 import { AddressContext } from "../../../../context/addressContext";
+import { CartContext } from "../../../../context/cartContext";
 
 export default function SearchBanner({ onSearch, location }) {
   // STATES
@@ -56,6 +57,8 @@ export default function SearchBanner({ onSearch, location }) {
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
+  const { setCartItems } = useContext(CartContext);
+
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -339,11 +342,12 @@ export default function SearchBanner({ onSearch, location }) {
       lat: "",
       lng: "",
     });
-    // setDeliveryAddress();
-    // setBillingAddress();
-    // removeCookie("delivery_address");
-    // removeCookie("billing_address");
-    // removeCookie("search_context");
+    setDeliveryAddress();
+    setBillingAddress();
+    setCartItems([]);
+    removeCookie("delivery_address");
+    removeCookie("billing_address");
+    removeCookie("search_context");
   }
 
   const loadingSpin = (
