@@ -156,14 +156,14 @@ export default function AddAddressModal(props) {
     if (validator.isEmpty(address?.areaCode)) {
       setError((error) => ({
         ...error,
-        areaCode_error: "Area Code cannot be empty",
+        areaCode_error: "Pin code cannot be empty",
       }));
       return false;
     }
     if (address?.areaCode?.length < 6) {
       setError((error) => ({
         ...error,
-        areaCode_error: "Please enter a valid Area Code",
+        areaCode_error: "Please enter a valid Pin Code",
       }));
       return false;
     }
