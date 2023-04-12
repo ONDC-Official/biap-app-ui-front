@@ -51,7 +51,7 @@ export default function AddAddressModal(props) {
   const { cancellablePromise } = useCancellablePromise();
 
   function checkName() {
-    if (validator.isEmpty(address?.name)) {
+    if (validator.isEmpty(address?.name.trim())) {
       setError((error) => ({
         ...error,
         name_error: "Please enter Name",
@@ -62,14 +62,14 @@ export default function AddAddressModal(props) {
   }
 
   function checkEmail() {
-    if (validator.isEmpty(address?.email)) {
+    if (validator.isEmpty(address?.email.trim())) {
       setError((error) => ({
         ...error,
         email_error: "Please enter Email",
       }));
       return false;
     }
-    if (!validator.isEmail(address?.email)) {
+    if (!validator.isEmail(address?.email.trim())) {
       setError((error) => ({
         ...error,
         email_error: "Please enter a valid Email",
@@ -80,14 +80,14 @@ export default function AddAddressModal(props) {
   }
 
   function checkPhoneNumber() {
-    if (validator.isEmpty(address?.phone)) {
+    if (validator.isEmpty(address?.phone.trim())) {
       setError((error) => ({
         ...error,
         phone_error: "Please enter a valid phone number",
       }));
       return false;
     }
-    if (!validator.isMobilePhone(address?.phone, "en-IN")) {
+    if (!validator.isMobilePhone(address?.phone.trim(), "en-IN")) {
       setError((error) => ({
         ...error,
         phone_error: "Please enter a valid phone number",
@@ -98,7 +98,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkStreetName() {
-    if (validator.isEmpty(address?.street)) {
+    if (validator.isEmpty(address?.street.trim())) {
       setError((error) => ({
         ...error,
         street_name_error: "Street Name cannot be empty",
@@ -109,7 +109,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkLandMark() {
-    if (validator.isEmpty(address?.door)) {
+    if (validator.isEmpty(address?.door.trim())) {
       setError((error) => ({
         ...error,
         door_error: "Landmark cannot be empty",
@@ -120,7 +120,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkCity() {
-    if (validator.isEmpty(address?.city)) {
+    if (validator.isEmpty(address?.city.trim())) {
       setError((error) => ({
         ...error,
         city_name_error: "City Name cannot be empty",
@@ -131,7 +131,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkState() {
-    if (validator.isEmpty(address?.state)) {
+    if (validator.isEmpty(address?.state.trim())) {
       setError((error) => ({
         ...error,
         state_name_error: "State Name cannot be empty",
@@ -142,7 +142,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkTag() {
-    if (validator.isEmpty(address?.tag)) {
+    if (validator.isEmpty(address?.tag.trim())) {
       setError((error) => ({
         ...error,
         tag_error: "State Name cannot be empty",
@@ -153,7 +153,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkPinCode() {
-    if (validator.isEmpty(address?.areaCode)) {
+    if (validator.isEmpty(address?.areaCode.trim())) {
       setError((error) => ({
         ...error,
         areaCode_error: "Pin code cannot be empty",
