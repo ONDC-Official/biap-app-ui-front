@@ -148,6 +148,7 @@ export default function ProductList() {
     if (eventData?.filters && Object.keys(eventData?.filters).length > 0) {
       let filterSet = eventData?.filters;
       filterSet.providers = filterSet.providers.filter((item) => item.name !== "" && item.name !== null);
+      filterSet.fulfillment = filterSet.fulfillment.filter((item) => item.name === undefined && item?.name !== "" && item?.name !== null);
       setFilters((filters) => ({
         ...filters,
         categories: [...filters?.categories, ...filterSet?.categories],
@@ -208,6 +209,7 @@ export default function ProductList() {
         getCall(`/clientApis/v1/getFilterParams?messageId=${messageId}`)
       );
       data.providers = data.providers.filter((item) => item.name !== "" && item.name !== null);
+      data.fulfillment = data.fulfillment.filter((item) => item.name === undefined && item.name !== "" && item.name !== null);
       setFilters((filters) => ({
         ...filters,
         minPrice: selected_filters.minPrice
