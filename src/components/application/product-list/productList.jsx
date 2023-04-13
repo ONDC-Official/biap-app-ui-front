@@ -492,7 +492,7 @@ export default function ProductList() {
                           )}
                         </div>
                       </div>
-                      <div className="container">
+                      <div className="container" style={{ minHeight: '500px' }}>
                         <div className="row pe-2">
                           {products.map((product) => {
                             return (
