@@ -131,7 +131,7 @@ export default function InitializeOrder() {
             return {
               context: {
                 transaction_id,
-                city: search_context.location.name,
+                city: search_context.location.city,
                 state: search_context.location.state,
               },
               message: {
