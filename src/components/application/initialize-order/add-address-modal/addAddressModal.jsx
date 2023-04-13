@@ -145,7 +145,7 @@ export default function AddAddressModal(props) {
     if (validator.isEmpty(address?.tag.trim())) {
       setError((error) => ({
         ...error,
-        tag_error: "State Name cannot be empty",
+        tag_error: "Please select tag",
       }));
       return false;
     }
@@ -665,8 +665,8 @@ export default function AddAddressModal(props) {
                         )
                       })
                     }
-                    <ErrorMessage>{error.door_error}</ErrorMessage>
                   </div>
+                  <ErrorMessage>{error.tag_error}</ErrorMessage>
                 </div>
               </div>
             </div>
