@@ -109,13 +109,13 @@ export default function AddAddressModal(props) {
   }
 
   function checkLandMark() {
-    if (validator.isEmpty(address?.door.trim())) {
-      setError((error) => ({
-        ...error,
-        door_error: "Landmark cannot be empty",
-      }));
-      return false;
-    }
+    // if (validator.isEmpty(address?.door.trim())) {
+    //   setError((error) => ({
+    //     ...error,
+    //     door_error: "Landmark cannot be empty",
+    //   }));
+    //   return false;
+    // }
     return true;
   }
 
@@ -565,7 +565,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                     onBlur={checkLandMark}
-                    required
+                  // required
                   />
                   <ErrorMessage>{error.door_error}</ErrorMessage>
                 </div>
