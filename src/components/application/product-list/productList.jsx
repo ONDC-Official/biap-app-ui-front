@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useState } from "react";
 import styles from "../../../styles/products/productList.module.scss";
 import Navbar from "../../shared/navbar/navbar";
-import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
+import Cart from '../../shared/svg/cart';
 import { getCall } from "../../../api/axios";
 import { ONDC_COLORS } from "../../shared/colors";
 import Loading from "../../shared/loading/loading";
@@ -148,6 +148,7 @@ export default function ProductList() {
     if (eventData?.filters && Object.keys(eventData?.filters).length > 0) {
       let filterSet = eventData?.filters;
       filterSet.providers = filterSet.providers.filter((item) => item.name !== "" && item.name !== null);
+      filterSet.fulfillment = filterSet.fulfillment.filter((item) => item.name === undefined && item?.name !== "" && item?.name !== null);
       setFilters((filters) => ({
         ...filters,
         categories: [...filters?.categories, ...filterSet?.categories],
@@ -180,7 +181,7 @@ export default function ProductList() {
     try {
       const data = await cancellablePromise(
         getCall(
-          `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
+          `/clientApis/v1/on_search?messageId=${message_id}&limit=12&pageNumber=1`
         )
       );
       localStorage.setItem(
@@ -208,6 +209,7 @@ export default function ProductList() {
         getCall(`/clientApis/v1/getFilterParams?messageId=${messageId}`)
       );
       data.providers = data.providers.filter((item) => item.name !== "" && item.name !== null);
+      data.fulfillment = data.fulfillment.filter((item) => item.name === undefined && item.name !== "" && item.name !== null);
       setFilters((filters) => ({
         ...filters,
         minPrice: selected_filters.minPrice
@@ -252,7 +254,7 @@ export default function ProductList() {
     sort_options,
     page_number
   ) {
-    let query = `?messageId=${message_id}&limit=10`;
+    let query = `?messageId=${message_id}&limit=12`;
     if (page_number) {
       query += `&pageNumber=${page_number}`;
     }
@@ -351,14 +353,10 @@ export default function ProductList() {
     >
       <div className="text-center">
         <div className="py-2">
-          <img
-            src={no_result_empty_illustration}
-            alt="empty_search"
-            style={{ height: "120px" }}
-          />
+          <Cart height="120" width="120" />
         </div>
         <div className="py-2">
-          <p className={styles.illustration_header}>Your search is empty</p>
+          <p className={styles.illustration_header}>No results found</p>
           <p className={styles.illustration_body}>
             No products found with the given name. Try searching for something
             else.
@@ -494,7 +492,7 @@ export default function ProductList() {
                           )}
                         </div>
                       </div>
-                      <div className="container">
+                      <div className="container" style={{ minHeight: '500px' }}>
                         <div className="row pe-2">
                           {products.map((product) => {
                             return (

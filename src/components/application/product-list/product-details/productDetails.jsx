@@ -3,6 +3,7 @@ import styles from '../../../../styles/products/productDetails.module.scss';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
 import no_image_found from '../../../../assets/images/no_image_found.png';
+import back_icon from '../../../../assets/images/back.svg';
 import Navbar from '../../../shared/navbar/navbar';
 import OrderSummary from '../../cart/order-summary/orderSummary';
 import { useContext } from 'react';
@@ -76,15 +77,15 @@ export default function ProductDetails() {
       <div className={styles.playground_height}>
         <div
           className={`py-2 ${cartItems.length > 0
-              ? styles.product_list_with_summary_wrapper
-              : styles.product_list_without_summary_wrapper
+            ? styles.product_list_with_summary_wrapper
+            : styles.product_list_without_summary_wrapper
             }`}
         >
           <div className="container">
             <div className="row py-3 px-2">
               <div className="d-inline-flex">
                 <Link to={{ pathname: '/application/products' }}>
-                  <p className={styles.back_text}>back</p>
+                  <p className={styles.back_text}><img className={styles.back_icon} src={back_icon} alt={"back_icon"} />back</p>
                 </Link>
               </div>
             </div>

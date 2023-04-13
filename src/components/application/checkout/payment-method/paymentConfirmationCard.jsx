@@ -467,6 +467,7 @@ export default function PaymentConfirmationCard(props) {
                 color={ONDC_COLORS.SECONDARYCOLOR}
                 onClick={() => {
                   setTogglePaymentGateway(false);
+                  setConfirmOrderLoading(false);
                   setActivePaymentMethod(payment_methods.COD);
                 }}
               />
@@ -516,9 +517,9 @@ export default function PaymentConfirmationCard(props) {
                     disabled={confirmOrderLoading}
                     onClick={() => {
                       setActivePaymentMethod(payment_methods.JUSPAY);
-                      setTogglePaymentGateway(true);
-                      setLoadingSdkForPayment(true);
-                      initiateSDK();
+                      // setTogglePaymentGateway(true);
+                      // setLoadingSdkForPayment(true);
+                      // initiateSDK();
                     }}
                   >
                     <div className="px-3">
@@ -552,12 +553,18 @@ export default function PaymentConfirmationCard(props) {
               button_text="Place Order"
               onClick={() => {
                 setConfirmOrderLoading(true);
-                const request_object = constructQouteObject(
-                  cartItems.filter(({ provider }) =>
-                    successOrderIds.includes(provider.id.toString())
-                  )
-                );
-                confirmOrder(request_object, payment_methods.COD);
+                if (activePaymentMethod === payment_methods.JUSPAY) {
+                  setTogglePaymentGateway(true);
+                  setLoadingSdkForPayment(true);
+                  initiateSDK();
+                } else {
+                  const request_object = constructQouteObject(
+                    cartItems.filter(({ provider }) =>
+                      successOrderIds.includes(provider.id.toString())
+                    )
+                  );
+                  confirmOrder(request_object, payment_methods.COD);
+                }
               }}
             />
           </div>

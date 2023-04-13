@@ -8,5 +8,5 @@ export function getSubTotal(cartItems) {
       sum += quantity.count * Number(product.price.value);
     }
   });
-  return Number.isInteger(sum) ? sum : sum.toFixed(2);
+  return Number.isInteger(sum) ? Number(sum).toFixed(2) : sum.toFixed(2);
 }

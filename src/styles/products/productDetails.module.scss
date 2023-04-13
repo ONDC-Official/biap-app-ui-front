@@ -22,6 +22,21 @@ a {
   transition: color 0.3s;
 }
 
+.back_icon {
+  font-size: $font-12;
+  color: #aaa !important;
+  text-align: left;
+  cursor: pointer;
+  margin: 0;
+  height: 15px !important;
+  margin-right: 5px !important;
+}
+
+.back_icon:hover {
+  color: $accentColor;
+  transition: color 0.3s;
+}
+
 .width {
   width: 60%;
 }
@@ -157,7 +172,7 @@ a {
   align-items: center;
 }
 
-.quantity_count_wrapper > div {
+.quantity_count_wrapper>div {
   width: 40px;
   height: 35px;
 }
@@ -176,6 +191,7 @@ a {
 .subtract_svg_wrapper:hover {
   background-color: rgba($white, $alpha: 0.75);
   transition: all 0.3s;
+
   .subtract_svg_color {
     fill: $accentColor;
   }
@@ -190,6 +206,7 @@ a {
 .add_svg_wrapper:hover {
   background-color: rgba($white, $alpha: 0.75);
   transition: all 0.3s;
+
   .add_svg_color {
     fill: $accentColor;
   }
