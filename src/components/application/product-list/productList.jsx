@@ -181,7 +181,7 @@ export default function ProductList() {
     try {
       const data = await cancellablePromise(
         getCall(
-          `/clientApis/v1/on_search?messageId=${message_id}&limit=10&pageNumber=1`
+          `/clientApis/v1/on_search?messageId=${message_id}&limit=12&pageNumber=1`
         )
       );
       localStorage.setItem(
@@ -254,7 +254,7 @@ export default function ProductList() {
     sort_options,
     page_number
   ) {
-    let query = `?messageId=${message_id}&limit=10`;
+    let query = `?messageId=${message_id}&limit=12`;
     if (page_number) {
       query += `&pageNumber=${page_number}`;
     }
