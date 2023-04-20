@@ -18,12 +18,14 @@ import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
 import ReturnOrderModal from "../return-order-modal/returnOrderModal";
+import IssueOrderModal from "../issue-order-modal/issueOrderModal";
 
 export default function OrderCard(props) {
   const {
     product = [],
     quantity = [],
     quote = [],
+    fulfillments = [],
     billing_address,
     delivery_address,
     status,
@@ -31,6 +33,7 @@ export default function OrderCard(props) {
     order_id,
     transaction_id,
     bpp_id,
+    bpp_uri,
     onFetchUpdatedOrder,
     accoodion_id,
     currentSelectedAccordion,
@@ -43,11 +46,13 @@ export default function OrderCard(props) {
   // STATES
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [issueLoading, setIssueLoading] = useState(false);
   const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
   const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
+  const [toggleIssueModal, setToggleIssueModal] = useState(false);
 
   // REFS
   const trackOrderRef = useRef(null);
@@ -440,6 +445,29 @@ export default function OrderCard(props) {
           order_id={order_id}
         />
       )}
+
+      {
+        toggleIssueModal && (
+          <IssueOrderModal
+            onClose={() => setToggleIssueModal(false)}
+            onSuccess={() => {
+              setToggleIssueModal(false);
+              setCurrentSelectedAccordion("");
+              onFetchUpdatedOrder();
+            }}
+            quantity={quantity}
+            partailsCancelProductList={product}
+            order_status={status}
+            billing_address={billing_address}
+            delivery_address={delivery_address}
+            transaction_id={transaction_id}
+            order_id={order_id}
+            bpp_id={bpp_id}
+            bpp_uri={bpp_uri}
+            fulfillments={fulfillments}
+          />
+        )
+      }
       <div
         className={`d-flex align-items-center ${styles.padding_20}`}
         data-bs-toggle="collapse"
@@ -739,6 +767,26 @@ export default function OrderCard(props) {
             {/* IF ORDER STATUS IS NOT CANCEL  */}
             {current_order_status?.status !== order_statuses.cancelled && (
               <div className="d-flex align-items-center justify-content-center flex-wrap">
+                <div className="pe-3 py-1">
+                  <button
+                    disabled={
+                      trackOrderLoading || statusLoading || supportOrderLoading || issueLoading
+                    }
+                    className={
+                      statusLoading
+                        ? styles.secondary_action_loading
+                        : styles.secondary_action
+                    }
+                    onClick={() => setToggleIssueModal(true)}
+                  >
+                    {issueLoading ? (
+                      <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                    ) : (
+                      "Raise Issue"
+                    )}
+                  </button>
+                </div>
+
                 <div className="pe-3 py-1">
                   <button
                     disabled={
