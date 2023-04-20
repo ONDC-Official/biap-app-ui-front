@@ -83,14 +83,15 @@ export default function IssueOrderModal({
                     message: {
                         issue: {
                             category: selectedIssueCategory.value.toUpperCase(),
-                            sub_category: selectedIssueCategory.value,
+                            sub_category: selectedIssueSubcategory.value,
                             bppId: bpp_id,
                             bpp_uri,
                             created_at: new Date(),
                             updated_at: new Date(),
                             complainant_info: {
                                 person: {
-                                    name: billing_address.name
+                                    name: billing_address.name,
+                                    email: billing_address.email
                                 },
                                 contact: {
                                     phone: billing_address.phone
