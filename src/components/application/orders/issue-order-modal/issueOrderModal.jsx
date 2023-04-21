@@ -112,8 +112,10 @@ export default function IssueOrderModal({
                                 items: selectedIds,
                                 fulfillments: fulfillments,
                                 provider_id: "P1"
+                            },
+                            issue_actions: {
+                                complainant_actions: []
                             }
-
                         }
                     },
                 })
