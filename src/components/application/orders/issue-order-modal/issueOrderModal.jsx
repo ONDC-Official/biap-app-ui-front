@@ -79,66 +79,53 @@ export default function IssueOrderModal({
 
         cancelPartialEventSourceResponseRef.current = [];
         setLoading(true);
-        const map = new Map();
-        selectedIds.map((item) => {
-            const provider_id = item?.provider_details?.id;
-            if (map.get(provider_id)) {
-                return map.set(provider_id, [...map.get(provider_id), item]);
-            }
-            return map.set(provider_id, [item]);
-        });
-        const requestObject = Array.from(map.values());
-        console.log('requestObject= ', requestObject);
         try {
             const data = await cancellablePromise(
-                postCall("/issueApis/v1/issue",
-                    requestObject?.map((item, index) => {
-                        return {
-                            context: {
-                                city: delivery_address.location?.city,
-                                state: delivery_address.location?.state,
-                                transaction_id,
-                            },
-                            message: {
-                                issue: {
-                                    category: selectedIssueCategory.value.toUpperCase(),
-                                    sub_category: selectedIssueSubcategory.value,
-                                    bppId: bpp_id,
-                                    bpp_uri,
-                                    created_at: new Date(),
-                                    updated_at: new Date(),
-                                    complainant_info: {
-                                        person: {
-                                            name: billing_address.name,
-                                            email: billing_address.email
-                                        },
-                                        contact: {
-                                            phone: billing_address.phone
-                                        }
-                                    },
-                                    description: {
-                                        short_desc: shortDescription,
-                                        long_desc: longDescription,
-                                        additional_desc: {
-                                            "url": "https://buyerapp.com/additonal-details/desc.txt",
-                                            "content_type": "text/plain"
-                                        },
-                                        images: baseImage
-                                    },
-                                    order_details: {
-                                        id: order_id,
-                                        state: order_status,
-                                        items: selectedIds,
-                                        fulfillments: fulfillments,
-                                        provider_id: item?.[index]?.product.provider_details?.id
-                                    },
-                                    issue_actions: {
-                                        complainant_actions: []
-                                    }
+                postCall("/issueApis/v1/issue", {
+                    context: {
+                        city: delivery_address.location?.city,
+                        state: delivery_address.location?.state,
+                        transaction_id,
+                    },
+                    message: {
+                        issue: {
+                            category: selectedIssueCategory.value.toUpperCase(),
+                            sub_category: selectedIssueSubcategory.value,
+                            bppId: bpp_id,
+                            bpp_uri,
+                            created_at: new Date(),
+                            updated_at: new Date(),
+                            complainant_info: {
+                                person: {
+                                    name: billing_address.name,
+                                    email: billing_address.email
+                                },
+                                contact: {
+                                    phone: billing_address.phone
                                 }
                             },
+                            description: {
+                                short_desc: shortDescription,
+                                long_desc: longDescription,
+                                additional_desc: {
+                                    "url": "https://buyerapp.com/additonal-details/desc.txt",
+                                    "content_type": "text/plain"
+                                },
+                                images: baseImage
+                            },
+                            order_details: {
+                                id: order_id,
+                                state: order_status,
+                                items: selectedIds,
+                                fulfillments: fulfillments,
+                                provider_id: selectedIds?.[0]?.product.provider_details?.id
+                            },
+                            issue_actions: {
+                                complainant_actions: []
+                            }
                         }
-                    })
+                    }
+                }
                 )
             );
             //Error handling workflow eg, NACK
@@ -304,15 +291,14 @@ export default function IssueOrderModal({
 
     useEffect(() => {
         if (selectedIds.length > 0) {
+            setSelectedIssueSubcategory()
             if (selectedIds.length < partailsCancelProductList.length) {
-
                 const type = ISSUE_TYPES.find(
                     ({ value }) =>
                         value === "Item"
                 );
                 setSelectedIssueCategory(type);
             } else {
-
                 const type = ISSUE_TYPES.find(
                     ({ value }) =>
                         value === "Fulfillment"
