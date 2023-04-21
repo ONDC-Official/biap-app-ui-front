@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Button from "../../../shared/button/button";
@@ -9,13 +9,15 @@ import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import { postCall } from "../../../../api/axios";
+import { getCall, postCall } from "../../../../api/axios";
 import Checkbox from "../../../shared/checkbox/checkbox";
 import Dropdown from "../../../shared/dropdown/dropdown";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import { ISSUE_TYPES } from "../../../../constants/issue-types";
 import Input from "../../../shared/input/input";
 import validator from "validator";
+import { getValueFromCookie } from "../../../../utils/cookies";
+import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 
 export default function IssueOrderModal({
     billing_address,
@@ -47,6 +49,10 @@ export default function IssueOrderModal({
     const [selectedIds, setSelectedIds] = useState([]);
     const [orderQty, setOrderQty] = useState([]);
 
+    // REFS
+    const cancelPartialEventSourceResponseRef = useRef(null);
+    const eventTimeOutRef = useRef([]);
+
     // CONTEXT
     const dispatch = useContext(ToastContext);
 
@@ -71,62 +77,80 @@ export default function IssueOrderModal({
         const allCheckPassed = [checkSubcategory(), checkIsOrderSelected(), checkShortDescription(), checkLongDescription()].every(Boolean);
         if (!allCheckPassed) return;
 
+        cancelPartialEventSourceResponseRef.current = [];
         setLoading(true);
+        const map = new Map();
+        selectedIds.map((item) => {
+            const provider_id = item?.provider_details?.id;
+            if (map.get(provider_id)) {
+                return map.set(provider_id, [...map.get(provider_id), item]);
+            }
+            return map.set(provider_id, [item]);
+        });
+        const requestObject = Array.from(map.values());
+        console.log('requestObject= ', requestObject);
         try {
-            const { message } = await cancellablePromise(
-                postCall("/issueApis/v1/issue", {
-                    context: {
-                        city: delivery_address.location?.city,
-                        state: delivery_address.location?.state,
-                        transaction_id,
-                    },
-                    message: {
-                        issue: {
-                            category: selectedIssueCategory.value.toUpperCase(),
-                            sub_category: selectedIssueSubcategory.value,
-                            bppId: bpp_id,
-                            bpp_uri,
-                            created_at: new Date(),
-                            updated_at: new Date(),
-                            complainant_info: {
-                                person: {
-                                    name: billing_address.name,
-                                    email: billing_address.email
-                                },
-                                contact: {
-                                    phone: billing_address.phone
+            const data = await cancellablePromise(
+                postCall("/issueApis/v1/issue",
+                    requestObject?.map((item, index) => {
+                        return {
+                            context: {
+                                city: delivery_address.location?.city,
+                                state: delivery_address.location?.state,
+                                transaction_id,
+                            },
+                            message: {
+                                issue: {
+                                    category: selectedIssueCategory.value.toUpperCase(),
+                                    sub_category: selectedIssueSubcategory.value,
+                                    bppId: bpp_id,
+                                    bpp_uri,
+                                    created_at: new Date(),
+                                    updated_at: new Date(),
+                                    complainant_info: {
+                                        person: {
+                                            name: billing_address.name,
+                                            email: billing_address.email
+                                        },
+                                        contact: {
+                                            phone: billing_address.phone
+                                        }
+                                    },
+                                    description: {
+                                        short_desc: shortDescription,
+                                        long_desc: longDescription,
+                                        additional_desc: {
+                                            "url": "https://buyerapp.com/additonal-details/desc.txt",
+                                            "content_type": "text/plain"
+                                        },
+                                        images: baseImage
+                                    },
+                                    order_details: {
+                                        id: order_id,
+                                        state: order_status,
+                                        items: selectedIds,
+                                        fulfillments: fulfillments,
+                                        provider_id: item?.[index]?.product.provider_details?.id
+                                    },
+                                    issue_actions: {
+                                        complainant_actions: []
+                                    }
                                 }
                             },
-                            description: {
-                                short_desc: shortDescription,
-                                long_desc: longDescription,
-                                additional_desc: {
-                                    "url": "https://buyerapp.com/additonal-details/desc.txt",
-                                    "content_type": "text/plain"
-                                },
-                                images: baseImage
-                            },
-                            order_details: {
-                                id: order_id,
-                                state: order_status,
-                                items: selectedIds,
-                                fulfillments: fulfillments,
-                                provider_id: "P1"
-                            },
-                            issue_actions: {
-                                complainant_actions: []
-                            }
                         }
-                    },
-                })
+                    })
+                )
             );
-            setLoading(false);
-            if (message?.ack?.status === "ACK") {
-                onSuccess();
+            //Error handling workflow eg, NACK
+            if (data[0].error && data[0].message.ack.status === "NACK") {
+                setLoading(false);
+                dispatchToast(data[0].error.message, toast_types.error);
             } else {
-                dispatchToast(
-                    "Something went wrong!, issue cannot be raised",
-                    toast_types.error
+                fetchCancelPartialOrderDataThroughEvents(
+                    data?.map((txn) => {
+                        const { context } = txn;
+                        return context?.message_id;
+                    })
                 );
             }
         } catch (err) {
@@ -134,6 +158,84 @@ export default function IssueOrderModal({
             dispatchToast(err?.message, toast_types.error);
         }
     }
+
+    // PARTIAL CANCEL APIS
+    // use this function to fetch cancel product through events
+    function fetchCancelPartialOrderDataThroughEvents(message_id) {
+        const token = getValueFromCookie("token");
+        let header = {
+            headers: {
+                ...(token && {
+                    Authorization: `Bearer ${token}`,
+                }),
+            },
+        };
+        let es = new window.EventSourcePolyfill(
+            `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+            header
+        );
+        es.addEventListener("on_update", (e) => {
+            const { messageId } = JSON.parse(e?.data);
+            getPartialCancelOrderDetails(messageId);
+        });
+
+        const timer = setTimeout(() => {
+            es.close();
+            if (cancelPartialEventSourceResponseRef.current.length <= 0) {
+                dispatchToast(
+                    "Cannot proceed with you request now! Please try again",
+                    toast_types.error
+                );
+                setLoading(false);
+            }
+        }, SSE_TIMEOUT);
+
+        eventTimeOutRef.current = [
+            ...eventTimeOutRef.current,
+            {
+                eventSource: es,
+                timer,
+            },
+        ];
+    }
+
+    // on Issue api
+    async function getPartialCancelOrderDetails(message_id) {
+        try {
+            const data = await cancellablePromise(
+                getCall(`/clientApis/v2/on_issue?messageId=${message_id}`)
+            );
+            cancelPartialEventSourceResponseRef.current = [
+                ...cancelPartialEventSourceResponseRef.current,
+                data,
+            ];
+            setLoading(false);
+            if (data?.message) {
+                onSuccess();
+            } else {
+                dispatchToast(
+                    "Something went wrong!, product status cannot be updated",
+                    toast_types.error
+                );
+            }
+        } catch (err) {
+            setLoading(false);
+            dispatchToast(err?.message, toast_types.error);
+            eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+                eventSource.close();
+                clearTimeout(timer);
+            });
+        }
+    }
+
+    useEffect(() => {
+        return () => {
+            eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+                eventSource.close();
+                clearTimeout(timer);
+            });
+        };
+    }, []);
 
     function checkShortDescription() {
         if (validator.isEmpty(shortDescription.trim())) {
