@@ -153,7 +153,7 @@ export default function IssueOrderModal({
             },
         };
         let es = new window.EventSourcePolyfill(
-            `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+            `${process.env.REACT_APP_BASE_URL}issueApis/events?messageId=${message_id}`,
             header
         );
         es.addEventListener("on_update", (e) => {
@@ -185,7 +185,7 @@ export default function IssueOrderModal({
     async function getPartialCancelOrderDetails(message_id) {
         try {
             const data = await cancellablePromise(
-                getCall(`/clientApis/v2/on_issue?messageId=${message_id}`)
+                getCall(`/issueApis/v1/on_issue?messageId=${message_id}`)
             );
             cancelPartialEventSourceResponseRef.current = [
                 ...cancelPartialEventSourceResponseRef.current,
