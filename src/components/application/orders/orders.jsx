@@ -58,6 +58,7 @@ export default function Orders() {
           billing,
           createdAt,
           bppId,
+          bpp_uri,
           items,
         } = order;
         return {
@@ -97,6 +98,8 @@ export default function Orders() {
           transaction_id: transactionId,
           createdAt,
           bpp_id: bppId,
+          bpp_uri: bpp_uri,
+          fulfillments: fulfillments
         };
       });
       setPagination((prev) => ({
@@ -196,13 +199,17 @@ export default function Orders() {
                       transaction_id,
                       createdAt,
                       bpp_id,
-                      quote
+                      bpp_uri,
+                      quote,
+                      fulfillments
                     },
                     index
                   ) => {
                     return (
                       <div className="py-2" key={`order_id_${index}`}>
                         <OrderCard
+                          bpp_uri={bpp_uri}
+                          fulfillments={fulfillments}
                           product={product}
                           quantity={quantity}
                           quote={quote}
