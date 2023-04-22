@@ -156,7 +156,7 @@ export default function IssueOrderModal({
             `${process.env.REACT_APP_BASE_URL}issueApis/events?messageId=${message_id}`,
             header
         );
-        es.addEventListener("on_update", (e) => {
+        es.addEventListener("on_issue", (e) => {
             const { messageId } = JSON.parse(e?.data);
             getPartialCancelOrderDetails(messageId);
         });
