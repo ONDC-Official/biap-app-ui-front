@@ -6,7 +6,11 @@ import styles from "../../../../../styles/cart/cartView.module.scss";
 import Add from "../../../../shared/svg/add";
 import AddAddressModal from "../../add-address-modal/addAddressModal";
 import AddressRadioButton from "../address-radio-button/addressRadioButton";
-import { AddCookie, removeCookie, getValueFromCookie } from "../../../../../utils/cookies";
+import {
+  AddCookie,
+  removeCookie,
+  getValueFromCookie,
+} from "../../../../../utils/cookies";
 import { restoreToDefault } from "../../add-address-modal/utils/restoreDefaultAddress";
 import { ToastContext } from "../../../../../context/toastContext";
 import useCancellablePromise from "../../../../../api/cancelRequest";
@@ -16,8 +20,13 @@ import {
 } from "../../../../shared/toast/utils/toast";
 
 export default function DeliveryAddress(props) {
-  const { deliveryAddresses, setDeliveryAddresses, updateQuoteBasedOnDeliveryAddress } = props;
-  const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
+  const {
+    deliveryAddresses,
+    setDeliveryAddresses,
+    updateQuoteBasedOnDeliveryAddress,
+  } = props;
+  const { deliveryAddress, setDeliveryAddress, setBillingAddress } =
+    useContext(AddressContext);
   const [toggleAddressModal, setToggleAddressModal] = useState({
     actionType: "",
     toggle: false,
@@ -50,7 +59,9 @@ export default function DeliveryAddress(props) {
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${eloc}`
         )
       );
-      const { latitude, longitude } = data;
+
+      const { latitude = 12.9812430000001, longitude = 77.5950340000001 } =
+        data;
       if (latitude && longitude) {
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
         let search_context = JSON.parse(
@@ -146,7 +157,11 @@ export default function DeliveryAddress(props) {
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>
-                          {`${address.tag ? address.tag + " (" + descriptor?.name + ")" : descriptor?.name} `}
+                          {`${
+                            address.tag
+                              ? address.tag + " (" + descriptor?.name + ")"
+                              : descriptor?.name
+                          } `}
                         </p>
                         <p className={`${styles.address_line_2} pb-2`}>
                           {descriptor?.email} - {descriptor?.phone}
