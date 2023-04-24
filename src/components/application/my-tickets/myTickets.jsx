@@ -120,7 +120,7 @@ export default function MyTickets() {
                 </div>
               </div>
               <div className={styles.order_list_wrapper}>
-                {tickets.map(
+                {tickets?.map(
                   (
                     {
                       order_details,
