@@ -135,6 +135,8 @@ export default function MyTickets() {
                       category,
                       description,
                       issue_type,
+                      message_id,
+                      transaction_id,
                     },
                     index
                   ) => {
@@ -142,14 +144,15 @@ export default function MyTickets() {
                       <div className="py-2" key={`order_id_${index}`}>
                         <TicketCard
                           description={description}
+                          message_id={message_id}
+                          transaction_id={transaction_id}
                           category={category}
                           sub_category={sub_category}
                           order_details={order_details}
                           issue_actions={issue_actions}
                           status={issue_status}
                           issue_type={issue_type}
-                          transaction_id={_id}
-                          order_id={issueId}
+                          issue_id={issueId}
                           updated_at={updated_at}
                           created_at={created_at}
                           bpp_id={bppId}

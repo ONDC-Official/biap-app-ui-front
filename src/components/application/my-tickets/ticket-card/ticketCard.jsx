@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useRef } from "react";
 import moment from "moment";
 import { getOrderStatus } from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
@@ -6,9 +6,11 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import Loading from "../../../shared/loading/loading";
-import CallSvg from "../../../shared/svg/callSvg";
-import CustomerPhoneCard from "../../orders/customer-phone-card/customerPhoneCard";
+
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
+import { getCall, postCall } from "../../../../api/axios";
+import { getValueFromCookie } from "../../../../utils/cookies";
+import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 
 export default function TicketCard(props) {
   const {
@@ -24,12 +26,18 @@ export default function TicketCard(props) {
     accoodion_id,
     currentSelectedAccordion,
     setCurrentSelectedAccordion,
+    transaction_id,
+    message_id,
+    bpp_id,
+    issue_id,
   } = props;
 
   // HELPERS
   const current_order_status = getOrderStatus(status);
-
+  const cancelPartialEventSourceResponseRef = useRef(null);
+  const eventTimeOutRef = useRef([]);
   // STATES
+
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [supportOrderLoading, setSupportOrderLoading] = useState(false);
@@ -37,6 +45,8 @@ export default function TicketCard(props) {
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
   const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
+
+  const [loading, setLoading] = useState(false);
 
   // REFS
 
@@ -46,7 +56,114 @@ export default function TicketCard(props) {
   const { cancellablePromise } = useCancellablePromise();
 
   // use this function to dispatch error
-  console.log("props= ", props);
+
+  const dispatch = useContext(ToastContext);
+
+  function dispatchToast(message, type) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type,
+        message,
+      },
+    });
+  }
+
+  const checkIssueStatus = async () => {
+    cancelPartialEventSourceResponseRef.current = [];
+    setLoading(true);
+    try {
+      const data = await cancellablePromise(
+        postCall("/issueApis/v1/issue_status", {
+          context: {
+            transaction_id: transaction_id,
+            bpp_id: bpp_id,
+          },
+          message: {
+            id: issue_id,
+          },
+        })
+      );
+      //Error handling workflow eg, NACK
+      if (data.message && data.message.ack.status === "NACK") {
+        setLoading(false);
+        dispatchToast("Something went wrong", toast_types.error);
+      } else {
+        fetchIssueStatusThroughEvents(data.context?.message_id);
+      }
+    } catch (err) {
+      setLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  };
+
+  function fetchIssueStatusThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}issueApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_issue_status", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getIssueStatusDetails(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (cancelPartialEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
+        setLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
+  async function getIssueStatusDetails(message_id) {
+    try {
+      const data = await cancellablePromise(
+        getCall(`/issueApis/v1/on_issue_status?messageId=${message_id}`)
+      );
+      cancelPartialEventSourceResponseRef.current = [
+        ...cancelPartialEventSourceResponseRef.current,
+        data,
+      ];
+      setLoading(false);
+      if (data?.message) {
+        console.log(data?.message);
+      } else {
+        dispatchToast(
+          "Something went wrong!, issue status cannot be fetched",
+          toast_types.error
+        );
+      }
+    } catch (err) {
+      setLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    }
+  }
+
   return (
     <div className={styles.orders_card}>
       <div
@@ -322,7 +439,7 @@ export default function TicketCard(props) {
 
         {/* ACTIONS FOR AN ORDER  */}
         <div
-          className="align-items-center mt-3 pt-3"
+          className="align-items-center mt-3 pt-3 "
           style={{ borderTop: "1px solid #ddd" }}
         >
           <p className={styles.status_label}>
@@ -336,6 +453,17 @@ export default function TicketCard(props) {
               ?.resolution_support?.respondentContact?.phone ?? "N/A"}
           </p>
         </div>
+        <button
+          disabled={loading}
+          onClick={() => {
+            console.log("issue_id", issue_id);
+            console.log("transaction_id", transaction_id);
+            checkIssueStatus();
+          }}
+        >
+          {" "}
+          Check status
+        </button>
       </div>
     </div>
   );
