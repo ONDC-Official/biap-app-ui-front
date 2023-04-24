@@ -65,6 +65,10 @@ export function getOrderStatus(status) {
         border: ONDC_COLORS.WARNING,
       };
     default:
-      return null;
+        return {
+          status: status,
+          color: "46, 176, 134",
+          border: ONDC_COLORS.SUCCESS,
+      };
   }
 }
