@@ -149,10 +149,10 @@ export default function MyTickets() {
                                                     status={issue_status}
                                                     issue_type={issue_type}
                                                     transaction_id={_id}
-                                                    order_id={issueId}
                                                     updated_at={updated_at}
                                                     created_at={created_at}
                                                     bpp_id={bppId}
+                                                    issue_id={issueId}
                                                     accoodion_id={`order_id_${index}`}
                                                     onFetchUpdatedOrder={() => {
                                                         setCurrentSelectedAccordion("");

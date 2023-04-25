@@ -35,29 +35,22 @@ export default function TicketCard(props) {
 
     // HELPERS
     const current_order_status = getOrderStatus(status);
-    const cancelPartialEventSourceResponseRef = useRef(null);
-    const eventTimeOutRef = useRef([]);
-    // STATES
 
-    const [trackOrderLoading, setTrackOrderLoading] = useState(false);
+    // STATES
     const [statusLoading, setStatusLoading] = useState(false);
-    const [supportOrderLoading, setSupportOrderLoading] = useState(false);
-    const [supportOrderDetails, setSupportOrderDetails] = useState();
-    const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
     const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
-    const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
 
     // REFS
+    const cancelPartialEventSourceResponseRef = useRef(null);
+    const eventTimeOutRef = useRef([]);
 
     // CONTEXT
+    const dispatch = useContext(ToastContext);
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
     // use this function to dispatch error
-
-    const dispatch = useContext(ToastContext);
-
     function dispatchToast(message, type) {
         dispatch({
             type: toast_actions.ADD_TOAST,
@@ -472,19 +465,7 @@ export default function TicketCard(props) {
                             )}
                         </button>
                     </div>
-
                 </div>
-                {/* <button
-          disabled={loading}
-          onClick={() => {
-            console.log("issue_id", issue_id);
-            console.log("transaction_id", transaction_id);
-            checkIssueStatus();
-          }}
-        >
-          {" "}
-          Check status
-        </button> */}
             </div>
         </div>
     );
