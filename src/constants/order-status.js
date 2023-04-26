@@ -12,6 +12,8 @@ export const order_statuses = {
   returned: "Returned",
   replaced: "Replaced",
   Active: "Active",
+  open: "Open",
+  closed: "Close"
 };
 
 export function getOrderStatus(status) {
@@ -34,6 +36,18 @@ export function getOrderStatus(status) {
         color: "46, 176, 134",
         border: ONDC_COLORS.SUCCESS,
       };
+      case order_statuses.open:
+        return {
+          status: "Open",
+          color: "46, 176, 134",
+          border: ONDC_COLORS.SUCCESS,
+        };
+        case order_statuses.closed:
+          return {
+            status: "Close",
+            color: "46, 176, 134",
+            border: ONDC_COLORS.SUCCESS,
+          };
     case order_statuses.completed:
       return {
         status: "Completed",
@@ -65,10 +79,6 @@ export function getOrderStatus(status) {
         border: ONDC_COLORS.WARNING,
       };
     default:
-        return {
-          status: status,
-          color: "46, 176, 134",
-          border: ONDC_COLORS.SUCCESS,
-      };
+      return null;
   }
 }

@@ -12,6 +12,7 @@ import { getCall, postCall } from "../../../../api/axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import Loading from "../../../shared/loading/loading";
+import CustomerActionCard from "../action-card/actionCard";
 
 export default function TicketCard(props) {
     const {
@@ -38,7 +39,8 @@ export default function TicketCard(props) {
 
     // STATES
     const [statusLoading, setStatusLoading] = useState(false);
-    const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
+    const [toggleActionModal, setToggleActionModal] = useState(false);
+    const [supportActionDetails, setSupportActionDetails] = useState();
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -158,6 +160,17 @@ export default function TicketCard(props) {
 
     return (
         <div className={styles.orders_card}>
+            {toggleActionModal && (
+                <CustomerActionCard
+                    supportActionDetails={supportActionDetails}
+                    onClose={() => setToggleActionModal(false)}
+                    onSuccess={() => {
+                        dispatchToast("Action successfully taken", toast_types.success);
+                        setSupportActionDetails();
+                        setToggleActionModal(false);
+                    }}
+                />
+            )}
             <div
                 className={`d-flex align-items-center ${styles.padding_20}`}
                 data-bs-toggle="collapse"
@@ -177,6 +190,12 @@ export default function TicketCard(props) {
                         {issue_type ?? "Issue"} raised on
                         <span style={{ fontWeight: "500", padding: "0 5px" }}>
                             {updated_at ? moment(updated_at).format("MMMM Do, YYYY") : "NA"}
+                        </span>
+                    </p>
+                    <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
+                        Issue Id:
+                        <span style={{ fontWeight: "500", padding: "0 5px" }}>
+                            {issue_id}
                         </span>
                     </p>
                 </div>
@@ -447,24 +466,51 @@ export default function TicketCard(props) {
                         </p>
                     </div>
                     <div className="ms-auto">
-                        <button
-                            disabled={
-                                statusLoading
+                        <div className="d-flex align-items-center justify-content-center flex-wrap">
+                            {
+                                status === 'Close' ?
+                                    <button
+                                        disabled={
+                                            statusLoading
+                                        }
+                                        className={
+                                            statusLoading
+                                                ? styles.secondary_action_loading
+                                                : styles.secondary_action
+                                        }
+                                        onClick={() => {
+                                            setSupportActionDetails(props)
+                                            setToggleActionModal(true)
+                                        }}
+                                    >
+                                        {statusLoading ? (
+                                            <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                                        ) : (
+                                            "Take Action"
+                                        )}
+                                    </button>
+                                    :
+                                    <button
+                                        disabled={
+                                            statusLoading
+                                        }
+                                        className={
+                                            statusLoading
+                                                ? styles.secondary_action_loading
+                                                : styles.secondary_action
+                                        }
+                                        onClick={() => checkIssueStatus()}
+                                    >
+                                        {statusLoading ? (
+                                            <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                                        ) : (
+                                            "Get Status"
+                                        )}
+                                    </button>
                             }
-                            className={
-                                statusLoading
-                                    ? styles.secondary_action_loading
-                                    : styles.secondary_action
-                            }
-                            onClick={() => checkIssueStatus()}
-                        >
-                            {statusLoading ? (
-                                <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
-                            ) : (
-                                "Get Status"
-                            )}
-                        </button>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
