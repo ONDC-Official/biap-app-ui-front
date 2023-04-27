@@ -126,6 +126,7 @@ export default function IssueOrderModal({
               },
               issue_actions: {
                 complainant_actions: [],
+                respondent_actions: []
               },
             },
           },
