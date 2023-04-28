@@ -5,6 +5,7 @@ import Button from "../../../shared/button/button";
 import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import productStyles from "../../../../styles/orders/orders.module.scss";
+import productCartStyles from '../../../../styles/products/productCard.module.scss';
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
@@ -18,6 +19,8 @@ import Input from "../../../shared/input/input";
 import validator from "validator";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
+import Subtract from "../../../shared/svg/subtract";
+import Add from "../../../shared/svg/add";
 
 export default function IssueOrderModal({
   billing_address,
@@ -83,6 +86,9 @@ export default function IssueOrderModal({
 
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
+
+    console.log('selectedIds', selectedIds)
+
     try {
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
@@ -342,6 +348,26 @@ export default function IssueOrderModal({
     });
   };
 
+
+  const onUpdateQty = (qty, idx, pId) => {
+    let qtyData = Object.assign([], orderQty);
+    qtyData[idx].count = qty;
+    setOrderQty(qtyData);
+    updateQtyForSelectedProduct(pId, qty)
+  };
+
+
+  function updateQtyForSelectedProduct(pId, qty) {
+    let data = JSON.parse(JSON.stringify(Object.assign([], selectedIds)));
+    data = data.map((item) => {
+      if(item.id === pId){
+        item.quantity.count = qty;
+      }else{}
+      return item;
+    })
+    setSelectedIds(data);
+  }
+
   return (
     <div className={styles.overlay}>
       <div className={styles.popup_card} style={{ width: "700px" }}>
@@ -403,6 +429,58 @@ export default function IssueOrderModal({
                         </div>
                       </Checkbox>
                     </div>
+
+
+                    <div style={{ width: "30%" }}>
+                            <div className={productCartStyles.quantity_count_wrapper}  style={{marginLeft:"30px !important"}}>
+                              <div
+                                className={`${orderQty[idx]?.count > 1?productCartStyles.subtract_svg_wrapper:""} d-flex align-items-center justify-content-center`}
+                                onClick={() => {
+                                //   setQuantityCount(quantityCount - 1);
+                                //   onReduceQuantity(id);
+                                //   if (quantityCount - 1 === 0) {
+                                //     setToggleAddToCart(false);
+                                //   }
+                                  if(orderQty[idx]?.count > 1){
+                                    onUpdateQty(orderQty[idx]?.count-1, idx, product?.id);
+                                  }
+                                }}
+                              >
+                                {
+                                  orderQty[idx]?.count > 1 && (
+                                    <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
+                                  )
+                                }
+                              </div>
+                              <div className="d-flex align-items-center justify-content-center">
+                                <p className={productCartStyles.quantity_count}>
+                                  {orderQty[idx]?.count ?? "0"}
+                                  {/* {quantityCount} */}
+                                </p>
+                              </div>
+                              <div
+                                className={`${orderQty[idx]?.count < quantity[idx]?.count?productCartStyles.add_svg_wrapper:""} d-flex align-items-center justify-content-center`}
+                                onClick={() => {
+                                //   setQuantityCount((quantityCount) => quantityCount + 1);
+                                //   onAddQuantity(id);
+                                  if(orderQty[idx]?.count < quantity[idx]?.count){
+                                    onUpdateQty(orderQty[idx]?.count+1, idx, product?.id);
+                                  }
+                                }}
+                              >
+                                {
+                                  orderQty[idx]?.count < quantity[idx]?.count && (
+                                    <Add
+                                      width="13"
+                                      height="13"
+                                      classes={productCartStyles.add_svg_color}
+                                    />
+                                  )
+                                }
+                              </div>
+                            </div>
+                          </div>
+
                     <div className="ms-auto">
                       <p
                         className={productStyles.product_price}
