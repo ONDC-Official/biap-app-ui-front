@@ -126,7 +126,7 @@ export default function IssueOrderModal({
               },
               issue_actions: {
                 complainant_actions: [],
-                respondent_actions: []
+                respondent_actions: [],
               },
             },
           },
@@ -161,7 +161,6 @@ export default function IssueOrderModal({
       header
     );
     es.addEventListener("on_issue", (e) => {
-      console.log("HERE in ON_ISSUE");
       const { messageId } = JSON.parse(e?.data);
       getPartialCancelOrderDetails(messageId);
     });
