@@ -19,7 +19,7 @@ import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import CancelOrderModal from "../cancel-order-modal/cancelOrderModal";
 import ReturnOrderModal from "../return-order-modal/returnOrderModal";
 import IssueOrderModal from "../issue-order-modal/issueOrderModal";
-
+import { useHistory } from "react-router-dom"
 export default function OrderCard(props) {
   const {
     product = [],
@@ -46,7 +46,8 @@ export default function OrderCard(props) {
   // STATES
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
-  const [issueLoading, setIssueLoading] = useState(false);
+  const [issueLoading, setIssueLoading] = useState(true);
+  const [isIssueRaised, setIsIssueRaised] = useState(false);
   const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
   const [toggleCustomerPhoneCard, setToggleCustomerPhoneCard] = useState(false);
@@ -63,6 +64,7 @@ export default function OrderCard(props) {
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
+  const history = useHistory();
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -181,6 +183,24 @@ export default function OrderCard(props) {
         eventSource.close();
         clearTimeout(timer);
       });
+    }
+  }
+
+  // get issue status
+  async function getTrackIssueDetails() {
+    try {
+      const { context, message } = await cancellablePromise(
+        getCall(`/clientApis/v2/issue?transactionId=${transaction_id}`)
+      );
+
+      if (message?.issue) {
+        setIsIssueRaised(true)
+        return;
+      }
+      setIssueLoading(false);
+    } catch (err) {
+      setIssueLoading(false);
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 
@@ -385,6 +405,7 @@ export default function OrderCard(props) {
   }
 
   useEffect(() => {
+    getTrackIssueDetails()
     return () => {
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
         eventSource.close();
@@ -768,23 +789,43 @@ export default function OrderCard(props) {
             {current_order_status?.status !== order_statuses.cancelled && (
               <div className="d-flex align-items-center justify-content-center flex-wrap">
                 <div className="pe-3 py-1">
-                  <button
-                    disabled={
-                      trackOrderLoading || statusLoading || supportOrderLoading || issueLoading
-                    }
-                    className={
-                      statusLoading
-                        ? styles.secondary_action_loading
-                        : styles.secondary_action
-                    }
-                    onClick={() => setToggleIssueModal(true)}
-                  >
-                    {issueLoading ? (
-                      <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
-                    ) : (
-                      "Raise Issue"
-                    )}
-                  </button>
+                  {isIssueRaised ?
+                    <button
+                      disabled={
+                        trackOrderLoading || statusLoading || supportOrderLoading || issueLoading
+                      }
+                      className={
+                        statusLoading
+                          ? styles.secondary_action_loading
+                          : styles.secondary_action
+                      }
+                      onClick={() => history.push("/application/tickets")}
+                    >
+                      {issueLoading ? (
+                        <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                      ) : (
+                        "Track Issue"
+                      )}
+                    </button>
+                    :
+                    <button
+                      disabled={
+                        trackOrderLoading || statusLoading || supportOrderLoading || issueLoading
+                      }
+                      className={
+                        statusLoading
+                          ? styles.secondary_action_loading
+                          : styles.secondary_action
+                      }
+                      onClick={() => setToggleIssueModal(true)}
+                    >
+                      {issueLoading ? (
+                        <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                      ) : (
+                        "Raise Issue"
+                      )}
+                    </button>
+                  }
                 </div>
 
                 <div className="pe-3 py-1">
