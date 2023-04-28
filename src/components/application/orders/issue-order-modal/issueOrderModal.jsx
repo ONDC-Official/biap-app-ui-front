@@ -86,9 +86,6 @@ export default function IssueOrderModal({
 
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
-
-    console.log('selectedIds', selectedIds)
-
     try {
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
