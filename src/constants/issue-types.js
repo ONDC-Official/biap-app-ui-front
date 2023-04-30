@@ -67,15 +67,17 @@
             key: '04',
             value: 'Packaging',
             enums: 'FLM04'
-        }, {
-            key: '05',
-            value: 'Buyer not found',
-            enums: 'FLM05'
-        }, {
-            key: '06',
-            value: 'Seller not found',
-            enums: 'FLM06'
-        }, {
+         },
+        // {
+        //     key: '05',
+        //     value: 'Buyer not found',
+        //     enums: 'FLM05'
+        // }, {
+        //     key: '06',
+        //     value: 'Seller not found',
+        //     enums: 'FLM06'
+        // },
+         {
             key: '07',
             value: 'Package info mismatch',
             enums: 'FLM07'
