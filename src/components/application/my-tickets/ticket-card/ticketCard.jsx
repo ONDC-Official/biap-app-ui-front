@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import moment from "moment";
 import { getOrderStatus } from "../../../../constants/order-status";
 import styles from "../../../../styles/orders/orders.module.scss";
@@ -6,7 +6,6 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import DropdownSvg from "../../../shared/svg/dropdonw";
 import { ToastContext } from "../../../../context/toastContext";
 import useCancellablePromise from "../../../../api/cancelRequest";
-
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { getCall, postCall } from "../../../../api/axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
@@ -41,6 +40,8 @@ export default function TicketCard(props) {
     const [statusLoading, setStatusLoading] = useState(false);
     const [toggleActionModal, setToggleActionModal] = useState(false);
     const [supportActionDetails, setSupportActionDetails] = useState();
+    const [issueActions, setIssueActions] = useState([]);
+
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -63,6 +64,20 @@ export default function TicketCard(props) {
             },
         });
     }
+
+    useEffect(() => {
+        mergeRespondantArrays(issue_actions)
+    }, [])
+
+    const mergeRespondantArrays = (actions) => {
+        let resActions = actions.respondent_actions,
+            comActions = actions.complainant_actions.map(item => { return ({ ...item, respondent_action: item.complainant_action }) }),
+            mergedarray = [...comActions, ...resActions]
+
+        mergedarray.sort((a, b) => new Date(a.updated_at) - new Date(b.updated_at));
+        setIssueActions(mergedarray)
+    }
+
 
     const checkIssueStatus = async () => {
         cancelPartialEventSourceResponseRef.current = [];
@@ -141,6 +156,7 @@ export default function TicketCard(props) {
             ];
             setStatusLoading(false);
             if (data?.message) {
+                mergeRespondantArrays(data.message.issue?.issue_actions)
                 onFetchUpdatedOrder();
             } else {
                 dispatchToast(
@@ -357,7 +373,7 @@ export default function TicketCard(props) {
                 </div>
 
                 {/* RESPONDENT ACTIONS  */}
-                {issue_actions?.respondent_actions?.length > 0 && (
+                {issueActions?.length > 0 && (
                     <div
                         className="container py-2 px-0"
                         style={{ borderTop: "1px solid #ddd" }}
@@ -365,7 +381,7 @@ export default function TicketCard(props) {
                         <p className={styles.product_name} style={{ fontSize: "16px" }}>
                             Actions taken
                         </p>
-                        {issue_actions?.respondent_actions?.map(
+                        {issueActions?.map(
                             (
                                 { respondent_action, remarks, updated_at, updated_by },
                                 index
@@ -389,7 +405,7 @@ export default function TicketCard(props) {
                                                 <div className="pt-1">
                                                     <p className={styles.quantity_count}>
                                                         {`Updated at:  ${moment(updated_at).format(
-                                                            "MMMM Do, YYYY"
+                                                            "MMMM Do, YYYY hh:mm a"
                                                         )}`}
                                                     </p>
                                                 </div>
@@ -456,13 +472,13 @@ export default function TicketCard(props) {
                     <div >
                         <p className={styles.status_label}>
                             Email:{" "}
-                            {issue_actions?.resolution_provider?.respondent_info
-                                ?.resolution_support?.respondentContact?.email ?? "N/A"}
+                            {issue_actions?.respondent_actions[issue_actions.respondent_actions.length - 1]?.updated_by
+                                ?.contact?.email ?? "N/A"}
                         </p>
                         <p className={styles.status_label}>
                             Phone:{" "}
-                            {issue_actions?.resolution_provider?.respondent_info
-                                ?.resolution_support?.respondentContact?.phone ?? "N/A"}
+                            {issue_actions?.respondent_actions[issue_actions.respondent_actions.length - 1]?.updated_by
+                                ?.contact?.phone ?? "N/A"}
                         </p>
                     </div>
                     <div className="ms-auto">

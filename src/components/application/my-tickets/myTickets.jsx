@@ -51,7 +51,7 @@ export default function MyTickets() {
                 ...prev,
                 totalCount,
             }));
-            setTickets(issues);
+            setTickets(issues.reverse());
             setFetchOrderLoading(false);
         } catch (err) {
             dispatch({
@@ -140,60 +140,46 @@ export default function MyTickets() {
                                         index
                                     ) => {
                                         return (
-                                          <div
-                                            className="py-2"
-                                            key={`order_id_${index}`}
-                                          >
-                                            <TicketCard
-                                              description={description}
-                                              category={category}
-                                              sub_category={sub_category}
-                                              order_details={order_details}
-                                              issue_actions={issue_actions}
-                                              status={issue_status}
-                                              issue_type={issue_type}
-                                              transaction_id={transaction_id}
-                                              updated_at={updated_at}
-                                              created_at={created_at}
-                                              bpp_id={bppId}
-                                              issue_id={issueId}
-                                              accoodion_id={`order_id_${index}`}
-                                              onFetchUpdatedOrder={() => {
-                                                setCurrentSelectedAccordion("");
-                                                dispatch({
-                                                  type: toast_actions.ADD_TOAST,
-                                                  payload: {
-                                                    id: Math.floor(
-                                                      Math.random() * 100
-                                                    ),
-                                                    type: toast_types.success,
-                                                    message:
-                                                      "Complaint status updated successfully!",
-                                                  },
-                                                });
-                                                getAllTickets();
-                                              }}
-                                              currentSelectedAccordion={
-                                                currentSelectedAccordion
-                                              }
-                                              setCurrentSelectedAccordion={(
-                                                value
-                                              ) => {
-                                                if (
-                                                  currentSelectedAccordion.toLowerCase() ===
-                                                  `order_id_${index}`.toLowerCase()
-                                                ) {
-                                                  setCurrentSelectedAccordion(
-                                                    ""
-                                                  );
-                                                  return;
-                                                }
-                                                setCurrentSelectedAccordion(
-                                                  value
-                                                );
-                                              }}
-                                            />
-                                          </div>
+                                            <div className="py-2" key={`order_id_${index}`}>
+                                                <TicketCard
+                                                    description={description}
+                                                    category={category}
+                                                    sub_category={sub_category}
+                                                    order_details={order_details}
+                                                    issue_actions={issue_actions}
+                                                    status={issue_status}
+                                                    issue_type={issue_type}
+                                                    transaction_id={_id}
+                                                    updated_at={updated_at}
+                                                    created_at={created_at}
+                                                    bpp_id={bppId}
+                                                    issue_id={issueId}
+                                                    accoodion_id={`order_id_${index}`}
+                                                    onFetchUpdatedOrder={() => {
+                                                        //setCurrentSelectedAccordion("");
+                                                        dispatch({
+                                                            type: toast_actions.ADD_TOAST,
+                                                            payload: {
+                                                                id: Math.floor(Math.random() * 100),
+                                                                type: toast_types.success,
+                                                                message: "Complaint status updated successfully!",
+                                                            },
+                                                        });
+                                                        //getAllTickets();
+                                                    }}
+                                                    currentSelectedAccordion={currentSelectedAccordion}
+                                                    setCurrentSelectedAccordion={(value) => {
+                                                        if (
+                                                            currentSelectedAccordion.toLowerCase() ===
+                                                            `order_id_${index}`.toLowerCase()
+                                                        ) {
+                                                            setCurrentSelectedAccordion("");
+                                                            return;
+                                                        }
+                                                        setCurrentSelectedAccordion(value);
+                                                    }}
+                                                />
+                                            </div>
                                         );
                                     }
                                 )}

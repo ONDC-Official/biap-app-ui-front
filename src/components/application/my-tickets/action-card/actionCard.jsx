@@ -101,7 +101,7 @@ export default function CustomerActionCard({
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
     try {
-      const { bpp_id, issue_actions, issue_id } = supportActionDetails;
+      const { bpp_id, issue_actions, issue_id, transaction_id, created_at } = supportActionDetails;
 
       const dataObject = {
         context: {
@@ -109,7 +109,7 @@ export default function CustomerActionCard({
           bpp_id,
           // bpp_uri,
           timestamp: new Date(),
-          transaction_id: supportActionDetails?.transaction_id
+          transaction_id
         },
       };
 
@@ -120,7 +120,7 @@ export default function CustomerActionCard({
             status: "CLOSED",
             rating: like ? "THUMBS-UP" : "THUMBS-DOWN",
             updated_at: new Date(),
-            created_at: supportActionDetails?.created_at,
+            created_at,
             issue_actions: {
               complainant_actions: [
                 ...issue_actions.complainant_actions,
@@ -141,7 +141,7 @@ export default function CustomerActionCard({
             status: "OPEN",
             issue_type: "GRIEVANCE",
             updated_at: new Date(),
-            created_at: new Date(),
+            created_at,
             issue_actions: {
               complainant_actions: [
                 ...issue_actions.complainant_actions,
