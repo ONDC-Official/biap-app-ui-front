@@ -102,12 +102,14 @@ export default function CustomerActionCard({
     setLoading(true);
     try {
       const { bpp_id, issue_actions, issue_id } = supportActionDetails;
+
       const dataObject = {
         context: {
           action: "issue",
           bpp_id,
           // bpp_uri,
           timestamp: new Date(),
+          transaction_id: supportActionDetails?.transaction_id
         },
       };
 
@@ -118,7 +120,7 @@ export default function CustomerActionCard({
             status: "CLOSED",
             rating: like ? "THUMBS-UP" : "THUMBS-DOWN",
             updated_at: new Date(),
-            created_at: new Date(),
+            created_at: supportActionDetails?.created_at,
             issue_actions: {
               complainant_actions: [
                 ...issue_actions.complainant_actions,
