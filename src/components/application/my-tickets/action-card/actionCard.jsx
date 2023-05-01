@@ -118,7 +118,6 @@ export default function CustomerActionCard({
             status: "CLOSED",
             rating: like ? "THUMBS-UP" : "THUMBS-DOWN",
             updated_at: new Date(),
-            created_at: new Date(),
             issue_actions: {
               complainant_actions: [
                 ...issue_actions.complainant_actions,
@@ -139,7 +138,6 @@ export default function CustomerActionCard({
             status: "OPEN",
             issue_type: "GRIEVANCE",
             updated_at: new Date(),
-            created_at: new Date(),
             issue_actions: {
               complainant_actions: [
                 ...issue_actions.complainant_actions,

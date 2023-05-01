@@ -51,7 +51,7 @@ export default function MyTickets() {
                 ...prev,
                 totalCount,
             }));
-            setTickets(issues);
+            setTickets(issues.reverse());
             setFetchOrderLoading(false);
         } catch (err) {
             dispatch({
@@ -155,7 +155,7 @@ export default function MyTickets() {
                                                     issue_id={issueId}
                                                     accoodion_id={`order_id_${index}`}
                                                     onFetchUpdatedOrder={() => {
-                                                        setCurrentSelectedAccordion("");
+                                                        //setCurrentSelectedAccordion("");
                                                         dispatch({
                                                             type: toast_actions.ADD_TOAST,
                                                             payload: {
@@ -164,7 +164,7 @@ export default function MyTickets() {
                                                                 message: "Complaint status updated successfully!",
                                                             },
                                                         });
-                                                        getAllTickets();
+                                                        //getAllTickets();
                                                     }}
                                                     currentSelectedAccordion={currentSelectedAccordion}
                                                     setCurrentSelectedAccordion={(value) => {

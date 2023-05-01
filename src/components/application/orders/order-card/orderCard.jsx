@@ -46,7 +46,7 @@ export default function OrderCard(props) {
   // STATES
   const [trackOrderLoading, setTrackOrderLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
-  const [issueLoading, setIssueLoading] = useState(true);
+  const [issueLoading, setIssueLoading] = useState(false);
   const [isIssueRaised, setIsIssueRaised] = useState(false);
   const [supportOrderLoading, setSupportOrderLoading] = useState(false);
   const [supportOrderDetails, setSupportOrderDetails] = useState();
@@ -189,11 +189,13 @@ export default function OrderCard(props) {
   // get issue status
   async function getTrackIssueDetails() {
     try {
-      const { context, message } = await cancellablePromise(
-        getCall(`/clientApis/v2/issue?transactionId=${transaction_id}`)
+      if (currentSelectedAccordion !== accoodion_id) return
+      setIssueLoading(true)
+      const { issueExistance } = await cancellablePromise(
+        getCall(`/issueApis/v1/issue?transactionId=${transaction_id}`)
       );
 
-      if (message?.issue) {
+      if (issueExistance) {
         setIsIssueRaised(true)
         return;
       }
@@ -405,7 +407,6 @@ export default function OrderCard(props) {
   }
 
   useEffect(() => {
-    getTrackIssueDetails()
     return () => {
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
         eventSource.close();
@@ -413,6 +414,10 @@ export default function OrderCard(props) {
       });
     };
   }, []);
+
+  useEffect(() => {
+    getTrackIssueDetails()
+  }, [currentSelectedAccordion === accoodion_id])
 
 
   return (
