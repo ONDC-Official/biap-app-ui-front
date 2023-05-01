@@ -134,7 +134,8 @@ export default function MyTickets() {
                                             sub_category,
                                             category,
                                             description,
-                                            issue_type
+                                            issue_type,
+                                            transaction_id
                                         },
                                         index
                                     ) => {
