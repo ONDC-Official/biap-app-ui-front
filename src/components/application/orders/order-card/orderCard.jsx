@@ -191,15 +191,18 @@ export default function OrderCard(props) {
     try {
       if (currentSelectedAccordion !== accoodion_id) return
       setIssueLoading(true)
-      const { issueExistance } = await cancellablePromise(
+      const data = await cancellablePromise(
         getCall(`/issueApis/v1/issue?transactionId=${transaction_id}`)
       );
 
+      const { issueExistance } = data[0];
       if (issueExistance) {
-        setIsIssueRaised(true)
         setIssueLoading(false);
-        return;
+        setIsIssueRaised(true)
+      } else {
+        setIssueLoading(false);
       }
+
     } catch (err) {
       setIssueLoading(false);
       dispatchToast(err?.message, toast_types.error);

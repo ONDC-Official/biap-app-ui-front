@@ -386,15 +386,15 @@ export default function IssueOrderModal({
                   <div key={product?.id} className="d-flex align-items-center">
                     <div
                       style={{
-                        width: isProductSelected(product?.id) ? "70%" : "90%",
+                        width: "80%",
                       }}
                     >
                       <Checkbox
                         id={product?.id}
                         checked={isProductSelected(product?.id)}
                         disabled={loading}
-                        boxBasis="8%"
-                        nameBasis="92%"
+                        boxBasis="20%"
+                        nameBasis="80%"
                         onClick={() => {
                           setInlineError((error) => ({
                             ...error,
@@ -428,11 +428,10 @@ export default function IssueOrderModal({
                         style={{ marginLeft: "30px !important" }}
                       >
                         <div
-                          className={`${
-                            orderQty[idx]?.count > 1
-                              ? productCartStyles.subtract_svg_wrapper
-                              : ""
-                          } d-flex align-items-center justify-content-center`}
+                          className={`${orderQty[idx]?.count > 1
+                            ? productCartStyles.subtract_svg_wrapper
+                            : ""
+                            } d-flex align-items-center justify-content-center`}
                           onClick={() => {
                             //   setQuantityCount(quantityCount - 1);
                             //   onReduceQuantity(id);
@@ -462,11 +461,10 @@ export default function IssueOrderModal({
                           </p>
                         </div>
                         <div
-                          className={`${
-                            orderQty[idx]?.count < quantity[idx]?.count
-                              ? productCartStyles.add_svg_wrapper
-                              : ""
-                          } d-flex align-items-center justify-content-center`}
+                          className={`${orderQty[idx]?.count < quantity[idx]?.count
+                            ? productCartStyles.add_svg_wrapper
+                            : ""
+                            } d-flex align-items-center justify-content-center`}
                           onClick={() => {
                             //   setQuantityCount((quantityCount) => quantityCount + 1);
                             //   onAddQuantity(id);
@@ -508,55 +506,54 @@ export default function IssueOrderModal({
             <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>
           )}
 
-          {selectedIds.length > 0 && (
-            <div className="px-2">
-              <p className={styles.cancel_dropdown_label_text}>
-                Select Subcategory
-              </p>
-              <Dropdown
-                header={
-                  <div
-                    className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
-                  >
-                    <div className="px-2">
-                      <p className={styles.cancel_dropdown_text}>
-                        {selectedIssueSubcategory?.value
-                          ? selectedIssueSubcategory?.value
-                          : "Select issue subcategory"}
-                      </p>
-                    </div>
-                    <div className="px-2 ms-auto">
-                      <DropdownSvg
-                        width="15"
-                        height="10"
-                        color={ONDC_COLORS.ACCENTCOLOR}
-                      />
-                    </div>
+          <div className="px-2">
+            <p className={styles.cancel_dropdown_label_text}>
+              Select Subcategory
+            </p>
+            <Dropdown
+              header={
+                <div
+                  className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
+                >
+                  <div className="px-2">
+                    <p className={styles.cancel_dropdown_text}>
+                      {selectedIssueSubcategory?.value
+                        ? selectedIssueSubcategory?.value
+                        : "Select issue subcategory"}
+                    </p>
                   </div>
-                }
-                body_classes="dropdown-menu-right"
-                style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
-                click={(reasonValue) => {
-                  const type = AllCategory.find(
-                    ({ value }) =>
-                      value.toLowerCase() === reasonValue.toLowerCase()
-                  );
-                  setSelectedIssueSubcategory(type);
-                  setInlineError((error) => ({
-                    ...error,
-                    subcategory_error: "",
-                  }));
-                }}
-                options={AllCategory.map(({ value }) => ({
-                  value,
-                }))}
-                show_icons={false}
-              />
-              {inlineError.subcategory_error && (
-                <ErrorMessage>{inlineError.subcategory_error}</ErrorMessage>
-              )}
-            </div>
-          )}
+                  <div className="px-2 ms-auto">
+                    <DropdownSvg
+                      width="15"
+                      height="10"
+                      color={ONDC_COLORS.ACCENTCOLOR}
+                    />
+                  </div>
+                </div>
+              }
+              body_classes="dropdown-menu-right"
+              style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
+              click={(reasonValue) => {
+                const type = AllCategory.find(
+                  ({ value }) =>
+                    value.toLowerCase() === reasonValue.toLowerCase()
+                );
+                setSelectedIssueSubcategory(type);
+                setInlineError((error) => ({
+                  ...error,
+                  subcategory_error: "",
+                }));
+              }}
+              options={AllCategory.map(({ value }) => ({
+                value,
+              }))}
+              show_icons={false}
+            />
+            {inlineError.subcategory_error && (
+              <ErrorMessage>{inlineError.subcategory_error}</ErrorMessage>
+            )}
+          </div>
+
           <div className="px-2">
             <Input
               label_name="Short dscription"
