@@ -189,20 +189,20 @@ export default function OrderCard(props) {
   // get issue status
   async function getTrackIssueDetails() {
     try {
-      if (currentSelectedAccordion !== accoodion_id) return
-      setIssueLoading(true)
+      if (currentSelectedAccordion !== accoodion_id) return;
+      setIssueLoading(true);
       const data = await cancellablePromise(
         getCall(`/issueApis/v1/issue?transactionId=${transaction_id}`)
       );
 
-      const { issueExistance } = data[0];
+
+      const { issueExistance } = data;
       if (issueExistance) {
         setIssueLoading(false);
-        setIsIssueRaised(true)
+        setIsIssueRaised(true);
       } else {
         setIssueLoading(false);
       }
-
     } catch (err) {
       setIssueLoading(false);
       dispatchToast(err?.message, toast_types.error);
@@ -419,9 +419,8 @@ export default function OrderCard(props) {
   }, []);
 
   useEffect(() => {
-    getTrackIssueDetails()
-  }, [currentSelectedAccordion === accoodion_id])
-
+    getTrackIssueDetails();
+  }, [currentSelectedAccordion === accoodion_id]);
 
   return (
     <div className={styles.orders_card}>
@@ -547,9 +546,9 @@ export default function OrderCard(props) {
             style={
               currentSelectedAccordion === accoodion_id
                 ? {
-                  transform: "rotate(180deg)",
-                  transition: "all 0.7s",
-                }
+                    transform: "rotate(180deg)",
+                    transition: "all 0.7s",
+                  }
                 : { transform: "rotate(0)", transition: "all 0.7s" }
             }
           >
