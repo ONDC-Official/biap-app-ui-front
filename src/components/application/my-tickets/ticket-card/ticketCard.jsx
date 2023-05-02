@@ -320,7 +320,7 @@ export default function TicketCard(props) {
                     <p className={styles.address_type_label}>
                         {description?.long_desc ?? "NA"}
                     </p>
-                    {description?.additional_desc?.url && (
+                    {/* {description?.additional_desc?.url && (
                         <div>
                             <a
                                 href={description.additional_desc.url}
@@ -330,7 +330,7 @@ export default function TicketCard(props) {
                                 <div>{description.additional_desc.url}</div>
                             </a>
                         </div>
-                    )}
+                    )} */}
                     {description?.images &&
                         description?.images?.map((image) => {
                             return (
@@ -395,7 +395,7 @@ export default function TicketCard(props) {
                                                     title={remarks}
                                                     style={{ fontSize: "16px" }}
                                                 >
-                                                    {remarks}
+                                                    ⦿ {remarks}
                                                 </p>
                                                 <div className="pt-1">
                                                     <p className={styles.quantity_count}>
@@ -419,7 +419,7 @@ export default function TicketCard(props) {
                                                 </p>
                                             </div>
                                         </div>
-                                        {index < issue_actions?.respondent_actions?.length - 1 && (
+                                        {index < issueActions?.length - 1 && (
                                             <hr
                                                 className="mt-3 mb-0"
                                                 style={{ border: "1px solid #ddd", width: "100%" }}
@@ -481,52 +481,53 @@ export default function TicketCard(props) {
                                 ?.contact?.phone ?? "N/A"}
                         </p>
                     </div>
-                    <div className="ms-auto">
-                        <div className="d-flex align-items-center justify-content-center flex-wrap">
-                            {
-                                status === 'Close' ?
-                                    <button
-                                        disabled={
-                                            statusLoading
-                                        }
-                                        className={
-                                            statusLoading
-                                                ? styles.secondary_action_loading
-                                                : styles.secondary_action
-                                        }
-                                        onClick={() => {
-                                            setSupportActionDetails(props)
-                                            setToggleActionModal(true)
-                                        }}
-                                    >
-                                        {statusLoading ? (
-                                            <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
-                                        ) : (
-                                            "Take Action"
-                                        )}
-                                    </button>
-                                    :
-                                    <button
-                                        disabled={
-                                            statusLoading
-                                        }
-                                        className={
-                                            statusLoading
-                                                ? styles.secondary_action_loading
-                                                : styles.secondary_action
-                                        }
-                                        onClick={() => checkIssueStatus()}
-                                    >
-                                        {statusLoading ? (
-                                            <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
-                                        ) : (
-                                            "Get Status"
-                                        )}
-                                    </button>
-                            }
+                    {!issue_actions.complainant_actions.some(x => x.complainant_action === "CLOSE") &&
+                        <div className="ms-auto">
+                            <div className="d-flex align-items-center justify-content-center flex-wrap">
+                                {
+                                    status === 'Close' ?
+                                        <button
+                                            disabled={
+                                                statusLoading
+                                            }
+                                            className={
+                                                statusLoading
+                                                    ? styles.secondary_action_loading
+                                                    : styles.secondary_action
+                                            }
+                                            onClick={() => {
+                                                setSupportActionDetails(props)
+                                                setToggleActionModal(true)
+                                            }}
+                                        >
+                                            {statusLoading ? (
+                                                <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                                            ) : (
+                                                "Take Action"
+                                            )}
+                                        </button>
+                                        :
+                                        <button
+                                            disabled={
+                                                statusLoading
+                                            }
+                                            className={
+                                                statusLoading
+                                                    ? styles.secondary_action_loading
+                                                    : styles.secondary_action
+                                            }
+                                            onClick={() => checkIssueStatus()}
+                                        >
+                                            {statusLoading ? (
+                                                <Loading backgroundColor={ONDC_COLORS.SECONDARYCOLOR} />
+                                            ) : (
+                                                "Get Status"
+                                            )}
+                                        </button>
+                                }
+                            </div>
                         </div>
-                    </div>
-
+                    }
                 </div>
             </div>
         </div>
