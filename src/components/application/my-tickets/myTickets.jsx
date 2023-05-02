@@ -149,7 +149,7 @@ export default function MyTickets() {
                                               issue_actions={issue_actions}
                                               status={issue_status}
                                               issue_type={issue_type}
-                                                    transaction_id={_id}
+                                              transaction_id={transaction_id}
                                               updated_at={updated_at}
                                               created_at={created_at}
                                               bpp_id={bppId}
