@@ -197,9 +197,9 @@ export default function OrderCard(props) {
 
       if (issueExistance) {
         setIsIssueRaised(true)
+        setIssueLoading(false);
         return;
       }
-      setIssueLoading(false);
     } catch (err) {
       setIssueLoading(false);
       dispatchToast(err?.message, toast_types.error);

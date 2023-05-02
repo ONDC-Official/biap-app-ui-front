@@ -39,8 +39,8 @@ export function getOrderStatus(status) {
       case order_statuses.open:
         return {
           status: "Open",
-          color: "46, 176, 134",
-          border: ONDC_COLORS.SUCCESS,
+          color: "249, 193, 50",
+          border: ONDC_COLORS.WARNING,
         };
         case order_statuses.closed:
           return {

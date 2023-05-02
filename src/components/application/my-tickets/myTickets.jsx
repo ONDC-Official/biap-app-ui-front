@@ -19,9 +19,6 @@ import { ToastContext } from "../../../context/toastContext";
 import useCancellablePromise from "../../../api/cancelRequest";
 
 export default function MyTickets() {
-    // HISTORY
-    const history = useHistory();
-
     // STATES
     const [tickets, setTickets] = useState([]);
     const [fetchOrderLoading, setFetchOrderLoading] = useState(false);
