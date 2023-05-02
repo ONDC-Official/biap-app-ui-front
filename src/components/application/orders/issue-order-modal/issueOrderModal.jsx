@@ -5,7 +5,7 @@ import Button from "../../../shared/button/button";
 import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import productStyles from "../../../../styles/orders/orders.module.scss";
-import productCartStyles from '../../../../styles/products/productCard.module.scss';
+import productCartStyles from "../../../../styles/products/productCard.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { ToastContext } from "../../../../context/toastContext";
@@ -52,6 +52,15 @@ export default function IssueOrderModal({
   const [selectedIds, setSelectedIds] = useState([]);
   const [orderQty, setOrderQty] = useState([]);
 
+  const AllCategory = ISSUE_TYPES.map((item) => {
+    return item.subCategory.map((subcategoryItem) => {
+      return {
+        ...subcategoryItem,
+        category: item.value,
+      };
+    });
+  }).flat();
+
   // REFS
   const cancelPartialEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
@@ -86,6 +95,7 @@ export default function IssueOrderModal({
 
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
+
     try {
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
@@ -96,7 +106,7 @@ export default function IssueOrderModal({
           },
           message: {
             issue: {
-              category: selectedIssueCategory.value.toUpperCase(),
+              category: selectedIssueSubcategory.category.toUpperCase(),
               sub_category: selectedIssueSubcategory.value,
               bppId: bpp_id,
               bpp_uri,
@@ -291,19 +301,6 @@ export default function IssueOrderModal({
     setSelectedIds([...selectedIds, modifiedAttributes]);
   }
 
-  useEffect(() => {
-    if (selectedIds.length > 0) {
-      setSelectedIssueSubcategory();
-      if (selectedIds.length < partailsCancelProductList.length) {
-        const type = ISSUE_TYPES.find(({ value }) => value === "Item");
-        setSelectedIssueCategory(type);
-      } else {
-        const type = ISSUE_TYPES.find(({ value }) => value === "Fulfillment");
-        setSelectedIssueCategory(type);
-      }
-    }
-  }, [selectedIds]);
-
   // use this function to remove the selected attribute from filter
   function removeProductToCancel(attribute) {
     setSelectedIds(selectedIds.filter(({ id }) => id !== attribute.id));
@@ -344,23 +341,22 @@ export default function IssueOrderModal({
     });
   };
 
-
   const onUpdateQty = (qty, idx, pId) => {
     let qtyData = Object.assign([], orderQty);
     qtyData[idx].count = qty;
     setOrderQty(qtyData);
-    updateQtyForSelectedProduct(pId, qty)
+    updateQtyForSelectedProduct(pId, qty);
   };
-
 
   function updateQtyForSelectedProduct(pId, qty) {
     let data = JSON.parse(JSON.stringify(Object.assign([], selectedIds)));
     data = data.map((item) => {
-      if(item.id === pId){
+      if (item.id === pId) {
         item.quantity.count = qty;
-      }else{}
+      } else {
+      }
       return item;
-    })
+    });
     setSelectedIds(data);
   }
 
@@ -426,56 +422,73 @@ export default function IssueOrderModal({
                       </Checkbox>
                     </div>
 
-
                     <div style={{ width: "30%" }}>
-                            <div className={productCartStyles.quantity_count_wrapper}  style={{marginLeft:"30px !important"}}>
-                              <div
-                                className={`${orderQty[idx]?.count > 1?productCartStyles.subtract_svg_wrapper:""} d-flex align-items-center justify-content-center`}
-                                onClick={() => {
-                                //   setQuantityCount(quantityCount - 1);
-                                //   onReduceQuantity(id);
-                                //   if (quantityCount - 1 === 0) {
-                                //     setToggleAddToCart(false);
-                                //   }
-                                  if(orderQty[idx]?.count > 1){
-                                    onUpdateQty(orderQty[idx]?.count-1, idx, product?.id);
-                                  }
-                                }}
-                              >
-                                {
-                                  orderQty[idx]?.count > 1 && (
-                                    <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
-                                  )
-                                }
-                              </div>
-                              <div className="d-flex align-items-center justify-content-center">
-                                <p className={productCartStyles.quantity_count}>
-                                  {orderQty[idx]?.count ?? "0"}
-                                  {/* {quantityCount} */}
-                                </p>
-                              </div>
-                              <div
-                                className={`${orderQty[idx]?.count < quantity[idx]?.count?productCartStyles.add_svg_wrapper:""} d-flex align-items-center justify-content-center`}
-                                onClick={() => {
-                                //   setQuantityCount((quantityCount) => quantityCount + 1);
-                                //   onAddQuantity(id);
-                                  if(orderQty[idx]?.count < quantity[idx]?.count){
-                                    onUpdateQty(orderQty[idx]?.count+1, idx, product?.id);
-                                  }
-                                }}
-                              >
-                                {
-                                  orderQty[idx]?.count < quantity[idx]?.count && (
-                                    <Add
-                                      width="13"
-                                      height="13"
-                                      classes={productCartStyles.add_svg_color}
-                                    />
-                                  )
-                                }
-                              </div>
-                            </div>
-                          </div>
+                      <div
+                        className={productCartStyles.quantity_count_wrapper}
+                        style={{ marginLeft: "30px !important" }}
+                      >
+                        <div
+                          className={`${
+                            orderQty[idx]?.count > 1
+                              ? productCartStyles.subtract_svg_wrapper
+                              : ""
+                          } d-flex align-items-center justify-content-center`}
+                          onClick={() => {
+                            //   setQuantityCount(quantityCount - 1);
+                            //   onReduceQuantity(id);
+                            //   if (quantityCount - 1 === 0) {
+                            //     setToggleAddToCart(false);
+                            //   }
+                            if (orderQty[idx]?.count > 1) {
+                              onUpdateQty(
+                                orderQty[idx]?.count - 1,
+                                idx,
+                                product?.id
+                              );
+                            }
+                          }}
+                        >
+                          {orderQty[idx]?.count > 1 && (
+                            <Subtract
+                              width="13"
+                              classes={productCartStyles.subtract_svg_color}
+                            />
+                          )}
+                        </div>
+                        <div className="d-flex align-items-center justify-content-center">
+                          <p className={productCartStyles.quantity_count}>
+                            {orderQty[idx]?.count ?? "0"}
+                            {/* {quantityCount} */}
+                          </p>
+                        </div>
+                        <div
+                          className={`${
+                            orderQty[idx]?.count < quantity[idx]?.count
+                              ? productCartStyles.add_svg_wrapper
+                              : ""
+                          } d-flex align-items-center justify-content-center`}
+                          onClick={() => {
+                            //   setQuantityCount((quantityCount) => quantityCount + 1);
+                            //   onAddQuantity(id);
+                            if (orderQty[idx]?.count < quantity[idx]?.count) {
+                              onUpdateQty(
+                                orderQty[idx]?.count + 1,
+                                idx,
+                                product?.id
+                              );
+                            }
+                          }}
+                        >
+                          {orderQty[idx]?.count < quantity[idx]?.count && (
+                            <Add
+                              width="13"
+                              height="13"
+                              classes={productCartStyles.add_svg_color}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="ms-auto">
                       <p
@@ -495,7 +508,7 @@ export default function IssueOrderModal({
             <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>
           )}
 
-          {selectedIssueCategory && (
+          {selectedIds.length > 0 && (
             <div className="px-2">
               <p className={styles.cancel_dropdown_label_text}>
                 Select Subcategory
@@ -524,8 +537,7 @@ export default function IssueOrderModal({
                 body_classes="dropdown-menu-right"
                 style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
                 click={(reasonValue) => {
-                  const REASONS = selectedIssueCategory.subCategory;
-                  const type = REASONS.find(
+                  const type = AllCategory.find(
                     ({ value }) =>
                       value.toLowerCase() === reasonValue.toLowerCase()
                   );
@@ -535,7 +547,7 @@ export default function IssueOrderModal({
                     subcategory_error: "",
                   }));
                 }}
-                options={selectedIssueCategory.subCategory.map(({ value }) => ({
+                options={AllCategory.map(({ value }) => ({
                   value,
                 }))}
                 show_icons={false}
