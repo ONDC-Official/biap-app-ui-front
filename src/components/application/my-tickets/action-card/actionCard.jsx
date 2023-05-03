@@ -190,7 +190,7 @@ export default function CustomerActionCard({
     );
     es.addEventListener("on_issue", (e) => {
       const { messageId } = JSON.parse(e?.data);
-      getPartialCancelOrderDetails(messageId);
+      selectedCancelType === ACTION_TYPES.escalateIssue && getPartialCancelOrderDetails(messageId);
     });
 
     const timer = setTimeout(() => {
