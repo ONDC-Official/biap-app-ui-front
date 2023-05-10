@@ -165,7 +165,11 @@ export default function CustomerActionCard({
         setLoading(false);
         dispatchToast("Something went wrong", toast_types.error);
       } else {
-        fetchCancelPartialOrderDataThroughEvents(data.context?.message_id);
+        if(selectedCancelType === ACTION_TYPES.escalateIssue){
+          fetchCancelPartialOrderDataThroughEvents(data.context?.message_id);
+        }else{
+          onSuccess();
+        }
       }
     } catch (err) {
       setLoading(false);
@@ -190,7 +194,7 @@ export default function CustomerActionCard({
     );
     es.addEventListener("on_issue", (e) => {
       const { messageId } = JSON.parse(e?.data);
-      selectedCancelType === ACTION_TYPES.escalateIssue && getPartialCancelOrderDetails(messageId);
+       getPartialCancelOrderDetails(messageId);
     });
 
     const timer = setTimeout(() => {
