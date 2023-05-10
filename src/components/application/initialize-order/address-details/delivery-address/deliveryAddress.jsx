@@ -60,8 +60,7 @@ export default function DeliveryAddress(props) {
         )
       );
 
-      const { latitude = 12.9812430000001, longitude = 77.5950340000001 } =
-        data;
+      const { latitude, longitude } = data;
       if (latitude && longitude) {
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
         let search_context = JSON.parse(
@@ -157,11 +156,10 @@ export default function DeliveryAddress(props) {
                     >
                       <div className="px-3">
                         <p className={styles.address_name_and_phone}>
-                          {`${
-                            address.tag
+                          {`${address.tag
                               ? address.tag + " (" + descriptor?.name + ")"
                               : descriptor?.name
-                          } `}
+                            } `}
                         </p>
                         <p className={`${styles.address_line_2} pb-2`}>
                           {descriptor?.email} - {descriptor?.phone}

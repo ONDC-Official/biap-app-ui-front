@@ -47,8 +47,7 @@ export default function SelectAddressModal(props) {
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${eloc}`
         )
       );
-      const { latitude = 12.9812430000001, longitude = 77.5950340000001 } =
-        data;
+      const { latitude, longitude } = data;
       if (latitude && longitude) {
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
       } else {
@@ -149,11 +148,10 @@ export default function SelectAddressModal(props) {
                         >
                           <div className="px-3">
                             <p className={cartStyles.address_name_and_phone}>
-                              {`${
-                                address.tag
+                              {`${address.tag
                                   ? address.tag + " (" + descriptor?.name + ")"
                                   : descriptor?.name
-                              } `}
+                                } `}
                             </p>
                             <p className={`${cartStyles.address_line_2} pb-2`}>
                               {descriptor?.email} - {descriptor?.phone}

@@ -156,7 +156,7 @@ export default function TicketCard(props) {
             ];
             setStatusLoading(false);
             if (data?.message) {
-                mergeRespondantArrays(data.message.issue?.issue_actions)
+                mergeRespondantArrays({respondent_actions:data.message.issue?.issue_actions.respondent_actions, complainant_actions:issue_actions.complainant_actions})
                 onFetchUpdatedOrder();
             } else {
                 dispatchToast(

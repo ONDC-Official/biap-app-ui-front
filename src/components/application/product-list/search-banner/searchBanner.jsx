@@ -207,15 +207,13 @@ export default function SearchBanner({ onSearch, location }) {
           `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${locationData?.location?.address?.areaCode}`
         )
       );
-      const latitude = 12.9812430000001;
-      const longitude = 77.5950340000001;
-      if ((data?.latitude && data?.longitude) || (latitude && longitude)) {
-        // const { latitude, longitude } = data;
+      if (data?.latitude && data?.longitude) {
+        const { latitude, longitude } = data;
         AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
         getAreadCodeFromLatLong({
           name: locationData?.name,
-          lat: data?.latitude || latitude,
-          long: data?.longitude || longitude,
+          lat: data?.latitude,
+          long: data?.longitude,
           tag: locationData?.location?.address?.tag,
         });
       } else {
@@ -389,8 +387,8 @@ export default function SearchBanner({ onSearch, location }) {
                 {searchedLocation.tag
                   ? searchedLocation.tag
                   : searchedLocation.name
-                  ? searchedLocation.name
-                  : "Select your address"}
+                    ? searchedLocation.name
+                    : "Select your address"}
                 {(searchedLocation.tag || searchedLocation.name) && (
                   <>: {searchedLocation?.pincode}</>
                 )}
