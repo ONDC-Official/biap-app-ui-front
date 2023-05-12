@@ -12,6 +12,7 @@ import { deleteAllCookies, removeCookie } from "../../../utils/cookies";
 import { getValueFromCookie } from "../../../utils/cookies";
 import default_user_avatar from "../../../assets/images/user.svg";
 import supportSvg from "../../../assets/images/help.svg";
+import MyTickets from "../svg/my-tickets";
 
 export default function Navbar() {
   const user = JSON.parse(getValueFromCookie("user"));
@@ -20,6 +21,7 @@ export default function Navbar() {
     PRODUCTS: "Products",
     CART: "Cart",
     ORDERS: "Orders",
+    TICKETS: "Complaints",
     PROFILE: "Profile",
     LOGOUT: "Logout",
   };
@@ -35,6 +37,10 @@ export default function Navbar() {
     {
       img: <Orders width="17" />,
       value: dropdown_links.ORDERS,
+    },
+    {
+      img: <MyTickets />,
+      value: dropdown_links.TICKETS,
     },
     {
       img: <User width="15" />,
@@ -105,6 +111,9 @@ export default function Navbar() {
                 }
                 if (value === dropdown_links.ORDERS) {
                   return history.push("/application/orders");
+                }
+                if (value === dropdown_links.TICKETS) {
+                  return history.push("/application/tickets");
                 }
                 if (value === dropdown_links.PROFILE) {
                   return history.push("/application/profile");

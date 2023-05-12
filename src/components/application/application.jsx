@@ -11,6 +11,7 @@ import Profile from "./profile/profile";
 import Support from "./support/support";
 import ProductDetails from "./product-list/product-details/productDetails";
 import InitializeOrder from "./initialize-order/initializeOrder";
+import MyTickets from "./my-tickets/myTickets";
 
 export default function Application() {
   return (
@@ -33,6 +34,9 @@ export default function Application() {
           </PrivateRoute>
           <PrivateRoute path={"/application/orders"}>
             <Orders />
+          </PrivateRoute>
+          <PrivateRoute path={"/application/tickets"}>
+            <MyTickets />
           </PrivateRoute>
           <PrivateRoute path={"/application/profile"}>
             <Profile />

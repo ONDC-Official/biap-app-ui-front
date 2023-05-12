@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import { search_types } from "../../../../constants/searchTypes";
 import { postCall, getCall } from "../../../../api/axios";
-import { AddCookie, removeCookie, getValueFromCookie } from "../../../../utils/cookies";
+import {
+  AddCookie,
+  removeCookie,
+  getValueFromCookie,
+} from "../../../../utils/cookies";
 import { debounce } from "../../../../utils/search";
 import Loading from "../../../shared/loading/loading";
 import { ONDC_COLORS } from "../../../shared/colors";
@@ -45,20 +49,21 @@ export default function SearchBanner({ onSearch, location }) {
   const [searchedLocationLoading, setSearchLocationLoading] = useState(false);
   const [searchProductLoading, setSearchProductLoading] = useState(false);
   const [locations, setLocations] = useState([]);
-  const [selectAddressModal, setSelectAddressModal] = useState(false)
+  const [selectAddressModal, setSelectAddressModal] = useState(false);
   const [toggleAddressModal, setToggleAddressModal] = useState({
     actionType: "",
     toggle: false,
     address: restoreToDefault(),
   });
-  const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] = useState();
+  const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] =
+    useState();
   const [addressList, setAddressList] = useState([]);
-  const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
+  const { deliveryAddress, setDeliveryAddress, setBillingAddress } =
+    useContext(AddressContext);
 
   // CONTEXT
   const dispatch = useContext(ToastContext);
   const { setCartItems } = useContext(CartContext);
-
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -209,7 +214,7 @@ export default function SearchBanner({ onSearch, location }) {
           name: locationData?.name,
           lat: data?.latitude,
           long: data?.longitude,
-          tag: locationData?.location?.address?.tag
+          tag: locationData?.location?.address?.tag,
         });
       } else {
         setInlineError((error) => ({
@@ -372,26 +377,24 @@ export default function SearchBanner({ onSearch, location }) {
           >
             <div
               className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
-              onClick={() =>
-                setSelectAddressModal(true)
-              }
-              style={{ cursor: 'pointer' }}
+              onClick={() => setSelectAddressModal(true)}
+              style={{ cursor: "pointer" }}
             >
               <div className="px-2">
                 <LocationSvg />
               </div>
               <div className={styles.formControl}>
-                {searchedLocation.tag ? searchedLocation.tag : searchedLocation.name ? searchedLocation.name : "Select your address"}
-                {
-                  (searchedLocation.tag || searchedLocation.name) && (
-                    <>
-                      : {searchedLocation?.pincode}
-                    </>
-                  )
-                }
+                {searchedLocation.tag
+                  ? searchedLocation.tag
+                  : searchedLocation.name
+                    ? searchedLocation.name
+                    : "Select your address"}
+                {(searchedLocation.tag || searchedLocation.name) && (
+                  <>: {searchedLocation?.pincode}</>
+                )}
               </div>
               <div className="px-2">
-                {(searchedLocation.tag !== "" || searchedLocation.name !== "") ? (
+                {searchedLocation.tag !== "" || searchedLocation.name !== "" ? (
                   <CrossIcon
                     width="20"
                     height="20"
@@ -405,76 +408,70 @@ export default function SearchBanner({ onSearch, location }) {
                 )}
               </div>
             </div>
-            {
-              selectAddressModal && (
-                <SelectAddressModal
-                  addresses={addressList}
-                  onSelectAddress={(pin) => {
-                    fetchLatLongFromEloc(pin);
-                  }}
-                  onClose={() =>
-                    setSelectAddressModal(false)
-                  }
-                  setAddAddress={() => {
-                    setSelectAddressModal(false);
-                    setToggleAddressModal({
-                      actionType: "add",
-                      toggle: true,
-                      address: restoreToDefault(),
-                    });
-                  }}
-                  setUpdateAddress={(address) => {
-                    setSelectAddressModal(false);
-                    setToggleAddressModal({
-                      actionType: "edit",
-                      toggle: true,
-                      address: address,
-                    });
-                  }}
-                />
-              )
-            }
-            {
-              toggleAddressModal.toggle && (
-                <AddAddressModal
-                  action_type={toggleAddressModal.actionType}
-                  address_type={address_types.delivery}
-                  selectedAddress={toggleAddressModal.address}
-                  onClose={() => {
-                    setToggleAddressModal({
-                      actionType: "",
-                      toggle: false,
-                      address: restoreToDefault(),
-                    });
-                    setSelectAddressModal(true);
-                  }}
-                  onAddAddress={(address) => {
-                    setToggleAddressModal({
-                      actionType: "",
-                      toggle: false,
-                      address: restoreToDefault(),
-                    });
-                    setAddressList([...addressList, address]);
-                    setSelectAddressModal(true);
-                  }}
-                  onUpdateAddress={(address) => {
-                    const updatedAddress = addressList.map((d) => {
-                      if (d.id === address.id) {
-                        return address;
-                      }
-                      return d;
-                    });
-                    setAddressList(updatedAddress);
-                    setToggleAddressModal({
-                      actionType: "",
-                      toggle: false,
-                      address: restoreToDefault(),
-                    });
-                    setSelectAddressModal(true);
-                  }}
-                />
-              )
-            }
+            {selectAddressModal && (
+              <SelectAddressModal
+                addresses={addressList}
+                onSelectAddress={(pin) => {
+                  fetchLatLongFromEloc(pin);
+                }}
+                onClose={() => setSelectAddressModal(false)}
+                setAddAddress={() => {
+                  setSelectAddressModal(false);
+                  setToggleAddressModal({
+                    actionType: "add",
+                    toggle: true,
+                    address: restoreToDefault(),
+                  });
+                }}
+                setUpdateAddress={(address) => {
+                  setSelectAddressModal(false);
+                  setToggleAddressModal({
+                    actionType: "edit",
+                    toggle: true,
+                    address: address,
+                  });
+                }}
+              />
+            )}
+            {toggleAddressModal.toggle && (
+              <AddAddressModal
+                action_type={toggleAddressModal.actionType}
+                address_type={address_types.delivery}
+                selectedAddress={toggleAddressModal.address}
+                onClose={() => {
+                  setToggleAddressModal({
+                    actionType: "",
+                    toggle: false,
+                    address: restoreToDefault(),
+                  });
+                  setSelectAddressModal(true);
+                }}
+                onAddAddress={(address) => {
+                  setToggleAddressModal({
+                    actionType: "",
+                    toggle: false,
+                    address: restoreToDefault(),
+                  });
+                  setAddressList([...addressList, address]);
+                  setSelectAddressModal(true);
+                }}
+                onUpdateAddress={(address) => {
+                  const updatedAddress = addressList.map((d) => {
+                    if (d.id === address.id) {
+                      return address;
+                    }
+                    return d;
+                  });
+                  setAddressList(updatedAddress);
+                  setToggleAddressModal({
+                    actionType: "",
+                    toggle: false,
+                    address: restoreToDefault(),
+                  });
+                  setSelectAddressModal(true);
+                }}
+              />
+            )}
             {inlineError.location_error ? (
               <ErrorMessage>{inlineError.location_error}</ErrorMessage>
             ) : (
