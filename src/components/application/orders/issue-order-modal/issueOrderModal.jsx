@@ -556,9 +556,9 @@ export default function IssueOrderModal({
 
           <div className="px-2">
             <Input
-              label_name="Short dscription"
+              label_name="Short description"
               type="text"
-              placeholder="Enter short dscription"
+              placeholder="Enter short description"
               id="shortDes"
               value={shortDescription}
               onChange={(event) => {
@@ -574,9 +574,9 @@ export default function IssueOrderModal({
             />
 
             <Input
-              label_name="Long dscription"
+              label_name="Long description"
               type="text"
-              placeholder="Enter long dscription"
+              placeholder="Enter long description"
               id="longDes"
               value={longDescription}
               onChange={(event) => {
