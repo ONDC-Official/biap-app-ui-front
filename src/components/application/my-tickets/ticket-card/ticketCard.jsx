@@ -42,8 +42,8 @@ export default function TicketCard(props) {
     const [complaintState, setComplaintState] = useState(status);
 
 
-     // HELPERS
-     const current_order_status = getOrderStatus(complaintState);
+    // HELPERS
+    const current_order_status = getOrderStatus(complaintState);
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -92,7 +92,7 @@ export default function TicketCard(props) {
                         bpp_id
                     },
                     message: {
-                        id: issue_id,
+                        issue_id: issue_id,
                     },
                 })
             );
@@ -158,8 +158,8 @@ export default function TicketCard(props) {
             ];
             setStatusLoading(false);
             if (data?.message) {
-                mergeRespondantArrays({respondent_actions:data.message.issue?.issue_actions.respondent_actions, complainant_actions:issue_actions.complainant_actions})
-                if(data.message.issue?.resolution?.resolution_action === "RESOLVE"){
+                mergeRespondantArrays({ respondent_actions: data.message.issue?.issue_actions.respondent_actions, complainant_actions: issue_actions.complainant_actions })
+                if (data.message.issue?.resolution?.resolution_action === "RESOLVE") {
                     setComplaintState("Close")
                 }
                 onFetchUpdatedOrder();
@@ -388,7 +388,7 @@ export default function TicketCard(props) {
                         </p>
                         {issueActions?.map(
                             (
-                                { respondent_action, remarks, updated_at, updated_by },
+                                { respondent_action, short_desc, updated_at, updated_by },
                                 index
                             ) => {
                                 return (
@@ -397,10 +397,10 @@ export default function TicketCard(props) {
                                             <div style={{ width: "90%" }}>
                                                 <p
                                                     className={styles.product_name}
-                                                    title={remarks}
+                                                    title={short_desc}
                                                     style={{ fontSize: "16px" }}
                                                 >
-                                                    ⦿ {remarks}
+                                                    ⦿ {short_desc}
                                                 </p>
                                                 <div className="pt-1">
                                                     <p className={styles.quantity_count}>
