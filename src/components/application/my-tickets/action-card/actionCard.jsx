@@ -72,7 +72,7 @@ export default function CustomerActionCard({
     if (validator.isEmpty(customerRemarks)) {
       setInlineError((error) => ({
         ...error,
-        remarks_error: "Please enter a phone number",
+        remarks_error: "Please enter the remarks",
       }));
       return false;
     }
@@ -126,7 +126,7 @@ export default function CustomerActionCard({
                 ...issue_actions.complainant_actions,
                 {
                   complainant_action: "CLOSE",
-                  remarks: "Complaint closed",
+                  short_desc: "Complaint closed",
                   updated_at: new Date(),
                   updated_by: issue_actions.complainant_actions[0].updated_by,
                 },
@@ -147,7 +147,7 @@ export default function CustomerActionCard({
                 ...issue_actions.complainant_actions,
                 {
                   complainant_action: "ESCALATE",
-                  remarks: customerRemarks,
+                  short_desc: customerRemarks,
                   updated_at: new Date(),
                   updated_by: issue_actions.complainant_actions[0].updated_by,
                 },
@@ -165,9 +165,9 @@ export default function CustomerActionCard({
         setLoading(false);
         dispatchToast("Something went wrong", toast_types.error);
       } else {
-        if(selectedCancelType === ACTION_TYPES.escalateIssue){
+        if (selectedCancelType === ACTION_TYPES.escalateIssue) {
           fetchCancelPartialOrderDataThroughEvents(data.context?.message_id);
-        }else{
+        } else {
           onSuccess();
         }
       }
@@ -194,7 +194,7 @@ export default function CustomerActionCard({
     );
     es.addEventListener("on_issue", (e) => {
       const { messageId } = JSON.parse(e?.data);
-       getPartialCancelOrderDetails(messageId);
+      getPartialCancelOrderDetails(messageId);
     });
 
     const timer = setTimeout(() => {
