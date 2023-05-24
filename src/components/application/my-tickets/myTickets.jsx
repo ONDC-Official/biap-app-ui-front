@@ -91,7 +91,7 @@ export default function MyTickets() {
                     />
                 </div>
                 <div className="py-2">
-                    <p className={styles.illustration_header}>No Tickets found!</p>
+                    <p className={styles.illustration_header}>No Complaints found!</p>
                 </div>
             </div>
         </div>
