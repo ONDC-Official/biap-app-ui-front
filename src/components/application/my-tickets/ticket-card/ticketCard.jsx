@@ -71,6 +71,11 @@ export default function TicketCard(props) {
         mergeRespondantArrays(issue_actions)
     }, [])
 
+
+    useEffect(() => {
+        checkIssueStatus();
+    }, [currentSelectedAccordion === accoodion_id]);
+
     const mergeRespondantArrays = (actions) => {
         let resActions = actions.respondent_actions,
             comActions = actions.complainant_actions.map(item => { return ({ ...item, respondent_action: item.complainant_action }) }),
@@ -82,6 +87,7 @@ export default function TicketCard(props) {
 
 
     const checkIssueStatus = async () => {
+        if (currentSelectedAccordion !== accoodion_id) return;
         cancelPartialEventSourceResponseRef.current = [];
         setStatusLoading(true);
         try {
