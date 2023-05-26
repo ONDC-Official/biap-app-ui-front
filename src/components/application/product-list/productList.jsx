@@ -42,7 +42,7 @@ export default function ProductList() {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalCount: 0,
-    postPerPage: 10,
+    postPerPage: 12,
   });
   const [searchedLocation, setSearchedLocation] = useState({
     name: "",
