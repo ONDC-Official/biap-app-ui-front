@@ -45,7 +45,7 @@ export default function SignUp() {
     if (!name) {
       setInlineError((inlineError) => ({
         ...inlineError,
-        name_error: "Name cannot be empty",
+        name_error: "Full Name cannot be empty",
       }));
       return false;
     }
