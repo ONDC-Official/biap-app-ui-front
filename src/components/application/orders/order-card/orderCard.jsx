@@ -443,7 +443,7 @@ export default function OrderCard(props) {
             setCurrentSelectedAccordion("");
             onFetchUpdatedOrder();
           }}
-          quantity={quantity}
+          quantity={quantity.filter((item) => !item.isCancledOrReturned)}
           partailsCancelProductList={product.filter(
             (p) => p.return_status !== "Cancelled"
           )}
@@ -546,9 +546,9 @@ export default function OrderCard(props) {
             style={
               currentSelectedAccordion === accoodion_id
                 ? {
-                    transform: "rotate(180deg)",
-                    transition: "all 0.7s",
-                  }
+                  transform: "rotate(180deg)",
+                  transition: "all 0.7s",
+                }
                 : { transform: "rotate(0)", transition: "all 0.7s" }
             }
           >

@@ -80,7 +80,10 @@ export default function Orders() {
             breakup: quote?.breakup.filter((item) => item["@ondc/org/title_type"] !== "item"),
             price: quote?.price
           },
-          quantity: items?.map(({ quantity }) => quantity),
+          quantity: items?.map(({ cancellation_status, return_status, quantity }) => {
+            quantity.isCancledOrReturned = cancellation_status !== undefined || return_status !== undefined
+            return quantity;
+          }),
           billing_address: {
             name: billing?.name,
             email: billing?.email,
