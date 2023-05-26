@@ -12,7 +12,7 @@ export default function ProductFilters({
   messageId,
   fetchFilterLoading,
   filters,
-  onCloseFilter = () => {},
+  onCloseFilter = () => { },
   onUpdateFilters,
 }) {
   const MINIMUM_FILTER_VALUE = 0;
@@ -129,7 +129,7 @@ export default function ProductFilters({
           {filters?.fulfillment?.length > 0 && (
             <div className="py-2">
               <MultiAttributeFilter
-                filterAttributeName="FullFillments"
+                filterAttributeName="Fulfillments"
                 filterAttributeArray={filters?.fulfillment}
                 selectedAttributes={selectedFilters.fulfillment}
                 onUpdateAttributeFilter={(selectedFulfillments) => {
