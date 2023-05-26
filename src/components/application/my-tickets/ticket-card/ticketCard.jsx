@@ -39,11 +39,9 @@ export default function TicketCard(props) {
     const [toggleActionModal, setToggleActionModal] = useState(false);
     const [supportActionDetails, setSupportActionDetails] = useState();
     const [issueActions, setIssueActions] = useState([]);
-    const [complaintState, setComplaintState] = useState(status);
-
 
     // HELPERS
-    const current_order_status = getOrderStatus(complaintState);
+    const current_order_status = getOrderStatus(status);
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -159,9 +157,6 @@ export default function TicketCard(props) {
             setStatusLoading(false);
             if (data?.message) {
                 mergeRespondantArrays({ respondent_actions: data.message.issue?.issue_actions.respondent_actions, complainant_actions: issue_actions.complainant_actions })
-                if (data.message.issue?.resolution?.resolution_action === "RESOLVE") {
-                    setComplaintState("Close")
-                }
                 onFetchUpdatedOrder();
             } else {
                 dispatchToast(
@@ -490,7 +485,7 @@ export default function TicketCard(props) {
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
-                                    complaintState === 'Close' ?
+                                    issueActions.some(x => x.respondent_action === "RESOLVED") ?
                                         <button
                                             disabled={
                                                 statusLoading

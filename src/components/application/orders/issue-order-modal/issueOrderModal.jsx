@@ -115,10 +115,10 @@ export default function IssueOrderModal({
               complainant_info: {
                 person: {
                   name: billing_address.name,
-                  email: billing_address.email,
                 },
                 contact: {
                   phone: billing_address.phone,
+                  email: billing_address.email,
                 },
               },
               description: {
