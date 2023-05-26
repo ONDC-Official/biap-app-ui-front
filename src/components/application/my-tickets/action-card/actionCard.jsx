@@ -200,10 +200,10 @@ export default function CustomerActionCard({
     const timer = setTimeout(() => {
       es.close();
       if (cancelPartialEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        // dispatchToast(
+        //   "Cannot proceed with you request now! Please try again",
+        //   toast_types.error
+        // );
         setLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -228,14 +228,7 @@ export default function CustomerActionCard({
         data,
       ];
       setLoading(false);
-      if (data?.message) {
-        onSuccess();
-      } else {
-        dispatchToast(
-          "Something went wrong!, product status cannot be updated",
-          toast_types.error
-        );
-      }
+      onSuccess();
     } catch (err) {
       setLoading(false);
       dispatchToast(err?.message, toast_types.error);

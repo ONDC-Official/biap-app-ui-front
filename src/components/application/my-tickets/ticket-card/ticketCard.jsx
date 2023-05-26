@@ -12,6 +12,7 @@ import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import Loading from "../../../shared/loading/loading";
 import CustomerActionCard from "../action-card/actionCard";
+import { ISSUE_TYPES } from "../../../../constants/issue-types";
 
 export default function TicketCard(props) {
     const {
@@ -52,6 +53,15 @@ export default function TicketCard(props) {
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
+
+    const AllCategory = ISSUE_TYPES.map((item) => {
+        return item.subCategory.map((subcategoryItem) => {
+            return {
+                ...subcategoryItem,
+                category: item.value,
+            };
+        });
+    }).flat();
 
     // use this function to dispatch error
     function dispatchToast(message, type) {
@@ -184,6 +194,7 @@ export default function TicketCard(props) {
                         dispatchToast("Action successfully taken", toast_types.success);
                         setSupportActionDetails();
                         setToggleActionModal(false);
+                        checkIssueStatus()
                     }}
                 />
             )}
@@ -200,7 +211,7 @@ export default function TicketCard(props) {
             >
                 <div className="flex-grow-1">
                     <p className={styles.card_header_title}>
-                        {category + "-" + sub_category ?? "NA"}
+                        {category + "-" + AllCategory.find(x => x.enums === sub_category)?.value ?? "NA"}
                     </p>
                     <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
                         {issue_type ?? "Issue"} raised on
