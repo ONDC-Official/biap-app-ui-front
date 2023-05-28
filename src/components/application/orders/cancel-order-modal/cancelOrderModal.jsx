@@ -461,7 +461,7 @@ export default function CancelOrderModal({
               </div>
             </AddressRadioButton>
             <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled() || partailsCancelProductList.length === 1}
+              disabled={loading || !areProductsToBeCancled() || (partailsCancelProductList.length === 1 && quantity[0].count === 1)}
               checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);

@@ -42,7 +42,7 @@ export default function ProductList() {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalCount: 0,
-    postPerPage: 10,
+    postPerPage: 12,
   });
   const [searchedLocation, setSearchedLocation] = useState({
     name: "",
@@ -149,6 +149,7 @@ export default function ProductList() {
       let filterSet = eventData?.filters;
       filterSet.providers = filterSet.providers.filter((item) => item.name !== "" && item.name !== null);
       filterSet.fulfillment = filterSet.fulfillment.filter((item) => item.name === undefined && item?.name !== "" && item?.name !== null);
+      filterSet.categories = filterSet.categories.filter((item) => item.name !== "" && item.name !== null);
       setFilters((filters) => ({
         ...filters,
         categories: [...filters?.categories, ...filterSet?.categories],
@@ -210,6 +211,7 @@ export default function ProductList() {
       );
       data.providers = data.providers.filter((item) => item.name !== "" && item.name !== null);
       data.fulfillment = data.fulfillment.filter((item) => item.name === undefined && item.name !== "" && item.name !== null);
+      data.categories = data.categories.filter((item) => item.name !== "" && item.name !== null);
       setFilters((filters) => ({
         ...filters,
         minPrice: selected_filters.minPrice

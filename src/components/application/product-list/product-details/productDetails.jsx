@@ -85,7 +85,7 @@ export default function ProductDetails() {
             <div className="row py-3 px-2">
               <div className="d-inline-flex">
                 <Link to={{ pathname: '/application/products' }}>
-                  <p className={styles.back_text}><img className={styles.back_icon} src={back_icon} alt={"back_icon"} />back</p>
+                  <p className={styles.back_text}><img className={styles.back_icon} src={back_icon} alt={"back_icon"} />Back</p>
                 </Link>
               </div>
             </div>

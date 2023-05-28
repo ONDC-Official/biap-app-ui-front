@@ -29,8 +29,7 @@ export default function Cart() {
         <div className="py-2">
           <p className={styles.illustration_header}>Your cart is empty</p>
           <p className={styles.illustration_body}>
-            looks like your shopping cart is empty, you can shop now by clicking
-            button below
+            Looks like your shopping cart is empty, you can shop now by clicking on below button
           </p>
         </div>
         <div className="py-3">

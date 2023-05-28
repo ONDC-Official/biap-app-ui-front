@@ -342,17 +342,17 @@ export default function SearchBanner({ onSearch, location }) {
   function clearSearch(e) {
     e.preventDefault();
     e.stopPropagation();
-    setSearchedLocation({
-      name: "",
-      lat: "",
-      lng: "",
-    });
-    setDeliveryAddress();
-    setBillingAddress();
-    setCartItems([]);
-    removeCookie("delivery_address");
-    removeCookie("billing_address");
-    removeCookie("search_context");
+    // setSearchedLocation({
+    //   name: "",
+    //   lat: "",
+    //   lng: "",
+    // });
+    // setDeliveryAddress();
+    // setBillingAddress();
+    // setCartItems([]);
+    // removeCookie("delivery_address");
+    // removeCookie("billing_address");
+    // removeCookie("search_context");
   }
 
   const loadingSpin = (
