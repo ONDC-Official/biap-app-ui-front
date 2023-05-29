@@ -194,8 +194,7 @@ export default function TicketCard(props) {
                         dispatchToast("Action successfully taken", toast_types.success);
                         setSupportActionDetails();
                         setToggleActionModal(false);
-                        issueActions.push(actionData)
-                        setIssueActions(issueActions)
+                        setIssueActions([...issueActions, actionData])
                     }}
                 />
             )}
@@ -411,7 +410,7 @@ export default function TicketCard(props) {
                                                 </p>
                                                 <div className="pt-1">
                                                     <p className={styles.quantity_count}>
-                                                        {`Updated by: ${updated_by?.person?.name}`}
+                                                        {`Updated by: ${updated_by?.person?.name}, ${updated_by?.org.name.split('::')[0]}`}
                                                     </p>
                                                 </div>
                                                 <div className="pt-1">
@@ -493,11 +492,11 @@ export default function TicketCard(props) {
                                 ?.contact?.phone ?? "N/A"}
                         </p>
                     </div>
-                    {!issueActions?.some(x => x.respondent_action === "CLOSE") &&
+                    {(!issueActions?.some(x => x.respondent_action === "CLOSE")) &&
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
-                                    issueActions.some(x => x.respondent_action === "RESOLVED") ?
+                                    (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
                                         <button
                                             disabled={
                                                 statusLoading
