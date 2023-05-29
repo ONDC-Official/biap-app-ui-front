@@ -224,6 +224,17 @@ export default function Orders() {
                           created_at={createdAt}
                           bpp_id={bpp_id}
                           accoodion_id={`order_id_${index}`}
+                          onUpdateOrder={(data) => {
+                            let orderData = Object.assign([], orders);
+                            orderData.map((item) => {
+                              if (item.id === data.id) {
+                                return data;
+                              } else {
+                                return item;
+                              }
+                            })
+                            setOrders(orderData);
+                          }}
                           onFetchUpdatedOrder={() => {
                             setCurrentSelectedAccordion("");
                             dispatch({
