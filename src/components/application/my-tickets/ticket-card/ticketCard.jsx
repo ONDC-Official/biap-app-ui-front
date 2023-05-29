@@ -190,11 +190,12 @@ export default function TicketCard(props) {
                 <CustomerActionCard
                     supportActionDetails={supportActionDetails}
                     onClose={() => setToggleActionModal(false)}
-                    onSuccess={() => {
+                    onSuccess={(actionData) => {
                         dispatchToast("Action successfully taken", toast_types.success);
                         setSupportActionDetails();
                         setToggleActionModal(false);
-                        checkIssueStatus()
+                        issueActions.push(actionData)
+                        setIssueActions(issueActions)
                     }}
                 />
             )}
@@ -492,7 +493,7 @@ export default function TicketCard(props) {
                                 ?.contact?.phone ?? "N/A"}
                         </p>
                     </div>
-                    {!issue_actions.complainant_actions.some(x => x.complainant_action === "CLOSE") &&
+                    {!issueActions?.some(x => x.respondent_action === "CLOSE") &&
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
