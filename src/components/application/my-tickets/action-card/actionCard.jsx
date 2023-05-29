@@ -166,9 +166,14 @@ export default function CustomerActionCard({
         dispatchToast("Something went wrong", toast_types.error);
       } else {
         if (selectedCancelType === ACTION_TYPES.escalateIssue) {
-          fetchCancelPartialOrderDataThroughEvents(data.context?.message_id);
+          fetchCancelPartialOrderDataThroughEvents(data.context?.message_id, issue_actions);
         } else {
-          onSuccess();
+          onSuccess({
+            respondent_action: "CLOSE",
+            short_desc: "Complaint closed",
+            updated_at: new Date(),
+            updated_by: issue_actions.complainant_actions[0].updated_by,
+          });
         }
       }
     } catch (err) {
@@ -179,7 +184,7 @@ export default function CustomerActionCard({
 
   // PARTIAL CANCEL APIS
   // use this function to fetch cancel product through events
-  function fetchCancelPartialOrderDataThroughEvents(message_id) {
+  function fetchCancelPartialOrderDataThroughEvents(message_id, issue_actions) {
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -194,7 +199,7 @@ export default function CustomerActionCard({
     );
     es.addEventListener("on_issue", (e) => {
       const { messageId } = JSON.parse(e?.data);
-      getPartialCancelOrderDetails(messageId);
+      getPartialCancelOrderDetails(messageId, issue_actions);
     });
 
     const timer = setTimeout(() => {
@@ -218,7 +223,7 @@ export default function CustomerActionCard({
   }
 
   // on Issue api
-  async function getPartialCancelOrderDetails(message_id) {
+  async function getPartialCancelOrderDetails(message_id, issue_actions) {
     try {
       const data = await cancellablePromise(
         getCall(`/issueApis/v1/on_issue?messageId=${message_id}`)
@@ -228,7 +233,12 @@ export default function CustomerActionCard({
         data,
       ];
       setLoading(false);
-      onSuccess();
+      onSuccess({
+        respondent_action: "ESCALATE",
+        short_desc: customerRemarks,
+        updated_at: new Date(),
+        updated_by: issue_actions.complainant_actions[0].updated_by,
+      },);
     } catch (err) {
       setLoading(false);
       dispatchToast(err?.message, toast_types.error);
