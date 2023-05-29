@@ -361,8 +361,7 @@ export default function InitializeOrder() {
         <div className="py-2">
           <p className={styles.illustration_header}>Your cart is empty</p>
           <p className={styles.illustration_body}>
-            looks like your shopping cart is empty, you can shop now by clicking
-            button below
+            Looks like your shopping cart is empty, you can shop now by clicking on below button
           </p>
         </div>
         <div className="py-3">
@@ -407,30 +406,34 @@ export default function InitializeOrder() {
                         updateQuoteBasedOnDeliveryAddress={updateQuoteBasedOnDeliveryAddress}
                       />
                     </div>
-                    <div className="col-12 pb-3">
-                      <OrderConfirmationCard
-                        updatedCartItems={updatedCartItems.current}
-                        responseReceivedIds={responseRef.current.map((item) => {
-                          const { message } = item;
-                          return message?.quote?.provider?.id.toString();
-                        })}
-                        productsQuote={productsQuote}
-                        responseText={errorMessageTimeOut}
-                        currentActiveStep={currentActiveStep}
-                        setCurrentActiveStep={(value) =>
-                          setCurrentActiveStep(value)
-                        }
-                        updateInitLoading={(value) => setInitLoading(value)}
-                        updateCartLoading={updateCartLoading}
-                        fetchUpdatedQuote={() => {
-                          setUpdateCartLoading(true);
-                          const request_object =
-                            constructQouteObject(cartItems);
-                          getQuote(request_object);
-                        }}
-                        toggleInit={toggleInit}
-                      />
-                    </div>
+                    {
+                      currentActiveStep.current_active_step_number > 1 && (
+                        <div className="col-12 pb-3">
+                          <OrderConfirmationCard
+                            updatedCartItems={updatedCartItems.current}
+                            responseReceivedIds={responseRef.current.map((item) => {
+                              const { message } = item;
+                              return message?.quote?.provider?.id.toString();
+                            })}
+                            productsQuote={productsQuote}
+                            responseText={errorMessageTimeOut}
+                            currentActiveStep={currentActiveStep}
+                            setCurrentActiveStep={(value) =>
+                              setCurrentActiveStep(value)
+                            }
+                            updateInitLoading={(value) => setInitLoading(value)}
+                            updateCartLoading={updateCartLoading}
+                            fetchUpdatedQuote={() => {
+                              setUpdateCartLoading(true);
+                              const request_object =
+                                constructQouteObject(cartItems);
+                              getQuote(request_object);
+                            }}
+                            toggleInit={toggleInit}
+                          />
+                        </div>
+                      )
+                    }
                   </div>
                 </div>
               </div>
