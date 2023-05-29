@@ -12,6 +12,7 @@ import { getValueFromCookie } from "../../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import Loading from "../../../shared/loading/loading";
 import CustomerActionCard from "../action-card/actionCard";
+import { ISSUE_TYPES } from "../../../../constants/issue-types";
 
 export default function TicketCard(props) {
     const {
@@ -39,11 +40,9 @@ export default function TicketCard(props) {
     const [toggleActionModal, setToggleActionModal] = useState(false);
     const [supportActionDetails, setSupportActionDetails] = useState();
     const [issueActions, setIssueActions] = useState([]);
-    const [complaintState, setComplaintState] = useState(status);
 
-
-     // HELPERS
-     const current_order_status = getOrderStatus(complaintState);
+    // HELPERS
+    const current_order_status = getOrderStatus(status);
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -54,6 +53,15 @@ export default function TicketCard(props) {
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
+
+    const AllCategory = ISSUE_TYPES.map((item) => {
+        return item.subCategory.map((subcategoryItem) => {
+            return {
+                ...subcategoryItem,
+                category: item.value,
+            };
+        });
+    }).flat();
 
     // use this function to dispatch error
     function dispatchToast(message, type) {
@@ -92,7 +100,7 @@ export default function TicketCard(props) {
                         bpp_id
                     },
                     message: {
-                        id: issue_id,
+                        issue_id: issue_id,
                     },
                 })
             );
@@ -158,10 +166,7 @@ export default function TicketCard(props) {
             ];
             setStatusLoading(false);
             if (data?.message) {
-                mergeRespondantArrays({respondent_actions:data.message.issue?.issue_actions.respondent_actions, complainant_actions:issue_actions.complainant_actions})
-                if(data.message.issue?.resolution?.resolution_action === "RESOLVE"){
-                    setComplaintState("Close")
-                }
+                mergeRespondantArrays({ respondent_actions: data.message.issue?.issue_actions.respondent_actions, complainant_actions: issue_actions.complainant_actions })
                 onFetchUpdatedOrder();
             } else {
                 dispatchToast(
@@ -185,10 +190,11 @@ export default function TicketCard(props) {
                 <CustomerActionCard
                     supportActionDetails={supportActionDetails}
                     onClose={() => setToggleActionModal(false)}
-                    onSuccess={() => {
+                    onSuccess={(actionData) => {
                         dispatchToast("Action successfully taken", toast_types.success);
                         setSupportActionDetails();
                         setToggleActionModal(false);
+                        setIssueActions([...issueActions, actionData])
                     }}
                 />
             )}
@@ -205,7 +211,7 @@ export default function TicketCard(props) {
             >
                 <div className="flex-grow-1">
                     <p className={styles.card_header_title}>
-                        {category + "-" + sub_category ?? "NA"}
+                        {category + "-" + AllCategory.find(x => x.enums === sub_category)?.value ?? "NA"}
                     </p>
                     <p className={styles.address_type_label} style={{ fontSize: "12px" }}>
                         {issue_type ?? "Issue"} raised on
@@ -388,7 +394,7 @@ export default function TicketCard(props) {
                         </p>
                         {issueActions?.map(
                             (
-                                { respondent_action, remarks, updated_at, updated_by },
+                                { respondent_action, short_desc, updated_at, updated_by },
                                 index
                             ) => {
                                 return (
@@ -397,14 +403,14 @@ export default function TicketCard(props) {
                                             <div style={{ width: "90%" }}>
                                                 <p
                                                     className={styles.product_name}
-                                                    title={remarks}
+                                                    title={short_desc}
                                                     style={{ fontSize: "16px" }}
                                                 >
-                                                    ⦿ {remarks}
+                                                    ⦿ {short_desc}
                                                 </p>
                                                 <div className="pt-1">
                                                     <p className={styles.quantity_count}>
-                                                        {`Updated by: ${updated_by?.person?.name}`}
+                                                        {`Updated by: ${updated_by?.person?.name}, ${updated_by?.org.name.split('::')[0]}`}
                                                     </p>
                                                 </div>
                                                 <div className="pt-1">
@@ -486,11 +492,11 @@ export default function TicketCard(props) {
                                 ?.contact?.phone ?? "N/A"}
                         </p>
                     </div>
-                    {!issue_actions.complainant_actions.some(x => x.complainant_action === "CLOSE") &&
+                    {(!issueActions?.some(x => x.respondent_action === "CLOSE")) &&
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
-                                    complaintState === 'Close' ?
+                                    (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
                                         <button
                                             disabled={
                                                 statusLoading

@@ -107,7 +107,7 @@ export default function IssueOrderModal({
           message: {
             issue: {
               category: selectedIssueSubcategory.category.toUpperCase(),
-              sub_category: selectedIssueSubcategory.value,
+              sub_category: selectedIssueSubcategory.enums,
               bppId: bpp_id,
               bpp_uri,
               created_at: new Date(),
@@ -115,10 +115,10 @@ export default function IssueOrderModal({
               complainant_info: {
                 person: {
                   name: billing_address.name,
-                  email: billing_address.email,
                 },
                 contact: {
                   phone: billing_address.phone,
+                  email: billing_address.email,
                 },
               },
               description: {
