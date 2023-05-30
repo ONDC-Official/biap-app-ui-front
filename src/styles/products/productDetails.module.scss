@@ -60,6 +60,7 @@ a {
 
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.16);
   padding: 5px;
+  position: relative !important;
 }
 
 .product_img {
@@ -224,4 +225,38 @@ a {
   .width {
     width: 100%;
   }
+}
+
+.next_icon_container {
+  right: 10px;
+}
+
+.previous_icon_container {
+  left: 10px;
+}
+
+.next_icon_container,
+.previous_icon_container {
+  position: absolute !important;
+  cursor: pointer;
+  padding: 3px 5px !important;
+  border-radius: 50% !important;
+}
+
+.next_icon_container:hover,
+.previous_icon_container:hover {
+  background-color: #fff;
+}
+
+.next_icon {
+  font-size: 15px;
+  color: #aaa !important;
+  height: 15px !important;
+  transform: rotate(180deg);
+}
+
+.previous_icon {
+  font-size: 15px;
+  color: #aaa !important;
+  height: 15px !important;
 }
