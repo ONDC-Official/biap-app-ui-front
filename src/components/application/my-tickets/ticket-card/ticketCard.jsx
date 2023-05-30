@@ -40,9 +40,9 @@ export default function TicketCard(props) {
     const [toggleActionModal, setToggleActionModal] = useState(false);
     const [supportActionDetails, setSupportActionDetails] = useState();
     const [issueActions, setIssueActions] = useState([]);
-
+    const [issueStatus, setIssueStatus] = useState(status)
     // HELPERS
-    const current_order_status = getOrderStatus(status);
+    const current_order_status = getOrderStatus(issueStatus);
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -194,7 +194,8 @@ export default function TicketCard(props) {
                         dispatchToast("Action successfully taken", toast_types.success);
                         setSupportActionDetails();
                         setToggleActionModal(false);
-                        setIssueActions([...issueActions, actionData])
+                        setIssueActions([...issueActions, ...actionData])
+                        actionData[0].respondent_action === "CLOSE" && setIssueStatus('Close')
                     }}
                 />
             )}
@@ -496,7 +497,7 @@ export default function TicketCard(props) {
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
-                                    (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
+                                    (issueActions[issueActions.length - 1]?.respondent_action !== "PROCESSING") && (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
                                         <button
                                             disabled={
                                                 statusLoading
