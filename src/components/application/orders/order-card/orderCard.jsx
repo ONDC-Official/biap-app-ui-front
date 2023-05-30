@@ -443,7 +443,7 @@ export default function OrderCard(props) {
             setCurrentSelectedAccordion("");
             onFetchUpdatedOrder();
           }}
-          quantity={quantity}
+          quantity={quantity.filter((item) => !item.isCancledOrReturned)}
           partailsCancelProductList={product.filter(
             (p) => p.return_status !== "Cancelled"
           )}
@@ -546,9 +546,9 @@ export default function OrderCard(props) {
             style={
               currentSelectedAccordion === accoodion_id
                 ? {
-                    transform: "rotate(180deg)",
-                    transition: "all 0.7s",
-                  }
+                  transform: "rotate(180deg)",
+                  transition: "all 0.7s",
+                }
                 : { transform: "rotate(0)", transition: "all 0.7s" }
             }
           >
@@ -743,9 +743,9 @@ export default function OrderCard(props) {
                 {delivery_address?.phone ?? "NA"}
               </p>
               <p className={styles.address_line_1}>
-                {delivery_address?.location?.street
-                  ? delivery_address.location.street
-                  : delivery_address?.location?.door ?? "NA"}
+                {delivery_address?.location?.locality
+                  ? delivery_address.location.locality
+                  : "NA"}
                 , {delivery_address?.location?.city ?? "NA"}
               </p>
               <p className={styles.address_line_2}>
@@ -764,9 +764,9 @@ export default function OrderCard(props) {
                 {billing_address?.phone ?? "NA"}
               </p>
               <p className={styles.address_line_1}>
-                {billing_address?.location?.street
-                  ? billing_address.location.street
-                  : billing_address?.location?.door ?? "NA"}
+                {billing_address?.location?.locality
+                  ? billing_address.location.locality
+                  : "NA"}
                 , {billing_address?.location?.city ?? "NA"}
               </p>
               <p className={styles.address_line_2}>

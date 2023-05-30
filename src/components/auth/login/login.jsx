@@ -42,7 +42,7 @@ export default function Login() {
     if (!email) {
       setInlineError((inlineError) => ({
         ...inlineError,
-        email_error: "email cannot be empty",
+        email_error: "Email cannot be empty",
       }));
       return false;
     }
@@ -53,7 +53,7 @@ export default function Login() {
     if (!password) {
       setInlineError((inlineError) => ({
         ...inlineError,
-        password_error: "password cannot be empty",
+        password_error: "Password cannot be empty",
       }));
       return false;
     } else if (password && password.length < 8) {
