@@ -172,11 +172,19 @@ export default function OrderCard(props) {
           toast_types.error
         );
         return;
+      } else if (message.tracking.status === "active" && message?.tracking?.url !== "") {
+        setTrackOrderLoading(false);
+        trackOrderRef.current.href = message?.tracking?.url;
+        trackOrderRef.current.target = "_blank";
+        trackOrderRef.current.click();
+      } else {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
       }
-      setTrackOrderLoading(false);
-      trackOrderRef.current.href = message?.tracking?.url;
-      trackOrderRef.current.target = "_blank";
-      trackOrderRef.current.click();
     } catch (err) {
       setTrackOrderLoading(false);
       dispatchToast(err?.message, toast_types.error);
