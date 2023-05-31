@@ -168,12 +168,12 @@ export default function CustomerActionCard({
         if (selectedCancelType === ACTION_TYPES.escalateIssue) {
           fetchCancelPartialOrderDataThroughEvents(data.context?.message_id, issue_actions);
         } else {
-          onSuccess({
+          onSuccess([{
             respondent_action: "CLOSE",
             short_desc: "Complaint closed",
             updated_at: new Date(),
             updated_by: issue_actions.complainant_actions[0].updated_by,
-          });
+          }]);
         }
       }
     } catch (err) {
@@ -232,13 +232,22 @@ export default function CustomerActionCard({
         ...cancelPartialEventSourceResponseRef.current,
         data,
       ];
-      setLoading(false);
-      onSuccess({
+      let successData = [{
         respondent_action: "ESCALATE",
         short_desc: customerRemarks,
         updated_at: new Date(),
         updated_by: issue_actions.complainant_actions[0].updated_by,
-      },);
+      }]
+      if (data?.message) {
+        setLoading(false);
+        let respondentArray = data.message?.issue?.issue_actions?.respondent_actions
+        let processObj = respondentArray[respondentArray.length - 1]
+        onSuccess([...successData, processObj])
+      } else {
+        setLoading(false);
+        onSuccess(successData)
+      }
+
     } catch (err) {
       setLoading(false);
       dispatchToast(err?.message, toast_types.error);
