@@ -348,6 +348,7 @@ export default function PaymentConfirmationCard(props) {
                     : "ON-ORDER",
                 transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                   .transaction_id,
+                paymentGatewayEnabled: false //TODO: we send false for, if we enabled jusPay the we will handle.
               },
               quote: {
                 ...productsQuote[index],
@@ -554,9 +555,15 @@ export default function PaymentConfirmationCard(props) {
               onClick={() => {
                 setConfirmOrderLoading(true);
                 if (activePaymentMethod === payment_methods.JUSPAY) {
-                  setTogglePaymentGateway(true);
-                  setLoadingSdkForPayment(true);
-                  initiateSDK();
+                  // setTogglePaymentGateway(true);
+                  // setLoadingSdkForPayment(true);
+                  // initiateSDK();
+                  const request_object = constructQouteObject(
+                    cartItems.filter(({ provider }) =>
+                      successOrderIds.includes(provider.id.toString())
+                    )
+                  );
+                  confirmOrder(request_object, payment_methods.JUSPAY);
                 } else {
                   const request_object = constructQouteObject(
                     cartItems.filter(({ provider }) =>

@@ -36,6 +36,7 @@ export default function ToastProvider({ ...props }) {
             left: "15px",
             width: "100%",
             maxWidth: "400px",
+            wordBreak: 'normal'
           }}
         >
           <div
