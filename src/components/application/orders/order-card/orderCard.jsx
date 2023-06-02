@@ -35,6 +35,7 @@ export default function OrderCard(props) {
     bpp_id,
     bpp_uri,
     onFetchUpdatedOrder,
+    onUpdateOrder,
     accoodion_id,
     currentSelectedAccordion,
     setCurrentSelectedAccordion,
@@ -171,11 +172,19 @@ export default function OrderCard(props) {
           toast_types.error
         );
         return;
+      } else if (message.tracking.status === "active" && message?.tracking?.url !== "") {
+        setTrackOrderLoading(false);
+        trackOrderRef.current.href = message?.tracking?.url;
+        trackOrderRef.current.target = "_blank";
+        trackOrderRef.current.click();
+      } else {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
       }
-      setTrackOrderLoading(false);
-      trackOrderRef.current.href = message?.tracking?.url;
-      trackOrderRef.current.target = "_blank";
-      trackOrderRef.current.click();
     } catch (err) {
       setTrackOrderLoading(false);
       dispatchToast(err?.message, toast_types.error);
@@ -396,7 +405,15 @@ export default function OrderCard(props) {
         return;
       }
       if (message?.order) {
-        onFetchUpdatedOrder();
+        onUpdateOrder(message?.order);
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.success,
+            message: "Order status updated successfully!",
+          },
+        });
       }
       setStatusLoading(false);
     } catch (err) {

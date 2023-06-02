@@ -14,8 +14,8 @@ import Add from '../../../shared/svg/add';
 export default function ProductDetails() {
   const location = useLocation();
   const { product, bpp_id, location_id } = location.state;
-  const { id, descriptor, price, provider_details } = product;
-  const {
+  const { id, descriptor, price, provider_details, category_id } = product;
+  let {
     name: product_name,
     images,
     short_desc: product_description,
@@ -25,6 +25,7 @@ export default function ProductDetails() {
   const { name: provider_name } = provider_descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
   const [toggleAddToCart, setToggleAddToCart] = useState();
+  const [imageIndex, setImageIndex] = useState(0);
   const { cartItems, onReduceQuantity, onAddQuantity, onAddProduct } =
     useContext(CartContext);
 
@@ -94,7 +95,7 @@ export default function ProductDetails() {
                 {/* PRODUCT IMAGE  */}
                 <div className={styles.product_img_container}>
                   <img
-                    src={images?.length > 0 ? images[0] : no_image_found}
+                    src={images?.length > 0 ? images[imageIndex] : no_image_found}
                     alt={product_name}
                     width="300"
                     height="300"
@@ -104,6 +105,32 @@ export default function ProductDetails() {
                       event.target.src = no_image_found;
                     }}
                   />
+                  {
+                    images?.length > 1
+                      ? (
+                        <>
+                          {
+                            (imageIndex < (images.length - 1))
+                              ? (
+                                <span className={styles.next_icon_container} onClick={() => setImageIndex(imageIndex + 1)}>
+                                  <img className={styles.next_icon} src={back_icon} alt={"next_icon"} />
+                                </span>
+                              )
+                              : <></>
+                          }
+                          {
+                            imageIndex > 0
+                              ? (
+                                <span className={styles.previous_icon_container} onClick={() => setImageIndex(imageIndex - 1)}>
+                                  <img className={styles.previous_icon} src={back_icon} alt={"previous_icon"} />
+                                </span>
+                              )
+                              : <></>
+                          }
+                        </>
+                      )
+                      : <></>
+                  }
                 </div>
               </div>
               <div className="col-md-12 col-lg-8 p-3">
@@ -122,7 +149,7 @@ export default function ProductDetails() {
                   <p
                     className={`${styles.product_description} ${styles.width}`}
                   >
-                    {product_description}
+                    {`${product_description} ${category_id ? " | " : ""} ${category_id}`}
                   </p>
                 </div>
                 {/* PRICE  */}

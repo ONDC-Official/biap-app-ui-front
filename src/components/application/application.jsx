@@ -26,7 +26,7 @@ export default function Application() {
           <PrivateRoute path={"/application/products/:id"}>
             <ProductDetails />
           </PrivateRoute>
-          <PrivateRoute path={"/application/products"}>
+          <PrivateRoute exact path={"/application/products"}>
             <ProductList />
           </PrivateRoute>
           <PrivateRoute path={"/application/cart"}>
