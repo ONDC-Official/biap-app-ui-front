@@ -527,7 +527,7 @@ export default function PaymentConfirmationCard(props) {
                       <p className={styles.address_line_1}>Prepaid</p>
                     </div>
                   </AddressRadioButton>
-                  <div className="px-2">
+                  {/* <div className="px-2">
                     <p style={{ color: "#aaa", fontSize: "12px", margin: 0 }}>
                       powered by{" "}
                       <span>
@@ -538,7 +538,7 @@ export default function PaymentConfirmationCard(props) {
                         />
                       </span>{" "}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
