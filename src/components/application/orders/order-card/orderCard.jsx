@@ -482,10 +482,13 @@ export default function OrderCard(props) {
             onFetchUpdatedOrder();
           }}
           quantity={quantity}
-          partailsReturnProductList={product}
+          // partailsReturnProductList={product}
           // partailsReturnProductList={product?.filter(
           //   (p) => p?.["@ondc/org/returnable"] && p?.return_status === ""
           // )}
+          partailsReturnProductList={product?.filter(
+            (p) => p?.return_status !== "Cancelled"
+          )}
           order_status={status}
           bpp_id={bpp_id}
           transaction_id={transaction_id}

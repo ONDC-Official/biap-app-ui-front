@@ -23,6 +23,7 @@ export default function Navbar() {
     ORDERS: "Orders",
     TICKETS: "Complaints",
     PROFILE: "Profile",
+    ONBOARD: "Try it as a Seller",
     LOGOUT: "Logout",
   };
   const more_options_dropdown_options = [
@@ -45,6 +46,10 @@ export default function Navbar() {
     {
       img: <User width="15" />,
       value: dropdown_links.PROFILE,
+    },
+    {
+      img: <User width="15" />,
+      value: dropdown_links.ONBOARD,
     },
     {
       img: <Logout width="15" />,
@@ -117,6 +122,11 @@ export default function Navbar() {
                 }
                 if (value === dropdown_links.PROFILE) {
                   return history.push("/application/profile");
+                }
+                if (value === dropdown_links.ONBOARD) {
+                  const url = `${process.env.REACT_APP_SELLER_SIGNUP_URL}`
+                  return window.open(url, '_blank');
+                  // return history.push("/application/sign-up");
                 }
                 if (value === dropdown_links.LOGOUT) {
                   return handleLogout();
