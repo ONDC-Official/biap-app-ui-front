@@ -40,9 +40,9 @@ export default function TicketCard(props) {
     const [toggleActionModal, setToggleActionModal] = useState(false);
     const [supportActionDetails, setSupportActionDetails] = useState();
     const [issueActions, setIssueActions] = useState([]);
-
+    const [issueStatus, setIssueStatus] = useState(status)
     // HELPERS
-    const current_order_status = getOrderStatus(status);
+    const current_order_status = getOrderStatus(issueStatus);
 
     // REFS
     const cancelPartialEventSourceResponseRef = useRef(null);
@@ -191,10 +191,11 @@ export default function TicketCard(props) {
                     supportActionDetails={supportActionDetails}
                     onClose={() => setToggleActionModal(false)}
                     onSuccess={(actionData) => {
-                        dispatchToast("Action successfully taken", toast_types.success);
+                        dispatchToast(actionData[0].respondent_action === "ESCALATE" ? "GRO would be reaching out to you soon" : "Action successfully taken", toast_types.success);
                         setSupportActionDetails();
                         setToggleActionModal(false);
-                        setIssueActions([...issueActions, actionData])
+                        setIssueActions([...issueActions, ...actionData])
+                        actionData[0].respondent_action === "CLOSE" && setIssueStatus('Close')
                     }}
                 />
             )}
@@ -481,6 +482,12 @@ export default function TicketCard(props) {
                     style={{ borderTop: "1px solid #ddd" }}
                 >
                     <div >
+                        <p
+                            className={styles.product_name}
+                            style={{ fontSize: "16px" }}
+                        >
+                            Respondant
+                        </p>
                         <p className={styles.status_label}>
                             Email:{" "}
                             {issue_actions?.respondent_actions[issue_actions.respondent_actions.length - 1]?.updated_by
@@ -491,12 +498,37 @@ export default function TicketCard(props) {
                             {issue_actions?.respondent_actions[issue_actions.respondent_actions.length - 1]?.updated_by
                                 ?.contact?.phone ?? "N/A"}
                         </p>
+                        {issueActions.some(x => x.respondent_action === "ESCALATE") &&
+                            <div className="py-2">
+                                <p
+                                    className={styles.product_name}
+                                    style={{ fontSize: "16px" }}
+                                >
+                                    GRO
+                                </p>
+                                <p className={styles.status_label}>
+                                    Name:{" "}
+                                    Rishabhnand Singh
+                                </p>
+                                <p className={styles.status_label}>
+                                    Email:{" "}
+                                    Rishabhnand.singh@ondc.org
+                                </p>
+                                <p className={styles.status_label}>
+                                    Phone:{" "}
+                                    6239083807
+                                </p>
+                            </div>
+                        }
                     </div>
+
+
+
                     {(!issueActions?.some(x => x.respondent_action === "CLOSE")) &&
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
-                                    (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
+                                    (issueActions[issueActions.length - 1]?.respondent_action !== "PROCESSING") && (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
                                         <button
                                             disabled={
                                                 statusLoading

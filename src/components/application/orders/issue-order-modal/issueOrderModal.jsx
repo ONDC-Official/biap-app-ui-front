@@ -209,16 +209,17 @@ export default function IssueOrderModal({
         data,
       ];
       setLoading(false);
+      onSuccess();
       if (data?.message) {
-        onSuccess();
       } else {
         dispatchToast(
-          "Something went wrong!, product status cannot be updated",
+          "Something went wrong!, issue cannot be raised",
           toast_types.error
         );
       }
     } catch (err) {
       setLoading(false);
+      onSuccess();
       dispatchToast(err?.message, toast_types.error);
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
         eventSource.close();
