@@ -210,13 +210,6 @@ export default function IssueOrderModal({
       ];
       setLoading(false);
       onSuccess();
-      if (data?.message) {
-      } else {
-        dispatchToast(
-          "Something went wrong!, issue cannot be raised",
-          toast_types.error
-        );
-      }
     } catch (err) {
       setLoading(false);
       onSuccess();

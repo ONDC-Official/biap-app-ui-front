@@ -504,19 +504,21 @@ export default function TicketCard(props) {
                                     className={styles.product_name}
                                     style={{ fontSize: "16px" }}
                                 >
-                                    GRO
+
+                                    A Grievance has been raised. The GRO will be reaching out to you in 24 hours. Contact info of GRO:
+
                                 </p>
                                 <p className={styles.status_label}>
                                     Name:{" "}
-                                    Rishabhnand Singh
+                                    {process.env.BUYER_APP_GRO_NAME}
                                 </p>
                                 <p className={styles.status_label}>
                                     Email:{" "}
-                                    Rishabhnand.singh@ondc.org
+                                    {process.env.BUYER_APP_GRO_EMAIL}
                                 </p>
                                 <p className={styles.status_label}>
                                     Phone:{" "}
-                                    6239083807
+                                    {process.env.BUYER_APP_GRO_EMAIL}
                                 </p>
                             </div>
                         }
