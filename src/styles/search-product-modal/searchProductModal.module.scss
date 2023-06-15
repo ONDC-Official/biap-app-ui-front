@@ -274,6 +274,11 @@
   margin: 0;
 }
 
+.required:after {
+  content: " *";
+  color: red;
+}
+
 @keyframes fade {
   from {
     opacity: 0;

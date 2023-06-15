@@ -42,16 +42,16 @@ export default function IssueOrderModal({
     subcategory_error: "",
     shortDescription_error: "",
     longDescription_error: "",
+    image_error: ""
   });
   const [loading, setLoading] = useState(false);
-  const [selectedIssueCategory, setSelectedIssueCategory] = useState();
   const [selectedIssueSubcategory, setSelectedIssueSubcategory] = useState();
   const [shortDescription, setShortDescription] = useState("");
   const [longDescription, setLongDescription] = useState("");
+  const [email, setEmail] = useState(billing_address.email);
   const [baseImage, setBaseImage] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [orderQty, setOrderQty] = useState([]);
-
   const AllCategory = ISSUE_TYPES.map((item) => {
     return item.subCategory.map((subcategoryItem) => {
       return {
@@ -90,6 +90,7 @@ export default function IssueOrderModal({
       checkIsOrderSelected(),
       checkShortDescription(),
       checkLongDescription(),
+      checkImages()
     ].every(Boolean);
     if (!allCheckPassed) return;
 
@@ -118,7 +119,7 @@ export default function IssueOrderModal({
                 },
                 contact: {
                   phone: billing_address.phone,
-                  email: billing_address.email,
+                  email,
                 },
               },
               description: {
@@ -134,7 +135,7 @@ export default function IssueOrderModal({
                 id: order_id,
                 state: order_status,
                 items: selectedIds,
-                fulfillments: fulfillments,
+                fulfillments,
                 provider_id: selectedIds?.[0]?.product.provider_details?.id,
               },
               issue_actions: {
@@ -173,9 +174,15 @@ export default function IssueOrderModal({
       `${process.env.REACT_APP_BASE_URL}issueApis/events?messageId=${message_id}`,
       header
     );
+
     es.addEventListener("on_issue", (e) => {
-      const { messageId } = JSON.parse(e?.data);
-      getPartialCancelOrderDetails(messageId);
+      if (e?.data) {
+        const { messageId } = JSON.parse(e.data);
+        getPartialCancelOrderDetails(messageId);
+      } else {
+        setLoading(false);
+        onSuccess();
+      }
     });
 
     const timer = setTimeout(() => {
@@ -210,13 +217,6 @@ export default function IssueOrderModal({
       ];
       setLoading(false);
       onSuccess();
-      if (data?.message) {
-      } else {
-        dispatchToast(
-          "Something went wrong!, issue cannot be raised",
-          toast_types.error
-        );
-      }
     } catch (err) {
       setLoading(false);
       onSuccess();
@@ -277,6 +277,18 @@ export default function IssueOrderModal({
       setInlineError((error) => ({
         ...error,
         subcategory_error: "Please select subcategory",
+      }));
+      return false;
+    }
+    return true;
+  }
+
+  // use this function to check if any image is selected
+  function checkImages() {
+    if (['ITM02', 'ITM03', 'ITM04'].includes(selectedIssueSubcategory?.enums) && baseImage <= 0) {
+      setInlineError((error) => ({
+        ...error,
+        image_error: "Please select image",
       }));
       return false;
     }
@@ -377,7 +389,7 @@ export default function IssueOrderModal({
           </div>
         </div>
         <div className={styles.card_body}>
-          <p className={styles.cancel_dropdown_label_text}>
+          <p className={`${styles.cancel_dropdown_label_text} ${styles.required}`}>
             Choose Items that had a problem
           </p>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
@@ -434,11 +446,6 @@ export default function IssueOrderModal({
                             : ""
                             } d-flex align-items-center justify-content-center`}
                           onClick={() => {
-                            //   setQuantityCount(quantityCount - 1);
-                            //   onReduceQuantity(id);
-                            //   if (quantityCount - 1 === 0) {
-                            //     setToggleAddToCart(false);
-                            //   }
                             if (orderQty[idx]?.count > 1) {
                               onUpdateQty(
                                 orderQty[idx]?.count - 1,
@@ -458,7 +465,6 @@ export default function IssueOrderModal({
                         <div className="d-flex align-items-center justify-content-center">
                           <p className={productCartStyles.quantity_count}>
                             {orderQty[idx]?.count ?? "0"}
-                            {/* {quantityCount} */}
                           </p>
                         </div>
                         <div
@@ -467,8 +473,6 @@ export default function IssueOrderModal({
                             : ""
                             } d-flex align-items-center justify-content-center`}
                           onClick={() => {
-                            //   setQuantityCount((quantityCount) => quantityCount + 1);
-                            //   onAddQuantity(id);
                             if (orderQty[idx]?.count < quantity[idx]?.count) {
                               onUpdateQty(
                                 orderQty[idx]?.count + 1,
@@ -508,7 +512,7 @@ export default function IssueOrderModal({
           )}
 
           <div className="px-2">
-            <p className={styles.cancel_dropdown_label_text}>
+            <p className={`${styles.cancel_dropdown_label_text} ${styles.required}`}>
               Select Subcategory
             </p>
             <Dropdown
@@ -557,7 +561,7 @@ export default function IssueOrderModal({
 
           <div className="px-2">
             <Input
-              label_name="Short description"
+              label_name="Short Description"
               type="text"
               placeholder="Enter short description"
               id="shortDes"
@@ -575,7 +579,7 @@ export default function IssueOrderModal({
             />
 
             <Input
-              label_name="Long description"
+              label_name="Long Description"
               type="text"
               placeholder="Enter long description"
               id="longDes"
@@ -593,14 +597,58 @@ export default function IssueOrderModal({
             />
 
             <Input
-              label_name="Images"
+              label_name="Email"
+              type="text"
+              placeholder="Enter Email"
+              id="email"
+              value={email}
+              onChange={(event) => {
+                const name = event.target.value;
+                setEmail(name);
+              }}
+            />
+            <Input
+              label_name="Images (Maximum 4)"
               type="file"
               id="images"
-              accept="image/png"
-              multiple="multiple"
-              onChange={uploadImage}
+              accept="image/png,image/jpg"
+              onChange={(event) => {
+                const file = event.target.files[0];
+                if (file?.size / 1024 > 2048) {
+                  dispatchToast("File size cannot exceed more than 2MB", toast_types.error);
+                } else {
+                  uploadImage(event);
+                  setInlineError((error) => ({
+                    ...error,
+                    image_error: "",
+                  }));
+                }
+              }}
+              required={['ITM02', 'ITM03', 'ITM04'].includes(selectedIssueSubcategory?.enums)}
+              has_error={inlineError.image_error}
+              disabled={baseImage.length === 4}
             />
           </div>
+          <div className="d-flex">
+            {baseImage?.map((image) => {
+              return (
+                <div style={{ height: "10%", width: "10%", marginInline: 10 }}>
+                  <CrossIcon
+                    width="20"
+                    height="20"
+                    color={ONDC_COLORS.SECONDARYCOLOR}
+                    style={{ cursor: "pointer", backgroundColor: '#F0F0F0', position: 'absolute' }}
+                    onClick={() =>
+                      setBaseImage(baseImage.filter(item => item !== image))
+                    }
+                  />
+                  <img style={{ height: "100%", width: "100%" }} src={image} />
+                </div>
+              );
+            })}
+          </div>
+
+
         </div>
         <div
           className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
