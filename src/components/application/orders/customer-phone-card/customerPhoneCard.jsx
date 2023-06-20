@@ -39,14 +39,14 @@ export default function CustomerPhoneCard({
     if (validator.isEmpty(customerPhoneNumber)) {
       setInlineError((error) => ({
         ...error,
-        phone_number_error: "Please enter a phone number",
+        phone_number_error: " ",
       }));
       return false;
     }
     if (!validator.isMobilePhone(customerPhoneNumber, "en-IN")) {
       setInlineError((error) => ({
         ...error,
-        phone_number_error: "Please enter a valid phone number",
+        phone_number_error: "Please enter a valid Phone Number",
       }));
       return false;
     }
@@ -113,7 +113,7 @@ export default function CustomerPhoneCard({
     <div className={styles.overlay}>
       <div className={styles.popup_card}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
-          <p className={styles.card_header_title}>Phone number</p>
+          <p className={styles.card_header_title}>Phone Number</p>
           <div className="ms-auto">
             <CrossIcon
               width="20"
@@ -126,9 +126,9 @@ export default function CustomerPhoneCard({
         </div>
         <div className={styles.card_body}>
           <Input
-            label_name="Enter your phone number"
+            label_name="Enter your Phone Number"
             type="text"
-            placeholder="Enter the phone number on which you want us to call."
+            placeholder="Enter the Phone Number on which you want us to call."
             id="phone_number"
             has_error={inlineError.phone_number_error}
             onBlur={checkPhoneNumber}
@@ -167,7 +167,7 @@ export default function CustomerPhoneCard({
           <div className="px-3">
             <Button
               isloading={loading ? 1 : 0}
-              disabled={loading}
+              disabled={loading || customerPhoneNumber === ""}
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Contact"
