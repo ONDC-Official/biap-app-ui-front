@@ -71,8 +71,10 @@ export default function SearchBanner({ onSearch, location }) {
   useEffect(() => {
     if (getValueFromCookie("delivery_address")) {
       const address = JSON.parse(getValueFromCookie("delivery_address"));
+      console.log("address=====>", address);
       if (address) {
         setDeliveryAddress(() => address);
+        fetchLatLongFromEloc(address);
       }
     }
   }, []);
