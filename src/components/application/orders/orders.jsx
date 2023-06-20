@@ -237,14 +237,14 @@ export default function Orders() {
                           }}
                           onFetchUpdatedOrder={() => {
                             setCurrentSelectedAccordion("");
-                            dispatch({
-                              type: toast_actions.ADD_TOAST,
-                              payload: {
-                                id: Math.floor(Math.random() * 100),
-                                type: toast_types.success,
-                                message: "Order status updated successfully!",
-                              },
-                            });
+                            // dispatch({
+                            //   type: toast_actions.ADD_TOAST,
+                            //   payload: {
+                            //     id: Math.floor(Math.random() * 100),
+                            //     type: toast_types.success,
+                            //     message: "Order status updated successfully!",
+                            //   },
+                            // });
                             getAllOrders();
                           }}
                           currentSelectedAccordion={currentSelectedAccordion}
