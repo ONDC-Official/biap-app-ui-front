@@ -71,8 +71,10 @@ export default function SearchBanner({ onSearch, location }) {
   useEffect(() => {
     if (getValueFromCookie("delivery_address")) {
       const address = JSON.parse(getValueFromCookie("delivery_address"));
+      console.log("address=====>", address);
       if (address) {
         setDeliveryAddress(() => address);
+        fetchLatLongFromEloc(address);
       }
     }
   }, []);
@@ -394,18 +396,7 @@ export default function SearchBanner({ onSearch, location }) {
                 )}
               </div>
               <div className="px-2">
-                {searchedLocation.tag !== "" || searchedLocation.name !== "" ? (
-                  <CrossIcon
-                    width="20"
-                    height="20"
-                    color={ONDC_COLORS.SECONDARYCOLOR}
-                    style={{ cursor: "pointer" }}
-                    onClick={clearSearch}
-                  />
-                ) : (
-                  <></>
-                  // <DropdownSvg width="13" height="8" />
-                )}
+                <DropdownSvg width="13" height="8" />
               </div>
             </div>
             {selectAddressModal && (

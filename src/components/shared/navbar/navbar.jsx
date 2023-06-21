@@ -31,10 +31,10 @@ export default function Navbar() {
       img: <ProductList width="19" />,
       value: dropdown_links.PRODUCTS,
     },
-    {
-      img: <Cart />,
-      value: dropdown_links.CART,
-    },
+    // {
+    //   img: <Cart />,
+    //   value: dropdown_links.CART,
+    // },
     {
       img: <Orders width="17" />,
       value: dropdown_links.ORDERS,
