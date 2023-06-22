@@ -188,11 +188,12 @@ export default function IssueOrderModal({
     const timer = setTimeout(() => {
       es.close();
       if (cancelPartialEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        // dispatchToast(
+        //   "Cannot proceed with you request now! Please try again",
+        //   toast_types.error
+        // );
         setLoading(false);
+        onSuccess();
       }
     }, SSE_TIMEOUT);
 
@@ -630,19 +631,27 @@ export default function IssueOrderModal({
             />
           </div>
           <div className="d-flex">
-            {baseImage?.map((image) => {
+            {baseImage?.map((image, index) => {
+              const bgStyle = {
+                backgroundImage: `url(${image})`,
+                height: 80,
+                width: 60,
+                marginInline: 10,
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+              };
               return (
-                <div style={{ height: "10%", width: "10%", marginInline: 10 }}>
+                <div key={index} style={bgStyle}>
                   <CrossIcon
                     width="20"
                     height="20"
                     color={ONDC_COLORS.SECONDARYCOLOR}
-                    style={{ cursor: "pointer", backgroundColor: '#F0F0F0', position: 'absolute' }}
+                    style={{ cursor: "pointer", backgroundColor: '#F0F0F0', marginTop: -10 }}
                     onClick={() =>
                       setBaseImage(baseImage.filter(item => item !== image))
                     }
                   />
-                  <img style={{ height: "100%", width: "100%" }} src={image} />
+                  {/* <img style={{ height: "100%", width: "100%" }} src={image} /> */}
                 </div>
               );
             })}
