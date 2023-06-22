@@ -19,6 +19,7 @@ import Button from "../../shared/button/button";
 import { ToastContext } from "../../../context/toastContext";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import useCancellablePromise from "../../../api/cancelRequest";
+import { AddressContext } from "../../../context/addressContext";
 
 export default function InitializeOrder() {
   // CONSTANTS
@@ -51,6 +52,7 @@ export default function InitializeOrder() {
   // CONTEXT
   const { cartItems, onUpdateProduct } = useContext(CartContext);
   const dispatch = useContext(ToastContext);
+  const { setBillingAddress } = useContext(AddressContext);
 
   const { cancellablePromise } = useCancellablePromise();
 
@@ -307,6 +309,7 @@ export default function InitializeOrder() {
   }, [cartItems]);
 
   useEffect(() => {
+    setBillingAddress();
     // this check is so that when cart is empty we do not call the
     // and when the payment is not made
     if (cartItems.length > 0) {

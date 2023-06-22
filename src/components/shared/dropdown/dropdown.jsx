@@ -38,6 +38,7 @@ function Dropdown({
         {options.map((option) => {
           return (
             <div
+              style={{ width: '100% !importannt' }}
               key={option.value}
               className={`${Styles.dropdown_link_wrapper}`}
               onClick={() => {
@@ -56,7 +57,7 @@ function Dropdown({
                   }
                 </div>
               )}
-              <div>
+              <div style={{ width: '100% !importannt' }}>
                 <p className={`mb-0 ${Styles.dropdown_link}`}>{option.value}</p>
               </div>
             </div>

@@ -159,6 +159,14 @@ export default function CancelOrderModal({
       setLoading(false);
       if (data?.message) {
         onSuccess();
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.success,
+            message: "Complete order cancelled successfully",
+          },
+        });
       } else {
         dispatchToast(
           "Something went wrong!, product status cannot be updated",
@@ -304,6 +312,14 @@ export default function CancelOrderModal({
       setLoading(false);
       if (data?.message) {
         onSuccess();
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.success,
+            message: "Partial order cancelled successfully",
+          },
+        });
       } else {
         dispatchToast(
           "Something went wrong!, product status cannot be updated",
@@ -616,7 +632,7 @@ export default function CancelOrderModal({
                     </div>
                   }
                   body_classes="dropdown-menu-right"
-                  style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
+                  style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
                   click={(reasonValue) => {
                     const REASONS = reasons;
                     const type = REASONS.find(
@@ -668,7 +684,7 @@ export default function CancelOrderModal({
                     </div>
                   }
                   body_classes="dropdown-menu-right"
-                  style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
+                  style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
                   click={(reasonValue) => {
                     const REASONS = reasons;
                     const type = REASONS.find(

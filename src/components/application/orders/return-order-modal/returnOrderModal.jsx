@@ -25,7 +25,7 @@ export default function ReturnOrderModal({
   transaction_id,
   order_id,
   order_status,
-  partailsReturnProductList =[],
+  partailsReturnProductList = [],
   onClose,
   onSuccess,
   quantity,
@@ -262,9 +262,9 @@ export default function ReturnOrderModal({
   function updateQtyForSelectedProduct(pId, qty) {
     let data = JSON.parse(JSON.stringify(Object.assign([], selectedIds)));
     data = data.map((item) => {
-      if(item.id === pId){
+      if (item.id === pId) {
         item.quantity.count = qty;
-      }else{}
+      } else { }
       return item;
     })
     setSelectedIds(data);
@@ -280,19 +280,19 @@ export default function ReturnOrderModal({
   }, []);
 
   useEffect(() => {
-    if(selectedIds.length > 0){
+    if (selectedIds.length > 0) {
       const findNonReturnableItem = selectedIds.find((p) => !p?.["@ondc/org/returnable"]);
-      if(findNonReturnableItem){
+      if (findNonReturnableItem) {
         const data = RETURN_REASONS.filter((r) => r.isApplicableForNonReturnable);
         setReasons(data);
-      }else{
+      } else {
         setReasons(RETURN_REASONS);
       }
     };
   }, [selectedIds]);
 
   useEffect(() => {
-    if(quantity){
+    if (quantity) {
       setOrderQty(JSON.parse(JSON.stringify(Object.assign(quantity))));
     }
   }, [quantity]);
@@ -329,7 +329,7 @@ export default function ReturnOrderModal({
                       key={product?.id}
                       className="d-flex align-items-center"
                     >
-                      <div style={{ width: isProductSelected(product?.id)?"70%":"90%" }}>
+                      <div style={{ width: isProductSelected(product?.id) ? "70%" : "90%" }}>
                         <Checkbox
                           id={product?.id}
                           checked={isProductSelected(product?.id)}
@@ -367,15 +367,15 @@ export default function ReturnOrderModal({
                           <div style={{ width: "20%" }}>
                             <div className={productCartStyles.quantity_count_wrapper}>
                               <div
-                                className={`${orderQty[idx]?.count > 1?productCartStyles.subtract_svg_wrapper:""} d-flex align-items-center justify-content-center`}
+                                className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
                                 onClick={() => {
-                                //   setQuantityCount(quantityCount - 1);
-                                //   onReduceQuantity(id);
-                                //   if (quantityCount - 1 === 0) {
-                                //     setToggleAddToCart(false);
-                                //   }
-                                  if(orderQty[idx]?.count > 1){
-                                    onUpdateQty(orderQty[idx]?.count-1, idx, product?.id);
+                                  //   setQuantityCount(quantityCount - 1);
+                                  //   onReduceQuantity(id);
+                                  //   if (quantityCount - 1 === 0) {
+                                  //     setToggleAddToCart(false);
+                                  //   }
+                                  if (orderQty[idx]?.count > 1) {
+                                    onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
                                   }
                                 }}
                               >
@@ -392,12 +392,12 @@ export default function ReturnOrderModal({
                                 </p>
                               </div>
                               <div
-                                className={`${orderQty[idx]?.count < quantity[idx]?.count?productCartStyles.add_svg_wrapper:""} d-flex align-items-center justify-content-center`}
+                                className={`${orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
                                 onClick={() => {
-                                //   setQuantityCount((quantityCount) => quantityCount + 1);
-                                //   onAddQuantity(id);
-                                  if(orderQty[idx]?.count < quantity[idx]?.count){
-                                    onUpdateQty(orderQty[idx]?.count+1, idx, product?.id);
+                                  //   setQuantityCount((quantityCount) => quantityCount + 1);
+                                  //   onAddQuantity(id);
+                                  if (orderQty[idx]?.count < quantity[idx]?.count) {
+                                    onUpdateQty(orderQty[idx]?.count + 1, idx, product?.id);
                                   }
                                 }}
                               >
@@ -460,7 +460,7 @@ export default function ReturnOrderModal({
                     </div>
                   }
                   body_classes="dropdown-menu-right"
-                  style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
+                  style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
                   click={(reasonValue) => {
                     const REASONS = reasons;
                     const type = REASONS.find(
