@@ -188,11 +188,12 @@ export default function IssueOrderModal({
     const timer = setTimeout(() => {
       es.close();
       if (cancelPartialEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        // dispatchToast(
+        //   "Cannot proceed with you request now! Please try again",
+        //   toast_types.error
+        // );
         setLoading(false);
+        onSuccess();
       }
     }, SSE_TIMEOUT);
 
