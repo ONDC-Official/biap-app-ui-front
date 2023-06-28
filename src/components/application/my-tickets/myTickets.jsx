@@ -66,7 +66,7 @@ export default function MyTickets() {
     }, [pagination.currentPage, pagination.postPerPage]);
 
     useEffect(() => {
-        // getAllTickets();
+        getAllTickets();
     }, [getAllTickets, pagination.currentPage]);
 
     // loading UI

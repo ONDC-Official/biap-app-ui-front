@@ -96,7 +96,7 @@ export default function IssueOrderModal({
 
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
-
+    const user = JSON.parse(getValueFromCookie("user"));
     try {
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
@@ -119,7 +119,7 @@ export default function IssueOrderModal({
                 },
                 contact: {
                   phone: billing_address.phone,
-                  email,
+                  email: email === "" ? user?.email : email,
                 },
               },
               description: {
