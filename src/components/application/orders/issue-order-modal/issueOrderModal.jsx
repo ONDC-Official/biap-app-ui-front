@@ -286,7 +286,7 @@ export default function IssueOrderModal({
 
   // use this function to check if any image is selected
   function checkImages() {
-    if (['ITM02', 'ITM03', 'ITM04'].includes(selectedIssueSubcategory?.enums) && baseImage <= 0) {
+    if (['ITM02', 'ITM03', 'ITM04', 'ITM05', 'FLM04'].includes(selectedIssueSubcategory?.enums) && baseImage <= 0) {
       setInlineError((error) => ({
         ...error,
         image_error: "Please select image",
@@ -625,7 +625,7 @@ export default function IssueOrderModal({
                   }));
                 }
               }}
-              required={['ITM02', 'ITM03', 'ITM04'].includes(selectedIssueSubcategory?.enums)}
+              required={['ITM02', 'ITM03', 'ITM04', 'ITM05', 'FLM04'].includes(selectedIssueSubcategory?.enums)}
               has_error={inlineError.image_error}
               disabled={baseImage.length === 4}
             />
