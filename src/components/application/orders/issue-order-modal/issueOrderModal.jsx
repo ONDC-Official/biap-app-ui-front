@@ -289,7 +289,7 @@ export default function IssueOrderModal({
     if (['ITM02', 'ITM03', 'ITM04', 'ITM05', 'FLM04'].includes(selectedIssueSubcategory?.enums) && baseImage <= 0) {
       setInlineError((error) => ({
         ...error,
-        image_error: "Please select image",
+        image_error: "Please upload an image file",
       }));
       return false;
     }
@@ -629,6 +629,9 @@ export default function IssueOrderModal({
               has_error={inlineError.image_error}
               disabled={baseImage.length === 4}
             />
+            {inlineError.image_error && (
+              <ErrorMessage>{inlineError.image_error}</ErrorMessage>
+            )}
           </div>
           <div className="d-flex">
             {baseImage?.map((image, index) => {
