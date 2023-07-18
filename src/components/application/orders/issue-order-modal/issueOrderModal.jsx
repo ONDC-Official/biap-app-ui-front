@@ -96,7 +96,7 @@ export default function IssueOrderModal({
 
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
-
+    const user = JSON.parse(getValueFromCookie("user"));
     try {
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
@@ -119,7 +119,7 @@ export default function IssueOrderModal({
                 },
                 contact: {
                   phone: billing_address.phone,
-                  email,
+                  email: email === "" ? user?.email : email,
                 },
               },
               description: {
@@ -286,10 +286,10 @@ export default function IssueOrderModal({
 
   // use this function to check if any image is selected
   function checkImages() {
-    if (['ITM02', 'ITM03', 'ITM04'].includes(selectedIssueSubcategory?.enums) && baseImage <= 0) {
+    if (['ITM02', 'ITM03', 'ITM04', 'ITM05', 'FLM04'].includes(selectedIssueSubcategory?.enums) && baseImage <= 0) {
       setInlineError((error) => ({
         ...error,
-        image_error: "Please select image",
+        image_error: "Please upload an image file",
       }));
       return false;
     }
@@ -625,10 +625,13 @@ export default function IssueOrderModal({
                   }));
                 }
               }}
-              required={['ITM02', 'ITM03', 'ITM04'].includes(selectedIssueSubcategory?.enums)}
+              required={['ITM02', 'ITM03', 'ITM04', 'ITM05', 'FLM04'].includes(selectedIssueSubcategory?.enums)}
               has_error={inlineError.image_error}
               disabled={baseImage.length === 4}
             />
+            {inlineError.image_error && (
+              <ErrorMessage>{inlineError.image_error}</ErrorMessage>
+            )}
           </div>
           <div className="d-flex">
             {baseImage?.map((image, index) => {

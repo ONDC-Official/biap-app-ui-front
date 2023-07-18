@@ -486,7 +486,7 @@ export default function TicketCard(props) {
                             className={styles.product_name}
                             style={{ fontSize: "16px" }}
                         >
-                            Respondant
+                            Respondent
                         </p>
                         <p className={styles.status_label}>
                             Email:{" "}

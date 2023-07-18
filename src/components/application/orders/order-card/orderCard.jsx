@@ -503,6 +503,14 @@ export default function OrderCard(props) {
             setToggleIssueModal(false);
             setCurrentSelectedAccordion("");
             onFetchUpdatedOrder();
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Complaint raised successfully!",
+              },
+            });
           }}
           quantity={quantity}
           partailsCancelProductList={product}

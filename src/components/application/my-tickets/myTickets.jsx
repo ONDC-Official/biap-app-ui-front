@@ -17,6 +17,7 @@ import Pagination from "../../shared/pagination/pagination";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { ToastContext } from "../../../context/toastContext";
 import useCancellablePromise from "../../../api/cancelRequest";
+import MyTicket from "../../../components/shared/svg/my-tickets";
 
 export default function MyTickets() {
     // STATES
@@ -84,11 +85,7 @@ export default function MyTickets() {
         >
             <div className="text-center">
                 <div className="py-2">
-                    <img
-                        src={no_result_empty_illustration}
-                        alt="empty_search"
-                        style={{ height: "130px" }}
-                    />
+                    <MyTicket width={120} height={120} />
                 </div>
                 <div className="py-2">
                     <p className={styles.illustration_header}>No Complaints found!</p>
