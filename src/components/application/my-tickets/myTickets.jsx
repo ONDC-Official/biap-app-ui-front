@@ -7,8 +7,6 @@ import React, {
 } from "react";
 import styles from "../../../styles/orders/orders.module.scss";
 import Navbar from "../../shared/navbar/navbar";
-import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
-import { useHistory } from "react-router-dom";
 import { getCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
 import { ONDC_COLORS } from "../../shared/colors";
@@ -121,7 +119,7 @@ export default function MyTickets() {
                                             issue_actions,
                                             issue_status,
                                             issueId,
-                                            _id,
+                                            resolution,
                                             updated_at,
                                             created_at,
                                             bppId,
@@ -148,6 +146,7 @@ export default function MyTickets() {
                                                     created_at={created_at}
                                                     bpp_id={bppId}
                                                     issue_id={issueId}
+                                                    resolution={resolution}
                                                     accoodion_id={`order_id_${index}`}
                                                     onFetchUpdatedOrder={() => {
                                                         //setCurrentSelectedAccordion("");
