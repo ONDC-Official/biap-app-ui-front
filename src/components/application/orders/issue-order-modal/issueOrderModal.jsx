@@ -514,7 +514,7 @@ export default function IssueOrderModal({
 
           <div className="px-2">
             <p className={`${styles.cancel_dropdown_label_text} ${styles.required}`}>
-              Select Subcategory
+              Select Issue Subcategory
             </p>
             <Dropdown
               header={

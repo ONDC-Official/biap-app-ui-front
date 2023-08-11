@@ -32,6 +32,7 @@ export default function TicketCard(props) {
         onFetchUpdatedOrder,
         bpp_id,
         issue_id,
+        resolution
     } = props;
 
 
@@ -445,7 +446,7 @@ export default function TicketCard(props) {
                 )}
 
                 {/* RESOLUTION  */}
-                {issue_actions?.resolution && (
+                {resolution && (
                     <div
                         className="container py-2 px-0"
                         style={{ borderTop: "1px solid #ddd" }}
@@ -458,18 +459,36 @@ export default function TicketCard(props) {
                             <div style={{ width: "90%" }}>
                                 <p
                                     className={styles.product_name}
-                                    title={issue_actions?.resolution?.resolution_remarks}
+                                    title={resolution?.short_desc}
                                     style={{ fontSize: "16px" }}
                                 >
-                                    {issue_actions?.resolution?.resolution_remarks}
+                                    {resolution?.short_desc}
                                 </p>
+                                {resolution?.long_desc &&
+                                    <p
+                                        className={styles.product_name}
+                                        title={resolution?.long_desc}
+                                        style={{ fontSize: "16px" }}
+                                    >
+                                        {resolution?.long_desc}
+                                    </p>
+                                }
+                                {resolution?.refund_amount &&
+                                    <p
+                                        className={styles.product_name}
+                                        title={resolution?.refund_amount}
+                                        style={{ fontSize: "16px" }}
+                                    >
+                                        Refund Amount: {resolution?.refund_amount}
+                                    </p>
+                                }
                             </div>
                             <div className="ms-auto">
                                 <p
                                     className={styles.product_price}
                                     style={{ whiteSpace: "nowrap" }}
                                 >
-                                    Action: {issue_actions?.resolution?.resolution_action}
+                                    Action: {resolution?.action_triggered}
                                 </p>
                             </div>
                         </div>
