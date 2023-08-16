@@ -17,3 +17,9 @@ When buyer closed the complaint then system should display a toast message as "C
  
 ### Fixed
  
+
+### PR Link
+[Link](https://github.com/ONDC-Official/biap-app-ui-front/pull/78)
+
+### PR Hash
+[Hash](https://github.com/ONDC-Official/biap-app-ui-front/commit/d7405aa25f7bf27a4c5295584b87dd0d02c1c9b3)
