@@ -5,6 +5,8 @@ import MuiRadio from './MuiRadio';
 import MuiOutlinedInput from "./MuiOutlinedInput";
 import MuiFormLabel from './MuiFormLabel';
 import MuiInputLabel from "./MuiInputLabel";
+import MuiChip from './MuiChip';
+import MuiCard from "./MuiCard";
 
 const index = {
     MuiButton,
@@ -13,7 +15,9 @@ const index = {
     MuiRadio,
     MuiOutlinedInput,
     MuiFormLabel,
-    MuiInputLabel
+    MuiInputLabel,
+    MuiChip,
+    MuiCard
 };
 
 export default index;
