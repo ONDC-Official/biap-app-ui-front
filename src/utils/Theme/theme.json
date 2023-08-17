@@ -1,65 +1,78 @@
 {
-  "fontColor": "#000",
-  "iconColor": "#90959e",
-  "linkColor": "#3833a6",
-  "bodyBackground": "#f3f3f361",
-  "primaryColor": "#009192",
-  "primaryColorLight": "#e6edfd",
-  "successColor": "#208320",
-  "successContrastTextColor": "#4caf50",
-  "infoColor": "#CCF1FF",
-  "infoContrastTextColor": "#009192",
-  "warningColor": "#FEFE66",
-  "warningContrastTextColor": "#f5721e",
-  "errorColor": "#F04A45",
-  "errorContrastTextColor": "#e6edfd",
-  "inactiveColor": "#d0d0d0",
-  "initiated": "#E0D7FF",
-  "applicationReviewPending": "#e6f4f9",
-  "applicationReviewRejected": "#ffc8c5",
-  "applicationReviewSuccess": "#e1f766",
-  "applicationPaymentStarted": "#e6f4f9",
-  "applicationCutoffPaymentCompleted": "#e6f4f9",
-  "applicationPaymentCompleted": "#e1f766",
-  "transactionBounced": "#ffad58",
-  "transactionCancelled": "#db2020",
-  "transactionCleared": "#20db37",
-  "transactionCollected": "#585dff",
-  "transactionDeposited": "#009192",
-  "transactionPledged": "#74ffd9",
-  "transactionSuccess": "#e1f766",
-  "transactionFailure": "#ffc8c5",
-  "transactionPending": "#e6f4f9",
-  "orange": "#ffa500",
+  "fontColor": "#1D1D1D",
+  "disableColor": "#B9B9B9",
+
+  "primaryColor": "#196aab",
+  "primaryColorHover": "#175f9a",
+  "primaryColorActive": "#145589",
+  "primaryColorLight": "#e8f0f7",
+  "primaryColorLightHover": "#dde9f2",
+  "primaryColorLightActive": "#b8d1e5",
+  "primaryColorDark": "#135080",
+  "primaryColorDarkHover": "#0f4067",
+  "primaryColorDarkActive": "#0b304d",
+  "primaryContrastTextColor": "#fff",
+
+  "secondaryColor": "#008ecc",
+  "secondaryColorHover": "#0080b8",
+  "secondaryColorActive": "#0072a3",
+  "secondaryColorLight": "#e6f4fa",
+  "secondaryColorLightHover": "#d9eef7",
+  "secondaryColorLightActive": "#b0dcef",
+  "secondaryColorDark": "#006b99",
+  "secondaryColorDarkHover": "#00557a",
+  "secondaryColorDarkActive": "#00405c",
+  "secondaryContrastTextColor": "#196AAB",
+
+  "successColor": "#419E6A",
+  "successColorLight": "#E8FCF1",
+  "successColorDark": "#A5E1BF",
+  "successContrastTextColor": "#fff",
+
+  "warningColor": "#F9C51C",
+  "warningColorLight": "#FEFCE4",
+  "warningColorDark": "#FCF17E",
+  "warningContrastTextColor": "#fff",
+
+  "errorColor": "#D83232",
+  "errorColorLight": "#FFEBEB",
+  "errorColorDark": "#FC9595",
+  "errorContrastTextColor": "#fff",
+
   "h1": {
-    "fontSize": "32px",
-    "fontWeight": 400,
+    "fontSize": "48px",
+    "fontWeight": 700,
+    "lineHeight": "60px",
     "fontFamily": "'Roboto Slab', serif",
     "fontStyle": "normal",
     "textTransform": "uppercase"
   },
   "h2": {
-    "fontSize": "24px",
-    "fontWeight": 400,
+    "fontSize": "36px",
+    "fontWeight": 700,
+    "lineHeight": "44px",
     "fontFamily": "'Roboto Slab', serif",
     "fontStyle": "normal"
   },
   "h3": {
-    "fontSize": "22px",
-    "fontWeight": 500,
+    "fontSize": "30px",
+    "fontWeight": 700,
+    "lineHeight": "40px",
     "fontFamily": "'Roboto Slab', serif",
     "fontStyle": "normal",
     "textTransform": "uppercase"
   },
   "h4": {
-    "fontSize": "18px",
-    "fontWeight": 500,
+    "fontSize": "24px",
+    "fontWeight": 700,
+    "lineHeight": "32px",
     "fontFamily": "'Roboto Slab', serif",
     "fontStyle": "normal"
   },
   "h5": {
-    "fontSize": "16px",
-    "fontWeight": 500,
+    "fontSize": "20px",
+    "fontWeight": 700,
+    "lineHeight": "24px",
     "fontFamily": "'Roboto Slab', serif",
     "fontStyle": "normal",
     "textTransform": "uppercase"
@@ -68,54 +81,35 @@
     "fontSize": "16px",
     "fontWeight": 400,
     "fontFamily": "'Roboto Slab', serif",
-    "fontStyle": "normal"
+    "fontStyle": "normal",
+    "lineHeight": "18px"
   },
   "body": {
-    "fontSize": "10px",
+    "fontSize": "16px",
     "fontWeight": 400,
+    "lineHeight": "24px",
     "fontFamily": "'Lato', sans-serif",
     "fontStyle": "normal"
   },
   "body1": {
     "fontSize": "14px",
     "fontWeight": 400,
-    "fontFamily": "'Lato', sans-serif",
-    "fontStyle": "normal"
-  },
-  "body2": {
-    "fontSize": "12px",
-    "fontWeight": 400,
+    "lineHeight": "20px",
     "fontFamily": "'Lato', sans-serif",
     "fontStyle": "normal"
   },
   "subtitle1": {
-    "fontSize": "16px",
-    "fontWeight": "normal",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "16px",
     "fontFamily": "'Lato', sans-serif",
     "fontStyle": "normal"
   },
   "subtitle2": {
-    "fontSize": "16px",
+    "fontSize": "10px",
     "fontWeight": 400,
+    "lineHeight": "12px",
     "fontFamily": "'Lato', sans-serif",
     "fontStyle": "normal"
-  },
-  "button": {
-    "fontSize": "14px",
-    "fontFamily": "'Lato', sans-serif",
-    "fontWeight": "400",
-    "textTransform": "uppercase",
-    "fontStyle": "normal"
-  },
-  "overline": {
-    "fontSize": "12px",
-    "fontFamily": "'Lato', sans-serif",
-    "fontWeight": 400
-  },
-  "caption": {
-    "fontSize": "12px",
-    "fontFamily": "'Roboto Slab', sans-serif",
-    "textTransform": "uppercase",
-    "fontWeight": 600
   }
 }

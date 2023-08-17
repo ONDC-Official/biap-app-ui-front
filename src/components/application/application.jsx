@@ -13,6 +13,8 @@ import ProductDetails from "./product-list/product-details/productDetails";
 import InitializeOrder from "./initialize-order/initializeOrder";
 import MyTickets from "./my-tickets/myTickets";
 
+import AppLayout from "../appLayout";
+
 export default function Application() {
   return (
     <CartContextProvider>
@@ -27,7 +29,7 @@ export default function Application() {
             <ProductDetails />
           </PrivateRoute>
           <PrivateRoute exact path={"/application/products"}>
-            <ProductList />
+            <AppLayout><ProductList /></AppLayout>
           </PrivateRoute>
           {/* <PrivateRoute path={"/application/cart"}>
             <Cart />
