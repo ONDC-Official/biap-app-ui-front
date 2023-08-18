@@ -1,8 +1,8 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import NavBar from "./navbar";
-import Footer from "./footer";
+import NavBar from "./navbar/navbar";
+import Footer from "./footer/footer";
 
 const AppLayout = ({ pageTitle, children }) => {
 

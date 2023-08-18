@@ -78,11 +78,11 @@
     "textTransform": "uppercase"
   },
   "h6": {
-    "fontSize": "16px",
-    "fontWeight": 400,
+    "fontSize": "18px",
+    "fontWeight": 600,
     "fontFamily": "'Roboto Slab', serif",
     "fontStyle": "normal",
-    "lineHeight": "18px"
+    "lineHeight": "20px"
   },
   "body": {
     "fontSize": "16px",
