@@ -84,6 +84,10 @@ const useStyles = makeStyles({
         position: 'absolute',
         top: '-105px',
         right: '-135px'
+    },
+    copyright: {
+        marginTop: '18px',
+        marginBottom: '20px'
     }
 });
 

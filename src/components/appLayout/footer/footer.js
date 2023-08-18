@@ -149,7 +149,7 @@ const Footer = () => {
                     <Typography
                         variant="body1"
                         color="white"
-                        style={{marginTop: '18px', marginBottom: '20px'}}
+                        className={classes.copyright}
                     >
                         © 2023 All rights reserved. ONDC.
                     </Typography>

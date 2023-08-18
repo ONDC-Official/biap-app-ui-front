@@ -1,4 +1,5 @@
 import React from 'react';
+import useStyles from './style';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -19,64 +20,65 @@ import IconButton from '@mui/material/IconButton';
 
 const NavBar = () => {
 
+    const classes = useStyles();
     const user = JSON.parse(getValueFromCookie("user"));
     const history = useHistory();
 
     return (
         <AppBar position="absolute">
             <Toolbar
-                sx={{ display: 'flex', p: '18px 55px 16px 55px !important' }}
+                className={classes.headerContainer}
             >
                 <img
                     src={logo}
                     alt="logo"
-                    style={{ height: "40px", width: '100px', cursor: "pointer" }}
+                    className={classes.appLogo}
                     onClick={() => {
                         removeCookie("search_context");
                         history.push("/application");
                     }}
                 />
-                <div style={{display: 'flex', marginLeft: '20px'}}>
+                <div className={classes.addressContainer}>
                     <LocationIcon />
-                    <Typography variant="body2" style={{marginLeft: '4px', marginRight: '6px'}}>
+                    <Typography variant="body2" className={classes.addressTypo}>
                         Deliver to <b>423651</b>
                     </Typography>
                     <AddressDownIcon />
                 </div>
-                <div style={{flex: 1, marginLeft: '14px', marginRight: '80px'}}>
+                <div className={classes.inputContainer}>
                     <Paper
                         component="form"
-                        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', borderRadius: '58px', height: '43px' }}
+                        className={classes.inputForm}
                     >
-                        <IconButton sx={{ p: '10px' }} aria-label="menu">
+                        <IconButton className={classes.searchIcon} aria-label="menu">
                             <SearchIcon />
                         </IconButton>
                         <InputBase
                             fullWidth
-                            sx={{flex: 1 }}
+                            className={classes.inputBase}
                             placeholder="Search..."
                             inputProps={{ 'aria-label': 'Search...' }}
                         />
-                        <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                        <IconButton type="button" className={classes.listIcon} aria-label="search">
                             <ListIcon />
                         </IconButton>
                     </Paper>
                 </div>
-                <div style={{display: 'flex'}}>
-                    <HeartIcon style={{fill: '#fff'}} />
-                    <Typography variant="body2" style={{marginLeft: '5px', marginTop: '3px'}}>
+                <div className={classes.favourite}>
+                    <HeartIcon />
+                    <Typography variant="body2" className={classes.favouriteTypo}>
                         List
                     </Typography>
                 </div>
-                <div style={{display: 'flex', marginLeft: '22px', marginRight: '22px'}}>
+                <div className={classes.cart}>
                     <CartIcon />
-                    <Typography variant="body2" style={{marginLeft: '5px', marginTop: '3px'}}>
+                    <Typography variant="body2" className={classes.cartTypo}>
                         Cart
                     </Typography>
                 </div>
-                <div style={{display: 'flex'}}>
+                <div className={classes.user}>
                     <UserIcon />
-                    <Typography variant="body2" style={{marginLeft: '5px', marginTop: '3px'}}>
+                    <Typography variant="body2" className={classes.userTypo}>
                         User
                     </Typography>
                 </div>
