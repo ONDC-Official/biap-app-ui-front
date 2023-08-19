@@ -9,7 +9,7 @@ import { ReactComponent as WhatsappIcon} from "../../../assets/images/whatsapp.s
 import appStoreImage from "../../../assets/images/appStore.png";
 import playStoreImage from "../../../assets/images/playStore.png";
 import {removeCookie} from "../../../utils/cookies";
-import categoryList from '../../../constants/categories';
+import {categoryList} from '../../../constants/categories';
 
 const Footer = () => {
     const classes = useStyles();

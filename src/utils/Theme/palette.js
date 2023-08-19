@@ -8,8 +8,8 @@ const palette = {
         disableColor: Theme.disableColor,
     },
     text: {
-      primary: '#fff',
-      secondary: '#fff',
+      // primary: '#fff',
+      // secondary: '#fff',
       disabled: 'rgba(0, 0, 0, 0.38)',
     },
     primary: {
