@@ -10,7 +10,8 @@ const useStyles = makeStyles({
         justifyContent: 'center'
     },
     categoryItem: {
-        textAlign: 'center'
+        textAlign: 'center',
+        cursor: 'pointer'
     },
     categoryItemImageContainer: {
         height: '108px',

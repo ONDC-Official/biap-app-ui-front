@@ -11,7 +11,8 @@ const useStyles = makeStyles({
         paddingTop: '33px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '317px !important'
+        height: '317px !important',
+        cursor: 'pointer'
     },
     fashionImages: {
         textAlign: "center"
@@ -30,7 +31,8 @@ const useStyles = makeStyles({
         paddingTop: '23px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '177px !important'
+        height: '177px !important',
+        cursor: 'pointer'
     },
     electronicsImages: {
         textAlign: "center"
@@ -61,7 +63,8 @@ const useStyles = makeStyles({
         paddingTop: '33px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '210px !important'
+        height: '210px !important',
+        cursor: 'pointer'
     },
     groceryImages: {
         textAlign: "center"
@@ -80,7 +83,8 @@ const useStyles = makeStyles({
         paddingTop: '33px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '288px !important'
+        height: '288px !important',
+        cursor: 'pointer'
     },
     foodImages: {
         textAlign: "center"
@@ -92,7 +96,8 @@ const useStyles = makeStyles({
         paddingTop: '33px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '288px !important'
+        height: '288px !important',
+        cursor: 'pointer'
     },
     healthImages: {
         textAlign: "center"
@@ -111,7 +116,8 @@ const useStyles = makeStyles({
         paddingTop: '33px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '317px !important'
+        height: '317px !important',
+        cursor: 'pointer'
     },
     homeImages: {
         textAlign: "center"
@@ -126,7 +132,8 @@ const useStyles = makeStyles({
         paddingTop: '15px !important',
         paddingBottom: '23px !important',
         boxShadow: 'none !important',
-        height: '177px !important'
+        height: '177px !important',
+        cursor: 'pointer'
     },
     bpcImages: {
         textAlign: "center"

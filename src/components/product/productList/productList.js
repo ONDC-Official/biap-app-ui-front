@@ -43,11 +43,11 @@ const ProductList = () => {
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                 <div role="presentation" onClick={handleClick}>
                     <Breadcrumbs aria-label="breadcrumb">
-                        <MuiLink compoment={Link} underline="hover" color="inherit" to="/">
+                        <MuiLink component={Link} underline="hover" color="inherit" to="/">
                             Home
                         </MuiLink>
                         <MuiLink
-                            compoment={Link}
+                            component={Link}
                             underline="hover"
                             color="inherit"
                             to={`/category/${categoryName}`}
