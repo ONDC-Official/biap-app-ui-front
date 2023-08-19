@@ -74,8 +74,7 @@
     "fontWeight": 700,
     "lineHeight": "24px",
     "fontFamily": "'Roboto Slab', serif",
-    "fontStyle": "normal",
-    "textTransform": "uppercase"
+    "fontStyle": "normal"
   },
   "h6": {
     "fontSize": "18px",

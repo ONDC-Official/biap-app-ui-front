@@ -41,3 +41,7 @@ code {
 .text-amber {
   color: #FFBF00 !important;
 }
+
+body{
+  background: #fff !important;
+}
