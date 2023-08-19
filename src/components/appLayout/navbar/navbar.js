@@ -11,7 +11,6 @@ import {ReactComponent as SearchIcon} from "../../../assets/images/search.svg";
 import {ReactComponent as CartIcon} from "../../../assets/images/cart.svg";
 import {ReactComponent as HeartIcon} from "../../../assets/images/heart.svg";
 import {ReactComponent as UserIcon} from "../../../assets/images/loggedInUser.svg";
-import {getValueFromCookie, removeCookie} from "../../../utils/cookies";
 import {useHistory} from "react-router-dom";
 
 import InputBase from '@mui/material/InputBase';
@@ -21,7 +20,6 @@ import IconButton from '@mui/material/IconButton';
 const NavBar = () => {
 
     const classes = useStyles();
-    const user = JSON.parse(getValueFromCookie("user"));
     const history = useHistory();
 
     return (
@@ -34,8 +32,8 @@ const NavBar = () => {
                     alt="logo"
                     className={classes.appLogo}
                     onClick={() => {
-                        removeCookie("search_context");
-                        history.push("/application");
+                        // removeCookie("search_context");
+                        // history.push("/application");
                     }}
                 />
                 <div className={classes.addressContainer}>

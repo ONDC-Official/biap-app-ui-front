@@ -10,12 +10,13 @@ import Login from "./components/auth/login/login";
 import SignUp from "./components/auth/sign-up/signUp";
 import PageNotFound from "./components/page-not-found/pageNotFound";
 import Home from "./components/home/home";
+import AppLayout from "./components/appLayout";
 
 export default function OndcRoutes() {
   return (
     <Router>
       <Switch>
-        <Route path={"/"} exact component={Home} />
+        <Route path={"/"} exact component={() => <AppLayout><Home /></AppLayout>} />
         {/*<Route path={"/"} exact component={() => <Redirect to={"/login"} />} />*/}
         <Route path={"/login"} component={Login} />
         <Route path={"/sign-up"} component={SignUp} />
