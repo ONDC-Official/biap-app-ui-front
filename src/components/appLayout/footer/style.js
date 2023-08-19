@@ -86,8 +86,8 @@ const useStyles = makeStyles({
         right: '-135px'
     },
     copyright: {
-        marginTop: '18px',
-        marginBottom: '20px'
+        marginTop: '18px !important',
+        marginBottom: '20px !important'
     }
 });
 
