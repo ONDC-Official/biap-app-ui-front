@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Grid } from "@mui/material";
 import useStyles from "./style";
 import Typography from "@mui/material/Typography";
@@ -17,6 +17,12 @@ const moreImages = [
 
 const ProductDetails = () => {
   const classes = useStyles();
+  const [activeImage, setActiveImage] = useState(moreImages[0]);
+
+  const handleImageClick = (imageUrl) => {
+    setActiveImage(imageUrl);
+  };
+
   return (
     <div>
       <div className={classes.breadCrumbs} onClick={() => {}}>
@@ -34,15 +40,12 @@ const ProductDetails = () => {
       <Grid container className={classes.detailsContainer}>
         <Grid item xs={8}>
           <div className={classes.imgContainer}>
-            <img
-              className={classes.productImg}
-              src="https://s3.ap-south-1.amazonaws.com/tcsonline-live/catalog/product/cache/afad95d7734d2fa6d0a8ba78597182b7/m/o/model.jpg"
-            />
+            <img className={classes.productImg} src={activeImage} />
           </div>
           <div className={classes.moreImagesContainer}>
             {moreImages.map((item, idx) => {
               return (
-                <div className={classes.moreImages}>
+                <div className={classes.moreImages} onClick={() => handleImageClick(item)}>
                   <img className={classes.moreImage} src={item} />
                 </div>
               );

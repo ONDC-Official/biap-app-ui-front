@@ -39,6 +39,7 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    cursor: "pointer",
   },
   moreImage: {
     borderRadius: 12,
