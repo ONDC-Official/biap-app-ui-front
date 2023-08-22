@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Card, Divider, Grid } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import useStyles from "./style";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
@@ -7,10 +7,11 @@ import MuiLink from "@mui/material/Link";
 import { Link } from "react-router-dom";
 import DoneIcon from "@mui/icons-material/Done";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const moreImages = [
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR69qJNmanHDgPydPaWabIDeSLgK0HfC1d8XyVX41SL9ZnKmBFzt2BH_LjGfJhCziHfWbU&usqp=CAU",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9IjH0aznHBG2PCq3QdvS8k2NjJ3bIz6QuFTXSc9sJXhHENZ6ciBFpg1bIbrRhrS709Lw&usqp=CAU",
+  "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
+  "https://assets.ajio.com/medias/sys_master/root/20230605/vTcw/647de83042f9e729d7234ec6/-473Wx593H-466235200-green-MODEL.jpg",
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlGfIuMOFK-0A6pMAadMCNyAeMhRl5wNWuJHTyg2_ReQza1zkHfXD7nh9lWfd1zUkLCfA&usqp=CAU",
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQoeUWZOLfBQQO5ycC7RP7tJkzh01Lw2J9Ybr-Wf0BR1E4CI8d_e9IvbIxapZx7E3plWhk&usqp=CAU",
   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQw6S87D3OGBBOFEUmza4Dv5DSWWuTAVUTM-XMDIq_V9yj8mfty-ZGWnrh1s2KCoOE8LdQ&usqp=CAU",
@@ -32,6 +33,18 @@ const availabeSizes = [
   },
 ];
 
+const productDetails = {
+  "style code": "Bell & Ross Nightlum",
+  pattern: "Embroidered",
+  "pack of": 1,
+  ocassion: "Party & Festive, Wedding",
+  "Decorative Material": "zari",
+  "fabric care": "Dry Clean for the first wash, thereafter Hand Wash",
+  "Construction Type": "Woven",
+  "other details":
+    "Make a distinct style statement wearing this Cotton silk woven Saree from the Villagius. Designed to perfection, this saree will soon become your favorite . The stylishly designed saree Solid prints makes it a true value for money. Made from Cotton Silk this saree measures 5.5 m and comes with a 0.80 m blouse piece.",
+};
+
 const ProductDetails = () => {
   const classes = useStyles();
   const [activeImage, setActiveImage] = useState(moreImages[0]);
@@ -42,7 +55,7 @@ const ProductDetails = () => {
   };
 
   return (
-    <div>
+    <>
       <div className={classes.breadCrumbs} onClick={() => {}}>
         <Breadcrumbs aria-label="breadcrumb">
           <MuiLink component={Link} underline="hover" color="inherit" to="/">
@@ -135,8 +148,35 @@ const ProductDetails = () => {
           </Card>
         </Grid>
       </Grid>
-      <Grid>Product Details</Grid>
-    </div>
+      <Grid container className={classes.productDetailsSection}>
+        <Grid item xs={7} className={classes.productDetailsLeft}>
+          <Accordion elevation={0} square>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}>
+              <Typography variant="h4" color="black">
+                Product Details
+              </Typography>
+              <Divider />
+            </AccordionSummary>
+            <AccordionDetails sx={{ padding: "20px 0" }}>
+              {Object.keys(productDetails).map((key) => (
+                <Grid container className={classes.keyValueContainer}>
+                  <Grid xs={3}>
+                    <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+                      {key}
+                    </Typography>
+                  </Grid>
+                  <Grid xs={8}>
+                    <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+                      {productDetails[key]}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              ))}
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
+      </Grid>
+    </>
   );
 };
 

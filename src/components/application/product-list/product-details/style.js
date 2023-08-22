@@ -25,6 +25,7 @@ const useStyles = makeStyles({
   detailsContainer: {
     backgroundColor: palette.background.main,
     position: "relative",
+    paddingBottom: "6rem",
   },
   imgContainer: {
     height: 600,
@@ -43,7 +44,7 @@ const useStyles = makeStyles({
   },
   moreImages: {
     ...moreImageContainer(95, "lightgrey"),
-    marginRight: 8,
+    marginRight: 14,
     borderRadius: 12,
     padding: 6,
     backgroundColor: "#ffffff",
@@ -95,6 +96,23 @@ const useStyles = makeStyles({
     minWidth: 75,
   },
   availableColorImg: { height: 55, objectFit: "contain" },
+  productDetailsSection: {
+    backgroundColor: palette.background.paper,
+    padding: "24px 0px",
+  },
+  productDetailsLeft: {
+    paddingLeft: "60px",
+  },
+  keyValueContainer: {
+    marginTop: "10px",
+  },
+  key: {
+    textTransform: "capitalize",
+    fontWeight: 500,
+  },
+  value: {
+    fontWeight: 500,
+  },
 });
 
 export default useStyles;
