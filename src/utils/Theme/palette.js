@@ -47,7 +47,8 @@ const palette = {
         paper: "#fff",
     },
     action: {
-        disabled: Theme.disableColor
+        disabled: Theme.disableColor,
+        active: Theme.linkColor,
     }
 };
 

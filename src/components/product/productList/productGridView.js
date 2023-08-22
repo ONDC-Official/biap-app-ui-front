@@ -1,19 +1,25 @@
 import React from 'react';
 import useStyles from './style';
-import {useParams} from "react-router-dom";
 
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import {ReactComponent as CartIcon} from '../../../assets/images/cart.svg';
 
-const SingleProduct = ({data, index}) => {
-    let { categoryName } = useParams();
+const ProductGridView = ({data, index}) => {
     const classes = useStyles();
 
     return (
         <div className={classes.productItemContainer}>
             <Card className={classes.productCard}>
                 <img className={classes.productImage} src={data.imgUrl} alt={`sub-cat-img-${data.id}`}/>
+                <Tooltip title="Add to cart">
+                    <IconButton color="inherit" className={classes.cartIcon}>
+                        <CartIcon />
+                    </IconButton>
+                </Tooltip>
             </Card>
             <Typography component="div" variant="body" className={classes.productNameTypo}>
                 {data.name}
@@ -33,4 +39,4 @@ const SingleProduct = ({data, index}) => {
 
 };
 
-export default SingleProduct;
+export default ProductGridView;
