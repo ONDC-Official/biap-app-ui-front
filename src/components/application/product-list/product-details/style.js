@@ -1,6 +1,18 @@
 import { makeStyles } from "@mui/styles";
 import palette from "../../../../utils/Theme/palette";
 
+const moreImageContainer = (size, borderColor) => ({
+  height: size,
+  width: size,
+  border: "1px solid",
+  borderColor: borderColor,
+  overflow: "hidden",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+});
+
 const useStyles = makeStyles({
   breadCrumbs: {
     backgroundColor: palette.background.paper,
@@ -27,25 +39,62 @@ const useStyles = makeStyles({
   moreImagesContainer: {
     display: "flex",
     justifyContent: "center",
+    overflowX: "auto",
   },
   moreImages: {
+    ...moreImageContainer(95, "lightgrey"),
     marginRight: 8,
-    height: 95,
-    width: 95,
-    border: "1px solid",
-    borderColor: "lightgrey",
     borderRadius: 12,
-    overflow: "hidden",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
+    padding: 6,
+    backgroundColor: "#ffffff",
+  },
+  greyContainer: {
+    ...moreImageContainer("100%", "#e7e7e7"),
+    backgroundColor: "#e7e7e7",
+    borderRadius: 6,
   },
   moreImage: {
-    borderRadius: 12,
     height: 80,
     objectFit: "contain",
   },
+  productCard: {
+    marginTop: 40,
+    width: 560,
+    padding: "12px 16px",
+    display: "flex",
+    flexDirection: "column",
+  },
+  sizeContainer: {
+    height: 38,
+    width: 38,
+    borderRadius: 9,
+    border: "1px solid #BEBCBD",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 20,
+    cursor: "pointer",
+  },
+  activeSizeContainer: {
+    height: 38,
+    width: 38,
+    borderRadius: 9,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 20,
+    backgroundColor: "#008ECC",
+    cursor: "pointer",
+  },
+  availableColors: {
+    ...moreImageContainer(75, "lightgrey"),
+    marginRight: 12,
+    borderRadius: 12,
+    padding: 6,
+    backgroundColor: "#ffffff",
+    minWidth: 75,
+  },
+  availableColorImg: { height: 55, objectFit: "contain" },
 });
 
 export default useStyles;
