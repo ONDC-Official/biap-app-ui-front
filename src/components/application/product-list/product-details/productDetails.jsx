@@ -138,6 +138,17 @@ const ProductDetails = () => {
                 </div>
               ))}
             </Grid>
+            <Grid sx={{ marginBottom: 2.5 }}>
+              <Typography color="#1d1d1d" variant="body1">
+                Not getting your style? Create your custom design now
+              </Typography>
+              <Button variant="outlined" sx={{ marginTop: 1, textTransform: "none" }}>
+                <Typography color="#419E6A">
+                  Customize Now &nbsp;
+                  <ArrowForwardIcon fontSize="small" />
+                </Typography>
+              </Button>
+            </Grid>
             <Typography variant="body1" color="#1D1D1D" sx={{ marginBottom: 2.5 }}>
               Colours Available
             </Typography>
@@ -170,10 +181,10 @@ const ProductDetails = () => {
               </Grid>
             )}
             <Grid container alignItems="center">
-              <Button variant="contained" sx={{ flex: 1, marginRight: "16px" }}>
+              <Button variant="contained" sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}>
                 Add to cart
               </Button>
-              <Button variant="outlined" sx={{ flex: 1 }}>
+              <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
                 Order now
               </Button>
             </Grid>
