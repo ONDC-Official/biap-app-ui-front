@@ -96,7 +96,7 @@ const ProductList = () => {
                 </div>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.catNameTypoContainer}>
-                <Typography variant="h4" className={classes.catNameTypo}>
+                <Typography variant="h4" className={classes.catNameTypo} color={"success"}>
                     Women’s Sarees
                 </Typography>
                 <Button

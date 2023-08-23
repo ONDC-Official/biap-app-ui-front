@@ -10,6 +10,7 @@ const palette = {
     text: {
       // primary: '#fff',
       // secondary: '#fff',
+        success: Theme.successColor,
       disabled: 'rgba(0, 0, 0, 0.38)',
     },
     primary: {
