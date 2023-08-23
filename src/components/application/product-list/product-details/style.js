@@ -69,12 +69,12 @@ const useStyles = makeStyles({
     height: 38,
     width: 38,
     borderRadius: 9,
-    border: "1px solid #BEBCBD",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 20,
     cursor: "pointer",
+    border: "1px solid #BEBCBD",
   },
   activeSizeContainer: {
     height: 38,

@@ -77,7 +77,11 @@ const ProductDetails = () => {
           <div className={classes.moreImagesContainer}>
             {moreImages.map((item, idx) => {
               return (
-                <div className={classes.moreImages} onClick={() => handleImageClick(item)}>
+                <div
+                  style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                  className={classes.moreImages}
+                  onClick={() => handleImageClick(item)}
+                >
                   <div className={classes.greyContainer}>
                     <img className={classes.moreImage} src={item} />
                   </div>
@@ -119,7 +123,10 @@ const ProductDetails = () => {
               {availabeSizes.map((item) => (
                 <div
                   className={item.size === activeSize ? classes.activeSizeContainer : classes.sizeContainer}
-                  onClick={() => setActiveSize(item.size)}
+                  onClick={() => {
+                    console.log(item);
+                    setActiveSize(item.size);
+                  }}
                 >
                   <Typography
                     variant="body1"
@@ -138,7 +145,11 @@ const ProductDetails = () => {
               {moreImages.map((item, idx) => {
                 return (
                   <Grid container justifyContent="center">
-                    <div className={classes.availableColors} onClick={() => handleImageClick(item)}>
+                    <div
+                      style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                      className={classes.availableColors}
+                      onClick={() => handleImageClick(item)}
+                    >
                       <div className={classes.greyContainer}>
                         <img className={classes.availableColorImg} src={item} />
                       </div>
