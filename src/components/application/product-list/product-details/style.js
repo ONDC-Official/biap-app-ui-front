@@ -113,6 +113,12 @@ const useStyles = makeStyles({
   value: {
     fontWeight: 500,
   },
+  outOfStock: {
+    margin: "12px 0 24px 0",
+    padding: "6px",
+    backgroundColor: "#FC95953D",
+    borderRadius: 8,
+  },
 });
 
 export default useStyles;

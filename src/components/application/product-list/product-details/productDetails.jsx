@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import DoneIcon from "@mui/icons-material/Done";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloseIcon from "@mui/icons-material/Close";
 
 const moreImages = [
   "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
@@ -87,9 +88,18 @@ const ProductDetails = () => {
         </Grid>
         <Grid item xs={5}>
           <Card className={classes.productCard}>
-            <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
-              <DoneIcon color="success" /> In stock
-            </Typography>
+            {true ? (
+              <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
+                <DoneIcon color="success" fontSize="small" /> In stock
+              </Typography>
+            ) : (
+              <Grid container alignItems="center">
+                <CloseIcon color="error" fontSize="small" />
+                <Typography variant="body" color="#D83232">
+                  Out of Stock
+                </Typography>
+              </Grid>
+            )}
             <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
               Embroidered Handloom Cotton Silk Saree (Black)
             </Typography>
@@ -141,6 +151,13 @@ const ProductDetails = () => {
               })}
             </div>
 
+            {!true && (
+              <Grid container justifyContent="center" className={classes.outOfStock}>
+                <Typography variant="body" color="#D83232">
+                  Item is out of Stock
+                </Typography>
+              </Grid>
+            )}
             <Grid container alignItems="center">
               <Button variant="contained" sx={{ flex: 1, marginRight: "16px" }}>
                 Add to cart
