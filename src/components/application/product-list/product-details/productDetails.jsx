@@ -142,15 +142,19 @@ const ProductDetails = () => {
             </div>
 
             <Grid container alignItems="center">
-              <Button>Add to cart</Button>
-              <Button>Order now</Button>
+              <Button variant="contained" sx={{ flex: 1, marginRight: "16px" }}>
+                Add to cart
+              </Button>
+              <Button variant="outlined" sx={{ flex: 1 }}>
+                Order now
+              </Button>
             </Grid>
           </Card>
         </Grid>
       </Grid>
       <Grid container className={classes.productDetailsSection}>
         <Grid item xs={7} className={classes.productDetailsLeft}>
-          <Accordion elevation={0} square>
+          <Accordion elevation={0} square defaultExpanded>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}>
               <Typography variant="h4" color="black">
                 Product Details
