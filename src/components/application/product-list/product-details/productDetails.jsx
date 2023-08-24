@@ -1,5 +1,15 @@
-import React, { useState } from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Card,
+  Divider,
+  Grid,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import useStyles from "./style";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
@@ -46,13 +56,245 @@ const productDetails = {
     "Make a distinct style statement wearing this Cotton silk woven Saree from the Villagius. Designed to perfection, this saree will soon become your favorite . The stylishly designed saree Solid prints makes it a true value for money. Made from Cotton Silk this saree measures 5.5 m and comes with a 0.80 m blouse piece.",
 };
 
+const customizationGroups = [
+  {
+    id: "CG1",
+    name: "Crust(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 1,
+  },
+  {
+    id: "CG2",
+    name: "Size(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 2,
+  },
+  {
+    id: "CG3",
+    name: "Size(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 2,
+  },
+  {
+    id: "CG4",
+    name: "Toppings(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 3,
+  },
+  {
+    id: "CG5",
+    name: "Toppings(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 3,
+  },
+];
+
+const customizations = [
+  {
+    id: "C1",
+    name: "Hand tossed",
+    price: 299,
+    inStock: true,
+    parent: "CG1",
+    child: "CG2",
+  },
+  {
+    id: "C2",
+    name: "Thin crust",
+    price: 349,
+    inStock: true,
+    parent: "CG1",
+    child: "CG3",
+  },
+  {
+    id: "C3",
+    name: "Regular",
+    price: 50,
+    inStock: true,
+    parent: "CG2",
+    child: "CG4",
+  },
+  {
+    id: "C4",
+    name: "Large",
+    price: 100,
+    inStock: true,
+    parent: "CG2",
+  },
+  {
+    id: "C5",
+    name: "Small",
+    price: 30,
+    inStock: true,
+    parent: "CG3",
+  },
+  {
+    id: "C6",
+    name: "Large",
+    price: 120,
+    inStock: true,
+    parent: "CG3",
+  },
+  {
+    id: "C609",
+    name: "Extra Large",
+    price: 120,
+    inStock: true,
+    parent: "CG3",
+    child: "CG5",
+  },
+  {
+    id: "C7",
+    name: "Olives",
+    price: 120,
+    inStock: true,
+    parent: "CG4",
+  },
+  {
+    id: "C8",
+    name: "Paneer",
+    price: 120,
+    inStock: true,
+    parent: "CG4",
+  },
+  {
+    id: "C9",
+    name: "Onion",
+    price: 120,
+    inStock: true,
+    parent: "CG4",
+  },
+  {
+    id: "C999",
+    name: "Onion",
+    price: 120,
+    inStock: true,
+    parent: "CG5",
+  },
+];
+
 const ProductDetails = () => {
   const classes = useStyles();
   const [activeImage, setActiveImage] = useState(moreImages[0]);
   const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
+  const [customization_state, setCustomizationState] = useState({
+    1: { options: [], selected: [] },
+  });
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
+  };
+
+  const handleOptionSelect = (selectedOption, level) => {
+    const newState = { ...customization_state };
+
+    // Update the selected option for the current level
+    newState[level].selected = [selectedOption];
+
+    // Reset subsequent groups' selections
+    for (let i = level + 1; i <= Object.keys(newState).length; i++) {
+      delete newState[i];
+    }
+
+    while (selectedOption.child) {
+      const nextGroup = customizationGroups.find((group) => group.id === selectedOption.child);
+      if (nextGroup) {
+        const nextGroupOptions = customizations.filter((customization) => customization.parent === nextGroup.id);
+        const nextSelectedOption = nextGroupOptions.find((opt) => opt.inStock) || nextGroupOptions[0];
+
+        if (nextSelectedOption) {
+          level++;
+          newState[level] = { name: nextGroup.name, options: nextGroupOptions, selected: [nextSelectedOption] };
+          selectedOption = nextSelectedOption;
+
+          // Reset selections for subsequent groups under the new selection
+          for (let i = level + 1; i <= Object.keys(newState).length; i++) {
+            delete newState[i];
+          }
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    setCustomizationState(newState);
+  };
+
+  useEffect(() => {
+    const initializeCustomizationState = () => {
+      let currentGroup = "CG1";
+      let level = 1;
+      const newState = { ...customization_state };
+
+      while (currentGroup) {
+        const groupOptions = customizationGroups.find((group) => group.id === currentGroup);
+        if (groupOptions) {
+          newState[level] = { name: groupOptions.name, options: [], selected: [] };
+          newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+
+          const selectedCustomization = newState[level].options.find((opt) => opt.inStock);
+
+          if (selectedCustomization) {
+            newState[level].selected = [selectedCustomization];
+            currentGroup = selectedCustomization.child;
+            level++;
+          } else {
+            currentGroup = null;
+          }
+        } else {
+          currentGroup = null;
+        }
+      }
+
+      setCustomizationState(newState);
+    };
+
+    initializeCustomizationState();
+  }, []);
+
+  const renderCustomizations = () => {
+    return Object.keys(customization_state).map((level) => {
+      const cg = customization_state[level];
+      console.log("cg", cg);
+      return (
+        <>
+          <>
+            <Typography variant="body" color="black" sx={{ margin: "12px 0" }}>
+              {cg.name}
+            </Typography>
+            <Grid container>
+              {cg.options.map((c) => (
+                <>
+                  <div
+                    className={cg.selected.includes(c) ? classes.selectedCustomization : classes.customization}
+                    onClick={() => handleOptionSelect(c, parseInt(level))}
+                  >
+                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
+                      {c.name}
+                    </Typography>
+                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#222"}>
+                      ₹{c.price}
+                    </Typography>
+                  </div>
+                </>
+              ))}
+            </Grid>
+          </>
+        </>
+      );
+    });
   };
 
   return (
@@ -180,7 +422,10 @@ const ProductDetails = () => {
                 </Typography>
               </Grid>
             )}
-            <Grid container alignItems="center">
+
+            {renderCustomizations()}
+
+            <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
               <Button variant="contained" sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}>
                 Add to cart
               </Button>

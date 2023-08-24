@@ -119,6 +119,27 @@ const useStyles = makeStyles({
     backgroundColor: "#FC95953D",
     borderRadius: 8,
   },
+  customization: {
+    border: "2px solid rgba(190, 188, 189, 0.46);",
+    borderRadius: 9,
+    marginRight: 8,
+    padding: "10px 16px",
+    textAlign: "center",
+    minWidth: 90,
+    cursor: "pointer",
+    marginBottom: 8,
+  },
+  selectedCustomization: {
+    border: "2px solid #008ECC",
+    background: "#008ECC",
+    borderRadius: 9,
+    marginRight: 8,
+    padding: "10px 16px",
+    textAlign: "center",
+    minWidth: 90,
+    cursor: "pointer",
+    marginBottom: 8,
+  },
 });
 
 export default useStyles;
