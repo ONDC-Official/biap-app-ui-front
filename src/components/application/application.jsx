@@ -21,20 +21,16 @@ export default function Application() {
     <CartContextProvider>
       <Switch>
         <AddressContextProvider>
-
-          <Route
-            path={"/application"}
-            exact
-            component={() => <Redirect to={"/application/products"} />}
-          />
-          <PrivateRoute path={"/application/home"}>
-            <AppLayout><Home /></AppLayout>
-          </PrivateRoute>
+          <Route path={"/application"} exact component={() => <Redirect to={"/application/products"} />} />
           <PrivateRoute path={"/application/products/:id"}>
-            <ProductDetails />
+            <AppLayout>
+              <ProductDetails />
+            </AppLayout>
           </PrivateRoute>
           <PrivateRoute exact path={"/application/products"}>
-            <AppLayout><ProductList /></AppLayout>
+            <AppLayout>
+              <ProductList />
+            </AppLayout>
           </PrivateRoute>
           {/* <PrivateRoute path={"/application/cart"}>
             <Cart />
