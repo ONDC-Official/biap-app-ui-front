@@ -1,318 +1,471 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import styles from '../../../../styles/products/productDetails.module.scss';
-import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
-import no_image_found from '../../../../assets/images/no_image_found.png';
-import back_icon from '../../../../assets/images/back.svg';
-import Navbar from '../../../shared/navbar/navbar';
-import OrderSummary from '../../cart/order-summary/orderSummary';
-import { useContext } from 'react';
-import { CartContext } from '../../../../context/cartContext';
-import Subtract from '../../../shared/svg/subtract';
-import Add from '../../../shared/svg/add';
+import React, { useEffect, useState } from "react";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Card,
+  Divider,
+  Grid,
+  MenuItem,
+  Select,
+} from "@mui/material";
+import useStyles from "./style";
+import Typography from "@mui/material/Typography";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import MuiLink from "@mui/material/Link";
+import { Link } from "react-router-dom";
+import DoneIcon from "@mui/icons-material/Done";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloseIcon from "@mui/icons-material/Close";
 
-export default function ProductDetails() {
-  const location = useLocation();
-  const { product, bpp_id, location_id } = location.state;
-  const { id, descriptor, price, provider_details, category_id } = product;
-  let {
-    name: product_name,
-    images,
-    short_desc: product_description,
-  } = descriptor;
-  const { descriptor: provider_descriptor, id: bpp_provider_id } =
-    provider_details;
-  const { name: provider_name } = provider_descriptor;
-  const [quantityCount, setQuantityCount] = useState(0);
-  const [toggleAddToCart, setToggleAddToCart] = useState();
-  const [imageIndex, setImageIndex] = useState(0);
-  const { cartItems, onReduceQuantity, onAddQuantity, onAddProduct } =
-    useContext(CartContext);
+const moreImages = [
+  "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
+  "https://assets.ajio.com/medias/sys_master/root/20230605/vTcw/647de83042f9e729d7234ec6/-473Wx593H-466235200-green-MODEL.jpg",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlGfIuMOFK-0A6pMAadMCNyAeMhRl5wNWuJHTyg2_ReQza1zkHfXD7nh9lWfd1zUkLCfA&usqp=CAU",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQoeUWZOLfBQQO5ycC7RP7tJkzh01Lw2J9Ybr-Wf0BR1E4CI8d_e9IvbIxapZx7E3plWhk&usqp=CAU",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQw6S87D3OGBBOFEUmza4Dv5DSWWuTAVUTM-XMDIq_V9yj8mfty-ZGWnrh1s2KCoOE8LdQ&usqp=CAU",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTIpkpNh1LVgjHDjZiqtOVATD11btJgAAqi7zXYvgBQKTZarKlmqX2kczHQ9qmYIERy7s&usqp=CAU",
+];
+
+const availabeSizes = [
+  {
+    size: "S",
+  },
+  {
+    size: "M",
+  },
+  {
+    size: "XL",
+  },
+  {
+    size: "XS",
+  },
+];
+
+const productDetails = {
+  "style code": "Bell & Ross Nightlum",
+  pattern: "Embroidered",
+  "pack of": 1,
+  ocassion: "Party & Festive, Wedding",
+  "Decorative Material": "zari",
+  "fabric care": "Dry Clean for the first wash, thereafter Hand Wash",
+  "Construction Type": "Woven",
+  "other details":
+    "Make a distinct style statement wearing this Cotton silk woven Saree from the Villagius. Designed to perfection, this saree will soon become your favorite . The stylishly designed saree Solid prints makes it a true value for money. Made from Cotton Silk this saree measures 5.5 m and comes with a 0.80 m blouse piece.",
+};
+
+const customizationGroups = [
+  {
+    id: "CG1",
+    name: "Crust(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 1,
+  },
+  {
+    id: "CG2",
+    name: "Size(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 2,
+  },
+  {
+    id: "CG3",
+    name: "Size(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 2,
+  },
+  {
+    id: "CG4",
+    name: "Toppings(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 3,
+  },
+  {
+    id: "CG5",
+    name: "Toppings(Select any 1)",
+    inputType: "select",
+    minQuantity: 1,
+    maxQuantity: 1,
+    seq: 3,
+  },
+];
+
+const customizations = [
+  {
+    id: "C1",
+    name: "Hand tossed",
+    price: 299,
+    inStock: true,
+    parent: "CG1",
+    child: "CG2",
+  },
+  {
+    id: "C2",
+    name: "Thin crust",
+    price: 349,
+    inStock: true,
+    parent: "CG1",
+    child: "CG3",
+  },
+  {
+    id: "C3",
+    name: "Regular",
+    price: 50,
+    inStock: true,
+    parent: "CG2",
+    child: "CG4",
+  },
+  {
+    id: "C4",
+    name: "Large",
+    price: 100,
+    inStock: true,
+    parent: "CG2",
+  },
+  {
+    id: "C5",
+    name: "Small",
+    price: 30,
+    inStock: true,
+    parent: "CG3",
+  },
+  {
+    id: "C6",
+    name: "Large",
+    price: 120,
+    inStock: true,
+    parent: "CG3",
+  },
+  {
+    id: "C609",
+    name: "Extra Large",
+    price: 120,
+    inStock: true,
+    parent: "CG3",
+    child: "CG5",
+  },
+  {
+    id: "C7",
+    name: "Olives",
+    price: 120,
+    inStock: true,
+    parent: "CG4",
+  },
+  {
+    id: "C8",
+    name: "Paneer",
+    price: 120,
+    inStock: true,
+    parent: "CG4",
+  },
+  {
+    id: "C9",
+    name: "Onion",
+    price: 120,
+    inStock: true,
+    parent: "CG4",
+  },
+  {
+    id: "C999",
+    name: "Onion",
+    price: 120,
+    inStock: true,
+    parent: "CG5",
+  },
+];
+
+const ProductDetails = () => {
+  const classes = useStyles();
+  const [activeImage, setActiveImage] = useState(moreImages[0]);
+  const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
+  const [customization_state, setCustomizationState] = useState({
+    1: { options: [], selected: [] },
+  });
+
+  const handleImageClick = (imageUrl) => {
+    setActiveImage(imageUrl);
+  };
+
+  const handleOptionSelect = (selectedOption, level) => {
+    const newState = { ...customization_state };
+
+    // Update the selected option for the current level
+    newState[level].selected = [selectedOption];
+
+    // Reset subsequent groups' selections
+    for (let i = level + 1; i <= Object.keys(newState).length; i++) {
+      delete newState[i];
+    }
+
+    while (selectedOption.child) {
+      const nextGroup = customizationGroups.find((group) => group.id === selectedOption.child);
+      if (nextGroup) {
+        const nextGroupOptions = customizations.filter((customization) => customization.parent === nextGroup.id);
+        const nextSelectedOption = nextGroupOptions.find((opt) => opt.inStock) || nextGroupOptions[0];
+
+        if (nextSelectedOption) {
+          level++;
+          newState[level] = { name: nextGroup.name, options: nextGroupOptions, selected: [nextSelectedOption] };
+          selectedOption = nextSelectedOption;
+
+          // Reset selections for subsequent groups under the new selection
+          for (let i = level + 1; i <= Object.keys(newState).length; i++) {
+            delete newState[i];
+          }
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    setCustomizationState(newState);
+  };
 
   useEffect(() => {
-    const isProductPresent = cartItems.find(({ product }) => product.id === id && provider_details.id === product.provider_details.id);
-    if (isProductPresent) {
-      setToggleAddToCart(true);
-      setQuantityCount(isProductPresent.quantity.count);
-    } else {
-      setToggleAddToCart(false);
-      setQuantityCount(0);
-    }
-  }, [cartItems, id]);
+    const initializeCustomizationState = () => {
+      let currentGroup = "CG1";
+      let level = 1;
+      const newState = { ...customization_state };
 
-  const renderProductDetails = (detail) => {
-    const obj = product?.['@ondc/org/statutory_reqs_packaged_commodities'];
-    switch (detail) {
-      case 'manufacturer_or_packer_name':
-        return {
-          key: 'Manufacturer Name:',
-          value: obj?.['manufacturer_or_packer_name'],
-        };
-      case 'net_quantity_or_measure_of_commodity_in_pkg':
-        return {
-          key: 'Net Quantity:',
-          value: obj?.['net_quantity_or_measure_of_commodity_in_pkg'],
-        };
-      case 'month_year_of_manufacture_packing_import':
-        return {
-          key: 'Manufacturing Date:',
-          value: obj?.['month_year_of_manufacture_packing_import'],
-        };
-      case 'imported_product_country_of_origin':
-        return {
-          key: 'Country of Origin:',
-          value: obj?.['imported_product_country_of_origin'],
-        };
-      default:
-        return {
-          key: null,
-          value: null,
-        };
-    }
+      while (currentGroup) {
+        const groupOptions = customizationGroups.find((group) => group.id === currentGroup);
+        if (groupOptions) {
+          newState[level] = { name: groupOptions.name, options: [], selected: [] };
+          newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+
+          const selectedCustomization = newState[level].options.find((opt) => opt.inStock);
+
+          if (selectedCustomization) {
+            newState[level].selected = [selectedCustomization];
+            currentGroup = selectedCustomization.child;
+            level++;
+          } else {
+            currentGroup = null;
+          }
+        } else {
+          currentGroup = null;
+        }
+      }
+
+      setCustomizationState(newState);
+    };
+
+    initializeCustomizationState();
+  }, []);
+
+  const renderCustomizations = () => {
+    return Object.keys(customization_state).map((level) => {
+      const cg = customization_state[level];
+      console.log("cg", cg);
+      return (
+        <>
+          <>
+            <Typography variant="body" color="black" sx={{ margin: "12px 0" }}>
+              {cg.name}
+            </Typography>
+            <Grid container>
+              {cg.options.map((c) => (
+                <>
+                  <div
+                    className={cg.selected.includes(c) ? classes.selectedCustomization : classes.customization}
+                    onClick={() => handleOptionSelect(c, parseInt(level))}
+                  >
+                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
+                      {c.name}
+                    </Typography>
+                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#222"}>
+                      ₹{c.price}
+                    </Typography>
+                  </div>
+                </>
+              ))}
+            </Grid>
+          </>
+        </>
+      );
+    });
   };
 
   return (
-    <Fragment>
-      <Navbar />
-
-      <div className={styles.playground_height}>
-        <div
-          className={`py-2 ${cartItems.length > 0
-            ? styles.product_list_with_summary_wrapper
-            : styles.product_list_without_summary_wrapper
-            }`}
-        >
-          <div className="container">
-            <div className="row py-3 px-2">
-              <div className="d-inline-flex">
-                <Link to={{ pathname: '/application/products' }}>
-                  <p className={styles.back_text}><img className={styles.back_icon} src={back_icon} alt={"back_icon"} />Back</p>
-                </Link>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12 col-lg-4 p-3">
-                {/* PRODUCT IMAGE  */}
-                <div className={styles.product_img_container}>
-                  <img
-                    src={images?.length > 0 ? images[imageIndex] : no_image_found}
-                    alt={product_name}
-                    width="300"
-                    height="300"
-                    className={styles.product_img}
-                    onError={(event) => {
-                      event.target.onerror = null;
-                      event.target.src = no_image_found;
-                    }}
-                  />
-                  {
-                    images?.length > 1
-                      ? (
-                        <>
-                          {
-                            (imageIndex < (images.length - 1))
-                              ? (
-                                <span className={styles.next_icon_container} onClick={() => setImageIndex(imageIndex + 1)}>
-                                  <img className={styles.next_icon} src={back_icon} alt={"next_icon"} />
-                                </span>
-                              )
-                              : <></>
-                          }
-                          {
-                            imageIndex > 0
-                              ? (
-                                <span className={styles.previous_icon_container} onClick={() => setImageIndex(imageIndex - 1)}>
-                                  <img className={styles.previous_icon} src={back_icon} alt={"previous_icon"} />
-                                </span>
-                              )
-                              : <></>
-                          }
-                        </>
-                      )
-                      : <></>
-                  }
-                </div>
-              </div>
-              <div className="col-md-12 col-lg-8 p-3">
-                {/* NAME AND ORDERING FROM  */}
-                <div className="pb-2">
-                  <p className={`${styles.product_name} ${styles.width}`}>
-                    {product_name}
-                  </p>
-                  <p className={styles.ordered_from}>
-                    Ordering from{' '}
-                    <span className={styles.bold}>{provider_name}</span>
-                  </p>
-                </div>
-                {/* DESCRIPTION  */}
-                <div className="pb-3">
-                  <p
-                    className={`${styles.product_description} ${styles.width}`}
-                  >
-                    {`${product_description} ${category_id ? " | " : ""} ${category_id}`}
-                  </p>
-                </div>
-                {/* PRICE  */}
-                <div className="pb-2">
-                  <p className={styles.product_price}>
-                    ₹ {Number(price.value).toFixed(2)}
-                  </p>
-                </div>
-                {/* DIVIDER  */}
-                <div className={styles.width}>
-                  <hr style={{ border: '1px solid #aaa' }} />
-                  {/* AVAILABLE QUANTITY  */}
-                  {Number(product?.AvailableQuantity > 0) ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>
-                        Available Quantity:
-                      </p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.AvailableQuantity}
-                      </p>
-                    </div>
-                  ) : null}
-                  {/* RETURNABLE  */}
-                  {typeof product?.['@ondc/org/returnable'] !== 'undefined' ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>Returnable:</p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.['@ondc/org/returnable'] == true
-                          ? 'Yes'
-                          : 'No'}
-                      </p>
-                    </div>
-                  ) : null}
-                  {/* CANCELABLE  */}
-                  {typeof product?.['@ondc/org/cancellable'] !== 'undefined' ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>Cancelable:</p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.['@ondc/org/cancellable'] == true
-                          ? 'Yes'
-                          : 'No'}
-                      </p>
-                    </div>
-                  ) : null}
-                  {/* COD  */}
-                  {typeof product?.['@ondc/org/available_on_cod'] !==
-                    'undefined' ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>
-                        Cash On Delivery:
-                      </p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.['@ondc/org/available_on_cod'] == true
-                          ? 'Yes'
-                          : 'No'}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-                {/* PRODUCT DETAILS  */}
-                {Object.keys(
-                  product?.['@ondc/org/statutory_reqs_packaged_commodities'] ||
-                  {}
-                ).length > 0 && (
-                    <div className="pt-4 pb-2">
-                      <p className={styles.product_details_header}>
-                        Product Details
-                      </p>
-                      <div className={`${styles.width} pt-2`}>
-                        {Object.keys(
-                          product?.[
-                          '@ondc/org/statutory_reqs_packaged_commodities'
-                          ]
-                        ).map((commodity, index) => {
-                          const { key, value } = renderProductDetails(commodity);
-                          if (key && value) {
-                            return (
-                              <div
-                                className="d-flex align-items-center py-1"
-                                key={`id-${index}`}
-                              >
-                                <p className={styles.prodcut_details_key}>
-                                  {key}
-                                </p>
-                                <p className={styles.prodcut_details_value}>
-                                  {value}
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    </div>
-                  )}
-                {/* ADD TO CART BUTTON  */}
-                <div className="py-3">
-                  {toggleAddToCart && quantityCount > 0 ? (
-                    <div className={styles.quantity_count_wrapper}>
-                      <div
-                        className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
-                        onClick={() => {
-                          setQuantityCount(quantityCount - 1);
-                          onReduceQuantity(id);
-                          if (quantityCount - 1 === 0) {
-                            setToggleAddToCart(false);
-                            return;
-                          }
-                        }}
-                      >
-                        <Subtract
-                          width="13"
-                          classes={styles.subtract_svg_color}
-                        />
-                      </div>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <p className={styles.quantity_count}>{quantityCount}</p>
-                      </div>
-                      <div
-                        className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
-                        onClick={() => {
-                          setQuantityCount(
-                            (quantityCount) => quantityCount + 1
-                          );
-                          onAddQuantity(id);
-                        }}
-                      >
-                        <Add
-                          width="13"
-                          height="13"
-                          classes={styles.add_svg_color}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      className={styles.add_to_cart_button}
-                      onClick={() => {
-                        setToggleAddToCart(true);
-                        setQuantityCount((quantityCount) => quantityCount + 1);
-                        onAddProduct({
-                          id,
-                          quantity: { count: quantityCount + 1 },
-                          bpp_id,
-                          provider: {
-                            id: bpp_provider_id,
-                            locations: [location_id],
-                          },
-                          product,
-                        });
-                      }}
-                    >
-                      Add
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {cartItems.length > 0 && <OrderSummary />}
+    <>
+      <div className={classes.breadCrumbs} onClick={() => {}}>
+        <Breadcrumbs aria-label="breadcrumb">
+          <MuiLink component={Link} underline="hover" color="inherit" to="/">
+            Home
+          </MuiLink>
+          <MuiLink component={Link} underline="hover" color="inherit" to={""}>
+            abc
+          </MuiLink>
+          <Typography color="text.primary">def</Typography>
+        </Breadcrumbs>
       </div>
-    </Fragment>
+
+      <Grid container className={classes.detailsContainer}>
+        <Grid item xs={7}>
+          <div className={classes.imgContainer}>
+            <img className={classes.productImg} src={activeImage} />
+          </div>
+          <div className={classes.moreImagesContainer}>
+            {moreImages.map((item, idx) => {
+              return (
+                <div
+                  style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                  className={classes.moreImages}
+                  onClick={() => handleImageClick(item)}
+                >
+                  <div className={classes.greyContainer}>
+                    <img className={classes.moreImage} src={item} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Grid>
+        <Grid item xs={5}>
+          <Card className={classes.productCard}>
+            {true ? (
+              <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
+                <DoneIcon color="success" fontSize="small" /> In stock
+              </Typography>
+            ) : (
+              <Grid container alignItems="center">
+                <CloseIcon color="error" fontSize="small" />
+                <Typography variant="body" color="#D83232">
+                  Out of Stock
+                </Typography>
+              </Grid>
+            )}
+            <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
+              Embroidered Handloom Cotton Silk Saree (Black)
+            </Typography>
+            <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
+              ₹ 2000
+            </Typography>
+            <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
+            <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
+              <Typography variant="body" color="#1D1D1D">
+                Select size
+              </Typography>
+              <Typography variant="body" color="secondary" sx={{ marginLeft: 2.5, cursor: "pointer" }}>
+                Size Guide <ArrowForwardIcon color="secondary" />
+              </Typography>
+            </Grid>
+            <Grid container sx={{ marginBottom: 2.5 }}>
+              {availabeSizes.map((item) => (
+                <div
+                  className={item.size === activeSize ? classes.activeSizeContainer : classes.sizeContainer}
+                  onClick={() => {
+                    console.log(item);
+                    setActiveSize(item.size);
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    color={item.size === activeSize ? "#ffffff" : "#3C4242"}
+                    sx={{ fontWeight: 700 }}
+                  >
+                    {item.size}
+                  </Typography>
+                </div>
+              ))}
+            </Grid>
+            <Grid sx={{ marginBottom: 2.5 }}>
+              <Typography color="#1d1d1d" variant="body1">
+                Not getting your style? Create your custom design now
+              </Typography>
+              <Button variant="outlined" sx={{ marginTop: 1, textTransform: "none" }}>
+                <Typography color="#419E6A">
+                  Customize Now &nbsp;
+                  <ArrowForwardIcon fontSize="small" />
+                </Typography>
+              </Button>
+            </Grid>
+            <Typography variant="body1" color="#1D1D1D" sx={{ marginBottom: 2.5 }}>
+              Colours Available
+            </Typography>
+            <div className={classes.moreImagesContainer} style={{ marginBottom: 16 }}>
+              {moreImages.map((item, idx) => {
+                return (
+                  <Grid container justifyContent="center">
+                    <div
+                      style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                      className={classes.availableColors}
+                      onClick={() => handleImageClick(item)}
+                    >
+                      <div className={classes.greyContainer}>
+                        <img className={classes.availableColorImg} src={item} />
+                      </div>
+                    </div>
+                    <Typography variant="body" color="black" sx={{ fontWeight: 600, marginRight: "14px" }}>
+                      ₹ 3999
+                    </Typography>
+                  </Grid>
+                );
+              })}
+            </div>
+
+            {!true && (
+              <Grid container justifyContent="center" className={classes.outOfStock}>
+                <Typography variant="body" color="#D83232">
+                  Item is out of Stock
+                </Typography>
+              </Grid>
+            )}
+
+            {renderCustomizations()}
+
+            <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
+              <Button variant="contained" sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}>
+                Add to cart
+              </Button>
+              <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
+                Order now
+              </Button>
+            </Grid>
+          </Card>
+        </Grid>
+      </Grid>
+      <Grid container className={classes.productDetailsSection}>
+        <Grid item xs={7} className={classes.productDetailsLeft}>
+          <Accordion elevation={0} square defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}>
+              <Typography variant="h4" color="black">
+                Product Details
+              </Typography>
+              <Divider />
+            </AccordionSummary>
+            <AccordionDetails sx={{ padding: "20px 0" }}>
+              {Object.keys(productDetails).map((key) => (
+                <Grid container className={classes.keyValueContainer}>
+                  <Grid xs={3}>
+                    <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+                      {key}
+                    </Typography>
+                  </Grid>
+                  <Grid xs={8}>
+                    <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+                      {productDetails[key]}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              ))}
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
+      </Grid>
+    </>
   );
-}
+};
+
+export default ProductDetails;
