@@ -84,7 +84,7 @@ const Home = () => {
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{height: '100%'}}>
-                                    <Card className={classes.foodCategory} onClick={() => history.push(`category/Food & Beverage`)}>
+                                    <Card className={classes.foodCategory} onClick={() => history.push(`category/F&B`)}>
                                         <div className={classes.foodImages}>
                                             <img src={Food} alt="Food 1"/>
                                         </div>

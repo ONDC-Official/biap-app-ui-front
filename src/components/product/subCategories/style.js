@@ -2,12 +2,23 @@ import { makeStyles } from '@mui/styles';
 import palette from "../../../utils/Theme/palette";
 
 const useStyles = makeStyles({
-    categoriesContainer: {
+    categoriesRootContainer: {
         background: '#F9F9F9',
-        display: 'flex',
-        gap: '29px',
-        padding: '16px !important',
-        justifyContent: 'center'
+    },
+    categoriesContainer: {
+        "& ul": {
+            display: 'flex',
+            gap: '29px',
+            padding: '16px !important',
+            justifyContent: 'center',
+            "& li > .MuiPaginationItem-ellipsis": {
+                // background: 'red !important',
+                display: 'none',
+                gap: '0px',
+                marginLeft: '-29px !important',
+                marginRight: '-29px !important'
+            }
+        },
     },
     categoryItem: {
         textAlign: 'center'
@@ -28,11 +39,18 @@ const useStyles = makeStyles({
     },
     categoryNameTypo: {
         fontWeight: '600 !important',
-        marginTop: '5px !important'
+        marginTop: '5px !important',
+        maxWidth: '120px'
     },
     selectedCategory: {
         background: '#EBEBEB !important',
         border: `1px solid ${palette.secondary.main}`
+    },
+    actionButton: {
+        border: '1px solid rgba(0, 0, 0, 0.14) !important'
+    },
+    pageEllipsisContainer: {
+
     }
 });
 

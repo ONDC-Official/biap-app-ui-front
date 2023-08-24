@@ -9,7 +9,7 @@ const SingleCategory = ({data, index}) => {
     const history = useHistory();
     const classes = useStyles();
     return (
-        <div className={classes.categoryItem} onClick={() => history.push(`/category/${data.name}`)}>
+        <div className={classes.categoryItem} onClick={() => history.push(`/category/${data.routeName}`)}>
             <div className={`${classes.categoryItemImageContainer} ${categoryName === data.routeName?classes.selectedCategory: ""}`}>
                 <img className={classes.categoryImage} src={data.imageUrl} alt={`category-img-${index}`} />
             </div>

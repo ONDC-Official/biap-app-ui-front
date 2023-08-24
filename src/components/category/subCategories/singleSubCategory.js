@@ -13,12 +13,12 @@ const SingleSubCategory = ({data}) => {
 
     console.log("categoryName=====>", `category/${categoryName}/${data.name}`);
     return (
-        <div className={classes.subCategoryItemContainer} onClick={() => history.push(`/category/${categoryName}/${data.name}`)}>
+        <div className={classes.subCategoryItemContainer} onClick={() => history.push(`/category/${categoryName}/${data.value}`)}>
             <Card className={classes.subCategoryCard}>
-                <img className={classes.subCatImage} src={data.imgUrl} alt={`sub-cat-img-${data.id}`}/>
+                <img className={classes.subCatImage} src={data.imageUrl} alt={`sub-cat-img-${data.value}`}/>
             </Card>
             <Typography component="div" variant="body" className={classes.subCatNameTypo}>
-                {data.name}
+                {data.value}
             </Typography>
         </div>
     )

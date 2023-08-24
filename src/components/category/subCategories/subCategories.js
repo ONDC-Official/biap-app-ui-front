@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import useStyles from './style';
+import {useParams} from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -17,6 +18,8 @@ import subcat7 from '../../../assets/images/subcaregory/subcat7.png';
 import subcat8 from '../../../assets/images/subcaregory/subcat8.png';
 import subcat9 from '../../../assets/images/subcaregory/subcat9.png';
 
+import {PRODUCT_SUBCATEGORY} from "../../../constants/categories";
+
 const SubCatList = [
     {id: 1, name: "Top Deals", imgUrl: subcat0},
     {id: 2, name: "Winter Wear", imgUrl: subcat1},
@@ -31,7 +34,17 @@ const SubCatList = [
 ];
 
 const SubCategories = () => {
+    let { categoryName } = useParams();
     const classes = useStyles();
+    const [subCatList, setSubCatList] = useState([]);
+
+    useEffect(() => {
+        if(categoryName){
+            const options = PRODUCT_SUBCATEGORY[categoryName];
+            setSubCatList(options || []);
+        }
+    }, [categoryName]);
+
     return (
         <Grid container spacing={3} className={classes.subCatContainer}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -42,7 +55,7 @@ const SubCategories = () => {
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                 <Grid container spacing={4} columns={10}>
                     {
-                        SubCatList.map((item, ind) => (
+                        subCatList.map((item, ind) => (
                             <Grid key={`sub-cat-item-${ind}`} item xs={12} sm={12} md={2} lg={2} xl={2}>
                                 <SingleSubCategory
                                     data={item}
