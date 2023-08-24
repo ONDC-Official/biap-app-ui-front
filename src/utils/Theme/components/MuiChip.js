@@ -2,11 +2,10 @@ import palette from "../palette";
 const MuiChip = {
     styleOverrides: {
         root: {
-            // borderRadius: '6px !important',
-            // height: '20px !important',
-            // width: '20px',
-            // border: '2px solid #979797'
-            padding: '8px 20px'
+            borderRadius: '60px !important',
+            color: '#222222',
+            padding: '10px',
+            fontSize: '14px',
         },
         outlinedPrimary: {
             backgroundColor: palette.primary.light
@@ -22,6 +21,11 @@ const MuiChip = {
         },
         outlinedError: {
             backgroundColor: palette.error.light
+        },
+        deleteIcon: {
+            "& g path": {
+                fill: '#222222'
+            }
         }
     }
 };

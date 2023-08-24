@@ -9,10 +9,12 @@ import { ReactComponent as WhatsappIcon} from "../../../assets/images/whatsapp.s
 import appStoreImage from "../../../assets/images/appStore.png";
 import playStoreImage from "../../../assets/images/playStore.png";
 import {removeCookie} from "../../../utils/cookies";
-import categoryList from '../../../constants/categories';
+import {categoryList} from '../../../constants/categories';
+import {useHistory} from "react-router-dom";
 
 const Footer = () => {
     const classes = useStyles();
+    const history = useHistory();
     return (
         <Box
             component="footer"
@@ -71,7 +73,7 @@ const Footer = () => {
                     <ul className={classes.listContainer}>
                         {
                             categoryList.map((item, index) => (
-                                <li key={`category-${index}`} className={classes.listStyle}>
+                                <li key={`category-${index}`} className={classes.listStyle} onClick={() => history.push(`/category/${item.routeName}`)}>
                                     <Typography
                                         className={classes.itemDetailsLabel} variant="body" component="div" color="white"
                                     >

@@ -7,8 +7,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: 'Inter';
 }
 
 /* width */
@@ -40,4 +39,8 @@ code {
 
 .text-amber {
   color: #FFBF00 !important;
+}
+
+body{
+  background: #fff !important;
 }

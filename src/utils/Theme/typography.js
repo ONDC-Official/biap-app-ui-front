@@ -36,7 +36,6 @@ const typography = {
     fontWeight: ThemeOne.h5.fontWeight,
     fontSize: ThemeOne.h5.fontSize,
     fontStyle: ThemeOne.h5.fontStyle,
-    "text-transform": ThemeOne.h5.textTransform,
     lineHeight: ThemeOne.h5.lineHeight
   },
   h6: {

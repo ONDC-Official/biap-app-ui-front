@@ -65,7 +65,8 @@ const useStyles = makeStyles({
     listStyle: {
         listStyle: 'disc',
         color: palette.common.white,
-        marginBottom: '10px'
+        marginBottom: '10px',
+        cursor: 'pointer'
     },
     circleOne: {
         height: '467px',
@@ -86,8 +87,8 @@ const useStyles = makeStyles({
         right: '-135px'
     },
     copyright: {
-        marginTop: '18px',
-        marginBottom: '20px'
+        marginTop: '18px !important',
+        marginBottom: '20px !important'
     }
 });
 

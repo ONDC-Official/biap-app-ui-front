@@ -8,6 +8,8 @@ import MuiInputLabel from "./MuiInputLabel";
 import MuiChip from './MuiChip';
 import MuiCard from "./MuiCard";
 import MuiInputBase from './MuiInputBase';
+import MuiBreadcrumbs from './MuiBreadcrumbs';
+import MuiIconButton from './MuiIconButton';
 
 const index = {
     MuiButton,
@@ -19,7 +21,9 @@ const index = {
     MuiInputLabel,
     MuiChip,
     MuiCard,
-    MuiInputBase
+    MuiInputBase,
+    MuiBreadcrumbs,
+    MuiIconButton
 };
 
 export default index;

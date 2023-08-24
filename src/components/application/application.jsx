@@ -7,6 +7,7 @@ import Cart from "./cart/cart";
 import Checkout from "./checkout/checkout";
 import Orders from "./orders/orders";
 import ProductList from "./product-list/productList";
+import Home from '../home/home';
 import Profile from "./profile/profile";
 import Support from "./support/support";
 import ProductDetails from "./product-list/product-details/productDetails";

@@ -10,11 +10,19 @@ import Login from "./components/auth/login/login";
 import SignUp from "./components/auth/sign-up/signUp";
 import PageNotFound from "./components/page-not-found/pageNotFound";
 
+import Home from "./components/home/home";
+import Category from "./components/category/category";
+import SubCategory from "./components/product/product";
+import AppLayout from "./components/appLayout";
+
 export default function OndcRoutes() {
   return (
     <Router>
       <Switch>
-        <Route path={"/"} exact component={() => <Redirect to={"/login"} />} />
+        <Route path={"/"} exact component={() => <AppLayout><Home /></AppLayout>} />
+        <Route path={"/category/:categoryName"} exact component={() => <AppLayout><Category /></AppLayout>} />
+        <Route path={"/category/:categoryName/:subCategoryName"} exact component={() => <AppLayout><SubCategory /></AppLayout>} />
+        {/*<Route path={"/"} exact component={() => <Redirect to={"/login"} />} />*/}
         <Route path={"/login"} component={Login} />
         <Route path={"/sign-up"} component={SignUp} />
         <Route path={"/application"} component={Application} />

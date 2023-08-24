@@ -8,8 +8,9 @@ const palette = {
         disableColor: Theme.disableColor,
     },
     text: {
-      primary: '#fff',
-      secondary: '#fff',
+      // primary: '#fff',
+      // secondary: '#fff',
+        success: Theme.successColor,
       disabled: 'rgba(0, 0, 0, 0.38)',
     },
     primary: {
@@ -47,7 +48,8 @@ const palette = {
         paper: "#fff",
     },
     action: {
-        disabled: Theme.disableColor
+        disabled: Theme.disableColor,
+        active: Theme.linkColor,
     }
 };
 
