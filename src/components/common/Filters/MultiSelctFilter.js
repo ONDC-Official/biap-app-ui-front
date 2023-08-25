@@ -116,7 +116,7 @@ const MultiSelctFilter = ({
                             {({TransitionProps}) => (
                                 <Fade {...TransitionProps}>
                                     <Paper className={classes.menuPaper}>
-                                        <Typography variant="h6" className={classes.marginBottom10}>{title}</Typography>
+                                        <Typography variant="h6" className={`${classes.marginBottom10} ${classes.filterName}`}>{title}</Typography>
                                         <Grid item xl={12} lg={12} md={12} sm={12} xs={12}
                                               className={`${classes.marginTop10} ${classes.marginBottom10}`}>
                                             <TextField
@@ -199,15 +199,19 @@ const MultiSelctFilter = ({
                 )
             }
             <Chip
-                className={`${classes.marginRight10} ${classes.marginBottom10}`}
+                className={`${classes.marginRight10} ${classes.marginBottom10} ${classes.filterName}`}
                 disabled={disabled}
                 color={`${value.length > 0 ? "primary" : "default"}`}
                 variant={`${value.length > 0 ? "outlined" : "contained"}`}
                 onClick={handleClickMenu}
-                label={filterName}
+                clickable={true}
+                label={
+                    <Typography variant="body2">
+                        {filterName}
+                        <DownIcon className={classes.downIcon} />
+                    </Typography>
+                }
                 size="medium"
-                onDelete={() => {}}
-                deleteIcon={<DownIcon />}
             >
                 {/*{`${filterName}: ${value.length > 0 && value.length !== arrayList.length ? '(' + value.length + ')' : 'All'}`}*/}
                 {/*{value.length > 0 && <ClearFilterIcon className={classes.clearFilterIcon} onClick={(e) => onClearFilter(e)}/>}*/}

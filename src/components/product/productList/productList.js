@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import useStyles from './style';
 import {useParams, Link} from "react-router-dom";
 
@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import MuiLink from '@mui/material/Link';
 import Button from '@mui/material/Button';
-
+import Pagination from '@mui/material/Pagination';
 
 import ProductGridView from "./productGridView";
 import ProductListView from "./productListView";
@@ -25,7 +25,14 @@ import product8 from '../../../assets/images/product/product8.png';
 import {ReactComponent as ListViewIcon} from '../../../assets/images/listView.svg';
 import {ReactComponent as GridViewIcon} from '../../../assets/images/gridView.svg';
 
-const Products = [
+import useCancellablePromise from "../../../api/cancelRequest";
+import {
+    getAllProductRequest,
+    getAllFiltersRequest,
+    getAllFilterValuesRequest
+} from '../../../api/product.api';
+
+const ProductsList = [
     {id: 1, name: 'Embroidered Handloom Cotton Silk Saree (Black)', price: '2999', provider: 'CHHABRA 555 Sarees', imgUrl: product1},
     {id: 2, name: 'Embroidered Handloom Cotton Silk Saree (Black)', price: '2999', provider: 'CHHABRA 555 Sarees', imgUrl: product2},
     {id: 3, name: 'Embroidered Handloom Cotton Silk Saree (Black)', price: '2999', provider: 'CHHABRA 555 Sarees', imgUrl: product3},
@@ -47,29 +54,105 @@ const ProductList = () => {
     const classes = useStyles();
     let { categoryName, subCategoryName } = useParams();
     const [viewType, setViewType] = useState("grid");
-    const defaultSearchData = useRef({
-        sareeType: [],
-        brand: []
-    });
+    const [products, setProducts] = useState([]);
+    const [totalProductCount, setTotalProductCount] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
         page: 0,
         pageSize: 10,
-        searchData: Object.assign({}, defaultSearchData.current)
+        searchData: []
     });
 
-    const handleClick = (event) => {
-        event.preventDefault();
-        console.info('You clicked a breadcrumb.');
+    // HOOKS
+    const { cancellablePromise } = useCancellablePromise();
+
+    const getAllProducts = async() => {
+        setIsLoading(true);
+        try {
+            const quaryParams = `?limit=${paginationModel.pageSize}&pageNumber=${paginationModel.page+1}&categoryIds=${"Pizza"}`
+            const data = await cancellablePromise(
+                getAllProductRequest(paginationModel)
+            );
+            console.log("getAllProducts=====>", data)
+            setProducts(data.data);
+            setTotalProductCount(data.count);
+        } catch (err) {
+            // dispatch({
+            //     type: toast_actions.ADD_TOAST,
+            //     payload: {
+            //         id: Math.floor(Math.random() * 100),
+            //         type: toast_types.error,
+            //         message: err?.message,
+            //     },
+            // });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleChangeFilter = (elementName, value) => {
-        const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
-        if(elementName === "dateRange"){
-            data.searchData.fromDate = value?.startDate || "";
-            data.searchData.toDate = value?.endDate || "";
-        }else{
-            data.searchData[elementName] = value;
+    const getFilterValues = async(attributeCode) => {
+        try {
+            const data = await cancellablePromise(
+                getAllFilterValuesRequest(attributeCode, subCategoryName)
+            );
+            console.log("getFilterValues=====>", data);
+            let filterValues = data.data;
+            filterValues = filterValues.map((value) => {
+                const createObj = {
+                    id: value,
+                    name: value,
+                }
+                return createObj
+            })
+            return filterValues
+        }  catch (err) {
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    const getAllFilters = async() => {
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getAllFiltersRequest(subCategoryName)
+            );
+            console.log("getAllFilters=====>", data)
+            let filtersData = data.data;
+
+            for (let filter of filtersData) {
+                const values = await getFilterValues(filter.code);
+                const findIndex = filtersData.findIndex((item) => item.code === filter.code);
+                if(findIndex > -1){
+                    filtersData[findIndex].options = values;
+                    filtersData[findIndex].selectedValues = [];
+                }
+            }
+            let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData = filtersData;
+            setPaginationModel(paginationData);
+        } catch (err) {
+            // dispatch({
+            //     type: toast_actions.ADD_TOAST,
+            //     payload: {
+            //         id: Math.floor(Math.random() * 100),
+            //         type: toast_types.error,
+            //         message: err?.message,
+            //     },
+            // });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getAllProducts();
+        getAllFilters();
+    }, []);
+
+    const handleChangeFilter = (filterIndex, value) => {
+        const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+        data.searchData[filterIndex].selectedValues = value;
         data.page = 0;
         data.pageSize = 10;
         setPaginationModel(data);
@@ -78,7 +161,7 @@ const ProductList = () => {
     return (
         <Grid container spacing={3} className={classes.productContainer}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                <div role="presentation" onClick={handleClick}>
+                <div role="presentation">
                     <Breadcrumbs aria-label="breadcrumb">
                         <MuiLink component={Link} underline="hover" color="inherit" to="/">
                             Home
@@ -117,54 +200,117 @@ const ProductList = () => {
                 </Button>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                <MultiSelctFilter
-                    arrayList={SAREETYPES}
-                    filterName="Saree Type"
-                    title="Saree Type"
-                    filterOn="id"
-                    saveButtonText="Apply"
-                    value={paginationModel.searchData.sareeType}
-                    onChangeFilter={(value) => handleChangeFilter('sareeType', value)}
-                    clearButtonText="Clear"
-                    disabled={false}
-                />
-                <MultiSelctFilter
-                    arrayList={SAREETYPES}
-                    filterName="Brand"
-                    title="Brand"
-                    filterOn="id"
-                    saveButtonText="Apply"
-                    value={paginationModel.searchData.brand}
-                    onChangeFilter={(value) => handleChangeFilter('brand', value)}
-                    clearButtonText="Clear"
-                    disabled={false}
-                />
+                {
+                    paginationModel.searchData && paginationModel.searchData.length > 0 && paginationModel.searchData.map((filter, filterIndex) => {
+                        return (
+                            <MultiSelctFilter
+                                key={`filter-${filter.code}-${filterIndex}`}
+                                arrayList={filter?.options || []}
+                                filterName={filter.code}
+                                title={filter.code}
+                                filterOn="id"
+                                saveButtonText="Apply"
+                                value={filter?.selectedValues || []}
+                                onChangeFilter={(value) => handleChangeFilter(filterIndex, value)}
+                                clearButtonText="Clear"
+                                disabled={false}
+                            />
+                        )
+                    })
+                }
+                {/*<MultiSelctFilter*/}
+                {/*    arrayList={SAREETYPES}*/}
+                {/*    filterName="Saree Type"*/}
+                {/*    title="Saree Type"*/}
+                {/*    filterOn="id"*/}
+                {/*    saveButtonText="Apply"*/}
+                {/*    value={paginationModel.searchData.sareeType}*/}
+                {/*    onChangeFilter={(value) => handleChangeFilter('sareeType', value)}*/}
+                {/*    clearButtonText="Clear"*/}
+                {/*    disabled={false}*/}
+                {/*/>*/}
+                {/*<MultiSelctFilter*/}
+                {/*    arrayList={SAREETYPES}*/}
+                {/*    filterName="Brand"*/}
+                {/*    title="Brand"*/}
+                {/*    filterOn="id"*/}
+                {/*    saveButtonText="Apply"*/}
+                {/*    value={paginationModel.searchData.brand}*/}
+                {/*    onChangeFilter={(value) => handleChangeFilter('brand', value)}*/}
+                {/*    clearButtonText="Clear"*/}
+                {/*    disabled={false}*/}
+                {/*/>*/}
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                 <Grid container spacing={4}>
                     {
-                        Products.map((item, ind) => {
-                            if(viewType === 'list'){
-                                return (
-                                    <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.listViewContainer}>
-                                        <ProductListView
-                                            data={item}
-                                        />
-                                    </Grid>
-                                )
-                            }else{
-                                return (
-                                    <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
-                                        <ProductGridView
-                                            data={item}
-                                        />
-                                    </Grid>
-                                )
-                            }
+                        products.length > 0
+                        ?(
+                            <>
+                                {
+                                    products.map((productItem, ind) => {
+                                        console.log("product SINGLE=====>", productItem)
+                                        if(viewType === 'list'){
+                                            return (
+                                                <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.listViewContainer}>
+                                                    <ProductListView
+                                                        product={productItem?.item_details}
+                                                        price={productItem?.item_details?.price}
+                                                        bpp_provider_descriptor={
+                                                            productItem?.provider_details?.descriptor
+                                                        }
+                                                        bpp_id={productItem?.bpp_details?.bpp_id}
+                                                        location_id={
+                                                            productItem?.location_details
+                                                                ? productItem.location_details?.id
+                                                                : ""
+                                                        }
+                                                        bpp_provider_id={productItem?.provider_details?.id}
+                                                    />
+                                                </Grid>
+                                            )
+                                        }else{
+                                            return (
+                                                <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
+                                                    <ProductGridView
+                                                        product={productItem?.item_details}
+                                                        price={productItem?.item_details?.price}
+                                                        bpp_provider_descriptor={
+                                                            productItem?.provider_details?.descriptor
+                                                        }
+                                                        bpp_id={productItem?.bpp_details?.bpp_id}
+                                                        location_id={
+                                                            productItem?.location_details
+                                                                ? productItem.location_details?.id
+                                                                : ""
+                                                        }
+                                                        bpp_provider_id={productItem?.provider_details?.id}
+                                                    />
+                                                </Grid>
+                                            )
+                                        }
 
-                        })
+                                    })
+                                }
+                            </>
+                        ):<></>
+
                     }
                 </Grid>
+            </Grid>
+            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.paginationContainer}>
+                <Pagination
+                    className={classes.pagination}
+                    count={Math.ceil(totalProductCount/paginationModel.pageSize)}
+                    shape="rounded"
+                    color="primary"
+                    page={paginationModel.page}
+                    onChange={(evant, page) => {
+                        let paginationData = Object.assign({}, paginationModel);
+                        paginationData.page = page;
+                        setPaginationModel(paginationData);
+                    }}
+                />
             </Grid>
         </Grid>
     );

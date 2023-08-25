@@ -50,6 +50,17 @@ const useStyles = makeStyles({
     marginRight10: {
         marginRight: '10px !important'
     },
+    filterName: {
+        textTransform: 'capitalize'
+    },
+    downIcon: {
+        marginLeft: '10px !important',
+        height: '18px !important',
+        width: '18px',
+        "& g path": {
+            fill: '#222222'
+        }
+    }
 });
 
 export default useStyles;
