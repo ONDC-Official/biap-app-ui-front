@@ -107,6 +107,7 @@ const customizations = [
     inStock: true,
     parent: "CG1",
     child: "CG2",
+    isDefault: true,
   },
   {
     id: "C2",
