@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import useStyles from "./styles";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -49,7 +48,7 @@ export default function Cart() {
   const renderTableHeads = () => {
     return (
       <>
-        <Grid container>
+        <Grid container sx={{ paddingTop: "20px" }}>
           <Grid item xs={4.3}>
             <Typography variant="body1" className={classes.tableHead}>
               Item

@@ -86,6 +86,7 @@ const useStyles = makeStyles({
     cursor: "pointer",
   },
   summaryCard: {
+    marginTop: 20,
     width: 470,
     padding: "16px 24px",
     display: "flex",
