@@ -77,7 +77,7 @@ const customizationGroups = [
     id: "CG3",
     name: "Size(Select any 1)",
     inputType: "select",
-    minQuantity: 1,
+    minQuantity: 0,
     maxQuantity: 1,
     seq: 2,
   },
@@ -161,7 +161,6 @@ const customizations = [
     price: 120,
     inStock: true,
     parent: "CG4",
-    isDefault: true,
   },
   {
     id: "C8",
@@ -169,6 +168,7 @@ const customizations = [
     price: 120,
     inStock: true,
     parent: "CG4",
+    isDefault: true,
   },
   {
     id: "C9",
@@ -183,6 +183,14 @@ const customizations = [
     price: 120,
     inStock: true,
     parent: "CG5",
+  },
+  {
+    id: "C111",
+    name: "Cheese",
+    price: 220,
+    inStock: true,
+    parent: "CG5",
+    isDefault: true,
   },
 ];
 
@@ -241,6 +249,11 @@ const ProductDetails = () => {
             options: customizations.filter((c) => c.parent === nextGroup.id),
             selected: [],
           };
+
+          for (let i = level + 2; i <= Object.keys(newState).length; i++) {
+            delete newState[i];
+          }
+
           setCustomizationState(newState); // Set state after rendering options
           return; // Exit loop after rendering options
         }
