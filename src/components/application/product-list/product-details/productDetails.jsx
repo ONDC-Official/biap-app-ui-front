@@ -69,7 +69,7 @@ const customizationGroups = [
     id: "CG2",
     name: "Size(Select any 1)",
     inputType: "select",
-    minQuantity: 1,
+    minQuantity: 0,
     maxQuantity: 1,
     seq: 2,
   },
@@ -93,8 +93,8 @@ const customizationGroups = [
     id: "CG5",
     name: "Toppings(Select any 1)",
     inputType: "select",
-    minQuantity: 1,
-    maxQuantity: 1,
+    minQuantity: 0,
+    maxQuantity: 2,
     seq: 3,
   },
 ];
@@ -107,7 +107,6 @@ const customizations = [
     inStock: true,
     parent: "CG1",
     child: "CG2",
-    isDefault: true,
   },
   {
     id: "C2",
@@ -131,6 +130,7 @@ const customizations = [
     price: 100,
     inStock: true,
     parent: "CG2",
+    isDefault: true,
   },
   {
     id: "C5",
@@ -153,6 +153,7 @@ const customizations = [
     inStock: true,
     parent: "CG3",
     child: "CG5",
+    isDefault: true,
   },
   {
     id: "C7",
@@ -160,6 +161,7 @@ const customizations = [
     price: 120,
     inStock: true,
     parent: "CG4",
+    isDefault: true,
   },
   {
     id: "C8",
@@ -198,34 +200,71 @@ const ProductDetails = () => {
 
   const handleOptionSelect = (selectedOption, level) => {
     const newState = { ...customization_state };
+    console.log("Selected option:", selectedOption);
+    console.log("Selected level:", level);
 
-    // Update the selected option for the current level
-    newState[level].selected = [selectedOption];
+    // Check if the parent's customization group has minQuantity === 0
+    const parentGroup = customizationGroups.find((group) => group.id === selectedOption.parent);
+    const parentAllowsUnselecting = parentGroup && parentGroup.minQuantity === 0;
+
+    // If the option is already selected and unselecting is allowed, deselect it
+    if (
+      (parentAllowsUnselecting && newState[level].selected.includes(selectedOption)) ||
+      !newState[level].selected.includes(selectedOption)
+    ) {
+      if (newState[level].selected.includes(selectedOption)) {
+        newState[level].selected = [];
+        for (let i = level + 1; i <= Object.keys(newState).length; i++) {
+          delete newState[i];
+        }
+        setCustomizationState(newState);
+        return;
+      } else {
+        newState[level].selected = [selectedOption];
+      }
+    }
 
     // Reset subsequent groups' selections
     for (let i = level + 1; i <= Object.keys(newState).length; i++) {
       delete newState[i];
     }
 
-    while (selectedOption.child) {
-      const nextGroup = customizationGroups.find((group) => group.id === selectedOption.child);
+    let currentSelectedOption = selectedOption; // Store the current selectedOption
+    while (currentSelectedOption.child) {
+      const nextGroup = customizationGroups.find((group) => group.id === currentSelectedOption.child);
       if (nextGroup) {
+        // Render options for non-mandatory group, but don't select any option
+        if (nextGroup.minQuantity === 0) {
+          console.log("Rendering options for non-mandatory group...");
+          newState[level + 1] = {
+            name: nextGroup.name,
+            options: customizations.filter((c) => c.parent === nextGroup.id),
+            selected: [],
+          };
+          setCustomizationState(newState); // Set state after rendering options
+          return; // Exit loop after rendering options
+        }
+
         const nextGroupOptions = customizations.filter((customization) => customization.parent === nextGroup.id);
-        const nextSelectedOption = nextGroupOptions.find((opt) => opt.inStock) || nextGroupOptions[0];
+        const nextSelectedOption = nextGroupOptions.find((opt) => opt.isDefault && opt.inStock) || nextGroupOptions[0];
 
         if (nextSelectedOption) {
+          console.log("Selecting next option in the loop...");
           level++;
           newState[level] = { name: nextGroup.name, options: nextGroupOptions, selected: [nextSelectedOption] };
-          selectedOption = nextSelectedOption;
 
           // Reset selections for subsequent groups under the new selection
           for (let i = level + 1; i <= Object.keys(newState).length; i++) {
             delete newState[i];
           }
+
+          currentSelectedOption = nextSelectedOption; // Update the current selectedOption
         } else {
+          console.log("No available option, breaking the loop...");
           break;
         }
       } else {
+        console.log("No next group found, breaking the loop...");
         break;
       }
     }
@@ -245,14 +284,24 @@ const ProductDetails = () => {
           newState[level] = { name: groupOptions.name, options: [], selected: [] };
           newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
 
-          const selectedCustomization = newState[level].options.find((opt) => opt.inStock);
+          // Skip selecting an option for non-mandatory groups (minQuantity === 0)
+          if (groupOptions.minQuantity === 1) {
+            const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
 
-          if (selectedCustomization) {
-            newState[level].selected = [selectedCustomization];
-            currentGroup = selectedCustomization.child;
-            level++;
-          } else {
-            currentGroup = null;
+            // If no default option, select the first available option
+            if (!selectedCustomization) {
+              newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
+            } else {
+              newState[level].selected = [selectedCustomization];
+            }
+          }
+
+          currentGroup = newState[level].selected[0]?.child || null;
+          level++;
+
+          // If a non-mandatory group is encountered, break the loop
+          if (groupOptions.minQuantity === 0) {
+            break;
           }
         } else {
           currentGroup = null;
@@ -268,7 +317,6 @@ const ProductDetails = () => {
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
-      console.log("cg", cg);
       return (
         <>
           <>
