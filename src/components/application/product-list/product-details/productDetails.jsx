@@ -86,7 +86,7 @@ const customizationGroups = [
     name: "Toppings(Select any 1)",
     inputType: "select",
     minQuantity: 1,
-    maxQuantity: 1,
+    maxQuantity: 2,
     seq: 3,
   },
   {
@@ -147,7 +147,7 @@ const customizations = [
     parent: "CG3",
   },
   {
-    id: "C609",
+    id: "C10",
     name: "Extra Large",
     price: 120,
     inStock: true,
@@ -178,14 +178,14 @@ const customizations = [
     parent: "CG4",
   },
   {
-    id: "C999",
+    id: "C11",
     name: "Onion",
     price: 120,
     inStock: true,
     parent: "CG5",
   },
   {
-    id: "C111",
+    id: "C12",
     name: "Cheese",
     price: 220,
     inStock: true,
@@ -198,6 +198,7 @@ const ProductDetails = () => {
   const classes = useStyles();
   const [activeImage, setActiveImage] = useState(moreImages[0]);
   const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
+  const [highestSeq, setHighestSeq] = useState(0);
   const [customization_state, setCustomizationState] = useState({
     1: { options: [], selected: [] },
   });
@@ -208,15 +209,26 @@ const ProductDetails = () => {
 
   const handleOptionSelect = (selectedOption, level) => {
     const newState = { ...customization_state };
-    console.log("Selected option:", selectedOption);
-    console.log("Selected level:", level);
 
     // Check if the parent's customization group has minQuantity === 0
     const parentGroup = customizationGroups.find((group) => group.id === selectedOption.parent);
     const parentAllowsUnselecting = parentGroup && parentGroup.minQuantity === 0;
 
+    if (parentGroup.seq === highestSeq) {
+      if (
+        newState[level].selected.length < parentGroup.maxQuantity &&
+        !newState[level].selected.includes(selectedOption)
+      ) {
+        newState[level].selected = [...newState[level].selected, selectedOption];
+      } else {
+        newState[level].selected = newState[level].selected.filter((item) => item.id !== selectedOption.id);
+        setCustomizationState(newState);
+        return;
+      }
+    }
+
     // If the option is already selected and unselecting is allowed, deselect it
-    if (
+    else if (
       (parentAllowsUnselecting && newState[level].selected.includes(selectedOption)) ||
       !newState[level].selected.includes(selectedOption)
     ) {
@@ -243,7 +255,6 @@ const ProductDetails = () => {
       if (nextGroup) {
         // Render options for non-mandatory group, but don't select any option
         if (nextGroup.minQuantity === 0) {
-          console.log("Rendering options for non-mandatory group...");
           newState[level + 1] = {
             name: nextGroup.name,
             options: customizations.filter((c) => c.parent === nextGroup.id),
@@ -262,7 +273,6 @@ const ProductDetails = () => {
         const nextSelectedOption = nextGroupOptions.find((opt) => opt.isDefault && opt.inStock) || nextGroupOptions[0];
 
         if (nextSelectedOption) {
-          console.log("Selecting next option in the loop...");
           level++;
           newState[level] = { name: nextGroup.name, options: nextGroupOptions, selected: [nextSelectedOption] };
 
@@ -273,11 +283,9 @@ const ProductDetails = () => {
 
           currentSelectedOption = nextSelectedOption; // Update the current selectedOption
         } else {
-          console.log("No available option, breaking the loop...");
           break;
         }
       } else {
-        console.log("No next group found, breaking the loop...");
         break;
       }
     }
@@ -324,6 +332,7 @@ const ProductDetails = () => {
       setCustomizationState(newState);
     };
 
+    setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
     initializeCustomizationState();
   }, []);
 
