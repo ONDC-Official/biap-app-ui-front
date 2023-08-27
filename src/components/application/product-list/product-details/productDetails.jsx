@@ -19,6 +19,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const moreImages = [
   "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
@@ -219,6 +220,8 @@ const ProductDetails = () => {
         newState[level].selected.length < parentGroup.maxQuantity &&
         !newState[level].selected.includes(selectedOption)
       ) {
+        newState[level].id = parentGroup.id;
+        newState[level].seq = parentGroup.seq;
         newState[level].selected = [...newState[level].selected, selectedOption];
       } else {
         newState[level].selected = newState[level].selected.filter((item) => item.id !== selectedOption.id);
@@ -240,6 +243,8 @@ const ProductDetails = () => {
         setCustomizationState(newState);
         return;
       } else {
+        newState[level].id = parentGroup.id;
+        newState[level].seq = parentGroup.seq;
         newState[level].selected = [selectedOption];
       }
     }
@@ -256,6 +261,8 @@ const ProductDetails = () => {
         // Render options for non-mandatory group, but don't select any option
         if (nextGroup.minQuantity === 0) {
           newState[level + 1] = {
+            id: nextGroup.id,
+            seq: nextGroup.seq,
             name: nextGroup.name,
             options: customizations.filter((c) => c.parent === nextGroup.id),
             selected: [],
@@ -274,7 +281,12 @@ const ProductDetails = () => {
 
         if (nextSelectedOption) {
           level++;
-          newState[level] = { name: nextGroup.name, options: nextGroupOptions, selected: [nextSelectedOption] };
+          newState[level] = {
+            id: nextGroup.id,
+            name: nextGroup.name,
+            options: nextGroupOptions,
+            selected: [nextSelectedOption],
+          };
 
           // Reset selections for subsequent groups under the new selection
           for (let i = level + 1; i <= Object.keys(newState).length; i++) {
@@ -300,13 +312,19 @@ const ProductDetails = () => {
       const newState = { ...customization_state };
 
       while (currentGroup) {
-        const groupOptions = customizationGroups.find((group) => group.id === currentGroup);
-        if (groupOptions) {
-          newState[level] = { name: groupOptions.name, options: [], selected: [] };
+        const group = customizationGroups.find((group) => group.id === currentGroup);
+        if (group) {
+          newState[level] = {
+            id: group.id,
+            seq: group.seq,
+            name: group.name,
+            options: [],
+            selected: [],
+          };
           newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
 
           // Skip selecting an option for non-mandatory groups (minQuantity === 0)
-          if (groupOptions.minQuantity === 1) {
+          if (group.minQuantity === 1) {
             const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
 
             // If no default option, select the first available option
@@ -321,7 +339,7 @@ const ProductDetails = () => {
           level++;
 
           // If a non-mandatory group is encountered, break the loop
-          if (groupOptions.minQuantity === 0) {
+          if (group.minQuantity === 0) {
             break;
           }
         } else {
@@ -339,6 +357,8 @@ const ProductDetails = () => {
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
+
+      // console.log(cg.selected.includes(c));
       return (
         <>
           <>
@@ -352,6 +372,9 @@ const ProductDetails = () => {
                     className={cg.selected.includes(c) ? classes.selectedCustomization : classes.customization}
                     onClick={() => handleOptionSelect(c, parseInt(level))}
                   >
+                    {cg.seq == highestSeq && cg.selected.includes(c) && (
+                      <CloseIcon fontSize="small" className={classes.cross} />
+                    )}
                     <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
                       {c.name}
                     </Typography>
