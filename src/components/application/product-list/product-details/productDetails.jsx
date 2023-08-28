@@ -10,6 +10,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { getCall } from "../../../../api/axios";
+import { getValueFromCookie } from "../../../../utils/cookies";
 
 const moreImages = [
   "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
@@ -52,6 +53,7 @@ const ProductDetails = () => {
   const location = useLocation();
   const { cancellablePromise } = useCancellablePromise();
 
+  const [productPayload, setProductPayload] = useState({});
   const [productDetails, setProductDetails] = useState({});
   const [isInitialized, setIsInitialized] = useState(false);
   const [customizationGroups, setCustomizationGroups] = useState([]);
@@ -208,11 +210,36 @@ const ProductDetails = () => {
     const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
     const { item_details, customisation_groups, customisation_items } = data.response;
 
+    setProductPayload(data.response);
     setProductDetails(item_details);
     setActiveImage(item_details?.descriptor?.images[0]);
 
     setCustomizationGroups(formatCustomizationGroups(customisation_groups));
     setCustomizations(formatCustomizations(customisation_items));
+  };
+
+  const addToCart = () => {
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}`;
+    const payload = {
+      id: productPayload.id,
+      bpp_id: productPayload.bpp_details.bpp_id,
+      // bpp_uri: "https://preprod-slurrpfarm-bpp.shopalyst.com/slurrpfarm",
+      quantity: {
+        count: 1,
+      },
+      provider: {
+        id: productPayload.bpp_details.bpp_id,
+        //   locations: ["da535769edeed27819b69a35f3066b62"],
+      },
+      product: {
+        id: productPayload.id,
+        ...productPayload.item_details,
+      },
+    };
+
+    console.log("Add to cart payload", payload);
+    console.log("product payload", productPayload);
   };
 
   //   fetch product details
@@ -440,7 +467,11 @@ const ProductDetails = () => {
             {renderCustomizations()}
 
             <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
-              <Button variant="contained" sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}>
+              <Button
+                variant="contained"
+                sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
+                onClick={addToCart}
+              >
                 Add to cart
               </Button>
               <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
