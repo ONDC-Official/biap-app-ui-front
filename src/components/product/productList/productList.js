@@ -64,7 +64,7 @@ const ProductList = () => {
     const [totalProductCount, setTotalProductCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
-        page: 0,
+        page: 1,
         pageSize: 10,
         searchData: []
     });
@@ -283,12 +283,12 @@ const ProductList = () => {
                             <>
                                 {
                                     products.map((productItem, ind) => {
-                                        console.log("product SINGLE=====>", productItem)
                                         if(viewType === 'list'){
                                             return (
                                                 <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.listViewContainer}>
                                                     <ProductListView
                                                         product={productItem?.item_details}
+                                                        productId={productItem.id}
                                                         price={productItem?.item_details?.price}
                                                         bpp_provider_descriptor={
                                                             productItem?.provider_details?.descriptor
@@ -308,6 +308,7 @@ const ProductList = () => {
                                                 <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
                                                     <ProductGridView
                                                         product={productItem?.item_details}
+                                                        productId={productItem.id}
                                                         price={productItem?.item_details?.price}
                                                         bpp_provider_descriptor={
                                                             productItem?.provider_details?.descriptor

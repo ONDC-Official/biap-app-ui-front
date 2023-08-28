@@ -15,6 +15,7 @@ const ProductGridView = (props) => {
     const history = useHistory();
     const {
         product,
+        productId,
         price,
         bpp_id,
         location_id,
@@ -30,7 +31,7 @@ const ProductGridView = (props) => {
     return (
         <div
             className={classes.productItemContainer}
-            onClick={() => history.push(`/application/products/${id}`)}
+            onClick={() => history.push(`/application/products/${productId}`)}
         >
             <Card className={classes.productCard}>
                 <img className={classes.productImage} src={images?.length > 0 ? images[0] : no_image_found} alt={`sub-cat-img-${bpp_id}`}/>

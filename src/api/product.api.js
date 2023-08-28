@@ -5,7 +5,7 @@ import { getCall } from "./axios";
  * @returns
  */
 export const getAllProductRequest = (data) => {
-    const pageNumber = data.page+1;
+    const pageNumber = data.page;
     const limit = data.pageSize;
     const productName = data?.searchData?.productName || "";
     const subCategoryName = data?.searchData?.subCategoryName || "";

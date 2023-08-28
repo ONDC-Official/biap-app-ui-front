@@ -14,6 +14,7 @@ const ProductListView = (props) => {
     const classes = useStyles();
     const {
         product,
+        productId,
         price,
         bpp_id,
         location_id,
@@ -51,7 +52,7 @@ const ProductListView = (props) => {
                 <div className={classes.footerActions}>
                     <MuiLink
                         component={Link}
-                        to={`/application/products/${id}`}
+                        to={`/application/products/${productId}`}
                     >
                         View details
                     </MuiLink>
