@@ -150,6 +150,22 @@ const useStyles = makeStyles({
     fontSize: "12px !important",
     color: "#CCCCCC",
   },
+  square: {
+    backgroundColor: "transparent",
+    border: "1px solid #008001",
+    width: 18,
+    height: 19,
+    marginRight: 6,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circle: {
+    backgroundColor: "#008001",
+    borderRadius: "50%",
+    height: "10px",
+    width: "10px",
+  },
 });
 
 export default useStyles;

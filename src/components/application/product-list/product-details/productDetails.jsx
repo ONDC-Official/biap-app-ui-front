@@ -222,10 +222,11 @@ const ProductDetails = () => {
   const addToCart = () => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
+
     const payload = {
       id: productPayload.id,
       bpp_id: productPayload.bpp_details.bpp_id,
-      // bpp_uri: "https://preprod-slurrpfarm-bpp.shopalyst.com/slurrpfarm",
+      bpp_uri: productPayload.context.bpp_uri,
       quantity: {
         count: 1,
       },
@@ -303,6 +304,41 @@ const ProductDetails = () => {
       setIsInitialized(true);
     }
   }, [customizationGroups, customizations, isInitialized]);
+
+  const renderVegNonVegTag = () => {
+    const category = "veg";
+
+    const getTagColor = () => {
+      if (category === "veg") {
+        return "#008001";
+      } else if (category == "nonVeg") {
+        return "red";
+      } else {
+        return "red";
+      }
+    };
+
+    const getTextColor = () => {
+      if (category === "veg") {
+        return "#419E6A";
+      } else if (category == "nonVeg") {
+        return "red";
+      } else {
+        return "red";
+      }
+    };
+
+    return (
+      <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
+        <div className={classes.square} style={{ borderColor: getTagColor() }}>
+          <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+        </div>
+        <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
+          Veg
+        </Typography>
+      </Grid>
+    );
+  };
 
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
@@ -382,7 +418,8 @@ const ProductDetails = () => {
         </Grid>
         <Grid item xs={5}>
           <Card className={classes.productCard}>
-            {true ? (
+            {renderVegNonVegTag()}
+            {/* {true ? (
               <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
                 <DoneIcon color="success" fontSize="small" /> In stock
               </Typography>
@@ -393,7 +430,7 @@ const ProductDetails = () => {
                   Out of Stock
                 </Typography>
               </Grid>
-            )}
+            )} */}
             <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
               {productDetails?.descriptor?.name}
             </Typography>
