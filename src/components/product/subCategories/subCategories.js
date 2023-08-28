@@ -146,17 +146,6 @@ const CategoriesComponent = () => {
                         }
                     }}
                 />
-                {/*<div className={classes.categoriesContainer}>*/}
-                {/*    {*/}
-                {/*        subCatList.map((subCat, index) => (*/}
-                {/*            <SingleCategory*/}
-                {/*                key={`single-category-${index}`}*/}
-                {/*                data={subCat}*/}
-                {/*                index={index}*/}
-                {/*            />*/}
-                {/*        ))*/}
-                {/*    }*/}
-                {/*</div>*/}
             </Grid>
             <Grid item xs={12} sm={12} md={1.5} lg={1.5} xl={1.5}></Grid>
         </Grid>
