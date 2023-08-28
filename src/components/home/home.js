@@ -39,7 +39,7 @@ const Home = () => {
 
     const updateQueryParams = (catName) => {
         if(lodationData.search === "" && query.get("c") === null){
-            history.push(`products?c=${catName}`)
+            history.push(`/application/products?c=${catName}`)
         }else{
 
         }
@@ -100,7 +100,7 @@ const Home = () => {
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{height: '100%'}}>
-                                    <Card className={classes.foodCategory} onClick={() => updateQueryParams(`F&B`)}>
+                                    <Card className={classes.foodCategory} onClick={() => updateQueryParams(`FNB`)}>
                                         <div className={classes.foodImages}>
                                             <img src={Food} alt="Food 1"/>
                                         </div>

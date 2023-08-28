@@ -16,7 +16,7 @@ const SingleCategory = ({data, index}) => {
     let query = useQuery();
     const categoryName = query.get("c");
     const updateSearchParams = () => {
-        const params = new URLSearchParams({['c']: data.routeName });
+        const params = new URLSearchParams({['c']: `${data.routeName}` });
         history.replace({ pathname: lodationData.pathname, search: params.toString() })
     };
     return (

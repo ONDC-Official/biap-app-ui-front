@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 import { AddressContextProvider } from "../../context/addressContext";
 import { CartContextProvider } from "../../context/cartContext";
+import { SearchContextProvider } from "../../context/searchContext";
 import PrivateRoute from "../../privateRoutes";
 import Cart from "./cart/cart";
 import Checkout from "./checkout/checkout";
@@ -22,42 +23,44 @@ export default function Application() {
     <CartContextProvider>
       <Switch>
         <AddressContextProvider>
-          <Route path={"/application"} exact component={() => <Redirect to={"/application/products"} />} />
-          <PrivateRoute exact path={"/application/products"}>
-            <AppLayout>
-              <Products />
-            </AppLayout>
-          </PrivateRoute>
+          <SearchContextProvider>
+            <Route path={"/application"} exact component={() => <Redirect to={"/application/products"} />} />
+            <PrivateRoute exact path={"/application/products"}>
+              <AppLayout>
+                <Products />
+              </AppLayout>
+            </PrivateRoute>
 
-          <PrivateRoute path={"/application/products/:id"}>
-            <AppLayout>
-              <ProductDetails />
-            </AppLayout>
-          </PrivateRoute>
-          <PrivateRoute path={"/application/cart"}>
-            <AppLayout>
-              <Cart />
-            </AppLayout>
-          </PrivateRoute>
+            <PrivateRoute path={"/application/products/:id"}>
+              <AppLayout>
+                <ProductDetails />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute path={"/application/cart"}>
+              <AppLayout>
+                <Cart />
+              </AppLayout>
+            </PrivateRoute>
 
-          {/*<PrivateRoute path={"/application/orders"}>*/}
-          {/*  <Orders />*/}
-          {/*</PrivateRoute>*/}
-          {/*<PrivateRoute path={"/application/tickets"}>*/}
-          {/*  <MyTickets />*/}
-          {/*</PrivateRoute>*/}
-          {/*<PrivateRoute path={"/application/profile"}>*/}
-          {/*  <Profile />*/}
-          {/*</PrivateRoute>*/}
-          {/*<PrivateRoute path={"/application/support"}>*/}
-          {/*  <Support />*/}
-          {/*</PrivateRoute>*/}
-          {/*<PrivateRoute path={"/application/initialize"}>*/}
-          {/*  <InitializeOrder />*/}
-          {/*</PrivateRoute>*/}
-          {/*<PrivateRoute path={"/application/checkout"}>*/}
-          {/*  <Checkout />*/}
-          {/*</PrivateRoute>*/}
+            {/*<PrivateRoute path={"/application/orders"}>*/}
+            {/*  <Orders />*/}
+            {/*</PrivateRoute>*/}
+            {/*<PrivateRoute path={"/application/tickets"}>*/}
+            {/*  <MyTickets />*/}
+            {/*</PrivateRoute>*/}
+            {/*<PrivateRoute path={"/application/profile"}>*/}
+            {/*  <Profile />*/}
+            {/*</PrivateRoute>*/}
+            {/*<PrivateRoute path={"/application/support"}>*/}
+            {/*  <Support />*/}
+            {/*</PrivateRoute>*/}
+            {/*<PrivateRoute path={"/application/initialize"}>*/}
+            {/*  <InitializeOrder />*/}
+            {/*</PrivateRoute>*/}
+            {/*<PrivateRoute path={"/application/checkout"}>*/}
+            {/*  <Checkout />*/}
+            {/*</PrivateRoute>*/}
+          </SearchContextProvider>
         </AddressContextProvider>
       </Switch>
     </CartContextProvider>

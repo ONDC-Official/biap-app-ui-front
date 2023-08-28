@@ -18,9 +18,9 @@ const SingleSubCategory = ({data}) => {
     const categoryName = query.get("c");
     const updateQueryParams = () => {
         if(lodationData.search === "" && query.get("c") === null){
-            history.push(`products?sc=${data.value}`)
+            history.push(`/application/products?sc=${data.value}`)
         }else{
-            history.push(`products?c=${categoryName}&sc=${data.value}`)
+            history.push(`/application/products?c=${categoryName}&sc=${data.value}`)
         }
     };
 
