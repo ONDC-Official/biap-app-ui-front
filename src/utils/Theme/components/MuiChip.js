@@ -22,6 +22,9 @@ const MuiChip = {
         outlinedError: {
             backgroundColor: palette.error.light
         },
+        label: {
+            padding: '0px 3px !important'
+        },
         deleteIcon: {
             "& g path": {
                 fill: '#222222'

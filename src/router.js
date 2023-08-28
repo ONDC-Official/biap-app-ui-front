@@ -22,6 +22,7 @@ export default function OndcRoutes() {
         <Route path={"/"} exact component={() => <AppLayout><Home /></AppLayout>} />
         <Route path={"/category/:categoryName"} exact component={() => <AppLayout><Category /></AppLayout>} />
         <Route path={"/category/:categoryName/:subCategoryName"} exact component={() => <AppLayout><SubCategory /></AppLayout>} />
+        <Route path={"/products"} exact component={() => <AppLayout><SubCategory /></AppLayout>} />
         {/*<Route path={"/"} exact component={() => <Redirect to={"/login"} />} />*/}
         <Route path={"/login"} component={Login} />
         <Route path={"/sign-up"} component={SignUp} />

@@ -8,49 +8,45 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import MuiLink from "@mui/material/Link";
 
+import no_image_found from "../../../assets/images/no_image_found.png";
 
-const ProductListView = ({data, index}) => {
-    let { categoryName } = useParams();
+const ProductListView = (props) => {
     const classes = useStyles();
+    const {
+        product,
+        price,
+        bpp_id,
+        location_id,
+        bpp_provider_id,
+        bpp_provider_descriptor,
+        show_quantity_button = true,
+        onUpdateCart = () => { },
+    } = props;
+    const { id, descriptor, provider_details } = product;
+    const { name: provider_name } = bpp_provider_descriptor;
+    const { name: product_name, images, short_desc: product_description } = descriptor;
 
     return (
-        // <div className={classes.productItemContainerList}>
-        //     <Card className={classes.productCardList}>
-        //         <img className={classes.productImage} src={data.imgUrl} alt={`sub-cat-img-${data.id}`}/>
-        //     </Card>
-        //     <Typography component="div" variant="body" className={classes.productNameTypo}>
-        //         {data.name}
-        //     </Typography>
-        //     <Typography variant="body1" className={classes.providerTypo}>
-        //         {data.provider}
-        //     </Typography>
-        //     <Box
-        //         component={"div"}
-        //         className={classes.divider}
-        //     />
-        //     <Typography variant="h5" className={classes.priceTypo}>
-        //         {`₹${data.price}`}
-        //     </Typography>
-        // </div>
         <Grid container spacing={0} className={classes.productItemContainerList}>
             <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
                 <Card className={classes.productCardList}>
-                    <img className={classes.productImage} src={data.imgUrl} alt={`sub-cat-img-${data.id}`}/>
+                        <img className={classes.productImage} src={images?.length > 0 ? images[0] : no_image_found} alt={`sub-cat-img-${bpp_id}`}/>
                 </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5} className={classes.productDetailsTypo}>
                 <Typography component="div" variant="h5" className={classes.productNameTypoList}>
-                    {data.name}
+                    {product_name}
                 </Typography>
                 <Typography variant="body1" className={classes.providerTypoList}>
-                    {data.provider}
+                    {provider_name}
                 </Typography>
                 <Typography variant="h4" className={classes.priceTypoList}>
-                    {`₹${data.price}`}
+                    {`₹${Number.isInteger(Number(price?.value))
+                        ? Number(price?.value).toFixed(2)
+                        : Number(price?.value).toFixed(2)}`}
                 </Typography>
                 <Typography component="div" variant="body" className={classes.descriptionTypoList}>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                    tempor incididunt ut labore et dolore magna aliqua
+                    {product_description}
                 </Typography>
                 <div className={classes.footerActions}>
                     <MuiLink

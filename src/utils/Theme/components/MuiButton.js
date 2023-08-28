@@ -40,6 +40,13 @@ const MuiButton = {
             color: palette.primary.main,
             '& svg path': {
                 stroke: palette.primary.main,
+            },
+            '&:hover': {
+                backgroundColor: palette.primary.main,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         containedPrimary: {
@@ -55,6 +62,13 @@ const MuiButton = {
             color: palette.secondary.main,
             '& svg path': {
                 stroke: palette.secondary.main,
+            },
+            '&:hover': {
+                backgroundColor: palette.secondary.main,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         containedSecondary: {
@@ -70,6 +84,13 @@ const MuiButton = {
             color: palette.success.main,
             '& svg path': {
                 stroke: palette.success.main,
+            },
+            '&:hover': {
+                backgroundColor: palette.success.main,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         containedSuccess: {
@@ -85,6 +106,13 @@ const MuiButton = {
             color: palette.error.main,
             '& svg path': {
                 stroke: palette.secondary.main,
+            },
+            '&:hover': {
+                backgroundColor: palette.error.main,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         containedError: {
@@ -100,6 +128,13 @@ const MuiButton = {
             color: palette.warning.main,
             '& svg path': {
                 stroke: palette.warning.main,
+            },
+            '&:hover': {
+                backgroundColor: palette.warning.main,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         containedWarning: {
@@ -132,27 +167,27 @@ const MuiButton = {
             minWidth: '32px',
             borderRadius: '8px',
             padding: '6px 12px',
-            '&:hover': {
-                backgroundColor: '#0A487A'
-            }
+            // '&:hover': {
+            //     backgroundColor: '#0A487A'
+            // }
         },
         sizeMedium: {
             height: '44px',
             minWidth: '44px',
             borderRadius: '8px',
             padding: '10px 16px',
-            '&:hover': {
-                backgroundColor: '#0A487A'
-            }
+            // '&:hover': {
+            //     backgroundColor: '#0A487A'
+            // }
         },
         sizeLarge: {
             height: '56px',
             minWidth: '56px',
             borderRadius: '8px',
             padding: '16px',
-            '&:hover': {
-                backgroundColor: '#0A487A'
-            }
+            // '&:hover': {
+            //     backgroundColor: '#0A487A'
+            // }
         },
     }
 };

@@ -68,7 +68,7 @@ const useStyles = makeStyles({
         boxShadow: "none !important",
         background: '#F5F5F5 !important',
         display: 'flex',
-        // height: '302px !important',
+        minHeight: '250px !important',
         // width: '314px !important',
         borderRadius: '12px 0px 0px 12px !important'
     },
@@ -102,6 +102,17 @@ const useStyles = makeStyles({
         float: 'right',
         marginLeft: '8px !important',
         width: '195px'
+    },
+
+    paginationContainer: {
+        marginTop: '24px !important',
+        marginBottom: '24px !important',
+    },
+    pagination: {
+        '& ul': {
+            justifyContent: 'center !important'
+        }
+
     }
 });
 

@@ -21,6 +21,7 @@ const SelectAddress = ({
     const classes = useStyles();
     const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
 
+    console.log("deliveryAddress=====>", deliveryAddress)
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
@@ -78,7 +79,7 @@ const SelectAddress = ({
             {
                 addresses && addresses.length > 0 && (
                     <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                        <FormControl>
+                        <FormControl className={classes.formControlRoot}>
                             {
                                 addresses
                                     .filter(
@@ -111,7 +112,7 @@ const SelectAddress = ({
                                                 control={<Radio checked={deliveryAddress?.id === id} />}
                                                 label={
                                                     <div>
-                                                        <Typography variant="h4">
+                                                        <Typography variant="h5">
                                                             {`${address.tag
                                                                 ? address.tag + " (" + descriptor?.name + ")"
                                                                 : descriptor?.name
@@ -131,6 +132,7 @@ const SelectAddress = ({
                                                 }
                                             />
                                             <Button
+                                                className={classes.editAddressButton}
                                                 variant="text" color="secondary"
                                                 onClick={(e) => {
                                                     e.preventDefault();
