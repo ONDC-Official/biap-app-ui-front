@@ -100,7 +100,7 @@ const Home = () => {
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{height: '100%'}}>
-                                    <Card className={classes.foodCategory} onClick={() => updateQueryParams(`FNB`)}>
+                                    <Card className={classes.foodCategory} onClick={() => updateQueryParams(`F And B`)}>
                                         <div className={classes.foodImages}>
                                             <img src={Food} alt="Food 1"/>
                                         </div>
@@ -110,7 +110,7 @@ const Home = () => {
                                     </Card>
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{height: '100%'}}>
-                                    <Card className={classes.healthCategory} onClick={() => updateQueryParams(`Health & Wellness`)}>
+                                    <Card className={classes.healthCategory} onClick={() => updateQueryParams(`Health And Wellness`)}>
                                         <div className={classes.healthImages}>
                                             <img src={Health1} alt="Health 1"/>
                                             <img className={classes.healthImage2} src={Health2} alt="Health 2"/>
@@ -127,7 +127,7 @@ const Home = () => {
                 <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                            <Card className={classes.homeCategory} onClick={() => updateQueryParams(`Home & Decor`)}>
+                            <Card className={classes.homeCategory} onClick={() => updateQueryParams(`Home And Decor`)}>
                                 <div className={classes.homeImages}>
                                     <img src={Home1} alt="Home 1"/>
                                     <img className={classes.homeImage2} src={Home2} alt="Home 2"/>
@@ -138,7 +138,7 @@ const Home = () => {
                             </Card>
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                            <Card className={classes.bpcCategory} onClick={() => updateQueryParams(`Beauty & Personal Care`)}>
+                            <Card className={classes.bpcCategory} onClick={() => updateQueryParams(`BPC`)}>
                                 <Grid container spacing={0}>
                                     <Grid item xs={12} sm={12} md={6} lg={6} xl={6} className={classes.bpcImages}>
                                         <img className={classes.bpcImage} src={BPC} alt="BPC 1"/>

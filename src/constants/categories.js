@@ -10,9 +10,9 @@ export const categoryList = [
     {id: '1', name: 'Fashion', shortName: 'Fashion', imageUrl: Fashion, routeName: 'Fashion'},
     {id: '2', name: 'Grocery', shortName: 'Grocery', imageUrl: Grocery, routeName: 'Grocery'},
     {id: '3', name: 'Electronics', shortName: 'Electronics', imageUrl: Electronics, routeName: 'Electronics'},
-    {id: '4', name: 'Food & Beverage', shortName: 'F&B', imageUrl: Food, routeName: 'FNB'},
-    {id: '5', name: 'Home & Decor', shortName: 'Home & Decor', imageUrl: Home, routeName: 'Home & Decor'},
-    {id: '6', name: 'Health & Wellness', shortName: 'Health & Wellness', imageUrl: Health, routeName: 'Health & Wellness'},
+    {id: '4', name: 'Food & Beverage', shortName: 'F&B', imageUrl: Food, routeName: 'F And B'},
+    {id: '5', name: 'Home & Decor', shortName: 'Home & Decor', imageUrl: Home, routeName: 'Home And Decor'},
+    {id: '6', name: 'Health & Wellness', shortName: 'Health & Wellness', imageUrl: Health, routeName: 'Health And Wellness'},
     {id: '7', name: 'Beauty & Personal Care', shortName: 'BPC', imageUrl: BPC, routeName: 'BPC'},
 ];
 
@@ -34,7 +34,7 @@ export const PRODUCT_SUBCATEGORY = {
         {value: 'Pet Care', key: 'Pet Care', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Grocery},
         {value: 'Stationery', key: 'Stationery', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Grocery},
     ],
-    "Beauty & Personal Care": [
+    "BPC": [
         {value: "Bath & Body", key: "Bath & Body", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: BPC},
         {value: "Feminine Care", key: "Feminine Care", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: BPC},
         {value: "Fragrance", key: "Fragrance", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: BPC},
@@ -83,7 +83,7 @@ export const PRODUCT_SUBCATEGORY = {
         {value: "Kid's Eyewear", key: "Kid's Eyewear", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Fashion},
         {value: "kids Kid's Bags & Luggage", key: "Kid's Bags & Luggage", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Fashion},
     ],
-    "Home & Decor": [
+    "Home And Decor": [
         {value: 'Home Decor', key: 'Home Decor', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
         {value: 'Home Furnishings', key: 'Home Furnishings', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
         {value: 'Furniture', key: 'Furniture', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
@@ -92,7 +92,7 @@ export const PRODUCT_SUBCATEGORY = {
         {value: 'Cookware and Dining', key: 'Cookware and Dining', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
         {value: 'Storage and Organisation', key: 'Storage and Organisation', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
     ],
-    "FNB": [
+    "F And B": [
         {value: 'Baklava', key: 'Baklava', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},
         {value: 'Bao', key: 'Bao', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},
         {value: 'Barbecue', key: 'Barbecue', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},
@@ -192,7 +192,7 @@ export const PRODUCT_SUBCATEGORY = {
         {value: "Water Purifiers and Coolers", key: "Water Purifiers and Coolers", protocolKey: "", imageUrl: Electronics},
         {value: "Inverter & Stabilizer", key: "Inverter & Stabilizer", protocolKey: "", imageUrl: Electronics}
     ],
-    "Health & Wellness": [
+    "Health And Wellness": [
         {key: "Pain Relief", value: "Pain Relief", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
         {key: "Nutrition and Fitness Supplements", value: "Nutrition and Fitness Supplements", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
         {key: "Personal Care", value: "Personal Care", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
