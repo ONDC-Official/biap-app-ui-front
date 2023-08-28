@@ -16,6 +16,14 @@ export default function Cart() {
   let user = JSON.parse(getValueFromCookie("user"));
   const [cartItems, setCartItems] = useState([]);
 
+  const getCartSubtotal = () => {
+    let subtotal = 0;
+    cartItems.map((cartItem) => {
+      subtotal += cartItem.item.product.subtotal;
+    });
+    return subtotal;
+  };
+
   const getCartItems = async () => {
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
@@ -29,6 +37,7 @@ export default function Cart() {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     getCartItems();
   }, []);
 
@@ -86,12 +95,7 @@ export default function Cart() {
       return (
         <>
           <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
-          <Grid
-            container
-            key={cartItem.item.id}
-            className={classes.emptyCartScreen}
-            style={{ alignItems: "flex-start" }}
-          >
+          <Grid container key={cartItem.item.id} style={{ alignItems: "flex-start" }}>
             <Grid item xs={4.3}>
               <Grid container>
                 <div className={classes.moreImages}>
@@ -134,7 +138,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                ₹{parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.price.value)}
+                ₹{parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.subtotal)}
               </Typography>
             </Grid>
             <Grid item xs={4}>
@@ -176,7 +180,7 @@ export default function Cart() {
             Subtotal
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹4,300.00
+            ₹{getCartSubtotal()}
           </Typography>
         </Grid>
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
@@ -189,7 +193,7 @@ export default function Cart() {
             </Typography>
           </Grid>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹21.00
+            ₹0
           </Typography>
         </Grid>
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
@@ -197,7 +201,7 @@ export default function Cart() {
             Tax
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹1.91
+            ₹0
           </Typography>
         </Grid>
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
@@ -205,7 +209,7 @@ export default function Cart() {
             GST (10%)
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹1.91
+            ₹0
           </Typography>
         </Grid>
         <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
@@ -214,7 +218,7 @@ export default function Cart() {
             Order Total
           </Typography>
           <Typography variant="subtitle1" sx={{ fontSize: 18, fontWeight: 600 }}>
-            ₹4,324
+            ₹{getCartSubtotal()}
           </Typography>
         </Grid>
 
@@ -239,7 +243,9 @@ export default function Cart() {
         <Grid container className={classes.cartContainer}>
           <Grid item xs={8}>
             {renderTableHeads()}
-            {renderProducts()}
+            <div style={{ height: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+              {renderProducts()}
+            </div>
           </Grid>
 
           <Grid item xs={4}>

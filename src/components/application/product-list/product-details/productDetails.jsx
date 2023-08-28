@@ -64,7 +64,7 @@ const ProductDetails = () => {
     1: { options: [], selected: [] },
   });
 
-  const [activeImage, setActiveImage] = useState(moreImages[0]);
+  const [activeImage, setActiveImage] = useState("");
   const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
 
   const handleImageClick = (imageUrl) => {
@@ -219,10 +219,23 @@ const ProductDetails = () => {
     setCustomizations(formatCustomizations(customisation_items));
   };
 
+  const calculateSubtotal = () => {
+    let subtotal = 0;
+
+    for (const level in customization_state) {
+      const selectedOptions = customization_state[level].selected;
+      if (selectedOptions.length > 0) {
+        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
+      }
+    }
+    return subtotal;
+  };
+
   const addToCart = async () => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
+    const subtotal = productDetails.price.value + calculateSubtotal();
     const payload = {
       id: productPayload.id,
       bpp_id: productPayload.bpp_details.bpp_id,
@@ -237,9 +250,12 @@ const ProductDetails = () => {
       },
       product: {
         id: productPayload.id,
+        subtotal,
         ...productPayload.item_details,
       },
     };
+
+    //  console.log(payload);
 
     const res = await postCall(url, payload);
     history.push("/application/cart");
