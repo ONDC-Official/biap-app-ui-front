@@ -7,16 +7,25 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.js";
 import ToastProvider from "./context/toastContext";
 import ErrorBoundary from "./components/shared/error-boundary/errorBoundary";
+import { AddressContextProvider } from "./context/addressContext";
+import { CartContextProvider } from "./context/cartContext";
+import { SearchContextProvider } from "./context/searchContext";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ToastProvider>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </ToastProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+    <React.StrictMode>
+        <ToastProvider>
+            <ErrorBoundary>
+                <CartContextProvider>
+                    <AddressContextProvider>
+                        <SearchContextProvider>
+                            <App/>
+                        </SearchContextProvider>
+                    </AddressContextProvider>
+                </CartContextProvider>
+            </ErrorBoundary>
+        </ToastProvider>
+    </React.StrictMode>,
+    document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function

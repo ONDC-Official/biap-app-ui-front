@@ -7,9 +7,11 @@ import { getCall } from "./axios";
 export const getAllProductRequest = (data) => {
     const pageNumber = data.page+1;
     const limit = data.pageSize;
+    const productName = data?.searchData?.productName || "";
+    const subCategoryName = data?.searchData?.subCategoryName || "";
     return new Promise(async (resolve, reject) => {
         try {
-            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}&categoryIds=${"Pizza"}`
+            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}${subCategoryName?`&categoryIds=${subCategoryName}`:''}${productName?`&productName=${productName}`:""}`
             const data = await getCall(`/clientApis/v2/search${quaryParams}`);
             return resolve(data.response);
         } catch (err) {

@@ -68,7 +68,7 @@ const useStyles = makeStyles({
         boxShadow: "none !important",
         background: '#F5F5F5 !important',
         display: 'flex',
-        minHeight: '302px !important',
+        minHeight: '250px !important',
         // width: '314px !important',
         borderRadius: '12px 0px 0px 12px !important'
     },

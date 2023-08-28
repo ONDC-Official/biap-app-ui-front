@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import {
-    Box,
-    Button,
-    Typography,
-    Modal as MuiModel,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import MuiModel from '@mui/material/Modal';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+
 import { styled } from '@mui/material/styles'
 
 const style = {
@@ -14,7 +13,7 @@ const style = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    minWidth: '40%',
+    minWidth: '20%',
     maxHeight: '100%',
     backgroundColor: 'background.paper',
     border: '1px solid #D9D9D9',
@@ -69,7 +68,7 @@ const ModalComponent = ({ children, title, open, onClose, fullWidth = false }) =
             <Modal
                 title={title}
                 open={open}
-                onClose={onClose}
+                // onClose={onClose}
             >
                 <Box sx={fullWidth?styleFullscreen:style}>
                     {
@@ -77,6 +76,14 @@ const ModalComponent = ({ children, title, open, onClose, fullWidth = false }) =
                             <Box sx={styleHeader}>
                                 <Typography variant="h6" component="h2">
                                     {title}
+                                    {
+                                        onClose && (
+                                            <CloseRoundedIcon
+                                                style={{float: 'right', cursor: 'pointer'}}
+                                                onClick={onClose}
+                                            />
+                                        )
+                                    }
                                 </Typography>
                             </Box>
                         )

@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import useStyles from './style';
-import {useParams, Link} from "react-router-dom";
+import {useParams, Link, useHistory, useLocation} from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -31,6 +31,8 @@ import {
     getAllFiltersRequest,
     getAllFilterValuesRequest
 } from '../../../api/product.api';
+import {getValueFromCookie} from "../../../utils/cookies";
+import {SearchContext} from '../../../context/searchContext';
 
 const ProductsList = [
     {id: 1, name: 'Embroidered Handloom Cotton Silk Saree (Black)', price: '2999', provider: 'CHHABRA 555 Sarees', imgUrl: product1},
@@ -53,6 +55,10 @@ const SAREETYPES = [
 const ProductList = () => {
     const classes = useStyles();
     let { categoryName, subCategoryName } = useParams();
+    const history = useHistory();
+    const lodationData = useLocation();
+    const { searchData, locationData } = useContext(SearchContext);
+
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
     const [totalProductCount, setTotalProductCount] = useState(0);
@@ -66,12 +72,35 @@ const ProductList = () => {
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
-    const getAllProducts = async() => {
+    // useEffect(() => {
+    //     if(searchData || locationData){
+    //         console.log("search_context searchData product page=====>", searchData)
+    //         console.log("search_context locationData product page=====>", locationData)
+    //         getAllProducts(searchName)
+    //     }
+    // }, [searchData, locationData]);
+
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+
+    useEffect(() => {
+        if(lodationData){
+            const searchName = query.get("s");
+            console.log("history.location.search again=====>", searchName);
+            getAllProducts(searchName)
+        }
+    }, [lodationData]);
+    const getAllProducts = async(searchName) => {
         setIsLoading(true);
         try {
-            const quaryParams = `?limit=${paginationModel.pageSize}&pageNumber=${paginationModel.page+1}&categoryIds=${"Pizza"}`
+            const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData.productName = searchName || "";
+            paginationData.searchData.subCategoryName = subCategoryName || "";
             const data = await cancellablePromise(
-                getAllProductRequest(paginationModel)
+                getAllProductRequest(paginationData)
             );
             console.log("getAllProducts=====>", data)
             setProducts(data.data);
@@ -146,9 +175,11 @@ const ProductList = () => {
     };
 
     useEffect(() => {
-        getAllProducts();
-        getAllFilters();
-    }, []);
+        if(subCategoryName){
+            getAllProducts();
+            getAllFilters();
+        }
+    }, [subCategoryName]);
 
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
@@ -180,7 +211,7 @@ const ProductList = () => {
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.catNameTypoContainer}>
                 <Typography variant="h4" className={classes.catNameTypo} color={"success"}>
-                    Women’s Sarees
+                    {subCategoryName}
                 </Typography>
                 <Button
                     className={classes.viewTypeButton}

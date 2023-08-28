@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useContext} from 'react';
 import axios from "axios";
 import useStyles from './style';
 import AppBar from '@mui/material/AppBar';
@@ -12,7 +12,7 @@ import {ReactComponent as SearchIcon} from "../../../assets/images/search.svg";
 import {ReactComponent as CartIcon} from "../../../assets/images/cart.svg";
 import {ReactComponent as HeartIcon} from "../../../assets/images/heart.svg";
 import {ReactComponent as UserIcon} from "../../../assets/images/loggedInUser.svg";
-import {useHistory} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 
 import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
@@ -28,11 +28,21 @@ import AddressForm from './addressForm/addressForm';
 import useCancellablePromise from "../../../api/cancelRequest";
 import { getCall } from "../../../api/axios";
 import {address_types} from "../../../constants/address-types";
+import {SearchContext} from "../../../context/searchContext";
+import {AddressContext} from "../../../context/addressContext";
 
-const NavBar = ({location}) => {
+const NavBar = () => {
 
     const classes = useStyles();
     const history = useHistory();
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+    const { setSearchData, setLocationData } = useContext(SearchContext);
+    const { setDeliveryAddress } = useContext(AddressContext);
 
     // STATES
     const [inlineError, setInlineError] = useState({
@@ -91,17 +101,35 @@ const NavBar = ({location}) => {
         }
     };
 
+    console.log("query====>", query)
     // use this function to get last entered values
     function getLastEnteredValues() {
         let search_context = getValueFromCookie("search_context");
         if (search_context) {
-            search_context = JSON.parse(search_context);
+            search_context = Object.assign({}, JSON.parse(search_context));
+            console.log("search_context=====>", search_context)
             setSearch(() => ({
                 type: search_context.search.type,
-                value: search_context.search.value,
+                value: query.size > 0?query.get("s"):"",
             }));
-        }
+            console.log("MAIN search_context=====>", search_context)
+            setSearchedLocation(search_context.location);
+            setSearchData(() => ({
+                type: search_context.search.type,
+                value: query.size > 0?query.get("s"):"",
+            }));
+            setLocationData(() => search_context.location);
+        }else{}
+        if (getValueFromCookie("delivery_address")) {
+            const address = JSON.parse(getValueFromCookie("delivery_address"));
+            console.log("address=====>", address);
+            if (address) {
+                setDeliveryAddress(() => address);
+                fetchLatLongFromEloc(address);
+            }
+        }else{}
     };
+
 
     useEffect(() => {
         getLastEnteredValues();
@@ -112,10 +140,6 @@ const NavBar = ({location}) => {
             setSearchProductLoading(false);
         };
     }, []);
-
-    useEffect(() => {
-        setSearchedLocation(location);
-    }, [location]);
 
     const setCriteriaLatLng = () => {
         if (getValueFromCookie("search_context")) {
@@ -150,6 +174,11 @@ const NavBar = ({location}) => {
         }
     };
 
+    useEffect(() => {
+        setCriteriaLatLng();
+        //sum of two variable
+    }, [search]);
+
     // get the area code of the location selected
     const getAreadCodeFromLatLong = async(location) => {
         try {
@@ -169,6 +198,24 @@ const NavBar = ({location}) => {
                 state,
                 tag: location?.tag,
             });
+            let search_context_data = getValueFromCookie("search_context");
+            search_context_data = Object.assign({}, JSON.parse(search_context));
+            // generating context for search
+            const search_context = {
+                search: search_context_data.search,
+                location: {
+                    ...searchedLocation,
+                    name: location?.name,
+                    lat,
+                    lng,
+                    pincode,
+                    city,
+                    state,
+                    tag: location?.tag,
+                },
+            };
+            setLocationData(() => search_context.location);
+            AddCookie("search_context", JSON.stringify(search_context));
             setToggleLocationListCard(false);
         } catch (err) {
             // dispatchError(err?.message);
@@ -230,16 +277,39 @@ const NavBar = ({location}) => {
                         className={classes.inputForm}
                     >
                         <IconButton className={classes.searchIcon} aria-label="menu">
-                            <SearchIcon />
+                            <ListIcon />
                         </IconButton>
                         <InputBase
                             fullWidth
                             className={classes.inputBase}
                             placeholder="Search..."
                             inputProps={{ 'aria-label': 'Search...' }}
+                            value={search?.value || ""}
+                            onChange={(e) => {
+                                const searchValue = e.target.value;
+                                let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
+                                searchDataUpdate.value = searchValue;
+                                setSearch(searchDataUpdate);
+                                // generating context for search
+                                const search_context = {
+                                    search: searchDataUpdate,
+                                    location: searchedLocation,
+                                };
+                                // setSearchData(() => searchDataUpdate);
+                                AddCookie("search_context", JSON.stringify(search_context));
+                            }}
                         />
-                        <IconButton type="button" className={classes.listIcon} aria-label="search">
-                            <ListIcon />
+                        <IconButton
+                            type="button"
+                            className={classes.listIcon}
+                            aria-label="search"
+                            onClick={() => {
+                                console.log("history=====>", history)
+                                setSearchData(() => search);
+                                history.push(`/products?s=${search.value}`);
+                            }}
+                        >
+                            <SearchIcon />
                         </IconButton>
                     </Paper>
                 </div>
@@ -266,7 +336,9 @@ const NavBar = ({location}) => {
                 selectAddressModal && (
                     <ModalComponent
                         open={selectAddressModal}
-                        // setOpen={setSelectAddressModal}
+                        onClose={() => {
+                            setSelectAddressModal(false)
+                        }}
                         title="Select Address"
                     >
                         <SelectAddress
@@ -299,7 +371,14 @@ const NavBar = ({location}) => {
                 toggleAddressModal.toggle && (
                     <ModalComponent
                         open={toggleAddressModal.toggle}
-                        // setOpen={setSelectAddressModal}
+                        onClose={() => {
+                            setToggleAddressModal({
+                                actionType: "",
+                                toggle: false,
+                                address: restoreToDefault(),
+                            });
+                            setSelectAddressModal(true);
+                        }}
                         title={`${toggleAddressModal.actionType === "edit"?`Update Delivery Address`:`Add Delivery Address`}`}
                     >
                         <AddressForm

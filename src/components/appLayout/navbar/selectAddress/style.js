@@ -1,11 +1,31 @@
 import { makeStyles } from '@mui/styles';
+import palette from "../../../../utils/Theme/palette";
 
 const useStyles = makeStyles({
+    formControlRoot: {
+      display: 'block !important',
+        padding: '16px !important',
+        borderRadius: '10px',
+        "&:hover": {
+          background: palette.primary.light
+        }
+    },
     selectAddressRadioContainer: {
         display: 'flex !important'
     },
     formControlLabel: {
-        flex: '1 !important'
+        flex: '1 !important',
+        alignItems: 'start !important',
+        marginLeft: '0px !important',
+        "& .MuiFormControlLabel-label": {
+            marginLeft: '24px !important',
+            "& .MuiTypography-root": {
+                marginBottom: '5px !important'
+            }
+        },
+        "& .MuiRadio-root": {
+            marginTop: '2px !important'
+        }
     },
     addAddressContainer: {
         display: 'flex !important',
@@ -17,6 +37,10 @@ const useStyles = makeStyles({
     addIcon: {
         marginTop: '-2px !important',
         marginRight: '5px !important'
+    },
+    editAddressButton: {
+        padding: '0px !important',
+        height: '20px !important'
     }
 });
 
