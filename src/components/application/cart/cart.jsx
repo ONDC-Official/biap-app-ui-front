@@ -7,19 +7,25 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
-import { getCall } from "../../../api/axios";
+import { deleteCall, getCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Cart() {
   const classes = useStyles();
   const history = useHistory();
+  let user = JSON.parse(getValueFromCookie("user"));
   const [cartItems, setCartItems] = useState([]);
 
   const getCartItems = async () => {
-    const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
     setCartItems(res);
+  };
+
+  const deleteCartItem = async (itemId) => {
+    const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
+    const res = await deleteCall(url);
+    getCartItems();
   };
 
   useEffect(() => {
@@ -80,7 +86,12 @@ export default function Cart() {
       return (
         <>
           <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
-          <Grid container key={cartItem.item.id}>
+          <Grid
+            container
+            key={cartItem.item.id}
+            className={classes.emptyCartScreen}
+            style={{ alignItems: "flex-start" }}
+          >
             <Grid item xs={4.3}>
               <Grid container>
                 <div className={classes.moreImages}>
@@ -143,7 +154,12 @@ export default function Cart() {
               />
 
               <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
-                <Button variant="text" startIcon={<DeleteOutlineIcon size="small" />} color="error">
+                <Button
+                  variant="text"
+                  startIcon={<DeleteOutlineIcon size="small" />}
+                  color="error"
+                  onClick={() => deleteCartItem(cartItem.item.id)}
+                >
                   <Typography>Delete</Typography>
                 </Button>
               </Grid>

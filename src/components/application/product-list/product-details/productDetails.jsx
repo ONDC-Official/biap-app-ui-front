@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import useStyles from "./style";
-import Typography from "@mui/material/Typography";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
-import { Link, useLocation } from "react-router-dom";
-import DoneIcon from "@mui/icons-material/Done";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import useCancellablePromise from "../../../../api/cancelRequest";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 import { getCall, postCall } from "../../../../api/axios";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
+import { Link, useLocation, useHistory } from "react-router-dom";
+import useCancellablePromise from "../../../../api/cancelRequest";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 const moreImages = [
@@ -51,6 +50,7 @@ const additionalProductDetails = {
 
 const ProductDetails = () => {
   const classes = useStyles();
+  const history = useHistory();
   const location = useLocation();
   const { cancellablePromise } = useCancellablePromise();
 
@@ -239,9 +239,8 @@ const ProductDetails = () => {
         ...productPayload.item_details,
       },
     };
-
     const res = await postCall(url, payload);
-    console.log(res);
+    history.push("/application/cart");
   };
 
   //   fetch product details
