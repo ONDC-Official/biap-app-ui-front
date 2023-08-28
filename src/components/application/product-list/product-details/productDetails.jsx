@@ -11,6 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { getCall } from "../../../../api/axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 const moreImages = [
   "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
@@ -326,8 +327,13 @@ const ProductDetails = () => {
                     <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
                       {c.name}
                     </Typography>
-                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#222"}>
-                      ₹{c.price}
+                    <Typography
+                      variant="body1"
+                      color={cg.selected.includes(c) ? "white" : "#222"}
+                      sx={{ fontSize: 16, fontWeight: 600 }}
+                    >
+                      <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                      {c.price}
                     </Typography>
                   </div>
                 </>
@@ -388,10 +394,10 @@ const ProductDetails = () => {
                 </Typography>
               </Grid>
             )}
-            <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
+            <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
               {productDetails?.descriptor?.name}
             </Typography>
-            <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
+            <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}>
               ₹ {productDetails?.price?.value}
             </Typography>
             <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
@@ -485,7 +491,7 @@ const ProductDetails = () => {
         <Grid item xs={7} className={classes.productDetailsLeft}>
           <Accordion elevation={0} square defaultExpanded>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}>
-              <Typography variant="h4" color="black">
+              <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 600 }}>
                 Product Details
               </Typography>
               <Divider />

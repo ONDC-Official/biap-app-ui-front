@@ -109,6 +109,7 @@ const useStyles = makeStyles({
   key: {
     textTransform: "capitalize",
     fontWeight: 500,
+    fontFamily: "Inter !important",
   },
   value: {
     fontWeight: 500,
