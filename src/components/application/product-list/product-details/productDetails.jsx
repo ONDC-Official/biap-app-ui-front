@@ -257,47 +257,56 @@ const ProductDetails = () => {
   useEffect(() => {
     if (!isInitialized && customizationGroups.length > 0 && customizations.length > 0) {
       const initializeCustomizationState = () => {
-        let currentGroup = "CG1";
-        let level = 1;
-        const newState = { ...customization_state };
-
-        while (currentGroup) {
-          const group = customizationGroups.find((group) => group.id === currentGroup);
-          if (group) {
-            newState[level] = {
-              id: group.id,
-              seq: group.seq,
-              name: group.name,
-              options: [],
-              selected: [],
-            };
-            newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
-
-            // Skip selecting an option for non-mandatory groups (minQuantity === 0)
-            if (group.minQuantity === 1) {
-              const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
-
-              // If no default option, select the first available option
-              if (!selectedCustomization) {
-                newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
-              } else {
-                newState[level].selected = [selectedCustomization];
-              }
-            }
-
-            currentGroup = newState[level].selected[0]?.child || null;
-            level++;
-
-            // If a non-mandatory group is encountered, break the loop
-            if (group.minQuantity === 0) {
-              break;
-            }
-          } else {
-            currentGroup = null;
+        let firstGroup = null;
+        for (const group of customizationGroups) {
+          if (group.seq === 1) {
+            firstGroup = group;
+            break;
           }
         }
+        if (firstGroup) {
+          let currentGroup = firstGroup.id;
+          let level = 1;
+          const newState = { ...customization_state };
 
-        setCustomizationState(newState);
+          while (currentGroup) {
+            const group = customizationGroups.find((group) => group.id === currentGroup);
+            if (group) {
+              newState[level] = {
+                id: group.id,
+                seq: group.seq,
+                name: group.name,
+                options: [],
+                selected: [],
+              };
+              newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+
+              // Skip selecting an option for non-mandatory groups (minQuantity === 0)
+              if (group.minQuantity === 1) {
+                const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
+
+                // If no default option, select the first available option
+                if (!selectedCustomization) {
+                  newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
+                } else {
+                  newState[level].selected = [selectedCustomization];
+                }
+              }
+
+              currentGroup = newState[level].selected[0]?.child || null;
+              level++;
+
+              // If a non-mandatory group is encountered, break the loop
+              if (group.minQuantity === 0) {
+                break;
+              }
+            } else {
+              currentGroup = null;
+            }
+          }
+
+          setCustomizationState(newState);
+        }
       };
 
       setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));

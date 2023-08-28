@@ -57,7 +57,7 @@ export default function Cart() {
             </Typography>
           </Grid>
           <Grid item xs={1}>
-            <Typography variant="body1" className={classes.tableHead}>
+            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "6px" }}>
               Price
             </Typography>
           </Grid>
@@ -120,7 +120,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                {cartItem.item.product.price.value}
+                ₹ {cartItem.item.product.price.value}
               </Typography>
             </Grid>
             <Grid item xs={1.2}>
@@ -132,9 +132,9 @@ export default function Cart() {
                 <KeyboardArrowDownIcon className={classes.qtyArrowDown} />
               </div>
             </Grid>
-            <Grid item xs={1.2}>
+            <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                {parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.price.value)}
+                ₹{parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.price.value)}
               </Typography>
             </Grid>
             <Grid item xs={4}>
