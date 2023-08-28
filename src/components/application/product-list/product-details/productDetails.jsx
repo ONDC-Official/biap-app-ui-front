@@ -19,6 +19,9 @@ import DoneIcon from "@mui/icons-material/Done";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import useCancellablePromise from "../../../../api/cancelRequest";
+import { getCall } from "../../../../api/axios";
 
 const moreImages = [
   "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
@@ -44,7 +47,7 @@ const availabeSizes = [
   },
 ];
 
-const productDetails = {
+const additionalProductDetails = {
   "style code": "Bell & Ross Nightlum",
   pattern: "Embroidered",
   "pack of": 1,
@@ -56,171 +59,112 @@ const productDetails = {
     "Make a distinct style statement wearing this Cotton silk woven Saree from the Villagius. Designed to perfection, this saree will soon become your favorite . The stylishly designed saree Solid prints makes it a true value for money. Made from Cotton Silk this saree measures 5.5 m and comes with a 0.80 m blouse piece.",
 };
 
-const customizationGroups = [
-  {
-    id: "CG1",
-    name: "Crust(Select any 1)",
-    inputType: "select",
-    minQuantity: 1,
-    maxQuantity: 1,
-    seq: 1,
-  },
-  {
-    id: "CG2",
-    name: "Size(Select any 1)",
-    inputType: "select",
-    minQuantity: 1,
-    maxQuantity: 1,
-    seq: 2,
-  },
-  {
-    id: "CG3",
-    name: "Size(Select any 1)",
-    inputType: "select",
-    minQuantity: 1,
-    maxQuantity: 1,
-    seq: 2,
-  },
-  {
-    id: "CG4",
-    name: "Toppings(Select any 1)",
-    inputType: "select",
-    minQuantity: 1,
-    maxQuantity: 1,
-    seq: 3,
-  },
-  {
-    id: "CG5",
-    name: "Toppings(Select any 1)",
-    inputType: "select",
-    minQuantity: 1,
-    maxQuantity: 1,
-    seq: 3,
-  },
-];
-
-const customizations = [
-  {
-    id: "C1",
-    name: "Hand tossed",
-    price: 299,
-    inStock: true,
-    parent: "CG1",
-    child: "CG2",
-  },
-  {
-    id: "C2",
-    name: "Thin crust",
-    price: 349,
-    inStock: true,
-    parent: "CG1",
-    child: "CG3",
-  },
-  {
-    id: "C3",
-    name: "Regular",
-    price: 50,
-    inStock: true,
-    parent: "CG2",
-    child: "CG4",
-  },
-  {
-    id: "C4",
-    name: "Large",
-    price: 100,
-    inStock: true,
-    parent: "CG2",
-  },
-  {
-    id: "C5",
-    name: "Small",
-    price: 30,
-    inStock: true,
-    parent: "CG3",
-  },
-  {
-    id: "C6",
-    name: "Large",
-    price: 120,
-    inStock: true,
-    parent: "CG3",
-  },
-  {
-    id: "C609",
-    name: "Extra Large",
-    price: 120,
-    inStock: true,
-    parent: "CG3",
-    child: "CG5",
-  },
-  {
-    id: "C7",
-    name: "Olives",
-    price: 120,
-    inStock: true,
-    parent: "CG4",
-  },
-  {
-    id: "C8",
-    name: "Paneer",
-    price: 120,
-    inStock: true,
-    parent: "CG4",
-  },
-  {
-    id: "C9",
-    name: "Onion",
-    price: 120,
-    inStock: true,
-    parent: "CG4",
-  },
-  {
-    id: "C999",
-    name: "Onion",
-    price: 120,
-    inStock: true,
-    parent: "CG5",
-  },
-];
-
 const ProductDetails = () => {
   const classes = useStyles();
-  const [activeImage, setActiveImage] = useState(moreImages[0]);
-  const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
+  const { cancellablePromise } = useCancellablePromise();
+
+  const [productDetails, setProductDetails] = useState({});
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [customizationGroups, setCustomizationGroups] = useState([]);
+  const [customizations, setCustomizations] = useState([]);
+  const [highestSeq, setHighestSeq] = useState(0);
   const [customization_state, setCustomizationState] = useState({
     1: { options: [], selected: [] },
   });
+
+  const [activeImage, setActiveImage] = useState(moreImages[0]);
+  const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
   };
 
-  const handleOptionSelect = (selectedOption, level) => {
+  const handleCustomizationSelect = (selectedOption, level) => {
     const newState = { ...customization_state };
 
-    // Update the selected option for the current level
-    newState[level].selected = [selectedOption];
+    // Check if the parent's customization group has minQuantity === 0
+    const parentGroup = customizationGroups.find((group) => group.id === selectedOption.parent);
+    const parentAllowsUnselecting = parentGroup && parentGroup.minQuantity === 0;
+
+    if (parentGroup.seq === highestSeq) {
+      if (
+        newState[level].selected.length < parentGroup.maxQuantity &&
+        !newState[level].selected.includes(selectedOption)
+      ) {
+        newState[level].id = parentGroup.id;
+        newState[level].seq = parentGroup.seq;
+        newState[level].selected = [...newState[level].selected, selectedOption];
+      } else {
+        newState[level].selected = newState[level].selected.filter((item) => item.id !== selectedOption.id);
+        setCustomizationState(newState);
+        return;
+      }
+    }
+
+    // If the option is already selected and unselecting is allowed, deselect it
+    else if (
+      (parentAllowsUnselecting && newState[level].selected.includes(selectedOption)) ||
+      !newState[level].selected.includes(selectedOption)
+    ) {
+      if (newState[level].selected.includes(selectedOption)) {
+        newState[level].selected = [];
+        for (let i = level + 1; i <= Object.keys(newState).length; i++) {
+          delete newState[i];
+        }
+        setCustomizationState(newState);
+        return;
+      } else {
+        newState[level].id = parentGroup.id;
+        newState[level].seq = parentGroup.seq;
+        newState[level].selected = [selectedOption];
+      }
+    }
 
     // Reset subsequent groups' selections
     for (let i = level + 1; i <= Object.keys(newState).length; i++) {
       delete newState[i];
     }
 
-    while (selectedOption.child) {
-      const nextGroup = customizationGroups.find((group) => group.id === selectedOption.child);
+    let currentSelectedOption = selectedOption; // Store the current selectedOption
+    while (currentSelectedOption.child) {
+      const nextGroup = customizationGroups.find((group) => group.id === currentSelectedOption.child);
       if (nextGroup) {
+        // Render options for non-mandatory group, but don't select any option
+        if (nextGroup.minQuantity === 0) {
+          newState[level + 1] = {
+            id: nextGroup.id,
+            seq: nextGroup.seq,
+            name: nextGroup.name,
+            options: customizations.filter((c) => c.parent === nextGroup.id),
+            selected: [],
+          };
+
+          for (let i = level + 2; i <= Object.keys(newState).length; i++) {
+            delete newState[i];
+          }
+
+          setCustomizationState(newState); // Set state after rendering options
+          return; // Exit loop after rendering options
+        }
+
         const nextGroupOptions = customizations.filter((customization) => customization.parent === nextGroup.id);
-        const nextSelectedOption = nextGroupOptions.find((opt) => opt.inStock) || nextGroupOptions[0];
+        const nextSelectedOption = nextGroupOptions.find((opt) => opt.isDefault && opt.inStock) || nextGroupOptions[0];
 
         if (nextSelectedOption) {
           level++;
-          newState[level] = { name: nextGroup.name, options: nextGroupOptions, selected: [nextSelectedOption] };
-          selectedOption = nextSelectedOption;
+          newState[level] = {
+            id: nextGroup.id,
+            name: nextGroup.name,
+            options: nextGroupOptions,
+            selected: [nextSelectedOption],
+          };
 
           // Reset selections for subsequent groups under the new selection
           for (let i = level + 1; i <= Object.keys(newState).length; i++) {
             delete newState[i];
           }
+
+          currentSelectedOption = nextSelectedOption; // Update the current selectedOption
         } else {
           break;
         }
@@ -232,42 +176,120 @@ const ProductDetails = () => {
     setCustomizationState(newState);
   };
 
+  const formatCustomizationGroups = (customisation_groups) => {
+    const formattedCustomizationGroups = customisation_groups?.map((group) => {
+      const configTags = group.tags.find((tag) => tag.code === "config").list;
+      const minConfig = configTags.find((tag) => tag.code === "min").value;
+      const maxConfig = configTags.find((tag) => tag.code === "max").value;
+      const inputTypeConfig = configTags.find((tag) => tag.code === "input").value;
+      const seqConfig = configTags.find((tag) => tag.code === "seq").value;
+
+      return {
+        id: group.local_id,
+        name: group.descriptor.name,
+        inputType: inputTypeConfig,
+        minQuantity: parseInt(minConfig),
+        maxQuantity: parseInt(maxConfig),
+        seq: parseInt(seqConfig),
+      };
+    });
+
+    return formattedCustomizationGroups;
+  };
+
+  const formatCustomizations = (customisation_items) => {
+    const customizations = customisation_items.map((customization) => {
+      const itemDetails = customization.item_details;
+      const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
+      const childTag = itemDetails.tags.find((tag) => tag.code === "child");
+
+      return {
+        id: itemDetails.id,
+        name: itemDetails.descriptor.name,
+        price: itemDetails.price.value,
+        inStock: itemDetails.quantity.available.count > 0,
+        parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
+        child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
+      };
+    });
+    return customizations;
+  };
+
+  const getProductDetails = async () => {
+    const data = await cancellablePromise(getCall(`/clientApis/v2/items/sellerNP.com_P1_I1`));
+    const { item_details, customisation_groups, customisation_items } = data.response;
+
+    //  console.log(data.response);
+    //  console.log(customisation_items);
+    setProductDetails(item_details);
+    setActiveImage(item_details?.descriptor?.images[0]);
+
+    setCustomizationGroups(formatCustomizationGroups(customisation_groups));
+    setCustomizations(formatCustomizations(customisation_items));
+  };
+
+  //   fetch product details
   useEffect(() => {
-    const initializeCustomizationState = () => {
-      let currentGroup = "CG1";
-      let level = 1;
-      const newState = { ...customization_state };
+    getProductDetails();
+  }, []);
 
-      while (currentGroup) {
-        const groupOptions = customizationGroups.find((group) => group.id === currentGroup);
-        if (groupOptions) {
-          newState[level] = { name: groupOptions.name, options: [], selected: [] };
-          newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+  // initialize customization state
+  useEffect(() => {
+    if (!isInitialized && customizationGroups.length > 0 && customizations.length > 0) {
+      const initializeCustomizationState = () => {
+        let currentGroup = "CG1";
+        let level = 1;
+        const newState = { ...customization_state };
 
-          const selectedCustomization = newState[level].options.find((opt) => opt.inStock);
+        while (currentGroup) {
+          const group = customizationGroups.find((group) => group.id === currentGroup);
+          if (group) {
+            newState[level] = {
+              id: group.id,
+              seq: group.seq,
+              name: group.name,
+              options: [],
+              selected: [],
+            };
+            newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
 
-          if (selectedCustomization) {
-            newState[level].selected = [selectedCustomization];
-            currentGroup = selectedCustomization.child;
+            // Skip selecting an option for non-mandatory groups (minQuantity === 0)
+            if (group.minQuantity === 1) {
+              const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
+
+              // If no default option, select the first available option
+              if (!selectedCustomization) {
+                newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
+              } else {
+                newState[level].selected = [selectedCustomization];
+              }
+            }
+
+            currentGroup = newState[level].selected[0]?.child || null;
             level++;
+
+            // If a non-mandatory group is encountered, break the loop
+            if (group.minQuantity === 0) {
+              break;
+            }
           } else {
             currentGroup = null;
           }
-        } else {
-          currentGroup = null;
         }
-      }
 
-      setCustomizationState(newState);
-    };
+        setCustomizationState(newState);
+      };
 
-    initializeCustomizationState();
-  }, []);
+      setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
+      initializeCustomizationState();
+      setIsInitialized(true);
+    }
+  }, [customizationGroups, customizations, isInitialized]);
 
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
-      console.log("cg", cg);
+
       return (
         <>
           <>
@@ -279,8 +301,11 @@ const ProductDetails = () => {
                 <>
                   <div
                     className={cg.selected.includes(c) ? classes.selectedCustomization : classes.customization}
-                    onClick={() => handleOptionSelect(c, parseInt(level))}
+                    onClick={() => handleCustomizationSelect(c, parseInt(level))}
                   >
+                    {cg.seq == highestSeq && cg.selected.includes(c) && (
+                      <CloseIcon fontSize="small" className={classes.cross} />
+                    )}
                     <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
                       {c.name}
                     </Typography>
@@ -307,7 +332,7 @@ const ProductDetails = () => {
           <MuiLink component={Link} underline="hover" color="inherit" to={""}>
             abc
           </MuiLink>
-          <Typography color="text.primary">def</Typography>
+          <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
         </Breadcrumbs>
       </div>
 
@@ -317,7 +342,7 @@ const ProductDetails = () => {
             <img className={classes.productImg} src={activeImage} />
           </div>
           <div className={classes.moreImagesContainer}>
-            {moreImages.map((item, idx) => {
+            {productDetails?.descriptor?.images.map((item, idx) => {
               return (
                 <div
                   style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
@@ -347,13 +372,13 @@ const ProductDetails = () => {
               </Grid>
             )}
             <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
-              Embroidered Handloom Cotton Silk Saree (Black)
+              {productDetails?.descriptor?.name}
             </Typography>
             <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
-              ₹ 2000
+              ₹ {productDetails?.price?.value}
             </Typography>
             <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
-            <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
+            {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
               <Typography variant="body" color="#1D1D1D">
                 Select size
               </Typography>
@@ -366,7 +391,6 @@ const ProductDetails = () => {
                 <div
                   className={item.size === activeSize ? classes.activeSizeContainer : classes.sizeContainer}
                   onClick={() => {
-                    console.log(item);
                     setActiveSize(item.size);
                   }}
                 >
@@ -413,7 +437,7 @@ const ProductDetails = () => {
                   </Grid>
                 );
               })}
-            </div>
+            </div> */}
 
             {!true && (
               <Grid container justifyContent="center" className={classes.outOfStock}>
@@ -446,7 +470,7 @@ const ProductDetails = () => {
               <Divider />
             </AccordionSummary>
             <AccordionDetails sx={{ padding: "20px 0" }}>
-              {Object.keys(productDetails).map((key) => (
+              {Object.keys(additionalProductDetails).map((key) => (
                 <Grid container className={classes.keyValueContainer}>
                   <Grid xs={3}>
                     <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
@@ -455,7 +479,7 @@ const ProductDetails = () => {
                   </Grid>
                   <Grid xs={8}>
                     <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
-                      {productDetails[key]}
+                      {additionalProductDetails[key]}
                     </Typography>
                   </Grid>
                 </Grid>

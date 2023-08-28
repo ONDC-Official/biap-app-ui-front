@@ -1,139 +1,232 @@
-import React, { Fragment, useContext } from "react";
+import React, { useContext } from "react";
+import useStyles from "./styles";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
-import styles from "../../../styles/cart/cartView.module.scss";
-import { buttonTypes } from "../../shared/button/utils";
-import { getSubTotal } from "./utils/getSubTotal";
-import Button from "../../shared/button/button";
-import { ONDC_COLORS } from "../../shared/colors";
-import Navbar from "../../shared/navbar/navbar";
-import IndianRupee from "../../shared/svg/indian-rupee";
-import ProductCard from "../product-list/product-card/productCard";
-import no_result_empty_illustration from "../../../assets/images/empty-state-illustration.svg";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
+
+const products = [
+  {
+    img: "https://www.recipetineats.com/wp-content/uploads/2023/05/Garlic-cheese-pizza_9.jpg?w=500&h=500&crop=1",
+    name: "Garden Delight Pizza A classic veg pizza that combines the zing",
+    storeLogo:
+      "https://scontent.fdel27-5.fna.fbcdn.net/v/t1.6435-9/76751710_3219243534783822_6287676884046053376_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=dIE2V0jkRzcAX-pN8EI&_nc_ht=scontent.fdel27-5.fna&oh=00_AfAujFCqt9HFw47qdYPxu_icgEtrxPbYQKH6uFJLgj5TIQ&oe=650F0BDB",
+    storeName: "Pizza hut",
+    price: "₹999",
+    qty: 1,
+    subTotal: " ₹1999",
+  },
+  {
+    img: "https://www.recipetineats.com/wp-content/uploads/2023/05/Garlic-cheese-pizza_9.jpg?w=500&h=500&crop=1",
+    name: "Garden Delight Pizza A classic veg pizza that combines the zing",
+    storeLogo:
+      "https://scontent.fdel27-5.fna.fbcdn.net/v/t1.6435-9/76751710_3219243534783822_6287676884046053376_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=dIE2V0jkRzcAX-pN8EI&_nc_ht=scontent.fdel27-5.fna&oh=00_AfAujFCqt9HFw47qdYPxu_icgEtrxPbYQKH6uFJLgj5TIQ&oe=650F0BDB",
+    storeName: "Pizza hut",
+    price: "₹999",
+    qty: 1,
+    subTotal: " ₹1999",
+  },
+  {
+    img: "https://www.recipetineats.com/wp-content/uploads/2023/05/Garlic-cheese-pizza_9.jpg?w=500&h=500&crop=1",
+    name: "Garden Delight Pizza A classic veg pizza that combines the zing",
+    storeLogo:
+      "https://scontent.fdel27-5.fna.fbcdn.net/v/t1.6435-9/76751710_3219243534783822_6287676884046053376_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=dIE2V0jkRzcAX-pN8EI&_nc_ht=scontent.fdel27-5.fna&oh=00_AfAujFCqt9HFw47qdYPxu_icgEtrxPbYQKH6uFJLgj5TIQ&oe=650F0BDB",
+    storeName: "Pizza hut",
+    price: "₹999",
+    qty: 1,
+    subTotal: " ₹1999",
+  },
+];
 
 export default function Cart() {
+  const classes = useStyles();
   const { cartItems } = useContext(CartContext);
   const history = useHistory();
-  const empty_cart_state = (
-    <div
-      className={`${styles.playground_height} d-flex align-items-center justify-content-center`}
-    >
-      <div className="text-center">
-        <div className="py-2">
-          <img
-            src={no_result_empty_illustration}
-            alt="empty_search"
-            style={{ height: "130px" }}
-          />
-        </div>
-        <div className="py-2">
-          <p className={styles.illustration_header}>Your cart is empty</p>
-          <p className={styles.illustration_body}>
-            Looks like your shopping cart is empty, you can shop now by clicking on below button
-          </p>
-        </div>
-        <div className="py-3">
-          <Button
-            button_type={buttonTypes.primary}
-            button_hover_type={buttonTypes.primary_hover}
-            button_text="Shop now"
-            onClick={() => history.push("/application/")}
-          />
-        </div>
-      </div>
-    </div>
-  );
-  return (
-    <Fragment>
-      <Navbar />
-      {cartItems.length <= 0 ? (
-        empty_cart_state
-      ) : (
-        <div className={styles.playground_height}>
-          <div className="container">
-            <div className="row py-3">
-              <div className="col-12">
-                <p className={styles.cart_label}>Cart</p>
-              </div>
-            </div>
-            <div className="row py-2">
-              <div className="col-lg-8">
-                <div className="container-fluid p-0">
-                  <div className="row">
-                    {cartItems.map(({ id, bpp_id, product, provider }) => {
-                      const { locations } = provider;
-                      return (
-                        <div
-                          className="col-lg-6 col-md-12 p-2"
-                          key={id}
-                          id={id}
-                        >
-                          <ProductCard
-                            product={product}
-                            price={product?.price}
-                            bpp_provider_descriptor={{
-                              name: product?.provider_details?.descriptor?.name,
-                            }}
-                            bpp_id={bpp_id}
-                            location_id={locations ? locations[0] : ""}
-                            bpp_provider_id={provider?.id}
-                          />
-                        </div>
-                      );
-                    })}
+
+  const renderTableHeads = () => {
+    return (
+      <>
+        <Grid container sx={{ paddingTop: "20px" }}>
+          <Grid item xs={4.3}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Item
+            </Typography>
+          </Grid>
+          <Grid item xs={1}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Price
+            </Typography>
+          </Grid>
+          <Grid item xs={1.2}>
+            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "12px" }}>
+              Qty
+            </Typography>
+          </Grid>
+          <Grid item xs={1.4}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Subtotal
+            </Typography>
+          </Grid>
+          <Grid item xs={4}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Special Instructions
+            </Typography>
+          </Grid>
+        </Grid>
+      </>
+    );
+  };
+
+  const renderProducts = () => {
+    return products.map((item) => {
+      return (
+        <>
+          <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
+          <Grid container>
+            <Grid item xs={4.3}>
+              <Grid container>
+                <div className={classes.moreImages}>
+                  <div className={classes.greyContainer}>
+                    <img className={classes.moreImage} src={item.img} />
                   </div>
                 </div>
-              </div>
-              <div className="col-lg-4">
-                <div className="container-fluid p-0">
-                  <div className="row">
-                    <div className="col-12 p-2">
-                      <div className={styles.price_summary_card}>
-                        <div className={styles.card_header}>
-                          <p className={styles.card_header_title}>
-                            Price Details
-                          </p>
-                        </div>
-                        <div className={styles.card_body}>
-                          <div className="py-2 d-flex align-items-center">
-                            <div className="pe-2">
-                              <p className={styles.card_body_text}>
-                                Items in cart({cartItems.length})
-                              </p>
-                            </div>
-                            <div className="ms-auto d-flex align-items-center">
-                              <div className="px-1">
-                                <IndianRupee
-                                  width="8"
-                                  height="13"
-                                  color={ONDC_COLORS.PRIMARYCOLOR}
-                                />
-                              </div>
-                              <p className={styles.sub_total_text}>
-                                {getSubTotal(cartItems)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="pt-4 text-center">
-                            <Button
-                              button_type={buttonTypes.primary}
-                              button_hover_type={buttonTypes.primary_hover}
-                              button_text="Checkout"
-                              onClick={() =>
-                                history.push("/application/initialize")
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
+                <Grid>
+                  <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
+                    {item.name}
+                  </Typography>
+                  <Grid container sx={{ marginTop: "4px" }} alignItems="center">
+                    <div className={classes.logoContainer}>
+                      <img className={classes.logo} src={item.storeLogo} />
                     </div>
-                  </div>
-                </div>
+                    <Typography variant="body1" color="#686868" sx={{ fontWeight: 500 }}>
+                      {item.storeName}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={1}>
+              <Typography variant="body" sx={{ fontWeight: 600 }}>
+                {item.price}
+              </Typography>
+            </Grid>
+            <Grid item xs={1.2}>
+              <div className={classes.qtyContainer}>
+                <Typography variant="body1" sx={{ marginRight: "6px", fontWeight: 600 }}>
+                  {item.qty}
+                </Typography>
+                <KeyboardArrowUpIcon className={classes.qtyArrowUp} />
+                <KeyboardArrowDownIcon className={classes.qtyArrowDown} />
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </Fragment>
+            </Grid>
+            <Grid item xs={1.2}>
+              <Typography variant="body" sx={{ fontWeight: 600 }}>
+                {item.subTotal}
+              </Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+                placeholder="Write here"
+                sx={{ padding: "6px 12px" }}
+              />
+
+              <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
+                <Button variant="text" startIcon={<DeleteOutlineIcon size="small" />} color="error">
+                  <Typography>Delete</Typography>
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </>
+      );
+    });
+  };
+
+  const renderSummaryCard = () => {
+    return (
+      <Card className={classes.summaryCard}>
+        <Typography variant="h4" className={classes.summaryTypo}>
+          Summary
+        </Typography>
+        <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
+        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            Subtotal
+          </Typography>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            ₹4,300.00
+          </Typography>
+        </Grid>
+        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+          <Grid xs={8}>
+            <Typography variant="subtitle1" className={classes.summaryLabel}>
+              Shipping
+            </Typography>
+            <Typography variant="subtitle2" color="#A2A6B0">
+              (Standard Rate - Price may vary depending on the item/destination. TECS Staff will contact you.)
+            </Typography>
+          </Grid>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            ₹21.00
+          </Typography>
+        </Grid>
+        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            Tax
+          </Typography>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            ₹1.91
+          </Typography>
+        </Grid>
+        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            GST (10%)
+          </Typography>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            ₹1.91
+          </Typography>
+        </Grid>
+        <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
+        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+          <Typography variant="subtitle1" className={classes.summaryLabel}>
+            Order Total
+          </Typography>
+          <Typography variant="subtitle1" sx={{ fontSize: 18, fontWeight: 600 }}>
+            ₹4,324
+          </Typography>
+        </Grid>
+
+        <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }}>
+          Proceed to buy
+        </Button>
+      </Card>
+    );
+  };
+
+  return (
+    <>
+      <div className={classes.headingContainer}>
+        <Typography variant="h3" className={classes.heading}>
+          My Cart
+        </Typography>
+      </div>
+
+      <Grid container className={classes.cartContainer}>
+        <Grid item xs={8}>
+          {renderTableHeads()}
+          {renderProducts()}
+        </Grid>
+
+        <Grid item xs={4}>
+          {renderSummaryCard()}{" "}
+        </Grid>
+      </Grid>
+    </>
   );
 }

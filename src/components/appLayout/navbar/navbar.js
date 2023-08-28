@@ -249,7 +249,8 @@ const NavBar = () => {
             // dispatchError(err?.message);
         }
     }
-
+    
+    
     return (
         <AppBar position="absolute">
             <Toolbar
@@ -423,7 +424,7 @@ const NavBar = () => {
             }
         </AppBar>
     );
-
+    
 };
 
 export default NavBar;
