@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useStyles from "./styles";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
@@ -7,44 +7,24 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
-
-const products = [
-  {
-    img: "https://www.recipetineats.com/wp-content/uploads/2023/05/Garlic-cheese-pizza_9.jpg?w=500&h=500&crop=1",
-    name: "Garden Delight Pizza A classic veg pizza that combines the zing",
-    storeLogo:
-      "https://scontent.fdel27-5.fna.fbcdn.net/v/t1.6435-9/76751710_3219243534783822_6287676884046053376_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=dIE2V0jkRzcAX-pN8EI&_nc_ht=scontent.fdel27-5.fna&oh=00_AfAujFCqt9HFw47qdYPxu_icgEtrxPbYQKH6uFJLgj5TIQ&oe=650F0BDB",
-    storeName: "Pizza hut",
-    price: "₹999",
-    qty: 1,
-    subTotal: " ₹1999",
-  },
-  {
-    img: "https://www.recipetineats.com/wp-content/uploads/2023/05/Garlic-cheese-pizza_9.jpg?w=500&h=500&crop=1",
-    name: "Garden Delight Pizza A classic veg pizza that combines the zing",
-    storeLogo:
-      "https://scontent.fdel27-5.fna.fbcdn.net/v/t1.6435-9/76751710_3219243534783822_6287676884046053376_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=dIE2V0jkRzcAX-pN8EI&_nc_ht=scontent.fdel27-5.fna&oh=00_AfAujFCqt9HFw47qdYPxu_icgEtrxPbYQKH6uFJLgj5TIQ&oe=650F0BDB",
-    storeName: "Pizza hut",
-    price: "₹999",
-    qty: 1,
-    subTotal: " ₹1999",
-  },
-  {
-    img: "https://www.recipetineats.com/wp-content/uploads/2023/05/Garlic-cheese-pizza_9.jpg?w=500&h=500&crop=1",
-    name: "Garden Delight Pizza A classic veg pizza that combines the zing",
-    storeLogo:
-      "https://scontent.fdel27-5.fna.fbcdn.net/v/t1.6435-9/76751710_3219243534783822_6287676884046053376_n.jpg?_nc_cat=1&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=dIE2V0jkRzcAX-pN8EI&_nc_ht=scontent.fdel27-5.fna&oh=00_AfAujFCqt9HFw47qdYPxu_icgEtrxPbYQKH6uFJLgj5TIQ&oe=650F0BDB",
-    storeName: "Pizza hut",
-    price: "₹999",
-    qty: 1,
-    subTotal: " ₹1999",
-  },
-];
+import { getCall } from "../../../api/axios";
+import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Cart() {
   const classes = useStyles();
-  const { cartItems } = useContext(CartContext);
   const history = useHistory();
+  const [cartItems, setCartItems] = useState([]);
+
+  const getCartItems = async () => {
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}`;
+    const res = await getCall(url);
+    setCartItems(res);
+  };
+
+  useEffect(() => {
+    getCartItems();
+  }, []);
 
   const emptyCartScreen = () => {
     return (
@@ -96,28 +76,38 @@ export default function Cart() {
   };
 
   const renderProducts = () => {
-    return products.map((item) => {
+    return cartItems.map((cartItem) => {
       return (
         <>
           <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
-          <Grid container>
+          <Grid container key={cartItem.item.id}>
             <Grid item xs={4.3}>
               <Grid container>
                 <div className={classes.moreImages}>
                   <div className={classes.greyContainer}>
-                    <img className={classes.moreImage} src={item.img} />
+                    <img
+                      className={classes.moreImage}
+                      alt="product-image"
+                      src={cartItem.item.product.descriptor.images[0]}
+                    />
                   </div>
                 </div>
                 <Grid>
                   <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
-                    {item.name}
+                    {cartItem.item.product.descriptor.name}
                   </Typography>
                   <Grid container sx={{ marginTop: "4px" }} alignItems="center">
                     <div className={classes.logoContainer}>
-                      <img className={classes.logo} src={item.storeLogo} />
+                      <img
+                        className={classes.logo}
+                        //  FIX STORE LOGO
+                        alt={"item.storeLogo"}
+                        src={"item.storeLogo"}
+                      />
                     </div>
                     <Typography variant="body1" color="#686868" sx={{ fontWeight: 500 }}>
-                      {item.storeName}
+                      {/* Fix STORE NAME */}
+                      {"item.storeName"}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -125,13 +115,13 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                {item.price}
+                {cartItem.item.product.price.value}
               </Typography>
             </Grid>
             <Grid item xs={1.2}>
               <div className={classes.qtyContainer}>
                 <Typography variant="body1" sx={{ marginRight: "6px", fontWeight: 600 }}>
-                  {item.qty}
+                  {cartItem.item.quantity.count}
                 </Typography>
                 <KeyboardArrowUpIcon className={classes.qtyArrowUp} />
                 <KeyboardArrowDownIcon className={classes.qtyArrowDown} />
@@ -139,7 +129,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.2}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                {item.subTotal}
+                {parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.price.value)}
               </Typography>
             </Grid>
             <Grid item xs={4}>
@@ -233,7 +223,7 @@ export default function Cart() {
         </Typography>
       </div>
 
-      {true ? (
+      {cartItems.length === 0 ? (
         emptyCartScreen()
       ) : (
         <Grid container className={classes.cartContainer}>

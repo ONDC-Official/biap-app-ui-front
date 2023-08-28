@@ -9,7 +9,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import { getCall } from "../../../../api/axios";
+import { getCall, postCall } from "../../../../api/axios";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
@@ -219,7 +219,7 @@ const ProductDetails = () => {
     setCustomizations(formatCustomizations(customisation_items));
   };
 
-  const addToCart = () => {
+  const addToCart = async () => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
@@ -232,7 +232,7 @@ const ProductDetails = () => {
       },
       provider: {
         id: productPayload.bpp_details.bpp_id,
-        //   locations: ["da535769edeed27819b69a35f3066b62"],
+        locations: productPayload.locations,
       },
       product: {
         id: productPayload.id,
@@ -240,8 +240,8 @@ const ProductDetails = () => {
       },
     };
 
-    console.log("Add to cart payload", payload);
-    console.log("product payload", productPayload);
+    const res = await postCall(url, payload);
+    console.log(res);
   };
 
   //   fetch product details
