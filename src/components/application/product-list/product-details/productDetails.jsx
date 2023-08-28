@@ -347,7 +347,7 @@ const ProductDetails = () => {
             Home
           </MuiLink>
           <MuiLink component={Link} underline="hover" color="inherit" to={""}>
-            abc
+            {productPayload?.item_details?.category_id}
           </MuiLink>
           <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
         </Breadcrumbs>
