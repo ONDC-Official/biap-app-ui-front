@@ -189,16 +189,17 @@ const ProductList = () => {
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                 <div role="presentation">
                     <Breadcrumbs aria-label="breadcrumb">
-                        <MuiLink component={Link} underline="hover" color="inherit" to="/">
+                        <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
                             Home
                         </MuiLink>
                         {
                             categoryName && (
                                 <MuiLink
-                                    component={Link}
+                                    // component={Link}
                                     underline="hover"
                                     color="inherit"
-                                    to={`/category/${categoryName}`}
+                                    // to={`/category/${categoryName}`}
+                                    href={`/application/products?${searchProductName?`s=${searchProductName}&`:""}${categoryName?`c=${categoryName}`:""}`}
                                 >
                                     {categoryName}
                                 </MuiLink>

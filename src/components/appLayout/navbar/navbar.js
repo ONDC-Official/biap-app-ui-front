@@ -138,6 +138,10 @@ const NavBar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    getLastEnteredValues();
+  }, [lodationData]);
+
   const setCriteriaLatLng = () => {
     if (getValueFromCookie("search_context")) {
       let sc = JSON.parse(getValueFromCookie("search_context") || {});
@@ -251,8 +255,8 @@ const NavBar = () => {
         const categoryName = query.get("c");
         const subCategoryName = query.get("sc");
         const params = new URLSearchParams({});
-        if(lodationData.pathname !== "/products"){
-            history.push(`/products?s=${search.value}`)
+        if(lodationData.pathname !== "/application/products"){
+            history.push(`/application/products?s=${search.value}`)
         }else{
             if(search.value){
                 params.set('s', search.value)
@@ -276,7 +280,7 @@ const NavBar = () => {
           className={classes.appLogo}
           onClick={() => {
             // removeCookie("search_context");
-            history.push("/");
+            history.push("/application/products");
           }}
         />
         <div className={classes.addressContainer} onClick={() => setSelectAddressModal(true)}>

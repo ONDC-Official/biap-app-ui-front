@@ -28,16 +28,26 @@ const Products = () => {
             const product = query.get("s");
             if(cat){
                 setIsCatAvailable(true);
+            }else{
+                setIsCatAvailable(false);
             }
             if(subCat){
                 setIsSubCatAvailable(true);
+            }else{
+                setIsSubCatAvailable(false)
             }
             if(product){
                 setIsSearchAvailable(true);
+            }else{
+                setIsSearchAvailable(false)
             }
         }
     }, [lodationData]);
 
+    console.log("lodationData=====>", lodationData);
+    console.log("isCatAvailable=====>", isCatAvailable);
+    console.log("isSubCatAvailable=====>", isSubCatAvailable);
+    console.log("isSearchAvailable=====>", isSearchAvailable);
     if(isSearchAvailable && isSubCatAvailable && isCatAvailable){
         return (
             <>

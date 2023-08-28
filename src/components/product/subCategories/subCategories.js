@@ -53,6 +53,7 @@ const CategoriesComponent = () => {
     let query = useQuery();
     const categoryName = query.get("c");
     const subCategoryName = query.get("sc");
+    const searchProductName = query.get("s");
 
     useEffect(() => {
         if(categoryName){
@@ -77,7 +78,17 @@ const CategoriesComponent = () => {
                     className={classes.categoriesContainer}
                     onChange={(event, page) => {
                         const subCat = subCatList[page];
-                        history.push(`/category/${categoryName}/${subCat.value}`)
+                        const params = new URLSearchParams({});
+                        if(searchProductName){
+                            params.set('s', searchProductName)
+                        }
+                        if(categoryName){
+                            params.set('c', categoryName)
+                        }
+                        if(subCategoryName){
+                            params.set('sc', subCat.value)
+                        }else{}
+                        history.replace({ pathname: lodationData.pathname, search: params.toString() });
                     }}
                     boundaryCount={2}
                     renderItem={(item) => {
@@ -109,7 +120,17 @@ const CategoriesComponent = () => {
                                     color="inherit" className={classes.actionButton}
                                     onClick={() => {
                                         const subCat = subCatList[item.page];
-                                        history.push(`/category/${categoryName}/${subCat.value}`)
+                                        const params = new URLSearchParams({});
+                                        if(searchProductName){
+                                            params.set('s', searchProductName)
+                                        }
+                                        if(categoryName){
+                                            params.set('c', categoryName)
+                                        }
+                                        if(subCategoryName){
+                                            params.set('sc', subCat.value)
+                                        }else{}
+                                        history.replace({ pathname: lodationData.pathname, search: params.toString() });
                                     }}
                                     disabled={item.page === -1}
                                 >

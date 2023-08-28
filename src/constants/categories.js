@@ -10,7 +10,7 @@ export const categoryList = [
     {id: '1', name: 'Fashion', shortName: 'Fashion', imageUrl: Fashion, routeName: 'Fashion'},
     {id: '2', name: 'Grocery', shortName: 'Grocery', imageUrl: Grocery, routeName: 'Grocery'},
     {id: '3', name: 'Electronics', shortName: 'Electronics', imageUrl: Electronics, routeName: 'Electronics'},
-    {id: '4', name: 'Food & Beverage', shortName: 'F&B', imageUrl: Food, routeName: 'F&B'},
+    {id: '4', name: 'Food & Beverage', shortName: 'F&B', imageUrl: Food, routeName: 'FNB'},
     {id: '5', name: 'Home & Decor', shortName: 'Home & Decor', imageUrl: Home, routeName: 'Home & Decor'},
     {id: '6', name: 'Health & Wellness', shortName: 'Health & Wellness', imageUrl: Health, routeName: 'Health & Wellness'},
     {id: '7', name: 'Beauty & Personal Care', shortName: 'BPC', imageUrl: BPC, routeName: 'BPC'},
@@ -92,7 +92,7 @@ export const PRODUCT_SUBCATEGORY = {
         {value: 'Cookware and Dining', key: 'Cookware and Dining', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
         {value: 'Storage and Organisation', key: 'Storage and Organisation', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
     ],
-    "F&B": [
+    "FNB": [
         {value: 'Baklava', key: 'Baklava', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},
         {value: 'Bao', key: 'Bao', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},
         {value: 'Barbecue', key: 'Barbecue', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},

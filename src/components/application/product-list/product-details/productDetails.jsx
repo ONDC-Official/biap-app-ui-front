@@ -411,7 +411,7 @@ const ProductDetails = () => {
     <>
       <div className={classes.breadCrumbs} onClick={() => {}}>
         <Breadcrumbs aria-label="breadcrumb">
-          <MuiLink component={Link} underline="hover" color="inherit" to="/">
+          <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
             Home
           </MuiLink>
           {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>

@@ -15,13 +15,13 @@ ReactDOM.render(
     <React.StrictMode>
         <ToastProvider>
             <ErrorBoundary>
-                <CartContextProvider>
-                    <AddressContextProvider>
-                        <SearchContextProvider>
+                {/*<CartContextProvider>*/}
+                {/*    <AddressContextProvider>*/}
+                {/*        <SearchContextProvider>*/}
                             <App/>
-                        </SearchContextProvider>
-                    </AddressContextProvider>
-                </CartContextProvider>
+                {/*        </SearchContextProvider>*/}
+                {/*    </AddressContextProvider>*/}
+                {/*</CartContextProvider>*/}
             </ErrorBoundary>
         </ToastProvider>
     </React.StrictMode>,

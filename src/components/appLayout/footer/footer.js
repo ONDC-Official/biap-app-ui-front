@@ -24,7 +24,7 @@ const Footer = () => {
 
     const updateQueryParams = (catName) => {
         if(lodationData.search === "" && query.get("c") === null){
-            history.push(`products?c=${catName}`)
+            history.push(`/application/products?c=${catName}`)
         }else{
             const params = new URLSearchParams({});
             params.set('c', catName)
@@ -44,6 +44,10 @@ const Footer = () => {
                             src={logo}
                             alt="logo"
                             className={classes.footerAppLogo}
+                            onClick={() => {
+                                // removeCookie("search_context");
+                                history.push("/application/products");
+                            }}
                         />
                     </div>
                     <div
