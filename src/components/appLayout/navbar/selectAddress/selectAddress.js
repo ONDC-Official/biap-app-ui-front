@@ -21,7 +21,6 @@ const SelectAddress = ({
     const classes = useStyles();
     const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
 
-    console.log("deliveryAddress=====>", deliveryAddress)
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 

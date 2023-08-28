@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import {useHistory} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 import Fashion1 from '../../assets/images/category/Fashion1.png';
 import Fashion2 from '../../assets/images/category/Fashion2.png';
 
@@ -30,13 +30,29 @@ import TopBrands from "./topBrands/topBrands";
 const Home = () => {
     const history = useHistory();
     const classes = useStyles();
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+
+    const updateQueryParams = (catName) => {
+        if(lodationData.search === "" && query.get("c") === null){
+            history.push(`products?c=${catName}`)
+        }else{
+
+        }
+
+    };
+
     return (
         <Box className={classes.homeContainer}>
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                            <Card className={classes.fashionCategory} onClick={() => history.push(`category/Fashion`)}>
+                            <Card className={classes.fashionCategory} onClick={() => updateQueryParams("Fashion")}>
                                 <div className={classes.fashionImages}>
                                     <img src={Fashion1} alt="Fashio 1"/>
                                     <img className={classes.fashionImage2} src={Fashion2} alt="Fashio 2"/>

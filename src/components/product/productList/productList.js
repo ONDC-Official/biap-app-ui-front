@@ -54,7 +54,7 @@ const SAREETYPES = [
 ]
 const ProductList = () => {
     const classes = useStyles();
-    let { categoryName, subCategoryName } = useParams();
+    // let { categoryName, subCategoryName } = useParams();
     const history = useHistory();
     const lodationData = useLocation();
     const { searchData, locationData } = useContext(SearchContext);
@@ -72,19 +72,14 @@ const ProductList = () => {
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
-    // useEffect(() => {
-    //     if(searchData || locationData){
-    //         console.log("search_context searchData product page=====>", searchData)
-    //         console.log("search_context locationData product page=====>", locationData)
-    //         getAllProducts(searchName)
-    //     }
-    // }, [searchData, locationData]);
-
     const useQuery = () => {
         const { search } = lodationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
+    const categoryName = query.get("c");
+    const subCategoryName = query.get("sc");
+    const searchProductName = query.get("s");
 
     useEffect(() => {
         if(lodationData){
@@ -197,15 +192,23 @@ const ProductList = () => {
                         <MuiLink component={Link} underline="hover" color="inherit" to="/">
                             Home
                         </MuiLink>
-                        <MuiLink
-                            component={Link}
-                            underline="hover"
-                            color="inherit"
-                            to={`/category/${categoryName}`}
-                        >
-                            {categoryName}
-                        </MuiLink>
-                        <Typography color="text.primary">{subCategoryName}</Typography>
+                        {
+                            categoryName && (
+                                <MuiLink
+                                    component={Link}
+                                    underline="hover"
+                                    color="inherit"
+                                    to={`/category/${categoryName}`}
+                                >
+                                    {categoryName}
+                                </MuiLink>
+                            )
+                        }
+                        {
+                            (subCategoryName || searchProductName) && (
+                                <Typography color="text.primary">{subCategoryName || searchProductName}</Typography>
+                            )
+                        }
                     </Breadcrumbs>
                 </div>
             </Grid>

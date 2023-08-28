@@ -40,7 +40,8 @@ const useStyles = makeStyles({
     categoryNameTypo: {
         fontWeight: '600 !important',
         marginTop: '5px !important',
-        maxWidth: '120px'
+        maxWidth: '120px',
+        height: '40px !important'
     },
     selectedCategory: {
         background: '#EBEBEB !important',

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import useStyles from './style';
-import {useParams} from "react-router-dom";
+import {useLocation, useParams} from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -34,9 +34,16 @@ const SubCatList = [
 ];
 
 const SubCategories = () => {
-    let { categoryName } = useParams();
+    // let { categoryName } = useParams();
     const classes = useStyles();
     const [subCatList, setSubCatList] = useState([]);
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+    const categoryName = query.get("c");
 
     useEffect(() => {
         if(categoryName){

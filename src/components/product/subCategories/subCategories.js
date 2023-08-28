@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import useStyles from './style';
-import {useHistory, useParams} from "react-router-dom";
+import {useHistory, useLocation, useParams} from "react-router-dom";
 import {PRODUCT_SUBCATEGORY} from "../../../constants/categories";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
@@ -11,11 +11,24 @@ import {ReactComponent as PreviousIcon} from '../../../assets/images/previous.sv
 import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
 
 const SingleCategory = ({data, index}) => {
-    let { categoryName, subCategoryName } = useParams();
+    // let { categoryName, subCategoryName } = useParams();
     const classes = useStyles();
     const history = useHistory();
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+    const categoryName = query.get("c");
+    const subCategoryName = query.get("sc");
+    const updateSearchParams = () => {
+        const params = new URLSearchParams({['c']: categoryName, ['sc']: data.value });
+        history.replace({ pathname: lodationData.pathname, search: params.toString() })
+    };
+
     return (
-        <div className={classes.categoryItem} onClick={() => history.push(`/category/${categoryName}/${data.value}`)}>
+        <div className={classes.categoryItem} onClick={() => updateSearchParams()}>
             <div className={`${classes.categoryItemImageContainer} ${subCategoryName === data.value?classes.selectedCategory: ""}`}>
                 <img className={classes.categoryImage} src={data.imageUrl} alt={`sub-category-img-${index}`} />
             </div>
@@ -28,25 +41,32 @@ const SingleCategory = ({data, index}) => {
 
 const CategoriesComponent = () => {
     const classes = useStyles();
-    let { categoryName, subCategoryName } = useParams();
+    // let { categoryName, subCategoryName } = useParams();
     const history = useHistory();
     const [subCatList, setSubCatList] = useState([]);
     const [page, setPage] = useState(0);
-    console.log("useParams()=====>", useParams())
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+    const categoryName = query.get("c");
+    const subCategoryName = query.get("sc");
+
     useEffect(() => {
         if(categoryName){
             const options = PRODUCT_SUBCATEGORY[categoryName];
-            console.log("options=====>", options)
             setSubCatList(options || []);
         }
-    }, [categoryName]);
+    }, [categoryName, lodationData]);
 
     useEffect(() => {
         if(subCategoryName && subCatList.length > 0){
             const findsubCatIndex = subCatList.findIndex((item) => item.value === subCategoryName);
             setPage(findsubCatIndex);
         }
-    }, [subCategoryName, subCatList]);
+    }, [subCategoryName, subCatList, lodationData]);
     return (
         <Grid container spacing={3} className={classes.categoriesRootContainer}>
             <Grid item xs={12} sm={12} md={1.5} lg={1.5} xl={1.5}></Grid>
@@ -61,7 +81,6 @@ const CategoriesComponent = () => {
                     }}
                     boundaryCount={2}
                     renderItem={(item) => {
-                        console.log("item=====>", item)
                         if(item.type === "page"){
                             const subCatIndex = item.page - 1;
                             const subCat = subCatList[subCatIndex];
