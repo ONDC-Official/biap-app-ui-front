@@ -7,22 +7,37 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
-import { getCall } from "../../../api/axios";
+import { deleteCall, getCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Cart() {
   const classes = useStyles();
   const history = useHistory();
+  let user = JSON.parse(getValueFromCookie("user"));
   const [cartItems, setCartItems] = useState([]);
 
+  const getCartSubtotal = () => {
+    let subtotal = 0;
+    cartItems.map((cartItem) => {
+      subtotal += cartItem.item.product.subtotal;
+    });
+    return subtotal;
+  };
+
   const getCartItems = async () => {
-    const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
     setCartItems(res);
   };
 
+  const deleteCartItem = async (itemId) => {
+    const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
+    const res = await deleteCall(url);
+    getCartItems();
+  };
+
   useEffect(() => {
+    window.scrollTo(0, 0);
     getCartItems();
   }, []);
 
@@ -51,7 +66,7 @@ export default function Cart() {
             </Typography>
           </Grid>
           <Grid item xs={1}>
-            <Typography variant="body1" className={classes.tableHead}>
+            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "6px" }}>
               Price
             </Typography>
           </Grid>
@@ -80,7 +95,7 @@ export default function Cart() {
       return (
         <>
           <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
-          <Grid container key={cartItem.item.id}>
+          <Grid container key={cartItem.item.id} style={{ alignItems: "flex-start" }}>
             <Grid item xs={4.3}>
               <Grid container>
                 <div className={classes.moreImages}>
@@ -98,16 +113,10 @@ export default function Cart() {
                   </Typography>
                   <Grid container sx={{ marginTop: "4px" }} alignItems="center">
                     <div className={classes.logoContainer}>
-                      <img
-                        className={classes.logo}
-                        //  FIX STORE LOGO
-                        alt={"item.storeLogo"}
-                        src={"item.storeLogo"}
-                      />
+                      <img className={classes.logo} alt={"store-logo"} src={cartItem.item.provider.descriptor.symbol} />
                     </div>
                     <Typography variant="body1" color="#686868" sx={{ fontWeight: 500 }}>
-                      {/* Fix STORE NAME */}
-                      {"item.storeName"}
+                      {cartItem.item.provider.descriptor.name}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -115,7 +124,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                {cartItem.item.product.price.value}
+                ₹ {cartItem.item.product.price.value}
               </Typography>
             </Grid>
             <Grid item xs={1.2}>
@@ -127,9 +136,9 @@ export default function Cart() {
                 <KeyboardArrowDownIcon className={classes.qtyArrowDown} />
               </div>
             </Grid>
-            <Grid item xs={1.2}>
+            <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                {parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.price.value)}
+                ₹{parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.subtotal)}
               </Typography>
             </Grid>
             <Grid item xs={4}>
@@ -143,7 +152,12 @@ export default function Cart() {
               />
 
               <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
-                <Button variant="text" startIcon={<DeleteOutlineIcon size="small" />} color="error">
+                <Button
+                  variant="text"
+                  startIcon={<DeleteOutlineIcon size="small" />}
+                  color="error"
+                  onClick={() => deleteCartItem(cartItem.item.id)}
+                >
                   <Typography>Delete</Typography>
                 </Button>
               </Grid>
@@ -166,7 +180,7 @@ export default function Cart() {
             Subtotal
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹4,300.00
+            ₹{getCartSubtotal()}
           </Typography>
         </Grid>
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
@@ -179,7 +193,7 @@ export default function Cart() {
             </Typography>
           </Grid>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹21.00
+            ₹0
           </Typography>
         </Grid>
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
@@ -187,7 +201,7 @@ export default function Cart() {
             Tax
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹1.91
+            ₹0
           </Typography>
         </Grid>
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
@@ -195,7 +209,7 @@ export default function Cart() {
             GST (10%)
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹1.91
+            ₹0
           </Typography>
         </Grid>
         <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
@@ -204,7 +218,7 @@ export default function Cart() {
             Order Total
           </Typography>
           <Typography variant="subtitle1" sx={{ fontSize: 18, fontWeight: 600 }}>
-            ₹4,324
+            ₹{getCartSubtotal()}
           </Typography>
         </Grid>
 
@@ -229,7 +243,9 @@ export default function Cart() {
         <Grid container className={classes.cartContainer}>
           <Grid item xs={8}>
             {renderTableHeads()}
-            {renderProducts()}
+            <div style={{ height: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+              {renderProducts()}
+            </div>
           </Grid>
 
           <Grid item xs={4}>

@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import useStyles from "./style";
-import Typography from "@mui/material/Typography";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
-import { Link, useLocation } from "react-router-dom";
-import DoneIcon from "@mui/icons-material/Done";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import useCancellablePromise from "../../../../api/cancelRequest";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 import { getCall, postCall } from "../../../../api/axios";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
+import { Link, useLocation, useHistory } from "react-router-dom";
+import useCancellablePromise from "../../../../api/cancelRequest";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 const moreImages = [
@@ -51,6 +50,7 @@ const additionalProductDetails = {
 
 const ProductDetails = () => {
   const classes = useStyles();
+  const history = useHistory();
   const location = useLocation();
   const { cancellablePromise } = useCancellablePromise();
 
@@ -64,7 +64,7 @@ const ProductDetails = () => {
     1: { options: [], selected: [] },
   });
 
-  const [activeImage, setActiveImage] = useState(moreImages[0]);
+  const [activeImage, setActiveImage] = useState("");
   const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
 
   const handleImageClick = (imageUrl) => {
@@ -219,10 +219,23 @@ const ProductDetails = () => {
     setCustomizations(formatCustomizations(customisation_items));
   };
 
+  const calculateSubtotal = () => {
+    let subtotal = 0;
+
+    for (const level in customization_state) {
+      const selectedOptions = customization_state[level].selected;
+      if (selectedOptions.length > 0) {
+        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
+      }
+    }
+    return subtotal;
+  };
+
   const addToCart = async () => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
+    const subtotal = productDetails.price.value + calculateSubtotal();
     const payload = {
       id: productPayload.id,
       bpp_id: productPayload.bpp_details.bpp_id,
@@ -233,15 +246,19 @@ const ProductDetails = () => {
       provider: {
         id: productPayload.bpp_details.bpp_id,
         locations: productPayload.locations,
+        ...productPayload.provider_details,
       },
       product: {
         id: productPayload.id,
+        subtotal,
         ...productPayload.item_details,
       },
     };
 
+    //  console.log(payload);
+
     const res = await postCall(url, payload);
-    console.log(res);
+    history.push("/application/cart");
   };
 
   //   fetch product details
@@ -256,47 +273,56 @@ const ProductDetails = () => {
   useEffect(() => {
     if (!isInitialized && customizationGroups.length > 0 && customizations.length > 0) {
       const initializeCustomizationState = () => {
-        let currentGroup = "CG1";
-        let level = 1;
-        const newState = { ...customization_state };
-
-        while (currentGroup) {
-          const group = customizationGroups.find((group) => group.id === currentGroup);
-          if (group) {
-            newState[level] = {
-              id: group.id,
-              seq: group.seq,
-              name: group.name,
-              options: [],
-              selected: [],
-            };
-            newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
-
-            // Skip selecting an option for non-mandatory groups (minQuantity === 0)
-            if (group.minQuantity === 1) {
-              const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
-
-              // If no default option, select the first available option
-              if (!selectedCustomization) {
-                newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
-              } else {
-                newState[level].selected = [selectedCustomization];
-              }
-            }
-
-            currentGroup = newState[level].selected[0]?.child || null;
-            level++;
-
-            // If a non-mandatory group is encountered, break the loop
-            if (group.minQuantity === 0) {
-              break;
-            }
-          } else {
-            currentGroup = null;
+        let firstGroup = null;
+        for (const group of customizationGroups) {
+          if (group.seq === 1) {
+            firstGroup = group;
+            break;
           }
         }
+        if (firstGroup) {
+          let currentGroup = firstGroup.id;
+          let level = 1;
+          const newState = { ...customization_state };
 
-        setCustomizationState(newState);
+          while (currentGroup) {
+            const group = customizationGroups.find((group) => group.id === currentGroup);
+            if (group) {
+              newState[level] = {
+                id: group.id,
+                seq: group.seq,
+                name: group.name,
+                options: [],
+                selected: [],
+              };
+              newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+
+              // Skip selecting an option for non-mandatory groups (minQuantity === 0)
+              if (group.minQuantity === 1) {
+                const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
+
+                // If no default option, select the first available option
+                if (!selectedCustomization) {
+                  newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
+                } else {
+                  newState[level].selected = [selectedCustomization];
+                }
+              }
+
+              currentGroup = newState[level].selected[0]?.child || null;
+              level++;
+
+              // If a non-mandatory group is encountered, break the loop
+              if (group.minQuantity === 0) {
+                break;
+              }
+            } else {
+              currentGroup = null;
+            }
+          }
+
+          setCustomizationState(newState);
+        }
       };
 
       setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
