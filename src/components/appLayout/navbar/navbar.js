@@ -278,6 +278,13 @@ const NavBar = () => {
               placeholder="Search..."
               inputProps={{ "aria-label": "Search..." }}
               value={search?.value || ""}
+              onKeyDown={(e) => {
+                  if(e.keyCode == 13){
+                      e.preventDefault()
+                      setSearchData(() => search);
+                      history.push(`/products?s=${search.value}`);
+                  }
+              }}
               onChange={(e) => {
                 const searchValue = e.target.value;
                 let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
@@ -297,7 +304,6 @@ const NavBar = () => {
               className={classes.listIcon}
               aria-label="search"
               onClick={() => {
-                console.log("history=====>", history);
                 setSearchData(() => search);
                 history.push(`/products?s=${search.value}`);
               }}
@@ -313,8 +319,8 @@ const NavBar = () => {
           </Typography>
         </div>
         <div className={classes.cart}>
-          <CartIcon />
           <Link to="/application/cart">
+            <CartIcon />
             <Typography variant="body2" className={classes.cartTypo}>
               Cart
             </Typography>

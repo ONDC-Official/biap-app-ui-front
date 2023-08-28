@@ -8,9 +8,11 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import {ReactComponent as CartIcon} from '../../../assets/images/cart.svg';
 import no_image_found from "../../../assets/images/no_image_found.png";
+import {useHistory} from "react-router-dom";
 
 const ProductGridView = (props) => {
     const classes = useStyles();
+    const history = useHistory();
     const {
         product,
         price,
@@ -26,7 +28,10 @@ const ProductGridView = (props) => {
     const { name: product_name, images } = descriptor;
 
     return (
-        <div className={classes.productItemContainer}>
+        <div
+            className={classes.productItemContainer}
+            onClick={() => history.push(`/application/products/${id}`)}
+        >
             <Card className={classes.productCard}>
                 <img className={classes.productImage} src={images?.length > 0 ? images[0] : no_image_found} alt={`sub-cat-img-${bpp_id}`}/>
                 <Tooltip title="Add to cart">
