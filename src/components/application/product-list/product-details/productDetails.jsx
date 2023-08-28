@@ -1,25 +1,13 @@
 import React, { useEffect, useState } from "react";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Button,
-  Card,
-  Divider,
-  Grid,
-  MenuItem,
-  Select,
-} from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import useStyles from "./style";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import DoneIcon from "@mui/icons-material/Done";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { getCall } from "../../../../api/axios";
 
@@ -61,6 +49,7 @@ const additionalProductDetails = {
 
 const ProductDetails = () => {
   const classes = useStyles();
+  const location = useLocation();
   const { cancellablePromise } = useCancellablePromise();
 
   const [productDetails, setProductDetails] = useState({});
@@ -215,12 +204,10 @@ const ProductDetails = () => {
     return customizations;
   };
 
-  const getProductDetails = async () => {
-    const data = await cancellablePromise(getCall(`/clientApis/v2/items/sellerNP.com_P1_I1`));
+  const getProductDetails = async (productId) => {
+    const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
     const { item_details, customisation_groups, customisation_items } = data.response;
 
-    //  console.log(data.response);
-    //  console.log(customisation_items);
     setProductDetails(item_details);
     setActiveImage(item_details?.descriptor?.images[0]);
 
@@ -230,8 +217,11 @@ const ProductDetails = () => {
 
   //   fetch product details
   useEffect(() => {
-    getProductDetails();
-  }, []);
+    let pathname = location.pathname;
+    let parts = pathname.split("/");
+    let productId = parts[parts.length - 1];
+    getProductDetails(productId);
+  }, [location]);
 
   // initialize customization state
   useEffect(() => {
