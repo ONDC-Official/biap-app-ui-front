@@ -10,11 +10,28 @@ import appStoreImage from "../../../assets/images/appStore.png";
 import playStoreImage from "../../../assets/images/playStore.png";
 import {removeCookie} from "../../../utils/cookies";
 import {categoryList} from '../../../constants/categories';
-import {useHistory} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 
 const Footer = () => {
     const classes = useStyles();
     const history = useHistory();
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+
+    const updateQueryParams = (catName) => {
+        if(lodationData.search === "" && query.get("c") === null){
+            history.push(`products?c=${catName}`)
+        }else{
+            const params = new URLSearchParams({});
+            params.set('c', catName)
+            history.replace({ pathname: lodationData.pathname, search: params.toString() });
+        }
+
+    };
     return (
         <Box
             component="footer"
@@ -73,7 +90,7 @@ const Footer = () => {
                     <ul className={classes.listContainer}>
                         {
                             categoryList.map((item, index) => (
-                                <li key={`category-${index}`} className={classes.listStyle} onClick={() => history.push(`/category/${item.routeName}`)}>
+                                <li key={`category-${index}`} className={classes.listStyle} onClick={() => updateQueryParams(item.routeName)}>
                                     <Typography
                                         className={classes.itemDetailsLabel} variant="body" component="div" color="white"
                                     >
