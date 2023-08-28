@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import useStyles from "./styles";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -44,6 +45,21 @@ export default function Cart() {
   const classes = useStyles();
   const { cartItems } = useContext(CartContext);
   const history = useHistory();
+
+  const emptyCartScreen = () => {
+    return (
+      <div className={classes.emptyCartScreen}>
+        <InfoOutlinedIcon color="warning" sx={{ fontSize: 90, marginBottom: 2 }} />
+        <Typography variant="h3" sx={{ fontFamily: "Inter", fontWeight: 700, textTransform: "none" }}>
+          Your Cart is Empty. Please add items
+        </Typography>
+        <Typography variant="body" sx={{ marginTop: 2, marginBottom: 2 }}>
+          Explore our wide selection and find something you like
+        </Typography>
+        <Button variant="contained">Explore Now</Button>
+      </div>
+    );
+  };
 
   const renderTableHeads = () => {
     return (
@@ -217,16 +233,20 @@ export default function Cart() {
         </Typography>
       </div>
 
-      <Grid container className={classes.cartContainer}>
-        <Grid item xs={8}>
-          {renderTableHeads()}
-          {renderProducts()}
-        </Grid>
+      {true ? (
+        emptyCartScreen()
+      ) : (
+        <Grid container className={classes.cartContainer}>
+          <Grid item xs={8}>
+            {renderTableHeads()}
+            {renderProducts()}
+          </Grid>
 
-        <Grid item xs={4}>
-          {renderSummaryCard()}{" "}
+          <Grid item xs={4}>
+            {renderSummaryCard()}
+          </Grid>
         </Grid>
-      </Grid>
+      )}
     </>
   );
 }
