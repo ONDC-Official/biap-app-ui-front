@@ -101,6 +101,14 @@ const useStyles = makeStyles({
     fontSize: "13px !important",
     fontWeight: "600 !important",
   },
+  emptyCartScreen: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#F9F9F9",
+    height: "80vh",
+  },
 });
 
 export default useStyles;

@@ -109,6 +109,7 @@ const useStyles = makeStyles({
   key: {
     textTransform: "capitalize",
     fontWeight: 500,
+    fontFamily: "Inter !important",
   },
   value: {
     fontWeight: 500,
@@ -148,6 +149,22 @@ const useStyles = makeStyles({
     right: 3,
     fontSize: "12px !important",
     color: "#CCCCCC",
+  },
+  square: {
+    backgroundColor: "transparent",
+    border: "1px solid #008001",
+    width: 18,
+    height: 19,
+    marginRight: 6,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circle: {
+    backgroundColor: "#008001",
+    borderRadius: "50%",
+    height: "10px",
+    width: "10px",
   },
 });
 

@@ -10,6 +10,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { getCall } from "../../../../api/axios";
+import { getValueFromCookie } from "../../../../utils/cookies";
+import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 
 const moreImages = [
   "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
@@ -52,6 +54,7 @@ const ProductDetails = () => {
   const location = useLocation();
   const { cancellablePromise } = useCancellablePromise();
 
+  const [productPayload, setProductPayload] = useState({});
   const [productDetails, setProductDetails] = useState({});
   const [isInitialized, setIsInitialized] = useState(false);
   const [customizationGroups, setCustomizationGroups] = useState([]);
@@ -208,11 +211,37 @@ const ProductDetails = () => {
     const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
     const { item_details, customisation_groups, customisation_items } = data.response;
 
+    setProductPayload(data.response);
     setProductDetails(item_details);
     setActiveImage(item_details?.descriptor?.images[0]);
 
     setCustomizationGroups(formatCustomizationGroups(customisation_groups));
     setCustomizations(formatCustomizations(customisation_items));
+  };
+
+  const addToCart = () => {
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}`;
+
+    const payload = {
+      id: productPayload.id,
+      bpp_id: productPayload.bpp_details.bpp_id,
+      bpp_uri: productPayload.context.bpp_uri,
+      quantity: {
+        count: 1,
+      },
+      provider: {
+        id: productPayload.bpp_details.bpp_id,
+        //   locations: ["da535769edeed27819b69a35f3066b62"],
+      },
+      product: {
+        id: productPayload.id,
+        ...productPayload.item_details,
+      },
+    };
+
+    console.log("Add to cart payload", payload);
+    console.log("product payload", productPayload);
   };
 
   //   fetch product details
@@ -276,6 +305,41 @@ const ProductDetails = () => {
     }
   }, [customizationGroups, customizations, isInitialized]);
 
+  const renderVegNonVegTag = () => {
+    const category = "veg";
+
+    const getTagColor = () => {
+      if (category === "veg") {
+        return "#008001";
+      } else if (category == "nonVeg") {
+        return "red";
+      } else {
+        return "red";
+      }
+    };
+
+    const getTextColor = () => {
+      if (category === "veg") {
+        return "#419E6A";
+      } else if (category == "nonVeg") {
+        return "red";
+      } else {
+        return "red";
+      }
+    };
+
+    return (
+      <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
+        <div className={classes.square} style={{ borderColor: getTagColor() }}>
+          <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+        </div>
+        <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
+          Veg
+        </Typography>
+      </Grid>
+    );
+  };
+
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
@@ -299,8 +363,13 @@ const ProductDetails = () => {
                     <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
                       {c.name}
                     </Typography>
-                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#222"}>
-                      ₹{c.price}
+                    <Typography
+                      variant="body1"
+                      color={cg.selected.includes(c) ? "white" : "#222"}
+                      sx={{ fontSize: 16, fontWeight: 600 }}
+                    >
+                      <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                      {c.price}
                     </Typography>
                   </div>
                 </>
@@ -319,9 +388,9 @@ const ProductDetails = () => {
           <MuiLink component={Link} underline="hover" color="inherit" to="/">
             Home
           </MuiLink>
-          <MuiLink component={Link} underline="hover" color="inherit" to={""}>
-            abc
-          </MuiLink>
+          {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>
+            {productPayload?.item_details?.category_id}
+          </MuiLink> */}
           <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
         </Breadcrumbs>
       </div>
@@ -349,7 +418,8 @@ const ProductDetails = () => {
         </Grid>
         <Grid item xs={5}>
           <Card className={classes.productCard}>
-            {true ? (
+            {renderVegNonVegTag()}
+            {/* {true ? (
               <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
                 <DoneIcon color="success" fontSize="small" /> In stock
               </Typography>
@@ -360,11 +430,11 @@ const ProductDetails = () => {
                   Out of Stock
                 </Typography>
               </Grid>
-            )}
-            <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
+            )} */}
+            <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
               {productDetails?.descriptor?.name}
             </Typography>
-            <Typography variant="h4" color="black" sx={{ marginBottom: 1 }}>
+            <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}>
               ₹ {productDetails?.price?.value}
             </Typography>
             <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
@@ -440,7 +510,11 @@ const ProductDetails = () => {
             {renderCustomizations()}
 
             <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
-              <Button variant="contained" sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}>
+              <Button
+                variant="contained"
+                sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
+                onClick={addToCart}
+              >
                 Add to cart
               </Button>
               <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
@@ -454,7 +528,7 @@ const ProductDetails = () => {
         <Grid item xs={7} className={classes.productDetailsLeft}>
           <Accordion elevation={0} square defaultExpanded>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}>
-              <Typography variant="h4" color="black">
+              <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 600 }}>
                 Product Details
               </Typography>
               <Divider />
