@@ -109,16 +109,10 @@ export default function Cart() {
                   </Typography>
                   <Grid container sx={{ marginTop: "4px" }} alignItems="center">
                     <div className={classes.logoContainer}>
-                      <img
-                        className={classes.logo}
-                        //  FIX STORE LOGO
-                        alt={"item.storeLogo"}
-                        src={"item.storeLogo"}
-                      />
+                      <img className={classes.logo} alt={"store-logo"} src={cartItem.item.provider.descriptor.symbol} />
                     </div>
                     <Typography variant="body1" color="#686868" sx={{ fontWeight: 500 }}>
-                      {/* Fix STORE NAME */}
-                      {"item.storeName"}
+                      {cartItem.item.provider.descriptor.name}
                     </Typography>
                   </Grid>
                 </Grid>

@@ -233,12 +233,14 @@ const ProductDetails = () => {
       provider: {
         id: productPayload.bpp_details.bpp_id,
         locations: productPayload.locations,
+        ...productPayload.provider_details,
       },
       product: {
         id: productPayload.id,
         ...productPayload.item_details,
       },
     };
+
     const res = await postCall(url, payload);
     history.push("/application/cart");
   };
