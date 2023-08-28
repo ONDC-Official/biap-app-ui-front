@@ -138,6 +138,10 @@ const NavBar = () => {
     };
   }, []);
 
+  useEffect(() => {
+    getLastEnteredValues();
+  }, [lodationData]);
+
   const setCriteriaLatLng = () => {
     if (getValueFromCookie("search_context")) {
       let sc = JSON.parse(getValueFromCookie("search_context") || {});
