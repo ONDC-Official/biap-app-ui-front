@@ -43,6 +43,9 @@ const NavBar = () => {
   const { setSearchData, setLocationData } = useContext(SearchContext);
   const { setDeliveryAddress } = useContext(AddressContext);
 
+    useEffect(() => {
+
+    }, [lodationData]);
   // STATES
   const [inlineError, setInlineError] = useState({
     location_error: "",
@@ -80,7 +83,6 @@ const NavBar = () => {
       const data = await cancellablePromise(getCall("/clientApis/v1/delivery_address"));
       setAddressList(data);
     } catch (err) {
-      console.log("err.response=====>", err);
       if (err.response.data.length > 0) {
         setAddressList([]);
         return;
@@ -98,29 +100,26 @@ const NavBar = () => {
     }
   };
 
-  console.log("query====>", query);
   // use this function to get last entered values
   function getLastEnteredValues() {
+    const searchProductName = query.get("s");
     let search_context = getValueFromCookie("search_context");
     if (search_context) {
       search_context = Object.assign({}, JSON.parse(search_context));
-      console.log("search_context=====>", search_context);
       setSearch(() => ({
         type: search_context.search.type,
-        value: query.size > 0 ? query.get("s") : "",
+        value: query.size > 0 && searchProductName ? searchProductName : "",
       }));
-      console.log("MAIN search_context=====>", search_context);
       setSearchedLocation(search_context.location);
       setSearchData(() => ({
         type: search_context.search.type,
-        value: query.size > 0 ? query.get("s") : "",
+        value: query.size > 0 &&searchProductName ? searchProductName : "",
       }));
       setLocationData(() => search_context.location);
     } else {
     }
     if (getValueFromCookie("delivery_address")) {
       const address = JSON.parse(getValueFromCookie("delivery_address"));
-      console.log("address=====>", address);
       if (address) {
         setDeliveryAddress(() => address);
         fetchLatLongFromEloc(address);
@@ -248,6 +247,26 @@ const NavBar = () => {
     }
   };
 
+    const updateSearchParams = () => {
+        const categoryName = query.get("c");
+        const subCategoryName = query.get("sc");
+        const params = new URLSearchParams({});
+        if(lodationData.pathname !== "/products"){
+            history.push(`/products?s=${search.value}`)
+        }else{
+            if(search.value){
+                params.set('s', search.value)
+            }
+            if(categoryName){
+                params.set('c', categoryName)
+            }
+            if(subCategoryName){
+                params.set('sc', subCategoryName)
+            }else{}
+            history.replace({ pathname: lodationData.pathname, search: params.toString() })
+        }
+    };
+
   return (
     <AppBar position="absolute">
       <Toolbar className={classes.headerContainer}>
@@ -269,15 +288,32 @@ const NavBar = () => {
         </div>
         <div className={classes.inputContainer}>
           <Paper component="form" className={classes.inputForm}>
-            <IconButton className={classes.searchIcon} aria-label="menu">
-              <ListIcon />
-            </IconButton>
+              <IconButton
+                  type="button"
+                  disabled
+                  // className={classes.searchIcon}
+                  aria-label="search"
+                  // onClick={() => {
+                  //     setSearchData(() => search);
+                  //     history.push(`/products?s=${search.value}`);
+                  // }}
+              >
+                  <SearchIcon />
+              </IconButton>
             <InputBase
               fullWidth
               className={classes.inputBase}
               placeholder="Search..."
               inputProps={{ "aria-label": "Search..." }}
               value={search?.value || ""}
+              onKeyDown={(e) => {
+                  if(e.keyCode == 13){
+                      e.preventDefault()
+                      setSearchData(() => search);
+                      // history.push(`/products?s=${search.value}`);
+                      updateSearchParams();
+                  }
+              }}
               onChange={(e) => {
                 const searchValue = e.target.value;
                 let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
@@ -292,18 +328,10 @@ const NavBar = () => {
                 AddCookie("search_context", JSON.stringify(search_context));
               }}
             />
-            <IconButton
-              type="button"
-              className={classes.listIcon}
-              aria-label="search"
-              onClick={() => {
-                console.log("history=====>", history);
-                setSearchData(() => search);
-                history.push(`/products?s=${search.value}`);
-              }}
-            >
-              <SearchIcon />
-            </IconButton>
+              <IconButton className={classes.listIcon} aria-label="menu">
+                  <ListIcon />
+              </IconButton>
+
           </Paper>
         </div>
         <div className={classes.favourite}>
@@ -313,8 +341,8 @@ const NavBar = () => {
           </Typography>
         </div>
         <div className={classes.cart}>
-          <CartIcon />
           <Link to="/application/cart">
+            <CartIcon />
             <Typography variant="body2" className={classes.cartTypo}>
               Cart
             </Typography>

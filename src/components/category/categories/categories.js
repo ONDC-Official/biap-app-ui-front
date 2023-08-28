@@ -1,15 +1,26 @@
 import React from 'react';
 import useStyles from './style';
-import {useHistory, useParams} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 import {categoryList as Categories} from "../../../constants/categories";
 import Typography from "@mui/material/Typography";
 
 const SingleCategory = ({data, index}) => {
-    let { categoryName } = useParams();
+    // let { categoryName } = useParams();
     const history = useHistory();
     const classes = useStyles();
+    const lodationData = useLocation();
+    const useQuery = () => {
+        const { search } = lodationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
+    const categoryName = query.get("c");
+    const updateSearchParams = () => {
+        const params = new URLSearchParams({['c']: data.routeName });
+        history.replace({ pathname: lodationData.pathname, search: params.toString() })
+    };
     return (
-        <div className={classes.categoryItem} onClick={() => history.push(`/category/${data.routeName}`)}>
+        <div className={classes.categoryItem} onClick={() => updateSearchParams()}>
             <div className={`${classes.categoryItemImageContainer} ${categoryName === data.routeName?classes.selectedCategory: ""}`}>
                 <img className={classes.categoryImage} src={data.imageUrl} alt={`category-img-${index}`} />
             </div>

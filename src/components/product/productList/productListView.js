@@ -51,7 +51,7 @@ const ProductListView = (props) => {
                 <div className={classes.footerActions}>
                     <MuiLink
                         component={Link}
-                        to={"/"}
+                        to={`/application/products/${id}`}
                     >
                         View details
                     </MuiLink>

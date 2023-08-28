@@ -15,7 +15,6 @@ import PizzaHut from '../../../assets/images/brands/PizzaHut.png'
 
 const BrandCard = ({data, index, onMouseOver}) => {
     const classes = useStyles();
-    console.log("data.imgUrl=====>", data)
     return (
         <Card className={classes.brandCard} onMouseOver={onMouseOver}>
             <img className={classes.brandImage} src={data.imgUrl} alt={`brand-${index}`}/>
@@ -52,7 +51,6 @@ const TopBrands = () => {
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
                 {
                     brandsList.map((brand, index) => {
-                        console.log("brand=====>", brand)
                         return (
                             <BrandCard
                                 key={index}
