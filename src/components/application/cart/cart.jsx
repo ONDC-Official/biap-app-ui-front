@@ -58,7 +58,7 @@ export default function Cart() {
 
   const renderTableHeads = () => {
     return (
-      <>
+      <Grid>
         <Grid container sx={{ paddingTop: "20px" }}>
           <Grid item xs={4.3}>
             <Typography variant="body1" className={classes.tableHead}>
@@ -86,15 +86,16 @@ export default function Cart() {
             </Typography>
           </Grid>
         </Grid>
-      </>
+        <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
+      </Grid>
     );
   };
 
   const renderProducts = () => {
     return cartItems.map((cartItem) => {
+      console.log(cartItem);
       return (
-        <>
-          <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
+        <Grid>
           <Grid container key={cartItem.item.id} style={{ alignItems: "flex-start" }}>
             <Grid item xs={4.3}>
               <Grid container>
@@ -163,7 +164,18 @@ export default function Cart() {
               </Grid>
             </Grid>
           </Grid>
-        </>
+          {cartItem.item.quantity.count > cartItem.item.product.quantity.available.count && (
+            <Grid>
+              <div className={classes.infoBox}>
+                <Typography className={classes.infoText}>
+                  Only {cartItem.item.product.quantity.available.count} available instead of{" "}
+                  {cartItem.item.quantity.count}. Update the quantity or switch to another provider.
+                </Typography>
+              </div>
+            </Grid>
+          )}
+          <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
+        </Grid>
       );
     });
   };
@@ -243,7 +255,7 @@ export default function Cart() {
         <Grid container className={classes.cartContainer}>
           <Grid item xs={8}>
             {renderTableHeads()}
-            <div style={{ height: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+            <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
               {renderProducts()}
             </div>
           </Grid>

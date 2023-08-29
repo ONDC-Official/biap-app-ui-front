@@ -107,7 +107,18 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
     background: "#F9F9F9",
-    height: "80vh",
+  },
+  infoBox: {
+    borderRadius: "8px",
+    background: "rgba(249, 197, 28, 0.17)",
+    padding: "8px 16px",
+    width: "max-content",
+  },
+  infoText: {
+    fontFamily: "Inter !important",
+    fontSize: 14,
+    fontWeight: "500 !important",
+    color: "#C89A04",
   },
 });
 
