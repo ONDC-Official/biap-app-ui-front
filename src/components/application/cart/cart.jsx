@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import useStyles from "./styles";
 import { useHistory } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
@@ -11,10 +11,13 @@ import { deleteCall, getCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Cart() {
+  const ref = useRef(null);
   const classes = useStyles();
   const history = useHistory();
   let user = JSON.parse(getValueFromCookie("user"));
+
   const [cartItems, setCartItems] = useState([]);
+  const [haveDistinctProviders, setHaveDistinctProviders] = useState(false);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -24,7 +27,28 @@ export default function Cart() {
     return subtotal;
   };
 
+  const checkDistinctProviders = () => {
+    console.log("Checking distinct providers");
+
+    if (cartItems.length < 2) {
+      setHaveDistinctProviders(false);
+    } else {
+      const firstProvider = cartItems[0].item.provider.id;
+      let haveDifferentProvider = false;
+
+      for (let i = 1; i < cartItems.length; i++) {
+        if (cartItems[i].item.provider.id !== firstProvider) {
+          haveDifferentProvider = true;
+          break;
+        }
+      }
+
+      setHaveDistinctProviders(haveDifferentProvider);
+    }
+  };
+
   const getCartItems = async () => {
+    console.log("fetching cart items");
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
     setCartItems(res);
@@ -37,9 +61,13 @@ export default function Cart() {
   };
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    ref.current?.scrollIntoView({ behavior: "smooth" });
     getCartItems();
   }, []);
+
+  useEffect(() => {
+    checkDistinctProviders();
+  }, [cartItems.length]);
 
   const emptyCartScreen = () => {
     return (
@@ -92,8 +120,7 @@ export default function Cart() {
   };
 
   const renderProducts = () => {
-    return cartItems.map((cartItem) => {
-      console.log(cartItem);
+    return cartItems.map((cartItem, idx) => {
       return (
         <Grid>
           <Grid container key={cartItem.item.id} style={{ alignItems: "flex-start" }}>
@@ -174,6 +201,15 @@ export default function Cart() {
               </div>
             </Grid>
           )}
+          {idx === cartItems.length - 1 && haveDistinctProviders && (
+            <Grid>
+              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
+                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
+                  You are ordering from different store. Please check your order again.
+                </Typography>
+              </div>
+            </Grid>
+          )}
           <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
         </Grid>
       );
@@ -242,7 +278,7 @@ export default function Cart() {
   };
 
   return (
-    <>
+    <div ref={ref}>
       <div className={classes.headingContainer}>
         <Typography variant="h3" className={classes.heading}>
           My Cart
@@ -265,6 +301,6 @@ export default function Cart() {
           </Grid>
         </Grid>
       )}
-    </>
+    </div>
   );
 }
