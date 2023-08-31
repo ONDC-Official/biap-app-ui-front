@@ -15,20 +15,20 @@ import {useHistory, useLocation} from "react-router-dom";
 const Footer = () => {
     const classes = useStyles();
     const history = useHistory();
-    const lodationData = useLocation();
+    const locationData = useLocation();
     const useQuery = () => {
-        const { search } = lodationData;
+        const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
 
     const updateQueryParams = (catName) => {
-        if(lodationData.search === "" && query.get("c") === null){
+        if(locationData.search === "" && query.get("c") === null){
             history.push(`/application/products?c=${catName}`)
         }else{
             const params = new URLSearchParams({});
             params.set('c', catName)
-            history.replace({ pathname: lodationData.pathname, search: params.toString() });
+            history.replace({ pathname: locationData.pathname, search: params.toString() });
         }
 
     };

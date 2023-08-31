@@ -16,6 +16,7 @@ const useStyles = makeStyles({
         }
     },
     brandCard: {
+        cursor: 'pointer',
         height: '171px !important',
         width: '171px !important',
         minWidth: '171px !important',

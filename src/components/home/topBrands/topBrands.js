@@ -12,11 +12,15 @@ import Woodland from '../../../assets/images/brands/Woodland.png'
 import MI from '../../../assets/images/brands/MI.png'
 import Apple from '../../../assets/images/brands/Apple.png'
 import PizzaHut from '../../../assets/images/brands/PizzaHut.png'
+import {useHistory} from "react-router-dom";
 
 const BrandCard = ({data, index, onMouseOver}) => {
     const classes = useStyles();
+    const history = useHistory();
     return (
-        <Card className={classes.brandCard} onMouseOver={onMouseOver}>
+        <Card className={classes.brandCard} onMouseOver={onMouseOver} onClick={() => (
+            history.push(`/application/brand/${data.id}`)
+        )}>
             <img className={classes.brandImage} src={data.imgUrl} alt={`brand-${index}`}/>
         </Card>
     )
@@ -26,20 +30,20 @@ const TopBrands = () => {
     const classes = useStyles();
     const [activeBrandIndex, setActiveBrandIndex] = useState(1);
     const brandsList = [
-        {name: 'KFC', imgUrl: KFC},
-        {name: 'HNM', imgUrl: HNM},
-        {name: 'Croma', imgUrl: Croma},
-        {name: 'Woodland', imgUrl: Woodland},
-        {name: 'MI', imgUrl: MI},
-        {name: 'Apple', imgUrl: Apple},
-        {name: 'PizzaHut', imgUrl: PizzaHut},
-        {name: 'KFC', imgUrl: KFC},
-        {name: 'HNM', imgUrl: HNM},
-        {name: 'Croma', imgUrl: Croma},
-        {name: 'Woodland', imgUrl: Woodland},
-        {name: 'MI', imgUrl: MI},
-        {name: 'Apple', imgUrl: Apple},
-        {name: 'PizzaHut', imgUrl: PizzaHut},
+        {id: '1', name: 'KFC', imgUrl: KFC},
+        {id: '2', name: 'HNM', imgUrl: HNM},
+        {id: '3', name: 'Croma', imgUrl: Croma},
+        {id: '4', name: 'Woodland', imgUrl: Woodland},
+        {id: '5', name: 'MI', imgUrl: MI},
+        {id: '6', name: 'Apple', imgUrl: Apple},
+        {id: '7', name: 'PizzaHut', imgUrl: PizzaHut},
+        {id: '8', name: 'KFC', imgUrl: KFC},
+        {id: '9', name: 'HNM', imgUrl: HNM},
+        {id: '10', name: 'Croma', imgUrl: Croma},
+        {id: '11', name: 'Woodland', imgUrl: Woodland},
+        {id: '12', name: 'MI', imgUrl: MI},
+        {id: '13', name: 'Apple', imgUrl: Apple},
+        {id: '14', name: 'PizzaHut', imgUrl: PizzaHut},
     ];
     return (
         <Grid container spacing={3} className={classes.topBrandsContainer}>

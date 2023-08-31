@@ -34,9 +34,9 @@ import { AddressContext } from "../../../context/addressContext";
 const NavBar = () => {
   const classes = useStyles();
   const history = useHistory();
-  const lodationData = useLocation();
+  const locationData = useLocation();
   const useQuery = () => {
-    const { search } = lodationData;
+    const { search } = locationData;
     return React.useMemo(() => new URLSearchParams(search), [search]);
   };
   let query = useQuery();
@@ -45,7 +45,7 @@ const NavBar = () => {
 
     useEffect(() => {
 
-    }, [lodationData]);
+    }, [locationData]);
   // STATES
   const [inlineError, setInlineError] = useState({
     location_error: "",
@@ -140,7 +140,7 @@ const NavBar = () => {
 
   useEffect(() => {
     getLastEnteredValues();
-  }, [lodationData]);
+  }, [locationData]);
 
   const setCriteriaLatLng = () => {
     if (getValueFromCookie("search_context")) {
@@ -255,7 +255,7 @@ const NavBar = () => {
         const categoryName = query.get("c");
         const subCategoryName = query.get("sc");
         const params = new URLSearchParams({});
-        if(lodationData.pathname !== "/application/products"){
+        if(locationData.pathname !== "/application/products"){
             history.push(`/application/products?s=${search.value}`)
         }else{
             if(search.value){
@@ -267,7 +267,7 @@ const NavBar = () => {
             if(subCategoryName){
                 params.set('sc', subCategoryName)
             }else{}
-            history.replace({ pathname: lodationData.pathname, search: params.toString() })
+            history.replace({ pathname: locationData.pathname, search: params.toString() })
         }
     };
 
