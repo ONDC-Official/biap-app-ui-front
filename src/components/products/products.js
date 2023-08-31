@@ -11,9 +11,9 @@ import {useLocation} from "react-router-dom";
 
 const Products = () => {
 
-    const lodationData = useLocation();
+    const locationData = useLocation();
     const useQuery = () => {
-        const { search } = lodationData;
+        const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
@@ -22,7 +22,7 @@ const Products = () => {
     const [isSearchAvailable, setIsSearchAvailable] = useState(false);
 
     useEffect(() => {
-        if(lodationData){
+        if(locationData){
             const cat = query.get("c");
             const subCat = query.get("sc");
             const product = query.get("s");
@@ -42,12 +42,8 @@ const Products = () => {
                 setIsSearchAvailable(false)
             }
         }
-    }, [lodationData]);
+    }, [locationData]);
 
-    console.log("lodationData=====>", lodationData);
-    console.log("isCatAvailable=====>", isCatAvailable);
-    console.log("isSubCatAvailable=====>", isSubCatAvailable);
-    console.log("isSearchAvailable=====>", isSearchAvailable);
     if(isSearchAvailable && isSubCatAvailable && isCatAvailable){
         return (
             <>

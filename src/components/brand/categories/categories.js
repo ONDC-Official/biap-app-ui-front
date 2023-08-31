@@ -23,8 +23,8 @@ const SingleCategory = ({data, index}) => {
     const categoryName = query.get("c");
     const subCategoryName = query.get("sc");
     const updateSearchParams = () => {
-        const params = new URLSearchParams({['c']: categoryName, ['sc']: data.value });
-        history.replace({ pathname: locationData.pathname, search: params.toString() })
+        // const params = new URLSearchParams({['c']: categoryName, ['sc']: data.value });
+        // history.replace({ pathname: locationData.pathname, search: params.toString() })
     };
 
     return (
@@ -41,6 +41,7 @@ const SingleCategory = ({data, index}) => {
 
 const CategoriesComponent = () => {
     const classes = useStyles();
+    // let { categoryName, subCategoryName } = useParams();
     const history = useHistory();
     const [subCatList, setSubCatList] = useState([]);
     const [page, setPage] = useState(0);
@@ -50,7 +51,7 @@ const CategoriesComponent = () => {
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
-    const categoryName = query.get("c");
+    const categoryName = 'Fashion';//query.get("c");
     const subCategoryName = query.get("sc");
     const searchProductName = query.get("s");
 

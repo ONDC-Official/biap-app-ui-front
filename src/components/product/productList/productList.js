@@ -26,7 +26,7 @@ import {
 
 const ProductList = () => {
     const classes = useStyles();
-    const lodationData = useLocation();
+    const locationData = useLocation();
 
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
@@ -42,7 +42,7 @@ const ProductList = () => {
     const { cancellablePromise } = useCancellablePromise();
 
     const useQuery = () => {
-        const { search } = lodationData;
+        const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
@@ -51,12 +51,12 @@ const ProductList = () => {
     const searchProductName = query.get("s");
 
     useEffect(() => {
-        if(lodationData){
+        if(locationData){
             const searchName = query.get("s");
             console.log("history.location.search again=====>", searchName);
             getAllProducts(searchName)
         }
-    }, [lodationData]);
+    }, [locationData]);
     const getAllProducts = async(searchName) => {
         setIsLoading(true);
         try {

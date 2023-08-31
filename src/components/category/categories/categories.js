@@ -8,16 +8,16 @@ const SingleCategory = ({data, index}) => {
     // let { categoryName } = useParams();
     const history = useHistory();
     const classes = useStyles();
-    const lodationData = useLocation();
+    const locationData = useLocation();
     const useQuery = () => {
-        const { search } = lodationData;
+        const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
     const categoryName = query.get("c");
     const updateSearchParams = () => {
         const params = new URLSearchParams({['c']: `${data.routeName}` });
-        history.replace({ pathname: lodationData.pathname, search: params.toString() })
+        history.replace({ pathname: locationData.pathname, search: params.toString() })
     };
     return (
         <div className={classes.categoryItem} onClick={() => updateSearchParams()}>

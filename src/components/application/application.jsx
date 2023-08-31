@@ -12,6 +12,7 @@ import Home from "../home/home";
 import Profile from "./profile/profile";
 import Support from "./support/support";
 import ProductDetails from "./product-list/product-details/productDetails";
+import Brand from "../brand/brand";
 import InitializeOrder from "./initialize-order/initializeOrder";
 import MyTickets from "./my-tickets/myTickets";
 
@@ -39,6 +40,11 @@ export default function Application() {
             <PrivateRoute path={"/application/cart"}>
               <AppLayout>
                 <Cart />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute path={"/application/brand/:brandId"}>
+              <AppLayout>
+                <Brand />
               </AppLayout>
             </PrivateRoute>
 

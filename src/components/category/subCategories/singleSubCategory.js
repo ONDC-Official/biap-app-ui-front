@@ -9,15 +9,15 @@ const SingleSubCategory = ({data}) => {
     // let { categoryName } = useParams();
     const history = useHistory();
     const classes = useStyles();
-    const lodationData = useLocation();
+    const locationData = useLocation();
     const useQuery = () => {
-        const { search } = lodationData;
+        const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
     const categoryName = query.get("c");
     const updateQueryParams = () => {
-        if(lodationData.search === "" && query.get("c") === null){
+        if(locationData.search === "" && query.get("c") === null){
             history.push(`/application/products?sc=${data.value}`)
         }else{
             history.push(`/application/products?c=${categoryName}&sc=${data.value}`)

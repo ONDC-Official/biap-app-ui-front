@@ -37,9 +37,9 @@ const SubCategories = () => {
     // let { categoryName } = useParams();
     const classes = useStyles();
     const [subCatList, setSubCatList] = useState([]);
-    const lodationData = useLocation();
+    const locationData = useLocation();
     const useQuery = () => {
-        const { search } = lodationData;
+        const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
