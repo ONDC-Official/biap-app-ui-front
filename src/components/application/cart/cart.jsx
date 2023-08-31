@@ -7,7 +7,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
-import { deleteCall, getCall } from "../../../api/axios";
+import { deleteCall, getCall, postCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Cart() {
@@ -16,6 +16,7 @@ export default function Cart() {
   const history = useHistory();
   let user = JSON.parse(getValueFromCookie("user"));
 
+  const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [haveDistinctProviders, setHaveDistinctProviders] = useState(false);
 
@@ -28,8 +29,6 @@ export default function Cart() {
   };
 
   const checkDistinctProviders = () => {
-    console.log("Checking distinct providers");
-
     if (cartItems.length < 2) {
       setHaveDistinctProviders(false);
     } else {
@@ -48,10 +47,31 @@ export default function Cart() {
   };
 
   const getCartItems = async () => {
-    console.log("fetching cart items");
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
     setCartItems(res);
+    console.log(res);
+  };
+
+  const updateCartItem = async (itemId, increment) => {
+    const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
+    const itemIndex = cartItems.findIndex((item) => item.item.id === itemId);
+
+    if (itemIndex !== -1) {
+      setLoading(true);
+      const updatedCartItems = [...cartItems];
+      if (increment) {
+        updatedCartItems[itemIndex].item.quantity.count += 1;
+      } else {
+        if (updatedCartItems[itemIndex].item.quantity.count > 1) {
+          updatedCartItems[itemIndex].item.quantity.count -= 1;
+        }
+      }
+      const res = await postCall(url, updatedCartItems);
+      console.log("after update:", res);
+      setLoading(false);
+      getCartItems();
+    }
   };
 
   const deleteCartItem = async (itemId) => {
@@ -160,8 +180,14 @@ export default function Cart() {
                 <Typography variant="body1" sx={{ marginRight: "6px", fontWeight: 600 }}>
                   {cartItem.item.quantity.count}
                 </Typography>
-                <KeyboardArrowUpIcon className={classes.qtyArrowUp} />
-                <KeyboardArrowDownIcon className={classes.qtyArrowDown} />
+                <KeyboardArrowUpIcon
+                  className={classes.qtyArrowUp}
+                  onClick={() => updateCartItem(cartItem.item.id, true)}
+                />
+                <KeyboardArrowDownIcon
+                  className={classes.qtyArrowDown}
+                  onClick={() => updateCartItem(cartItem.item.id, false)}
+                />
               </div>
             </Grid>
             <Grid item xs={1.4}>
@@ -270,7 +296,7 @@ export default function Cart() {
           </Typography>
         </Grid>
 
-        <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }}>
+        <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }} disabled={haveDistinctProviders}>
           Proceed to buy
         </Button>
       </Card>
