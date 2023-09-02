@@ -44,7 +44,7 @@
     "fontSize": "48px",
     "fontWeight": 700,
     "lineHeight": "60px",
-    "fontFamily": "'Roboto Slab', serif",
+    "fontFamily": "Inter",
     "fontStyle": "normal",
     "textTransform": "uppercase"
   },
@@ -52,14 +52,14 @@
     "fontSize": "36px",
     "fontWeight": 700,
     "lineHeight": "44px",
-    "fontFamily": "'Roboto Slab', serif",
+    "fontFamily": "Inter",
     "fontStyle": "normal"
   },
   "h3": {
     "fontSize": "30px",
     "fontWeight": 700,
     "lineHeight": "40px",
-    "fontFamily": "'Roboto Slab', serif",
+    "fontFamily": "Inter",
     "fontStyle": "normal",
     "textTransform": "uppercase"
   },
@@ -67,7 +67,7 @@
     "fontSize": "24px",
     "fontWeight": 700,
     "lineHeight": "32px",
-    "fontFamily": "'Roboto Slab', serif",
+    "fontFamily": "Inter",
     "fontStyle": "normal"
   },
   "h5": {

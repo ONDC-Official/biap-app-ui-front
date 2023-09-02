@@ -91,6 +91,7 @@ export const PRODUCT_SUBCATEGORY = {
         {value: 'Home Improvement', key: 'Home Improvement', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
         {value: 'Cookware and Dining', key: 'Cookware and Dining', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
         {value: 'Storage and Organisation', key: 'Storage and Organisation', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
+        {value: 'Home and Decor', key: 'Home and Decor', protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Home},
     ],
     "F And B": [
         {value: 'Baklava', key: 'Baklava', protocolKey: '@ondc/org/mandatory_reqs_veggies_fruits', imageUrl: Food},
@@ -199,7 +200,7 @@ export const PRODUCT_SUBCATEGORY = {
         {key: "Speciality Care", value: "Speciality Care", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
         {key: "Covid Essentials", value: "Covid Essentials", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
         {key: "Diabetes Control", value: "Diabetes Control", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
-        {key: "Healthcare Devices", value: "Healthcare Devices", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
+        // {key: "Healthcare Devices", value: "Healthcare Devices", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health}, image not available
         {key: "Ayush", value: "Ayush", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: Health},
     ]
 };

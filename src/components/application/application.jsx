@@ -13,6 +13,7 @@ import Profile from "./profile/profile";
 import Support from "./support/support";
 import ProductDetails from "./product-list/product-details/productDetails";
 import Brand from "../brand/brand";
+import OutletDetails from "../brand/outletDetails/outletDetails";
 import InitializeOrder from "./initialize-order/initializeOrder";
 import MyTickets from "./my-tickets/myTickets";
 
@@ -42,9 +43,14 @@ export default function Application() {
                 <Cart />
               </AppLayout>
             </PrivateRoute>
-            <PrivateRoute path={"/application/brand/:brandId"}>
+            <PrivateRoute exact path={"/application/brand/:brandId"}>
               <AppLayout>
                 <Brand />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute exact path={"/application/brand/:brandId/:outletId"}>
+              <AppLayout>
+                <OutletDetails />
               </AppLayout>
             </PrivateRoute>
 

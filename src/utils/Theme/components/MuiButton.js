@@ -10,6 +10,7 @@ const MuiButton = {
         outlined: {
             border: `1px solid rgba(0, 0, 0, 0.10)`,
             // color: palette.primary.main,
+            backgroundColor: '#fff',
             '& svg path': {
                 stroke: palette.common.black,
             },
