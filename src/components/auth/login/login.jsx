@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import {Redirect} from 'react-router-dom'
 import {
   getAuth,
   signInWithPopup,
@@ -19,6 +20,7 @@ import { AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
 
 import Google_Logo from "../../../assets/images/google.png";
+import { isLoggedIn } from "../../../utils/validateToken";
 
 export default function Login() {
   const auth = getAuth();
@@ -203,7 +205,12 @@ export default function Login() {
       </Link>
     </div>
   );
-  return (
-    <AuthActionCard action_form={loginForm} navigation_link={navigation_link} />
-  );
+
+  if(isLoggedIn()){
+    return <Redirect to={{ pathname: "/application" }} />;
+  }else{
+    return (
+        <AuthActionCard action_form={loginForm} navigation_link={navigation_link} />
+    );
+  }
 }

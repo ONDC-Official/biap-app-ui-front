@@ -10,6 +10,7 @@ import MuiCard from "./MuiCard";
 import MuiInputBase from './MuiInputBase';
 import MuiBreadcrumbs from './MuiBreadcrumbs';
 import MuiIconButton from './MuiIconButton';
+import MuiAccordion from './MuiAccordion'
 
 const index = {
     MuiButton,
@@ -23,7 +24,8 @@ const index = {
     MuiCard,
     MuiInputBase,
     MuiBreadcrumbs,
-    MuiIconButton
+    MuiIconButton,
+    MuiAccordion
 };
 
 export default index;
