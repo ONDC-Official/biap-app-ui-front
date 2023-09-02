@@ -18,6 +18,8 @@ const useStyles = makeStyles({
     },
     productImage: {
         margin: 'auto !important',
+        maxHeight: '95%',
+        maxWidth: '95%',
     },
     cartIcon: {
         position: 'absolute !important',

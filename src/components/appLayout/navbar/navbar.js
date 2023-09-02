@@ -26,12 +26,12 @@ import ModalComponent from "../../common/Modal";
 import SelectAddress from "./selectAddress/selectAddress";
 import AddressForm from "./addressForm/addressForm";
 import useCancellablePromise from "../../../api/cancelRequest";
-import { getCall } from "../../../api/axios";
 import { address_types } from "../../../constants/address-types";
 import { SearchContext } from "../../../context/searchContext";
 import { AddressContext } from "../../../context/addressContext";
+import {getAllDeliveryAddressRequest} from '../../../api/address.api';
 
-const NavBar = () => {
+const NavBar = ({isCheckout=false}) => {
   const classes = useStyles();
   const history = useHistory();
   const locationData = useLocation();
@@ -80,7 +80,7 @@ const NavBar = () => {
   const fetchDeliveryAddress = async () => {
     setFetchDeliveryAddressLoading(true);
     try {
-      const data = await cancellablePromise(getCall("/clientApis/v1/delivery_address"));
+      const data = await cancellablePromise(getAllDeliveryAddressRequest());
       setAddressList(data);
     } catch (err) {
       if (err.response.data.length > 0) {
@@ -283,81 +283,100 @@ const NavBar = () => {
             history.push("/application/products");
           }}
         />
-        <div className={classes.addressContainer} onClick={() => setSelectAddressModal(true)}>
-          <LocationIcon />
-          <Typography variant="body2" className={classes.addressTypo}>
-            Deliver to <b>{searchedLocation?.pincode}</b>
-          </Typography>
-          <AddressDownIcon />
-        </div>
-        <div className={classes.inputContainer}>
-          <Paper component="form" className={classes.inputForm}>
-              <IconButton
-                  type="button"
-                  disabled
-                  // className={classes.searchIcon}
-                  aria-label="search"
-                  // onClick={() => {
-                  //     setSearchData(() => search);
-                  //     history.push(`/products?s=${search.value}`);
-                  // }}
-              >
-                  <SearchIcon />
-              </IconButton>
-            <InputBase
-              fullWidth
-              className={classes.inputBase}
-              placeholder="Search..."
-              inputProps={{ "aria-label": "Search..." }}
-              value={search?.value || ""}
-              onKeyDown={(e) => {
-                  if(e.keyCode == 13){
-                      e.preventDefault()
-                      setSearchData(() => search);
-                      // history.push(`/products?s=${search.value}`);
-                      updateSearchParams();
-                  }
-              }}
-              onChange={(e) => {
-                const searchValue = e.target.value;
-                let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
-                searchDataUpdate.value = searchValue;
-                setSearch(searchDataUpdate);
-                // generating context for search
-                const search_context = {
-                  search: searchDataUpdate,
-                  location: searchedLocation,
-                };
-                // setSearchData(() => searchDataUpdate);
-                AddCookie("search_context", JSON.stringify(search_context));
-              }}
-            />
-              <IconButton className={classes.listIcon} aria-label="menu">
-                  <ListIcon />
-              </IconButton>
+        {
+          !isCheckout && (
+              <>
+                <div className={classes.addressContainer} onClick={() => setSelectAddressModal(true)}>
+                  <LocationIcon />
+                  <Typography variant="body2" className={classes.addressTypo}>
+                    Deliver to <b>{searchedLocation?.pincode}</b>
+                  </Typography>
+                  <AddressDownIcon />
+                </div>
+                <div className={classes.inputContainer}>
+                  <Paper component="form" className={classes.inputForm}>
+                    <IconButton
+                        type="button"
+                        disabled
+                        // className={classes.searchIcon}
+                        aria-label="search"
+                        // onClick={() => {
+                        //     setSearchData(() => search);
+                        //     history.push(`/products?s=${search.value}`);
+                        // }}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                    <InputBase
+                        fullWidth
+                        className={classes.inputBase}
+                        placeholder="Search..."
+                        inputProps={{ "aria-label": "Search..." }}
+                        value={search?.value || ""}
+                        onKeyDown={(e) => {
+                          if(e.keyCode == 13){
+                            e.preventDefault()
+                            setSearchData(() => search);
+                            // history.push(`/products?s=${search.value}`);
+                            updateSearchParams();
+                          }
+                        }}
+                        onChange={(e) => {
+                          const searchValue = e.target.value;
+                          let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
+                          searchDataUpdate.value = searchValue;
+                          setSearch(searchDataUpdate);
+                          // generating context for search
+                          const search_context = {
+                            search: searchDataUpdate,
+                            location: searchedLocation,
+                          };
+                          // setSearchData(() => searchDataUpdate);
+                          AddCookie("search_context", JSON.stringify(search_context));
+                        }}
+                    />
+                    <IconButton className={classes.listIcon} aria-label="menu">
+                      <ListIcon />
+                    </IconButton>
 
-          </Paper>
-        </div>
-        <div className={classes.favourite}>
-          <HeartIcon />
-          <Typography variant="body2" className={classes.favouriteTypo}>
-            List
-          </Typography>
-        </div>
-        <div className={classes.cart}>
-          <Link to="/application/cart">
-            <CartIcon />
-            <Typography variant="body2" className={classes.cartTypo}>
-              Cart
-            </Typography>
-          </Link>
-        </div>
-        <div className={classes.user}>
-          <UserIcon />
-          <Typography variant="body2" className={classes.userTypo}>
-            User
-          </Typography>
-        </div>
+                  </Paper>
+                </div>
+                <div className={classes.favourite}>
+                  <HeartIcon />
+                  <Typography variant="body2" className={classes.favouriteTypo}>
+                    List
+                  </Typography>
+                </div>
+                <div className={classes.cart}>
+                  <Link to="/application/cart">
+                    <CartIcon />
+                    <Typography variant="body2" className={classes.cartTypo}>
+                      Cart
+                    </Typography>
+                  </Link>
+                </div>
+                <div className={classes.user}>
+                  <UserIcon />
+                  <Typography variant="body2" className={classes.userTypo}>
+                    User
+                  </Typography>
+                </div>
+              </>
+            )
+        }
+        {
+          isCheckout && (
+              <>
+                <div className={classes.inputContainer}></div>
+                <div className={classes.user}>
+                  <UserIcon />
+                  <Typography variant="body2" className={classes.userTypo}>
+                    User
+                  </Typography>
+                </div>
+              </>
+          )
+        }
       </Toolbar>
       {selectAddressModal && (
         <ModalComponent

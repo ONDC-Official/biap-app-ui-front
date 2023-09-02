@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography';
-import FormLabel from '@mui/material/FormLabel';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
@@ -27,6 +26,7 @@ const AddressForm = (props) => {
         onClose,
         onAddAddress,
         onUpdateAddress,
+        fromCheckout= false
     } = props;
 
     // STATES
@@ -410,7 +410,7 @@ const AddressForm = (props) => {
     };
 
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={fromCheckout?5:3}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                 <TextField
                     required
@@ -705,6 +705,22 @@ const AddressForm = (props) => {
                             }}
                         >
                             Add Address
+                        </Button>
+                    )
+                }
+                {
+                    fromCheckout && (
+                        <Button
+                            variant="outlined" color="error"
+                            sx={{
+                                ml: 1
+                            }}
+                            onClick={() => {
+                                onClose()
+                            }}
+
+                        >
+                            Cancel
                         </Button>
                     )
                 }
