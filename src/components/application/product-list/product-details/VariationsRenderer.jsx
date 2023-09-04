@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 import { Grid, Typography } from "@mui/material";
+import { Link, useHistory } from "react-router-dom";
 
 const VariationsRenderer = (props) => {
   const { productPayload, variationState, setVariationState } = props;
   const classes = useStyles();
+  const history = useHistory();
 
+  const [currentProductId, setCurrentProductId] = useState("");
   const [variationGroups, setVariationGroups] = useState([]);
   const [variations, setVariations] = useState([]);
   const [initialVariationState, setInitialVariationState] = useState({});
@@ -41,7 +44,6 @@ const VariationsRenderer = (props) => {
       const attributeValue = productPayload.attributes[attributeName];
       newState[attributeName] = attributeValue;
     });
-    console.log("initialVariationState:-", newState);
     setInitialVariationState(newState);
   };
 
@@ -53,7 +55,7 @@ const VariationsRenderer = (props) => {
         variationsInfo[variation?.name] = attributes[variation?.name];
       });
       return {
-        id: item.item_details.id,
+        id: item.id,
         price: item.item_details.price.value,
         img: item.item_details.descriptor.symbol,
         ...variationsInfo,
@@ -61,19 +63,74 @@ const VariationsRenderer = (props) => {
     });
 
     setVariations(relatedItems);
-    console.log("variation-groups:", variations);
-    console.log("variations:", relatedItems);
   };
 
-  const handleOptionClick = (groupData, option) => {
+  const findGroupJustBeforeLast = () => {
+    // Find the last group in variationGroups
+    const lastGroup = variationGroups[variationGroups.length - 1];
+
+    // Iterate through variationState
+    for (const groupId in variationState) {
+      if (variationState.hasOwnProperty(groupId)) {
+        const group = variationState[groupId];
+
+        // Check if the current group's ID is one less than the ID of the last group
+        if (group.id === lastGroup.seq - 1) {
+          return group; // This is the group just before the last group
+        }
+      }
+    }
+
+    return null; // If not found
+  };
+
+  const findMatchingVariation = () => {
+    // Iterate through variations
+    for (const variation of variations) {
+      let isMatch = true;
+
+      // Iterate through variationState
+      for (const groupId in variationState) {
+        if (variationState.hasOwnProperty(groupId)) {
+          const groupData = variationState[groupId];
+          const groupName = groupData.name;
+          const selectedOption = groupData.selected[0];
+
+          // Check if the variation matches the values in variationState
+          if (variation[groupName] !== selectedOption) {
+            isMatch = false;
+            break; // No need to continue checking
+          }
+        }
+      }
+
+      // If all values in variationState matched this variation, return it
+      if (isMatch) {
+        return variation;
+      }
+    }
+
+    return null; // No matching variation found
+  };
+
+  const handleVariationClick = (groupData, option) => {
+    const groupJustBeforeLast = findGroupJustBeforeLast();
+
     let updatedVariationState = { ...variationState };
     groupData.selected = [option];
-
     updatedVariationState[groupData.id] = groupData;
+
+    if (groupData.id === Object.keys(variationState).length) {
+      const matchingVariation = findMatchingVariation();
+      if (matchingVariation) {
+        history.push(`/application/products/${matchingVariation.id}`);
+      }
+    }
 
     variationGroups.forEach((group, index) => {
       const groupName = group.name;
       const groupId = group.seq;
+
       const newGroupData = {
         id: groupId,
         name: groupName,
@@ -83,8 +140,26 @@ const VariationsRenderer = (props) => {
 
       if (index + 1 === 1) {
         variations.forEach((variation) => {
+          newGroupData.productId = variation.productId;
           if (!newGroupData.options.includes(variation[groupName])) {
             newGroupData.options.push(variation[groupName]);
+          }
+        });
+      } else if (groupJustBeforeLast.id === groupData.id) {
+        const prevGroupName = updatedVariationState[index].name;
+        const prevGroupSelection = updatedVariationState[index].selected[0];
+        if (productPayload.attributes[groupName] === option) {
+          newGroupData.selected = [option];
+        } else {
+          newGroupData.selected = [];
+        }
+
+        variations.forEach((variation) => {
+          //  newGroupData.productId = variation.productId;
+          if (variation[prevGroupName] === prevGroupSelection) {
+            if (!newGroupData.options.includes(variation[groupName])) {
+              newGroupData.options.push(variation[groupName]);
+            }
           }
         });
       } else {
@@ -92,6 +167,7 @@ const VariationsRenderer = (props) => {
         const prevGroupSelection = updatedVariationState[index].selected[0];
 
         variations.forEach((variation) => {
+          //  newGroupData.productId = variation.productId;
           if (variation[prevGroupName] === prevGroupSelection) {
             if (!newGroupData.options.includes(variation[groupName])) {
               newGroupData.options.push(variation[groupName]);
@@ -107,10 +183,20 @@ const VariationsRenderer = (props) => {
   };
 
   useEffect(() => {
-    if (productPayload) getVariationGroups();
+    if (productPayload) {
+      getVariationGroups();
+      setCurrentProductId(productPayload.id);
+    }
   }, [productPayload]);
 
-  // initialize variaitions state
+  useEffect(() => {
+    if (currentProductId != "") {
+      history.push(`/application/products/${currentProductId}`);
+      console.log(currentProductId);
+    }
+  }, [currentProductId]);
+
+  // initialize variaitions state.
   useEffect(() => {
     if (variationGroups && initialVariationState) {
       const result = {};
@@ -118,8 +204,10 @@ const VariationsRenderer = (props) => {
       variationGroups.forEach((group, index) => {
         const groupName = group.name;
         const groupId = group.seq;
+
         const groupData = {
           id: groupId,
+          productId: "",
           name: groupName,
           selected: [initialVariationState[groupName]],
           options: [],
@@ -127,6 +215,8 @@ const VariationsRenderer = (props) => {
 
         if (index === 0) {
           variations.forEach((variation) => {
+            groupData.productId = variation.id;
+
             if (!groupData.options.includes(variation[groupName])) {
               groupData.options.push(variation[groupName]);
             }
@@ -135,8 +225,8 @@ const VariationsRenderer = (props) => {
           const prevGroupName = variationGroups[index - 1].name;
           const prevGroupSelection = initialVariationState[prevGroupName];
 
-          console.log("prevGroupName", prevGroupName, prevGroupSelection);
           variations.forEach((variation) => {
+            groupData.productId = variation.id;
             if (variation[prevGroupName] === prevGroupSelection) {
               if (!groupData.options.includes(variation[groupName])) {
                 groupData.options.push(variation[groupName]);
@@ -148,7 +238,6 @@ const VariationsRenderer = (props) => {
         result[groupId] = groupData;
       });
 
-      console.log("VariationState:", result);
       setVariationState(result);
     }
   }, [variationGroups, initialVariationState, variations]);
@@ -164,27 +253,24 @@ const VariationsRenderer = (props) => {
             {groupName}
           </Typography>
           <Grid container>
-            {groupData.options.map((option) => (
-              <div
-                key={option}
-                className={groupData.selected.includes(option) ? classes.selectedCustomization : classes.customization}
-                onClick={() => {
-                  handleOptionClick(groupData, option);
-                }}
-              >
-                <Typography variant="body1" color={groupData.selected.includes(option) ? "white" : "#686868"}>
-                  {option}
-                </Typography>
-                {/* <Typography
-                    variant="body1"
-                    color={groupData.selected.includes(option) ? "white" : "#222"}
-                    sx={{ fontSize: 16, fontWeight: 600 }}
-                  >
-                    <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                    {groupData.price[option]}
-                  </Typography> */}
-              </div>
-            ))}
+            {/* groupId === variationGroups[variationGroups.length - 1].seq.toString()/ */}
+            {groupData.options.map((option) => {
+              return (
+                <div
+                  key={option}
+                  className={
+                    groupData.selected.includes(option) ? classes.selectedCustomization : classes.customization
+                  }
+                  onClick={() => {
+                    handleVariationClick(groupData, option);
+                  }}
+                >
+                  <Typography variant="body1" color={groupData.selected.includes(option) ? "white" : "#686868"}>
+                    {option}
+                  </Typography>
+                </div>
+              );
+            })}
           </Grid>
         </div>
       );

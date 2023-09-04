@@ -8,7 +8,7 @@ import { getCall, postCall } from "../../../../api/axios";
 import CustomizationRenderer from "./CustomizationRenderer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
-import { Link, useLocation, useHistory } from "react-router-dom";
+import { Link, useLocation, useHistory, useParams } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 
@@ -29,6 +29,7 @@ const ProductDetails = () => {
   const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
+  const params = useParams();
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
@@ -99,12 +100,12 @@ const ProductDetails = () => {
 
   //   fetch product details
   useEffect(() => {
-    let pathname = location.pathname;
-    let parts = pathname.split("/");
-    let productId = parts[parts.length - 1];
+    //  let pathname = location.pathname;
+    //  let parts = pathname.split("/");
+    let productId = params.id;
     getProductDetails(productId);
     top.current?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
-  }, [history]);
+  }, [params]);
 
   const renderVegNonVegTag = () => {
     const category = "veg";
