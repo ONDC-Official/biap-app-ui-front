@@ -17,6 +17,7 @@ const useStyles = makeStyles({
     },
     subCatImage: {
         margin: 'auto !important',
+        width: '100%'
     },
     subCatNameTypo: {
         fontWeight: '600 !important',

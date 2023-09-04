@@ -5,17 +5,19 @@ import { CartContextProvider } from "../../context/cartContext";
 import { SearchContextProvider } from "../../context/searchContext";
 import PrivateRoute from "../../privateRoutes";
 import Cart from "./cart/cart";
-import Checkout from "./checkout/checkout";
-import Orders from "./orders/orders";
-import ProductList from "./product-list/productList";
-import Home from "../home/home";
-import Profile from "./profile/profile";
-import Support from "./support/support";
+// import Checkout from "./checkout/checkout";
+// import Orders from "./orders/orders";
+// import ProductList from "./product-list/productList";
+// import Home from "../home/home";
+// import Profile from "./profile/profile";
+// import Support from "./support/support";
 import ProductDetails from "./product-list/product-details/productDetails";
 import Brand from "../brand/brand";
 import OutletDetails from "../brand/outletDetails/outletDetails";
-import InitializeOrder from "./initialize-order/initializeOrder";
-import MyTickets from "./my-tickets/myTickets";
+import Checkout from "../checkout/checkout";
+import Orders from "../orders/orders";
+// import InitializeOrder from "./initialize-order/initializeOrder";
+// import MyTickets from "./my-tickets/myTickets";
 
 import AppLayout from "../appLayout";
 import Products from "../products/products";
@@ -51,6 +53,18 @@ export default function Application() {
             <PrivateRoute exact path={"/application/brand/:brandId/:outletId"}>
               <AppLayout>
                 <OutletDetails />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute exact path={"/application/checkout"}>
+              <AppLayout
+                isCheckout={true}
+              >
+                <Checkout />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute path={"/application/orders"}>
+              <AppLayout>
+                <Orders />
               </AppLayout>
             </PrivateRoute>
 

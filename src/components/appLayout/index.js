@@ -22,11 +22,11 @@ const useStyles = makeStyles({
     }
 });
 
-const AppLayout = ({ pageTitle, children }) => {
+const AppLayout = ({ pageTitle, children, isCheckout=false }) => {
     const classes = useStyles();
     return (
         <Box className={classes.allLayoutContainer}>
-            <NavBar />
+            <NavBar isCheckout={isCheckout} />
             <Box
                 component="main"
                 className={classes.mainContainer}

@@ -32,10 +32,11 @@ const useStyles = makeStyles({
         margin: 'auto'
     },
     categoryImage: {
-        height: '78px',
-        maxWidth: '78px',
+        height: '102px',
+        maxWidth: '102px',
         minWidth: '42px',
-        margin: 'auto'
+        margin: 'auto',
+        borderRadius: '50%'
     },
     categoryNameTypo: {
         fontWeight: '600 !important',
@@ -45,7 +46,11 @@ const useStyles = makeStyles({
     },
     selectedCategory: {
         background: '#EBEBEB !important',
-        border: `1px solid ${palette.secondary.main}`
+        border: `2px solid ${palette.secondary.main}`,
+        '& $categoryImage': {
+            height: '98px',
+            maxWidth: '98px',
+        }
     },
     actionButton: {
         border: '1px solid rgba(0, 0, 0, 0.14) !important'

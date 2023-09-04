@@ -1,15 +1,19 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import useStyles from './style';
+import {useParams} from "react-router-dom";
 
 import Grid from '@mui/material/Grid';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import {ReactComponent as ExpandMoreIcon} from '../../../../assets/images/chevron-down.svg';
 import MenuItem from './menuItem';
-import Box from "@mui/material/Box";
+
+import {getBrandCustomMenuRequest} from "../../../../api/brand.api";
+import useCancellablePromise from "../../../../api/cancelRequest";
 
 const customMenuList = [
     {id: '1', name: 'Kings Burgers', items: [
@@ -29,66 +33,105 @@ const customMenuList = [
         {id: '23', name: 'Crispy Veg Burger+Fries(M)', price: 420, description: 'Save Rs. 111 | Veg Whopper + Paneer Royale + Crispy Veg', isVeg: false},
     ]},
 ]
-const CustomeMenu = () => {
+const CustomMenu = ({brandDetails, outletDetails}) => {
+    console.log("brandDetails==================================>", brandDetails)
     const classes = useStyles();
+    const {brandId, outletId} = useParams();
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [customMenu, setCustomMenu] = useState(false);
+
+    // HOOKS
+    const { cancellablePromise } = useCancellablePromise();
+
+    const getBrandCustomMenu = async(domain) => {
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getBrandCustomMenuRequest(domain)
+            );
+            console.log("getBrandCustomMenu=====>", data);
+            setCustomMenu(data.data);
+        } catch (err) {
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if(brandDetails){
+            getBrandCustomMenu(brandDetails.domain);
+        }
+    }, [brandDetails]);
 
     return (
         <div>
             {
-                customMenuList.length > 0
-                    ? (
-                        <>
-                            {
-                                customMenuList.map((menu, ind) => (
-                                    <Accordion
-                                        key={`custom-menu-ind-${ind}`}
-                                        // square={true}
-                                        defaultExpanded={true}
-                                    >
-                                        <AccordionSummary
-                                            expandIcon={<ExpandMoreIcon className={classes.expandIcon}/>}
-                                            aria-controls="panel1a-content"
-                                            id="panel1a-header"
-                                        >
-                                            <Typography variant="h5">{`${menu.name} (${menu.items.length})`}</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            {
-                                                menu.items.length > 0
-                                                    ? (
-                                                        <Grid
-                                                            container spacing={3}
-                                                        >
-                                                            {
-                                                                menu.items.map((item, itemInd) => (
-                                                                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} key={`menu-item-ind-${itemInd}`}>
-                                                                        <MenuItem
-                                                                            item={item}
-                                                                        />
+                isLoading
+                ?(
+                    <div className={classes.progressBarContainer}>
+                        <CircularProgress />
+                    </div>
+                ):(
+                    <>
+                        {
+                            customMenuList.length > 0
+                                ? (
+                                    <>
+                                        {
+                                            customMenuList.map((menu, ind) => (
+                                                <Accordion
+                                                    key={`custom-menu-ind-${ind}`}
+                                                    // square={true}
+                                                    defaultExpanded={true}
+                                                >
+                                                    <AccordionSummary
+                                                        expandIcon={<ExpandMoreIcon className={classes.expandIcon}/>}
+                                                        aria-controls="panel1a-content"
+                                                        id="panel1a-header"
+                                                    >
+                                                        <Typography variant="h5">{`${menu.name} (${menu.items.length})`}</Typography>
+                                                    </AccordionSummary>
+                                                    <AccordionDetails>
+                                                        {
+                                                            menu.items.length > 0
+                                                                ? (
+                                                                    <Grid
+                                                                        container spacing={3}
+                                                                    >
+                                                                        {
+                                                                            menu.items.map((item, itemInd) => (
+                                                                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12} key={`menu-item-ind-${itemInd}`}>
+                                                                                    <MenuItem
+                                                                                        item={item}
+                                                                                    />
+                                                                                </Grid>
+                                                                            ))
+                                                                        }
                                                                     </Grid>
-                                                                ))
-                                                            }
-                                                        </Grid>
-                                                    ) : (
-                                                        <Typography variant="body1">
-                                                            There is not items available in this menu
-                                                        </Typography>
-                                                    )
-                                            }
-                                        </AccordionDetails>
-                                    </Accordion>
-                                ))
-                            }
-                        </>
-                    ) : (
-                        <Typography variant="body1">
-                            Menu not available
-                        </Typography>
-                    )
+                                                                ) : (
+                                                                    <Typography variant="body1">
+                                                                        There is not items available in this menu
+                                                                    </Typography>
+                                                                )
+                                                        }
+                                                    </AccordionDetails>
+                                                </Accordion>
+                                            ))
+                                        }
+                                    </>
+                                ) : (
+                                    <Typography variant="body1">
+                                        Menu not available
+                                    </Typography>
+                                )
+                        }
+                    </>
+                )
             }
         </div>
     );
 
 };
 
-export default CustomeMenu;
+export default CustomMenu;

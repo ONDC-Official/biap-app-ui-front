@@ -58,6 +58,10 @@ const useStyles = makeStyles({
         top: '8px',
         right: '8px',
     },
+    progressBarContainer: {
+        textAlign: 'center !important',
+        marginTop: '16px !important',
+    }
 });
 
 export default useStyles;

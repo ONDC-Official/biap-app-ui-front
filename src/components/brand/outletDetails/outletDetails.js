@@ -14,36 +14,61 @@ import OutletImage from '../../../assets/images/outlet.png';
 import no_image_found from "../../../assets/images/no_image_found.png";
 import map from "../../../assets/images/map.png";
 
-import CustomeMenu from './customMenu/customMenu';
+import CustomMenu from './customMenu/customMenu';
 
-const OutletLists = [
-    {id: '1', name: 'Burger King', outletName: 'Industrial Area, Chandigarh', time: '20-25', distance: '1', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-    {id: '2', name: 'Burger King', outletName: 'Sector 35, Chandigarh', time: '35-40', distance: '3', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-    {id: '3', name: 'Burger King', outletName: 'Sector 8, Chandigarh', time: '45-50', distance: '4', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-    {id: '4', name: 'Burger King', outletName: 'Phase 11, Mohali', time: '40-50', distance: '4.5', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-    {id: '5', name: 'Burger King', outletName: 'Sector 9, Panchkula', time: '55-60', distance: '7', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-    {id: '6', name: 'Burger King', outletName: 'Sector 20, Chandigarh', time: '45-50', distance: '6', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-    {id: '7', name: 'Burger King', outletName: 'Phase 8, Mohali', time: '50-55', distance: '6.5', imageUrl: OutletImage, description: 'Burger, Fast Food, Desserts, Shake'},
-];
+import {getBrandDetailsRequest, getOutletDetailsRequest} from "../../../api/brand.api";
+import useCancellablePromise from "../../../api/cancelRequest";
 
 const OutletDetails = () => {
     const classes = useStyles();
     const {brandId, outletId} = useParams();
     const history = useHistory();
 
+    const [brandDetails, setBrandDetails] = useState(null);
     const [outletDetails, setOutletDetails] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        if(outletId){
-            const findOutlet = OutletLists.find((outlet) => outlet.id === outletId);
-            if(findOutlet){
-                setOutletDetails(findOutlet);
-            }else{
-                setOutletDetails(null)
+    // HOOKS
+    const { cancellablePromise } = useCancellablePromise();
+
+    const getBrandDetails = async() => {
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getBrandDetailsRequest(brandId)
+            );
+            setBrandDetails(data);
+            if(outletId){
+                await getOutletDetails()
             }
+        } catch (err) {
+        } finally {
+            setIsLoading(false);
         }
-    }, [outletId]);
+    };
+
+    const getOutletDetails = async() => {
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getOutletDetailsRequest(outletId)
+            );
+            setOutletDetails(data);
+        } catch (err) {
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if(brandId){
+            getBrandDetails();
+        }
+        // if(outletId){
+        //     getOutletDetails()
+        // }
+    }, [brandId, outletId]);
+
     return (
         <Grid container spacing={4} className={classes.outletDetailsContainer}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -53,11 +78,11 @@ const OutletDetails = () => {
                             Home
                         </MuiLink>
                         <MuiLink component={Link} underline="hover" color="inherit" to={`/application/brand/${brandId}`}>
-                            {outletDetails?.name}
+                            {brandDetails?.descriptor?.name}
                         </MuiLink>
                         {
                             brandId && (
-                                <Typography color="text.primary">{`${outletDetails?.name} Details`}</Typography>
+                                <Typography color="text.primary">{`${brandDetails?.descriptor?.name} Details`}</Typography>
                             )
                         }
                     </Breadcrumbs>
@@ -69,19 +94,19 @@ const OutletDetails = () => {
                         <Card className={classes.outletDetailsCard}>
                             <img
                                 className={classes.outletImage}
-                                src={outletDetails?.imageUrl ? outletDetails.imageUrl : no_image_found}
+                                src={brandDetails?.descriptor?.images?.length > 0 ? brandDetails?.descriptor?.images[0] : no_image_found}
                                 alt={`outlet-img-${outletDetails?.id}`}
                             />
                         </Card>
                         <div className={classes.detailsContainer}>
                             <Typography variant="h2">
-                                {outletDetails?.name}
+                                {brandDetails?.descriptor?.name}
                             </Typography>
                             <Typography component="div" variant="body" className={classes.descriptionTypo}>
                                 {outletDetails?.description}
                             </Typography>
                             <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                                {outletDetails?.outletName}
+                                {`${outletDetails?.address?`${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`:"-"}`}
                             </Typography>
                             <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
                                 <span className={classes.isOpen}>Open now</span>
@@ -114,7 +139,7 @@ const OutletDetails = () => {
                                 />
                             </div>
                             <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                                {outletDetails?.outletName}
+                                {`${outletDetails?.address?`${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`:"-"}`}
                             </Typography>
                             <Typography
                                 color="primary.main" component="div" variant="body"
@@ -123,7 +148,7 @@ const OutletDetails = () => {
                                     history.push(`/application/brand/${brandId}`)
                                 }}
                             >
-                                See all 78 Burger King outlets in Chandigarh >
+                                {`See all 78 ${brandDetails?.descriptor?.name} outlets in ${outletDetails?.address?.city} >`}
                             </Typography>
                         </Card>
                     </Grid>
@@ -134,7 +159,10 @@ const OutletDetails = () => {
                             component={"div"}
                             className={classes.divider}
                         />
-                        <CustomeMenu />
+                        <CustomMenu
+                            brandDetails={brandDetails}
+                            outletDetails={outletDetails}
+                        />
                     </Grid>
                     <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
                 </Grid>

@@ -112,7 +112,9 @@ const useStyles = makeStyles({
         '& ul': {
             justifyContent: 'center !important'
         }
-
+    },
+    brandIcon: {
+        height: '40px !important'
     }
 });
 

@@ -45,8 +45,7 @@
     "fontWeight": 700,
     "lineHeight": "60px",
     "fontFamily": "Inter",
-    "fontStyle": "normal",
-    "textTransform": "uppercase"
+    "fontStyle": "normal"
   },
   "h2": {
     "fontSize": "36px",
@@ -60,8 +59,7 @@
     "fontWeight": 700,
     "lineHeight": "40px",
     "fontFamily": "Inter",
-    "fontStyle": "normal",
-    "textTransform": "uppercase"
+    "fontStyle": "normal"
   },
   "h4": {
     "fontSize": "24px",
