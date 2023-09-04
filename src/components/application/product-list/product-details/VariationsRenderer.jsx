@@ -192,7 +192,6 @@ const VariationsRenderer = (props) => {
   useEffect(() => {
     if (currentProductId != "") {
       history.push(`/application/products/${currentProductId}`);
-      console.log(currentProductId);
     }
   }, [currentProductId]);
 
