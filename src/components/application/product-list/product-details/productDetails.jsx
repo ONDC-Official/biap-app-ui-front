@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
 import useStyles from "./style";
 import MuiLink from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
@@ -11,30 +10,7 @@ import { getValueFromCookie } from "../../../../utils/cookies";
 import { Link, useLocation, useHistory } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-
-const moreImages = [
-  "https://assets.shopkund.com/media/catalog/product/cache/3/image/9df78eab33525d08d6e5fb8d27136e95/a/c/acu7601-1-embroidered-lace-silk-green-saree-with-blouse-sr23275_1_.jpg",
-  "https://assets.ajio.com/medias/sys_master/root/20230605/vTcw/647de83042f9e729d7234ec6/-473Wx593H-466235200-green-MODEL.jpg",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlGfIuMOFK-0A6pMAadMCNyAeMhRl5wNWuJHTyg2_ReQza1zkHfXD7nh9lWfd1zUkLCfA&usqp=CAU",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQoeUWZOLfBQQO5ycC7RP7tJkzh01Lw2J9Ybr-Wf0BR1E4CI8d_e9IvbIxapZx7E3plWhk&usqp=CAU",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQw6S87D3OGBBOFEUmza4Dv5DSWWuTAVUTM-XMDIq_V9yj8mfty-ZGWnrh1s2KCoOE8LdQ&usqp=CAU",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTIpkpNh1LVgjHDjZiqtOVATD11btJgAAqi7zXYvgBQKTZarKlmqX2kczHQ9qmYIERy7s&usqp=CAU",
-];
-
-const availabeSizes = [
-  {
-    size: "S",
-  },
-  {
-    size: "M",
-  },
-  {
-    size: "XL",
-  },
-  {
-    size: "XS",
-  },
-];
+import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 
 const additionalProductDetails = {
   "style code": "Bell & Ross Nightlum",
@@ -49,6 +25,7 @@ const additionalProductDetails = {
 };
 
 const ProductDetails = () => {
+  const top = useRef(null);
   const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
@@ -65,7 +42,7 @@ const ProductDetails = () => {
   });
 
   const [activeImage, setActiveImage] = useState("");
-  const [activeSize, setActiveSize] = useState(availabeSizes[0].size);
+  const [activeSize, setActiveSize] = useState("");
 
   const [variationGroups, setVariationGroups] = useState([]);
   const [variations, setVariations] = useState([]);
@@ -329,6 +306,7 @@ const ProductDetails = () => {
     let parts = pathname.split("/");
     let productId = parts[parts.length - 1];
     getProductDetails(productId);
+    top.current?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
   }, [history]);
 
   // initialize customization state
@@ -397,6 +375,7 @@ const ProductDetails = () => {
     if (productPayload) getVariationGroups();
   }, [productPayload]);
 
+  // initialize variaitions state
   useEffect(() => {
     if (variationGroups && initialVariationState) {
       const result = {};
@@ -598,7 +577,7 @@ const ProductDetails = () => {
   };
 
   return (
-    <>
+    <div ref={top}>
       <div className={classes.breadCrumbs} onClick={() => {}}>
         <Breadcrumbs aria-label="breadcrumb">
           <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
@@ -769,7 +748,7 @@ const ProductDetails = () => {
           </Accordion>
         </Grid>
       </Grid>
-    </>
+    </div>
   );
 };
 
