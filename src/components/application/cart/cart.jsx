@@ -69,9 +69,6 @@ export default function Cart() {
       }
 
       updatedCartItem = updatedCartItem.item;
-
-      console.log(updatedCartItem);
-
       const res = await putCall(url, updatedCartItem);
       console.log("after update:", res);
       setLoading(false);
