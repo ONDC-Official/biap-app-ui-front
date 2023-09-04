@@ -79,6 +79,7 @@ const useStyles = makeStyles({
     },
     pickupBillingAddress: {
         marginTop: '20px !important',
+        marginBottom: '20px !important',
         display: 'flex'
     },
     billingTypo: {

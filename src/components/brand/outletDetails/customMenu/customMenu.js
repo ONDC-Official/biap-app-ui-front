@@ -12,7 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import {ReactComponent as ExpandMoreIcon} from '../../../../assets/images/chevron-down.svg';
 import MenuItem from './menuItem';
 
-import {getBrandCustomMenuRequest} from "../../../../api/brand.api";
+import {getBrandCustomMenuRequest, getCustomMenuItemsRequest} from "../../../../api/brand.api";
 import useCancellablePromise from "../../../../api/cancelRequest";
 
 const customMenuList = [
@@ -44,6 +44,20 @@ const CustomMenu = ({brandDetails, outletDetails}) => {
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
+    const getCustomMenuItems = async(menuName) => {
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getCustomMenuItemsRequest(menuName)
+            );
+            console.log("getCustomMenuItems=====>", data);
+            // setCustomMenu(data.data);
+        } catch (err) {
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const getBrandCustomMenu = async(domain) => {
         setIsLoading(true);
         try {
@@ -51,6 +65,11 @@ const CustomMenu = ({brandDetails, outletDetails}) => {
                 getBrandCustomMenuRequest(domain)
             );
             console.log("getBrandCustomMenu=====>", data);
+            let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
+            resData = await resData.map(async (customMenu) => {
+                customMenu.items = await getCustomMenuItems(customMenu.descriptor.name);
+                return customMenu;
+            })
             setCustomMenu(data.data);
         } catch (err) {
         } finally {

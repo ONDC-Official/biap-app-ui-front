@@ -61,10 +61,20 @@ const useStyles = makeStyles({
   },
   user: {
     display: "flex !important",
+    cursor: 'pointer',
+    gap: '5px'
+  },
+  userMenu: {
+    '& .MuiPaper-root':{
+      minWidth: '180px !important',
+      top: '65px !important',
+      borderRadius: '8px !important',
+      border: '1px solid #E2E8F0 !important',
+      boxShadow: '0px 10px 22px 0px rgba(45, 77, 108, 0.15) !important'
+    }
   },
   userTypo: {
-    marginLeft: "5px",
-    marginTop: "3px",
+    marginTop: "3px !important",
   },
 });
 
