@@ -107,6 +107,7 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
     background: "#F9F9F9",
+    height: "80vh",
   },
   infoBox: {
     borderRadius: "8px",

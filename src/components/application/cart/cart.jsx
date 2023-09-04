@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import useStyles from "./styles";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
-import { deleteCall, getCall, postCall } from "../../../api/axios";
+import { deleteCall, getCall, putCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
 
 export default function Cart() {
@@ -50,24 +50,26 @@ export default function Cart() {
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
     setCartItems(res);
-    console.log(res);
   };
 
   const updateCartItem = async (itemId, increment) => {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const itemIndex = cartItems.findIndex((item) => item.item.id === itemId);
-
     if (itemIndex !== -1) {
       setLoading(true);
-      const updatedCartItems = [...cartItems];
+      let updatedCartItem = cartItems[itemIndex];
+      updatedCartItem.id = updatedCartItem.item.id;
+
       if (increment) {
-        updatedCartItems[itemIndex].item.quantity.count += 1;
+        updatedCartItem.item.quantity.count += 1;
       } else {
-        if (updatedCartItems[itemIndex].item.quantity.count > 1) {
-          updatedCartItems[itemIndex].item.quantity.count -= 1;
+        if (updatedCartItem.item.quantity.count > 1) {
+          updatedCartItem.item.quantity.count -= 1;
         }
       }
-      const res = await postCall(url, updatedCartItems);
+
+      updatedCartItem = updatedCartItem.item;
+      const res = await putCall(url, updatedCartItem);
       console.log("after update:", res);
       setLoading(false);
       getCartItems();
@@ -99,7 +101,9 @@ export default function Cart() {
         <Typography variant="body" sx={{ marginTop: 2, marginBottom: 2 }}>
           Explore our wide selection and find something you like
         </Typography>
-        <Button variant="contained">Explore Now</Button>
+        <Link to="/application/products">
+          <Button variant="contained">Explore Now</Button>
+        </Link>
       </div>
     );
   };
@@ -140,10 +144,10 @@ export default function Cart() {
   };
 
   const renderProducts = () => {
-    return cartItems.map((cartItem, idx) => {
+    return cartItems?.map((cartItem, idx) => {
       return (
         <Grid>
-          <Grid container key={cartItem.item.id} style={{ alignItems: "flex-start" }}>
+          <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
             <Grid item xs={4.3}>
               <Grid container>
                 <div className={classes.moreImages}>
@@ -151,20 +155,24 @@ export default function Cart() {
                     <img
                       className={classes.moreImage}
                       alt="product-image"
-                      src={cartItem.item.product.descriptor.images[0]}
+                      src={cartItem?.item?.product?.descriptor?.images[0]}
                     />
                   </div>
                 </div>
                 <Grid>
                   <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
-                    {cartItem.item.product.descriptor.name}
+                    {cartItem?.item?.product?.descriptor?.name}
                   </Typography>
                   <Grid container sx={{ marginTop: "4px" }} alignItems="center">
                     <div className={classes.logoContainer}>
-                      <img className={classes.logo} alt={"store-logo"} src={cartItem.item.provider.descriptor.symbol} />
+                      <img
+                        className={classes.logo}
+                        alt={"store-logo"}
+                        src={cartItem?.item?.provider?.descriptor?.symbol}
+                      />
                     </div>
                     <Typography variant="body1" color="#686868" sx={{ fontWeight: 500 }}>
-                      {cartItem.item.provider.descriptor.name}
+                      {cartItem?.item?.provider?.descriptor?.name}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -172,13 +180,13 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                ₹ {cartItem.item.product.price.value}
+                ₹ {cartItem?.item?.product?.price?.value}
               </Typography>
             </Grid>
             <Grid item xs={1.2}>
               <div className={classes.qtyContainer}>
                 <Typography variant="body1" sx={{ marginRight: "6px", fontWeight: 600 }}>
-                  {cartItem.item.quantity.count}
+                  {cartItem?.item?.quantity?.count}
                 </Typography>
                 <KeyboardArrowUpIcon
                   className={classes.qtyArrowUp}
@@ -192,7 +200,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                ₹{parseInt(cartItem.item.quantity.count) * parseInt(cartItem.item.product.subtotal)}
+                ₹{parseInt(cartItem?.item?.quantity?.count) * parseInt(cartItem?.item?.product?.subtotal)}
               </Typography>
             </Grid>
             <Grid item xs={4}>
@@ -210,7 +218,7 @@ export default function Cart() {
                   variant="text"
                   startIcon={<DeleteOutlineIcon size="small" />}
                   color="error"
-                  onClick={() => deleteCartItem(cartItem.item.id)}
+                  onClick={() => deleteCartItem(cartItem?.item?.id)}
                 >
                   <Typography>Delete</Typography>
                 </Button>
@@ -297,7 +305,7 @@ export default function Cart() {
         </Grid>
 
         <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }} disabled={haveDistinctProviders}>
-          Proceed to buy
+          Checkout
         </Button>
       </Card>
     );
