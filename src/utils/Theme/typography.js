@@ -6,7 +6,6 @@ const typography = {
     fontWeight: ThemeOne.h1.fontWeight,
     fontSize: ThemeOne.h1.fontSize,
     fontStyle: ThemeOne.h1.fontStyle,
-    "text-transform": ThemeOne.h1.textTransform,
     lineHeight: ThemeOne.h1.lineHeight
   },
   h2: {
@@ -21,7 +20,6 @@ const typography = {
     fontWeight: ThemeOne.h3.fontWeight,
     fontSize: ThemeOne.h3.fontSize,
     fontStyle: ThemeOne.h3.fontStyle,
-    "text-transform": ThemeOne.h3.textTransform,
     lineHeight: ThemeOne.h3.lineHeight
   },
   h4: {

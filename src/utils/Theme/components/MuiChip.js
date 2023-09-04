@@ -22,6 +22,26 @@ const MuiChip = {
         outlinedError: {
             backgroundColor: palette.error.light
         },
+        filledPrimary: {
+            backgroundColor: palette.primary.light,
+            color: palette.primary.main
+        },
+        filledSecondary: {
+            backgroundColor: palette.secondary.light,
+            color: palette.secondary.main
+        },
+        filledSuccess: {
+            backgroundColor: palette.success.light,
+            color: palette.success.main
+        },
+        filledError: {
+            backgroundColor: palette.error.light,
+            color: palette.error.main
+        },
+        filledWarning: {
+            backgroundColor: palette.warning.light,
+            color: palette.warning.main
+        },
         label: {
             padding: '0px 3px !important'
         },
