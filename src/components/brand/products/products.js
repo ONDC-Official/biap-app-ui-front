@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import useStyles from './style';
 import {Link, useLocation, useParams} from "react-router-dom";
 import Grid from "@mui/material/Grid";
@@ -17,10 +17,14 @@ import {ReactComponent as ListViewIcon} from '../../../assets/images/listView.sv
 import {ReactComponent as GridViewIcon} from '../../../assets/images/gridView.svg';
 
 import useCancellablePromise from "../../../api/cancelRequest";
+import no_image_found from "../../../assets/images/no_image_found.png";
+import {getAllProductRequest} from "../../../api/product.api";
 
-const Products = () => {
+const Products = ({brandDetails}) => {
     const classes = useStyles();
     const {brandId} = useParams();
+    const {descriptor} = brandDetails;
+    const {name: brandName, images} = descriptor;
 
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
@@ -34,6 +38,38 @@ const Products = () => {
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
+
+    const getAllProducts = async(brandId) => {
+        setIsLoading(true);
+        try {
+            const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData.brandId = brandId || "";
+            const data = await cancellablePromise(
+                getAllProductRequest(paginationData)
+            );
+            console.log("getAllProducts=====>", data)
+            setProducts(data.data);
+            setTotalProductCount(data.count);
+        } catch (err) {
+            // dispatch({
+            //     type: toast_actions.ADD_TOAST,
+            //     payload: {
+            //         id: Math.floor(Math.random() * 100),
+            //         type: toast_types.error,
+            //         message: err?.message,
+            //     },
+            // });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if(brandId){
+            getAllProducts(brandId);
+            // getAllFilters();
+        }
+    }, [brandId]);
 
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
@@ -52,8 +88,8 @@ const Products = () => {
                             Home
                         </MuiLink>
                         {
-                            brandId && (
-                                <Typography color="text.primary">{brandId}</Typography>
+                            brandName && (
+                                <Typography color="text.primary">{brandName}</Typography>
                             )
                         }
                     </Breadcrumbs>
@@ -61,7 +97,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.catNameTypoContainer}>
                 <Typography variant="h4" className={classes.catNameTypo} color={"success"}>
-                    {brandId}
+                    <img className={classes.brandIcon} src={images?.length > 0 ? images[0] : no_image_found} alt={`brand-icon`} />
                 </Typography>
                 {
                     products.length > 0 && (
@@ -179,6 +215,24 @@ const Products = () => {
                     }
                 </Grid>
             </Grid>
+            {
+                products.length > 0 && (
+                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.paginationContainer}>
+                        <Pagination
+                            className={classes.pagination}
+                            count={Math.ceil(totalProductCount/paginationModel.pageSize)}
+                            shape="rounded"
+                            color="primary"
+                            page={paginationModel.page}
+                            onChange={(evant, page) => {
+                                let paginationData = Object.assign({}, paginationModel);
+                                paginationData.page = page;
+                                setPaginationModel(paginationData);
+                            }}
+                        />
+                    </Grid>
+                )
+            }
         </Grid>
     )
 

@@ -9,9 +9,10 @@ export const getAllProductRequest = (data) => {
     const limit = data.pageSize;
     const productName = data?.searchData?.productName || "";
     const subCategoryName = data?.searchData?.subCategoryName || "";
+    const providerIds = data?.searchData?.brandId || "";
     return new Promise(async (resolve, reject) => {
         try {
-            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}${subCategoryName?`&categoryIds=${subCategoryName}`:''}${productName?`&productName=${productName}`:""}`
+            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}${subCategoryName?`&categoryIds=${subCategoryName}`:''}${productName?`&productName=${productName}`:""}${providerIds?`&providerIds=${providerIds}`:""}`
             const data = await getCall(`/clientApis/v2/search${quaryParams}`);
             return resolve(data.response);
         } catch (err) {

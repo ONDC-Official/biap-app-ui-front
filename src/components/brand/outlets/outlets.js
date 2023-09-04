@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import useStyles from './style';
 
 import Grid from "@mui/material/Grid";
@@ -11,6 +11,9 @@ import {Link, useParams} from "react-router-dom";
 import OutletImage from '../../../assets/images/outlet.png';
 import SingleOutlet from "./singleOutlet";
 
+import {getAllOutletsRequest} from "../../../api/brand.api";
+import useCancellablePromise from "../../../api/cancelRequest";
+
 const OutletLists = [
     {id: '1', name: 'Burger King', outletName: 'Industrial Area, Chandigarh', time: '20-25', distance: '1', imageUrl: OutletImage},
     {id: '2', name: 'Burger King', outletName: 'Sector 35, Chandigarh', time: '35-40', distance: '3', imageUrl: OutletImage},
@@ -20,10 +23,34 @@ const OutletLists = [
     {id: '6', name: 'Burger King', outletName: 'Sector 20, Chandigarh', time: '45-50', distance: '6', imageUrl: OutletImage},
     {id: '7', name: 'Burger King', outletName: 'Phase 8, Mohali', time: '50-55', distance: '6.5', imageUrl: OutletImage},
 ]
-const Outlets = () => {
+const Outlets = ({brandDetails}) => {
     const classes = useStyles();
     const {brandId} = useParams();
+    const {descriptor} = brandDetails;
+    const {name: brandName, images} = descriptor;
+
     const [isLoading, setIsLoading] = useState(false);
+
+    // HOOKS
+    const { cancellablePromise } = useCancellablePromise();
+
+    const getAllOutlets = async() => {
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getAllOutletsRequest(brandId)
+            );
+            console.log("getAllOutlets=====>", data);
+            // setBrandDetails(data);
+        } catch (err) {
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getAllOutlets();
+    }, [brandId]);
 
     return (
         <Grid container spacing={4} className={classes.outletsContainer}>
@@ -35,7 +62,7 @@ const Outlets = () => {
                         </MuiLink>
                         {
                             brandId && (
-                                <Typography color="text.primary">{"Burger King"}</Typography>
+                                <Typography color="text.primary">{brandName}</Typography>
                             )
                         }
                     </Breadcrumbs>

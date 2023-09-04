@@ -7,13 +7,13 @@ import Health from '../assets/images/category/Health1.png';
 import BPC from '../assets/images/category/BPC.png';
 
 export const categoryList = [
-    {id: '1', name: 'Fashion', shortName: 'Fashion', imageUrl: Fashion, routeName: 'Fashion'},
-    {id: '2', name: 'Grocery', shortName: 'Grocery', imageUrl: Grocery, routeName: 'Grocery'},
-    {id: '3', name: 'Electronics', shortName: 'Electronics', imageUrl: Electronics, routeName: 'Electronics'},
-    {id: '4', name: 'Food & Beverage', shortName: 'F&B', imageUrl: Food, routeName: 'F And B'},
-    {id: '5', name: 'Home & Decor', shortName: 'Home & Decor', imageUrl: Home, routeName: 'Home And Decor'},
-    {id: '6', name: 'Health & Wellness', shortName: 'Health & Wellness', imageUrl: Health, routeName: 'Health And Wellness'},
-    {id: '7', name: 'Beauty & Personal Care', shortName: 'BPC', imageUrl: BPC, routeName: 'BPC'},
+    {id: '1', name: 'Fashion', shortName: 'Fashion', imageUrl: Fashion, routeName: 'Fashion', domain: 'ONDC:RET12'},
+    {id: '2', name: 'Grocery', shortName: 'Grocery', imageUrl: Grocery, routeName: 'Grocery', domain: 'ONDC:RET10'},
+    {id: '3', name: 'Electronics', shortName: 'Electronics', imageUrl: Electronics, routeName: 'Electronics', domain: 'ONDC:RET14'},
+    {id: '4', name: 'Food & Beverage', shortName: 'F&B', imageUrl: Food, routeName: 'F And B', domain: 'ONDC:RET11'},
+    {id: '5', name: 'Home & Decor', shortName: 'Home & Decor', imageUrl: Home, routeName: 'Home And Decor', domain: 'ONDC:RET16'},
+    {id: '6', name: 'Health & Wellness', shortName: 'Health & Wellness', imageUrl: Health, routeName: 'Health And Wellness', domain: 'ONDC:RET18'},
+    {id: '7', name: 'Beauty & Personal Care', shortName: 'BPC', imageUrl: BPC, routeName: 'BPC', domain: 'ONDC:RET13'},
 ];
 
 export const PRODUCT_SUBCATEGORY = {
