@@ -41,7 +41,9 @@ const Brand = () => {
     };
 
     useEffect(() => {
-        getBrandDetails();
+        if(brandId){
+            getBrandDetails();
+        }
     }, [brandId]);
 
     if(isLoading || brandDetails === null){

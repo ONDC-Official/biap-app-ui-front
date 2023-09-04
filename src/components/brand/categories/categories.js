@@ -9,7 +9,7 @@ import PaginationItem from '@mui/material/PaginationItem';
 import IconButton from '@mui/material/IconButton';
 import {ReactComponent as PreviousIcon} from '../../../assets/images/previous.svg';
 import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
-import {getBrandCustomeMenuRequest} from "../../../api/brand.api";
+import {getBrandCustomMenuRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 
 const SingleCategory = ({data, index}) => {
@@ -60,13 +60,13 @@ const CategoriesComponent = ({brandDetails}) => {
     //     }
     // }, [categoryName, locationData]);
 
-    const getCustomeMenu = async(domain) => {
+    const getCustomMenu = async(domain) => {
         setIsLoading(true);
         try {
             const data = await cancellablePromise(
-                getBrandCustomeMenuRequest(domain)
+                getBrandCustomMenuRequest(domain)
             );
-            console.log("getCustomeMenu=====>", data);
+            console.log("getCustomMenu=====>", data);
             setSubCatList(data.data)
         } catch (err) {
         } finally {
@@ -76,7 +76,7 @@ const CategoriesComponent = ({brandDetails}) => {
 
     useEffect(() => {
         if(brandDetails){
-            getCustomeMenu(brandDetails.domain)
+            getCustomMenu(brandDetails.domain)
         }
     }, [brandDetails]);
 

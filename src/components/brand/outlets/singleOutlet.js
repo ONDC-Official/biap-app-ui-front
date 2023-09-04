@@ -5,28 +5,30 @@ import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import no_image_found from "../../../assets/images/no_image_found.png";
 import {useHistory, useParams} from "react-router-dom";
 
-const SingleOutlet = ({outletDetails}) => {
+const SingleOutlet = ({outletDetails, brandImageUrl}) => {
     const classes = useStyles();
     const {brandId} = useParams();
     const history = useHistory();
 
+    const {id, address, circle} = outletDetails;
+    const {radius} = circle;
+
     return (
         <div
             className={classes.outletItemContainer}
-            onClick={() => history.push(`/application/brand/${brandId}/${outletDetails.id}`)}
+            onClick={() => history.push(`/application/brand/${brandId}/${id}`)}
         >
             <Card className={classes.outletCard}>
                 <img
                     className={classes.outletImage}
-                    src={outletDetails?.imageUrl ? outletDetails.imageUrl : no_image_found}
+                    src={brandImageUrl}
                     alt={`outlet-img-${outletDetails.id}`}
                 />
             </Card>
             <Typography component="div" variant="body" className={classes.outletNameTypo}>
-                {outletDetails.outletName}
+                {`${address.street}, ${address.city}`}
             </Typography>
             <Box
                 component={"div"}
@@ -37,7 +39,7 @@ const SingleOutlet = ({outletDetails}) => {
                     {`${outletDetails.time} min`}
                 </Typography>
                 <Typography variant="body1" className={classes.distanceTypo}>
-                    {`${outletDetails.distance} km`}
+                    {`${radius?.value} ${radius?.unit || "km"}`}
                 </Typography>
             </div>
         </div>
