@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import useStyles from "./styles";
 import { useHistory, Link } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
@@ -20,7 +20,7 @@ export default function Cart() {
   const ref = useRef(null);
   const classes = useStyles();
   const history = useHistory();
-  const addressContext = useContext(AddressContext);
+  const {deliveryAddress} = useContext(AddressContext);
   let user = JSON.parse(getValueFromCookie("user"));
   const { cancellablePromise } = useCancellablePromise();
   const transaction_id = getValueFromCookie("transaction_id");
@@ -64,11 +64,13 @@ export default function Cart() {
   };
 
   const getCartItems = async () => {
+    console.log("11111====>")
     try {
       setLoading(true);
       const url = `/clientApis/v2/cart/${user.id}`;
       const res = await getCall(url);
       setCartItems(res);
+      updatedCartItems.current = res;
     } catch (error) {
       console.log("Error fetching cart items:", error);
       setLoading(false);
@@ -79,9 +81,10 @@ export default function Cart() {
 
   const updateCartItem = async (itemId, increment) => {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
-    const itemIndex = cartItems.findIndex((item) => item.item.id === itemId);
+    const items = cartItems.concat([]);
+    const itemIndex = items.findIndex((item) => item.item.id === itemId);
     if (itemIndex !== -1) {
-      let updatedCartItem = cartItems[itemIndex];
+      let updatedCartItem = items[itemIndex];
       updatedCartItem.id = updatedCartItem.item.id;
 
       if (increment) {
@@ -352,9 +355,9 @@ export default function Cart() {
           sx={{ marginTop: 1, marginBottom: 2 }}
           disabled={haveDistinctProviders}
           onClick={() => {
+            console.log("Checkout=====>", cartItems)
             if (cartItems.length > 0) {
-              let c = cartItems;
-              c = c.map((item) => {
+              let c = cartItems.map((item) => {
                 return item.item;
               });
 
@@ -383,68 +386,76 @@ export default function Cart() {
     return ids;
   };
 
-  const getQuote = useCallback(async (items, searchContextData = null) => {
+  const getQuote = async (items, searchContextData = null) => {
+    const ttansactionId = uuidv4();
+    AddCookie("transaction_id", ttansactionId);
     responseRef.current = [];
-
-    try {
-      const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
-      let domain = "";
-      const updatedItems = items.map((item) => {
-        domain = item.domain;
-        return item;
-      });
-      let selectPayload = {
-        context: {
-          transaction_id: uuidv4(),
-          domain: domain,
-          city: search_context.location.city,
-          state: search_context.location.state,
-        },
-        message: {
-          cart: {
-            items: updatedItems,
+    if(deliveryAddress){
+      try {
+        const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
+        let domain = "";
+        const updatedItems = items.map((item) => {
+          domain = item.domain;
+          delete item.context;
+          return item;
+        });
+        let selectPayload = {
+          context: {
+            transaction_id: ttansactionId,
+            domain: domain,
+            city: deliveryAddress.location.address.city,
+            state: deliveryAddress.location.address.state,
           },
-          fulfillments: [
-            {
-              end: {
-                location: {
-                  gps: `${search_context?.location?.lat}, ${search_context?.location?.lng}`,
-                  address: {
-                    area_code: `${search_context?.location?.pincode}`,
+          message: {
+            cart: {
+              items: updatedItems,
+            },
+            fulfillments: [
+              {
+                end: {
+                  location: {
+                    gps: `${search_context?.location?.lat}, ${search_context?.location?.lng}`,
+                    address: {
+                      area_code: `${search_context?.location?.pincode}`,
+                    },
                   },
                 },
               },
-            },
-          ],
-        },
-      };
-      console.log("select payload:", selectPayload);
-      const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
-      //Error handling workflow eg, NACK
-      const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
-      if (isNACK) {
-        alert(isNACK.error.message);
+            ],
+          },
+        };
+        console.log("select payload:", selectPayload);
+        const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
+        //Error handling workflow eg, NACK
+        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+        if (isNACK) {
+          alert(isNACK.error.message);
+          setGetQuoteLoading(false);
+        } else {
+          // fetch through events
+          onFetchQuote(
+              data?.map((txn) => {
+                const { context } = txn;
+                return context?.message_id;
+              })
+          );
+        }
+      } catch (err) {
+        alert(err?.response?.data?.error?.message);
+        console.log(err?.response?.data?.error);
         setGetQuoteLoading(false);
-      } else {
-        // fetch through events
-        onFetchQuote(
-          data?.map((txn) => {
-            const { context } = txn;
-            return context?.message_id;
-          })
-        );
+        history.replace("/application/products");
       }
-    } catch (err) {
-      alert(err?.response?.data?.error?.message);
-      console.log(err?.response?.data?.error);
-      setGetQuoteLoading(false);
-      history.replace("/application/products");
+    }else{
+      alert("Please select address")
     }
+
     // eslint-disable-next-line
-  }, []);
+  };
 
   function onFetchQuote(message_id) {
     eventTimeOutRef.current = [];
+
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -490,16 +501,11 @@ export default function Cart() {
         },
       ];
 
-      console.log("cartItems", cartItems);
-      console.log("updatedcartItems", updatedCartItems);
-      localStorage.setItem("cartItems", JSON.stringify(cartItems));
-      localStorage.setItem("updatedCartItems", JSON.stringify(updatedCartItems));
-
       // history.push(`/application/checkout`);
     });
   }
 
-  const onGetQuote = useCallback(async (message_id) => {
+  const onGetQuote = async (message_id) => {
     try {
       const data = await cancellablePromise(getCall(`/clientApis/v2/on_select?messageIds=${message_id}`));
       responseRef.current = [...responseRef.current, data[0]];
@@ -508,21 +514,25 @@ export default function Cart() {
 
       // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
       data[0].message.quote.items.forEach((item) => {
-        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.id === item.id);
+        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.item.product.id === item.id);
         if (findItemIndexFromCart > -1) {
-          updatedCartItems.current[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
-          updatedCartItems.current[findItemIndexFromCart].fulfillments = data[0].message.quote.fulfillments;
+          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments = data[0].message.quote.fulfillments;
         }
 
         console.log("cart", cartItems);
         console.log("updated cart", updatedCartItems.current);
       });
+
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems.current));
+      localStorage.setItem("updatedCartItems", JSON.stringify(responseRef.current));
+      history.push(`/application/checkout`);
     } catch (err) {
       alert(err.message);
       setGetQuoteLoading(false);
     }
     // eslint-disable-next-line
-  }, []);
+  };
 
   return (
     <div ref={ref}>

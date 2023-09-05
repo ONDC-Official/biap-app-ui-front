@@ -17,7 +17,7 @@ export function CartContextProvider({ children }) {
   );
 
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    // localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
 
   // use this function to remove the product from cart
