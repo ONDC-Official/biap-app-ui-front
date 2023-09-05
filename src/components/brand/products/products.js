@@ -18,13 +18,23 @@ import {ReactComponent as GridViewIcon} from '../../../assets/images/gridView.sv
 
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
-import {getAllProductRequest} from "../../../api/product.api";
+import {
+    getAllProductRequest,
+    getAllFiltersRequest,
+    getAllFilterValuesRequest
+} from "../../../api/product.api";
 
 const Products = ({brandDetails}) => {
     const classes = useStyles();
     const {brandId} = useParams();
     const {descriptor} = brandDetails;
     const {name: brandName, images} = descriptor;
+    const locationData = useLocation();
+    const useQuery = () => {
+        const { search } = locationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
 
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
@@ -39,11 +49,12 @@ const Products = ({brandDetails}) => {
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
-    const getAllProducts = async(brandId) => {
+    const getAllProducts = async(brandId, customMenuId) => {
         setIsLoading(true);
         try {
             const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
             paginationData.searchData.brandId = brandId || "";
+            paginationData.searchData.customMenu = customMenuId || "";
             const data = await cancellablePromise(
                 getAllProductRequest(paginationData)
             );
@@ -64,12 +75,198 @@ const Products = ({brandDetails}) => {
         }
     };
 
+    // const getFilterValues = async(attributeCode) => {
+    //     try {
+    //         const data = await cancellablePromise(
+    //             getAllFilterValuesRequest(attributeCode, subCategoryName)
+    //         );
+    //         console.log("getFilterValues=====>", data);
+    //         let filterValues = data.data;
+    //         filterValues = filterValues.map((value) => {
+    //             const createObj = {
+    //                 id: value,
+    //                 name: value,
+    //             }
+    //             return createObj
+    //         })
+    //         return filterValues
+    //     }  catch (err) {
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
+    const getAllFilters = async() => {
+        // setIsLoading(true);
+        // try {
+        //     const data = await cancellablePromise(
+        //         getAllFiltersRequest(subCategoryName)
+        //     );
+        //     console.log("getAllFilters=====>", data)
+        //     let filtersData = data.data;
+        //
+        //     for (let filter of filtersData) {
+        //         const values = await getFilterValues(filter.code);
+        //         const findIndex = filtersData.findIndex((item) => item.code === filter.code);
+        //         if(findIndex > -1){
+        //             filtersData[findIndex].options = values;
+        //             filtersData[findIndex].selectedValues = [];
+        //         }
+        //     }
+        //     let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+        //     paginationData.searchData = filtersData;
+        //     setPaginationModel(paginationData);
+        // } catch (err) {
+        //     // dispatch({
+        //     //     type: toast_actions.ADD_TOAST,
+        //     //     payload: {
+        //     //         id: Math.floor(Math.random() * 100),
+        //     //         type: toast_types.error,
+        //     //         message: err?.message,
+        //     //     },
+        //     // });
+        // } finally {
+        //     setIsLoading(false);
+        // }
+
+        let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+        paginationData.searchData = [
+            {
+                "id": "brand",
+                "category": "Men's Topwear",
+                "code": "brand",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "Raymond",
+                        "name": "Raymond"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "gender",
+                "category": "Men's Topwear",
+                "code": "gender",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "Male",
+                        "name": "Male"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "pattern",
+                "category": "Men's Topwear",
+                "code": "pattern",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "Checked",
+                        "name": "Checked"
+                    },
+                    {
+                        "id": "Striped",
+                        "name": "Striped"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "material",
+                "category": "Men's Topwear",
+                "code": "material",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "cotton",
+                        "name": "cotton"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "color",
+                "category": "Men's Topwear",
+                "code": "color",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "black",
+                        "name": "black"
+                    },
+                    {
+                        "id": "red",
+                        "name": "red"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "size",
+                "category": "Men's Topwear",
+                "code": "size",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "L",
+                        "name": "L"
+                    },
+                    {
+                        "id": "M",
+                        "name": "M"
+                    },
+                    {
+                        "id": "S",
+                        "name": "S"
+                    }
+                ],
+                "selectedValues": []
+            }
+        ];
+        setPaginationModel(paginationData);
+    };
+
     useEffect(() => {
-        if(brandId){
-            getAllProducts(brandId);
-            // getAllFilters();
+        if(brandId && locationData){
+            const customMenuId = query.get("cm");
+            if(customMenuId){
+                getAllProducts(brandId, customMenuId);
+            }else{
+                getAllProducts(brandId, "");
+                getAllFilters();
+            }
         }
-    }, [brandId]);
+    }, [brandId, locationData]);
+
+    useEffect(() => {
+        if(locationData){
+            const customMenuId = query.get("cm");
+            if(customMenuId){
+                getAllProducts(brandId, customMenuId);
+            }
+        }
+    }, [locationData]);
 
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));

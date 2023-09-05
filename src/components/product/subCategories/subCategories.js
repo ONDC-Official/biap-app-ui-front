@@ -106,7 +106,17 @@ const CategoriesComponent = () => {
                                     color="inherit" className={classes.actionButton}
                                     onClick={() => {
                                         const subCat = subCatList[item.page];
-                                        history.push(`/category/${categoryName}/${subCat.value}`)
+                                        const params = new URLSearchParams({});
+                                        if(searchProductName){
+                                            params.set('s', searchProductName)
+                                        }
+                                        if(categoryName){
+                                            params.set('c', categoryName)
+                                        }
+                                        if(subCategoryName){
+                                            params.set('sc', subCat.value)
+                                        }else{}
+                                        history.replace({ pathname: locationData.pathname, search: params.toString() });
                                     }}
                                     disabled={subCatList.length === item.page}
                                 >

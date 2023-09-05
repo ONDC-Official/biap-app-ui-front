@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import NavBar from "./navbar/navbar";
@@ -24,6 +24,10 @@ const useStyles = makeStyles({
 
 const AppLayout = ({ pageTitle, children, isCheckout=false }) => {
     const classes = useStyles();
+
+    useEffect(()=>{
+        window.scrollTo(0,0);
+    }, [])
     return (
         <Box className={classes.allLayoutContainer}>
             <NavBar isCheckout={isCheckout} />
@@ -31,7 +35,7 @@ const AppLayout = ({ pageTitle, children, isCheckout=false }) => {
                 component="main"
                 className={classes.mainContainer}
             >
-                <Toolbar className={classes.toolbar} />
+                <Toolbar id="back-to-top-anchor" className={classes.toolbar} />
                 {children}
             </Box>
             <Footer />

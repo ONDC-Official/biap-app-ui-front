@@ -9,12 +9,14 @@ import MuiLink from '@mui/material/Link';
 import Button from '@mui/material/Button';
 import Box from "@mui/material/Box";
 
+import moment from "moment";
 import {Link, useHistory, useParams} from "react-router-dom";
 import OutletImage from '../../../assets/images/outlet.png';
 import no_image_found from "../../../assets/images/no_image_found.png";
 import map from "../../../assets/images/map.png";
 
 import CustomMenu from './customMenu/customMenu';
+import PlacePickerMap from '../../common/PlacePickerMap/PlacePickerMap';
 
 import {getBrandDetailsRequest, getOutletDetailsRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
@@ -47,12 +49,27 @@ const OutletDetails = () => {
         }
     };
 
+
     const getOutletDetails = async() => {
         setIsLoading(true);
         try {
-            const data = await cancellablePromise(
+            let data = await cancellablePromise(
                 getOutletDetailsRequest(outletId)
             );
+            data.timings = ``;
+            data.isOpen = false;
+            data.circle.gps = data.circle.gps.split(',');
+            data.circle.gps = {
+                lat: data.circle.gps[0],
+                lng: data.circle.gps[1]
+            }
+            if(data.time.range.start && data.time.range.end){
+                data.timings = `${moment(data.time.range.start, 'hhmm').format('h:mm a')} - ${moment(data.time.range.end, 'hhmm').format('h:mm a')}`
+                const time = moment(new Date(), 'hh:mm');
+                const startTime = moment(data.time.range.start, 'hh:mm');
+                const endTime = moment(data.time.range.end, 'hh:mm');
+                data.isOpen = time.isBetween(startTime, endTime);
+            }else{}
             setOutletDetails(data);
         } catch (err) {
         } finally {
@@ -64,9 +81,6 @@ const OutletDetails = () => {
         if(brandId){
             getBrandDetails();
         }
-        // if(outletId){
-        //     getOutletDetails()
-        // }
     }, [brandId, outletId]);
 
     return (
@@ -109,8 +123,8 @@ const OutletDetails = () => {
                                 {`${outletDetails?.address?`${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`:"-"}`}
                             </Typography>
                             <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
-                                <span className={classes.isOpen}>Open now</span>
-                                - 12 midnight – 1am, 9am – 12 midnight (Today)
+                                {outletDetails?.isOpen && <span className={classes.isOpen}>Open now</span>}
+                                {outletDetails?.isOpen?` - `:""} {outletDetails?.timings}
                             </Typography>
                             <div
                                 className={classes.actionButtonContainer}
@@ -137,6 +151,9 @@ const OutletDetails = () => {
                                     src={map}
                                     alt={`map-img-${outletDetails?.id}`}
                                 />
+                                {/*<PlacePickerMap*/}
+                                {/*    location={outletDetails?.circle?.gps}*/}
+                                {/*/>*/}
                             </div>
                             <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
                                 {`${outletDetails?.address?`${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`:"-"}`}

@@ -11,7 +11,7 @@ const palette = {
       // primary: '#fff',
       // secondary: '#fff',
         success: Theme.successColor,
-      disabled: 'rgba(0, 0, 0, 0.38)',
+        disabled: 'rgba(0, 0, 0, 0.38)',
     },
     primary: {
         main: Theme.primaryColor,
@@ -50,7 +50,8 @@ const palette = {
     action: {
         disabled: Theme.disableColor,
         active: Theme.linkColor,
-    }
+    },
+    divider: Theme.divider
 };
 
 export default palette;

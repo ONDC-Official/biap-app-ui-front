@@ -30,18 +30,18 @@ const SingleOutlet = ({outletDetails, brandImageUrl}) => {
             <Typography component="div" variant="body" className={classes.outletNameTypo}>
                 {`${address.street}, ${address.city}`}
             </Typography>
-            <Box
-                component={"div"}
-                className={classes.divider}
-            />
-            <div className={classes.detailsContainer}>
-                <Typography color="success.main" className={classes.timeTypo}>
-                    {`${outletDetails.time} min`}
-                </Typography>
-                <Typography variant="body1" className={classes.distanceTypo}>
-                    {`${radius?.value} ${radius?.unit || "km"}`}
-                </Typography>
-            </div>
+            {/*<Box*/}
+            {/*    component={"div"}*/}
+            {/*    className={classes.divider}*/}
+            {/*/>*/}
+            {/*<div className={classes.detailsContainer}>*/}
+            {/*    <Typography color="success.main" className={classes.timeTypo}>*/}
+            {/*        {`${outletDetails.time} min`}*/}
+            {/*    </Typography>*/}
+            {/*    <Typography variant="body1" className={classes.distanceTypo}>*/}
+            {/*        {`${radius?.value} ${radius?.unit || "km"}`}*/}
+            {/*    </Typography>*/}
+            {/*</div>*/}
         </div>
     )
 

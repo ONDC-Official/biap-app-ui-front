@@ -15,7 +15,7 @@ import AddressList from "./addressList";
 import AddressForm from '../../appLayout/navbar/addressForm/addressForm';
 import {restoreToDefault} from "../../../constants/restoreDefaultAddress";
 import {address_types} from "../../../constants/address-types";
-import {AddCookie} from "../../../utils/cookies";
+import {AddCookie, removeCookie} from "../../../utils/cookies";
 import {AddressContext} from "../../../context/addressContext";
 
 const StepTwoContent = ({handleNext}) => {
@@ -63,7 +63,7 @@ const StepTwoContent = ({handleNext}) => {
                 :(
                     <>
                         {
-                            !toggleAddressForm.toggle && (
+                            addressType !== address_types.delivery && (
                                 <>
                                     <AddressList
                                         addressList={addressList}
@@ -121,6 +121,8 @@ const StepTwoContent = ({handleNext}) => {
                                                 <FormControlLabel
                                                     className={classes.formControlLabel}
                                                     onClick={() => {
+                                                        setBillingAddress();
+                                                        removeCookie("billing_address");
                                                         setToggleAddressForm({
                                                             actionType: "add",
                                                             toggle: true,
@@ -128,7 +130,7 @@ const StepTwoContent = ({handleNext}) => {
                                                         });
                                                         setAddressType(address_types.billing);
                                                     }}
-                                                    control={<Radio checked={billingAddress?deliveryAddress?.id !== billingAddress?.id:false} />}
+                                                    control={<Radio checked={billingAddress?deliveryAddress?.id !== billingAddress?.id:addressType === address_types.billing?true:false} />}
                                                     label={
                                                         <Typography variant="body1" component="div" className={classes.billingTypo}>
                                                             Add New Billing Address

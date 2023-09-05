@@ -21,7 +21,8 @@ const useStyles = makeStyles({
         },
     },
     categoryItem: {
-        textAlign: 'center'
+        textAlign: 'center',
+        cursor: 'pointer'
     },
     categoryItemImageContainer: {
         height: '108px',
@@ -32,10 +33,11 @@ const useStyles = makeStyles({
         margin: 'auto'
     },
     categoryImage: {
-        height: '78px',
-        maxWidth: '78px',
+        height: '102px',
+        maxWidth: '102px',
         minWidth: '42px',
-        margin: 'auto'
+        margin: 'auto',
+        borderRadius: '50%'
     },
     categoryNameTypo: {
         fontWeight: '600 !important',

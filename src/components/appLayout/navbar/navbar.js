@@ -4,6 +4,11 @@ import useStyles from "./style";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Divider from '@mui/material/Divider';
+import Badge from '@mui/material/Badge';
+
 import logo from "../../../assets/images/AppLogo.png";
 import { ReactComponent as LocationIcon } from "../../../assets/images/location.svg";
 import { ReactComponent as AddressDownIcon } from "../../../assets/images/chevron-down.svg";
@@ -19,7 +24,7 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 
 import { restoreToDefault } from "../../../constants/restoreDefaultAddress";
-import { getValueFromCookie, AddCookie, removeCookie } from "../../../utils/cookies";
+import {getValueFromCookie, AddCookie, removeCookie, deleteAllCookies} from "../../../utils/cookies";
 import { search_types } from "../../../constants/searchTypes";
 
 import ModalComponent from "../../common/Modal";
@@ -30,11 +35,16 @@ import { address_types } from "../../../constants/address-types";
 import { SearchContext } from "../../../context/searchContext";
 import { AddressContext } from "../../../context/addressContext";
 import {getAllDeliveryAddressRequest} from '../../../api/address.api';
+import {getUser, isLoggedIn} from "../../../utils/validateToken";
+import {getCall} from "../../../api/axios";
+
+import {categoryList} from '../../../constants/categories';
 
 const NavBar = ({isCheckout=false}) => {
   const classes = useStyles();
   const history = useHistory();
   const locationData = useLocation();
+  const user  = getUser();
   const useQuery = () => {
     const { search } = locationData;
     return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -43,9 +53,8 @@ const NavBar = ({isCheckout=false}) => {
   const { setSearchData, setLocationData } = useContext(SearchContext);
   const { setDeliveryAddress } = useContext(AddressContext);
 
-    useEffect(() => {
+  useEffect(() => {}, [locationData]);
 
-    }, [locationData]);
   // STATES
   const [inlineError, setInlineError] = useState({
     location_error: "",
@@ -72,9 +81,28 @@ const NavBar = ({isCheckout=false}) => {
   const [addressList, setAddressList] = useState([]);
   const [fetchDeliveryAddressLoading, setFetchDeliveryAddressLoading] = useState();
   const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
+  const [anchorElUserMenu, setAnchorElUserMenu] = useState(null);
+  const openUserMenu = Boolean(anchorElUserMenu);
+  const [anchorElCaregoryMenu, setAnchorElCategoryMenu] = useState(null);
+  const openCategoryMenu = Boolean(anchorElCaregoryMenu);
+  const [cartItemsCount, setCartItemsCount] = useState(0);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
+
+  const handleClickUserMenu = (event) => {
+    setAnchorElUserMenu(event.currentTarget);
+  };
+  const handleCloseUserMenu = () => {
+    setAnchorElUserMenu(null);
+  };
+
+  const handleClickCategoryMenu = (event) => {
+    setAnchorElCategoryMenu(event.currentTarget);
+  };
+  const handleCloseCategoryMenu = () => {
+    setAnchorElCategoryMenu(null);
+  };
 
   // use this function to fetch existing address of the user
   const fetchDeliveryAddress = async () => {
@@ -128,6 +156,13 @@ const NavBar = ({isCheckout=false}) => {
     }
   }
 
+  const getCartItemsCount = async () => {
+    const url = `/clientApis/v2/cart/${user.id}`;
+    const res = await getCall(url);
+    console.log("getCartItemsCount=====>", res.length)
+    setCartItemsCount(res.length);
+  };
+
   useEffect(() => {
     getLastEnteredValues();
     fetchDeliveryAddress();
@@ -140,6 +175,15 @@ const NavBar = ({isCheckout=false}) => {
 
   useEffect(() => {
     getLastEnteredValues();
+    getCartItemsCount();
+    const anchor = (document).querySelector(
+        '#back-to-top-anchor',
+    );
+    if (anchor) {
+      anchor.scrollIntoView({
+        block: 'center',
+      });
+    }else{}
   }, [locationData]);
 
   const setCriteriaLatLng = () => {
@@ -272,6 +316,7 @@ const NavBar = ({isCheckout=false}) => {
     };
 
   return (
+    <>
     <AppBar position="absolute">
       <Toolbar className={classes.headerContainer}>
         <img
@@ -335,10 +380,46 @@ const NavBar = ({isCheckout=false}) => {
                           AddCookie("search_context", JSON.stringify(search_context));
                         }}
                     />
-                    <IconButton className={classes.listIcon} aria-label="menu">
+                    <IconButton
+                      className={classes.listIcon}
+                      onClick={handleClickCategoryMenu}
+                      id="basic-button-cat"
+                      aria-controls={openCategoryMenu ? 'basic-menu-cat' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={openCategoryMenu ? 'true' : undefined}
+
+                    >
                       <ListIcon />
                     </IconButton>
+                    <Menu
+                        className={classes.userMenu}
+                        id="basic-menu-cat"
+                        anchorEl={anchorElCaregoryMenu}
+                        open={openCategoryMenu}
+                        onClose={handleCloseCategoryMenu}
+                        MenuListProps={{
+                          'aria-labelledby': 'basic-button-cat',
+                        }}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right',
+                        }}
+                    >
+                      {
+                        categoryList.map((cat, catIndex) => {
+                          return (
+                              <MenuItem key={`cat-index-${catIndex}`} onClick={handleCloseCategoryMenu}>
+                                {cat.name}
+                              </MenuItem>
+                          )
+                        })
+                      }
 
+                    </Menu>
                   </Paper>
                 </div>
                 <div className={classes.favourite}>
@@ -349,18 +430,74 @@ const NavBar = ({isCheckout=false}) => {
                 </div>
                 <div className={classes.cart}>
                   <Link to="/application/cart">
-                    <CartIcon />
+                    <Badge color="error" badgeContent={cartItemsCount}>
+                      <CartIcon />
+                    </Badge>
                     <Typography variant="body2" className={classes.cartTypo}>
                       Cart
                     </Typography>
                   </Link>
                 </div>
-                <div className={classes.user}>
+                <div
+                  className={classes.user}
+                  id="basic-button"
+                  aria-controls={openUserMenu ? 'basic-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openUserMenu ? 'true' : undefined}
+                  onClick={handleClickUserMenu}
+                >
                   <UserIcon />
                   <Typography variant="body2" className={classes.userTypo}>
-                    User
+                    {isLoggedIn() && user ? user.name: 'User'}
                   </Typography>
                 </div>
+                <Menu
+                    className={classes.userMenu}
+                    id="basic-menu"
+                    anchorEl={anchorElUserMenu}
+                    open={openUserMenu}
+                    onClose={handleCloseUserMenu}
+                    MenuListProps={{
+                      'aria-labelledby': 'basic-button',
+                    }}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                >
+                  <MenuItem
+                      onClick={() => {}}
+                  >
+                    My Profile
+                  </MenuItem>
+                  <MenuItem
+                      onClick={() => {
+                        history.push(`/application/orders`)
+                      }}
+                  >
+                    Order History
+                  </MenuItem>
+                  <Divider />
+                  <MenuItem
+                      onClick={() => {}}
+                  >
+                    Support
+                  </MenuItem>
+                  <MenuItem
+                      onClick={() => {
+                        deleteAllCookies();
+                        localStorage.removeItem("product_list");
+                        localStorage.removeItem("cartItems");
+                        history.replace("/");
+                      }}
+                  >
+                    Logout
+                  </MenuItem>
+                </Menu>
               </>
             )
         }
@@ -464,6 +601,7 @@ const NavBar = ({isCheckout=false}) => {
         </ModalComponent>
       )}
     </AppBar>
+    </>
   );
 };
 
