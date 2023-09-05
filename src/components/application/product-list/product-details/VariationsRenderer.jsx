@@ -54,11 +54,11 @@ const VariationsRenderer = (props) => {
   const getInitialVariationState = (groupInfo) => {
     const parentId = productPayload.item_details.parent_item_id;
 
-    const tags = productPayload.categories.find((item) => item.id == parentId).tags;
-    const attr = tags.find((tag) => tag.code === "attr");
-    const name = attr.list.find((a) => a.code === "name");
+    const tags = productPayload.categories.find((item) => item.id == parentId)?.tags;
+    const attr = tags?.find((tag) => tag.code === "attr");
+    const name = attr?.list.find((a) => a.code === "name");
 
-    if (name.value === "item.quantity.unitized.measure") {
+    if (name?.value === "item.quantity.unitized.measure") {
       setInitialVariationState({ isUOM: true });
       setIsUOM(true);
     } else {
