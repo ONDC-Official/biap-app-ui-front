@@ -38,6 +38,8 @@ import {getAllDeliveryAddressRequest} from '../../../api/address.api';
 import {getUser, isLoggedIn} from "../../../utils/validateToken";
 import {getCall} from "../../../api/axios";
 
+import {categoryList} from '../../../constants/categories';
+
 const NavBar = ({isCheckout=false}) => {
   const classes = useStyles();
   const history = useHistory();
@@ -81,6 +83,8 @@ const NavBar = ({isCheckout=false}) => {
   const [toggleLocationListCard, setToggleLocationListCard] = useState(false);
   const [anchorElUserMenu, setAnchorElUserMenu] = useState(null);
   const openUserMenu = Boolean(anchorElUserMenu);
+  const [anchorElCaregoryMenu, setAnchorElCategoryMenu] = useState(null);
+  const openCategoryMenu = Boolean(anchorElCaregoryMenu);
   const [cartItemsCount, setCartItemsCount] = useState(0);
 
   // HOOKS
@@ -91,6 +95,13 @@ const NavBar = ({isCheckout=false}) => {
   };
   const handleCloseUserMenu = () => {
     setAnchorElUserMenu(null);
+  };
+
+  const handleClickCategoryMenu = (event) => {
+    setAnchorElCategoryMenu(event.currentTarget);
+  };
+  const handleCloseCategoryMenu = () => {
+    setAnchorElCategoryMenu(null);
   };
 
   // use this function to fetch existing address of the user
@@ -369,10 +380,46 @@ const NavBar = ({isCheckout=false}) => {
                           AddCookie("search_context", JSON.stringify(search_context));
                         }}
                     />
-                    <IconButton className={classes.listIcon} aria-label="menu">
+                    <IconButton
+                      className={classes.listIcon}
+                      onClick={handleClickCategoryMenu}
+                      id="basic-button-cat"
+                      aria-controls={openCategoryMenu ? 'basic-menu-cat' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={openCategoryMenu ? 'true' : undefined}
+
+                    >
                       <ListIcon />
                     </IconButton>
+                    <Menu
+                        className={classes.userMenu}
+                        id="basic-menu-cat"
+                        anchorEl={anchorElCaregoryMenu}
+                        open={openCategoryMenu}
+                        onClose={handleCloseCategoryMenu}
+                        MenuListProps={{
+                          'aria-labelledby': 'basic-button-cat',
+                        }}
+                        anchorOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                          vertical: 'top',
+                          horizontal: 'right',
+                        }}
+                    >
+                      {
+                        categoryList.map((cat, catIndex) => {
+                          return (
+                              <MenuItem key={`cat-index-${catIndex}`} onClick={handleCloseCategoryMenu}>
+                                {cat.name}
+                              </MenuItem>
+                          )
+                        })
+                      }
 
+                    </Menu>
                   </Paper>
                 </div>
                 <div className={classes.favourite}>
