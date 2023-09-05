@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
 import useStyles from "./style";
-import { Grid, Typography } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Typography,
+} from "@mui/material";
+import Radio from "../../../common/Radio";
 
 const CustomizationRenderer = (props) => {
   const { productPayload, customization_state, setCustomizationState } = props;
@@ -137,6 +146,7 @@ const CustomizationRenderer = (props) => {
       const itemDetails = customization.item_details;
       const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
       const childTag = itemDetails.tags.find((tag) => tag.code === "child");
+      const vegNonVegTag = itemDetails.tags.find((tag) => tag.code === "veg_nonveg");
 
       return {
         id: itemDetails.id,
@@ -145,6 +155,7 @@ const CustomizationRenderer = (props) => {
         inStock: itemDetails.quantity.available.count > 0,
         parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
         child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
+        vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",
       };
     });
     return customizations;
@@ -218,7 +229,37 @@ const CustomizationRenderer = (props) => {
       initializeCustomizationState();
       setIsInitialized(true);
     }
-  }, [customizationGroups, customizations, isInitialized]);
+  }, [isInitialized, customizationGroups, customizations]);
+
+  const renderVegNonVegTag = (category = "veg") => {
+    const getTagColor = () => {
+      if (category === "veg") {
+        return "#008001";
+      } else if (category == "non_veg") {
+        return "red";
+      } else {
+        return "red";
+      }
+    };
+
+    const getTextColor = () => {
+      if (category === "veg") {
+        return "#419E6A";
+      } else if (category == "nonVeg") {
+        return "red";
+      } else {
+        return "red";
+      }
+    };
+
+    return (
+      <Grid container alignItems="center" xs={1}>
+        <div className={classes.square} style={{ borderColor: getTagColor() }}>
+          <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+        </div>
+      </Grid>
+    );
+  };
 
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
@@ -226,36 +267,46 @@ const CustomizationRenderer = (props) => {
 
       return (
         <>
-          <>
-            <Typography variant="body" color="black" sx={{ margin: "12px 0" }}>
-              {cg.name}
-            </Typography>
-            <Grid container>
-              {cg.options.map((c) => (
-                <>
-                  <div
-                    className={cg.selected.includes(c) ? classes.selectedCustomization : classes.customization}
-                    onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                  >
-                    {cg.seq == highestSeq && cg.selected.includes(c) && (
-                      <CloseIcon fontSize="small" className={classes.cross} />
-                    )}
-                    <Typography variant="body1" color={cg.selected.includes(c) ? "white" : "#686868"}>
-                      {c.name}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      color={cg.selected.includes(c) ? "white" : "#222"}
-                      sx={{ fontSize: 16, fontWeight: 600 }}
-                    >
-                      <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                      {c.price}
-                    </Typography>
-                  </div>
-                </>
-              ))}
-            </Grid>
-          </>
+          <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ padding: 0, margin: 0 }}>
+              <Typography variant="body" color="black">
+                {cg.name}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails sx={{ padding: "20px 0" }}>
+              <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
+                {cg.options.map((c) => (
+                  <>
+                    <div onClick={() => handleCustomizationSelect(c, parseInt(level))}>
+                      <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: 1 }}>
+                        <Grid container noWrap xs={8}>
+                          {renderVegNonVegTag(c.vegNonVeg)}
+                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            {c.name}
+                          </Typography>
+                        </Grid>
+                        <Grid container xs={3} justifyContent="flex-end">
+                          <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
+                            <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                            {c.price}
+                          </Typography>
+                          <Radio
+                            size="small"
+                            checked={cg.selected.includes(c)}
+                            onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                            onChange={(e) => {
+                              e.preventDefault();
+                              handleCustomizationSelect(c, parseInt(level));
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </div>
+                  </>
+                ))}
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
         </>
       );
     });

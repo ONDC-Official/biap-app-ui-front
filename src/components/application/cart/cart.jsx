@@ -9,6 +9,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
 import { deleteCall, getCall, putCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
+import Loading from "../../shared/loading/loading";
 
 export default function Cart() {
   const ref = useRef(null);
@@ -47,16 +48,23 @@ export default function Cart() {
   };
 
   const getCartItems = async () => {
-    const url = `/clientApis/v2/cart/${user.id}`;
-    const res = await getCall(url);
-    setCartItems(res);
+    try {
+      setLoading(true);
+      const url = `/clientApis/v2/cart/${user.id}`;
+      const res = await getCall(url);
+      setCartItems(res);
+    } catch (error) {
+      console.log("Error fetching cart items:", error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateCartItem = async (itemId, increment) => {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const itemIndex = cartItems.findIndex((item) => item.item.id === itemId);
     if (itemIndex !== -1) {
-      setLoading(true);
       let updatedCartItem = cartItems[itemIndex];
       updatedCartItem.id = updatedCartItem.item.id;
 
@@ -143,6 +151,23 @@ export default function Cart() {
     );
   };
 
+  const getCustomizations = (cartItem) => {
+    if (cartItem.item.customisations) {
+      const customisations = cartItem.item.customisations;
+
+      return customisations.map((c) => {
+        return (
+          <Grid container sx={{ marginTop: 1 }}>
+            <Typography>{c.item_details.descriptor.name} &nbsp;</Typography>
+            <Typography>₹{c.item_details.price.value}</Typography>
+          </Grid>
+        );
+      });
+    }
+
+    return null;
+  };
+
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
       return (
@@ -156,6 +181,7 @@ export default function Cart() {
                       className={classes.moreImage}
                       alt="product-image"
                       src={cartItem?.item?.product?.descriptor?.images[0]}
+                      onClick={() => history.push(`/application/products/${cartItem.item.id}`)}
                     />
                   </div>
                 </div>
@@ -177,6 +203,7 @@ export default function Cart() {
                   </Grid>
                 </Grid>
               </Grid>
+              {getCustomizations(cartItem)}
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
@@ -259,13 +286,13 @@ export default function Cart() {
         <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            Subtotal
+            Cart Subtotal
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹{getCartSubtotal()}
           </Typography>
         </Grid>
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Grid xs={8}>
             <Typography variant="subtitle1" className={classes.summaryLabel}>
               Shipping
@@ -277,32 +304,32 @@ export default function Cart() {
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹0
           </Typography>
-        </Grid>
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        </Grid> */}
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             Tax
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹0
           </Typography>
-        </Grid>
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        </Grid> */}
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             GST (10%)
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹0
           </Typography>
-        </Grid>
-        <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        </Grid> */}
+        {/* <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} /> */}
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             Order Total
           </Typography>
           <Typography variant="subtitle1" sx={{ fontSize: 18, fontWeight: 600 }}>
             ₹{getCartSubtotal()}
           </Typography>
-        </Grid>
+        </Grid> */}
 
         <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }} disabled={haveDistinctProviders}>
           Checkout
@@ -319,21 +346,29 @@ export default function Cart() {
         </Typography>
       </div>
 
-      {cartItems.length === 0 ? (
-        emptyCartScreen()
+      {loading ? (
+        <div className={classes.loadingContainer}>
+          <Loading />
+        </div>
       ) : (
-        <Grid container className={classes.cartContainer}>
-          <Grid item xs={8}>
-            {renderTableHeads()}
-            <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
-              {renderProducts()}
-            </div>
-          </Grid>
+        <>
+          {cartItems.length === 0 ? (
+            emptyCartScreen()
+          ) : (
+            <Grid container className={classes.cartContainer}>
+              <Grid item xs={8}>
+                {renderTableHeads()}
+                <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+                  {renderProducts()}
+                </div>
+              </Grid>
 
-          <Grid item xs={4}>
-            {renderSummaryCard()}
-          </Grid>
-        </Grid>
+              <Grid item xs={4}>
+                {renderSummaryCard()}
+              </Grid>
+            </Grid>
+          )}
+        </>
       )}
     </div>
   );

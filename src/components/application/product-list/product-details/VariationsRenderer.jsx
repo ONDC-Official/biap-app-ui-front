@@ -48,7 +48,7 @@ const VariationsRenderer = (props) => {
   };
 
   const getRelatedVariations = (variations) => {
-    const relatedItems = productPayload.related_items.map((item) => {
+    const relatedItems = productPayload?.related_items?.map((item) => {
       const attributes = item.attributes;
       const variationsInfo = {};
       variations.forEach((variation) => {
@@ -248,11 +248,10 @@ const VariationsRenderer = (props) => {
 
       return (
         <div key={groupId}>
-          <Typography variant="body" color="black" sx={{ margin: "12px 0" }}>
-            {groupName}
+          <Typography variant="body" color="black" sx={{ fontWeight: 500, textTransform: "capitalize" }}>
+            Available {groupName} Options
           </Typography>
           <Grid container>
-            {/* groupId === variationGroups[variationGroups.length - 1].seq.toString()/ */}
             {groupData.options.map((option) => {
               return (
                 <div
@@ -260,6 +259,7 @@ const VariationsRenderer = (props) => {
                   className={
                     groupData.selected.includes(option) ? classes.selectedCustomization : classes.customization
                   }
+                  style={{ marginTop: "8px", marginBottom: "16px" }}
                   onClick={() => {
                     handleVariationClick(groupData, option);
                   }}
