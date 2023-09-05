@@ -15,6 +15,7 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import map from "../../../assets/images/map.png";
 
 import CustomMenu from './customMenu/customMenu';
+import PlacePickerMap from '../../common/PlacePickerMap/PlacePickerMap';
 
 import {getBrandDetailsRequest, getOutletDetailsRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
@@ -137,6 +138,9 @@ const OutletDetails = () => {
                                     src={map}
                                     alt={`map-img-${outletDetails?.id}`}
                                 />
+                                {/*<PlacePickerMap*/}
+                                {/*    location={{}}*/}
+                                {/*/>*/}
                             </div>
                             <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
                                 {`${outletDetails?.address?`${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`:"-"}`}

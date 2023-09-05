@@ -21,7 +21,8 @@ const useStyles = makeStyles({
         },
     },
     categoryItem: {
-        textAlign: 'center'
+        textAlign: 'center',
+        cursor: 'pointer'
     },
     categoryItemImageContainer: {
         height: '108px',

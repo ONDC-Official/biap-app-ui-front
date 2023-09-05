@@ -25,6 +25,12 @@ const Products = ({brandDetails}) => {
     const {brandId} = useParams();
     const {descriptor} = brandDetails;
     const {name: brandName, images} = descriptor;
+    const locationData = useLocation();
+    const useQuery = () => {
+        const { search } = locationData;
+        return React.useMemo(() => new URLSearchParams(search), [search]);
+    };
+    let query = useQuery();
 
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
@@ -39,11 +45,12 @@ const Products = ({brandDetails}) => {
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
-    const getAllProducts = async(brandId) => {
+    const getAllProducts = async(brandId, customMenuId) => {
         setIsLoading(true);
         try {
             const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
             paginationData.searchData.brandId = brandId || "";
+            paginationData.searchData.customMenu = customMenuId || "";
             const data = await cancellablePromise(
                 getAllProductRequest(paginationData)
             );
@@ -65,11 +72,25 @@ const Products = ({brandDetails}) => {
     };
 
     useEffect(() => {
-        if(brandId){
-            getAllProducts(brandId);
-            // getAllFilters();
+        if(brandId && locationData){
+            const customMenuId = query.get("cm");
+            if(customMenuId){
+                getAllProducts(brandId, customMenuId);
+            }else{
+                getAllProducts(brandId, "");
+                // getAllFilters();
+            }
         }
-    }, [brandId]);
+    }, [brandId, locationData]);
+
+    useEffect(() => {
+        if(locationData){
+            const customMenuId = query.get("cm");
+            if(customMenuId){
+                getAllProducts(brandId, customMenuId);
+            }
+        }
+    }, [locationData]);
 
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));

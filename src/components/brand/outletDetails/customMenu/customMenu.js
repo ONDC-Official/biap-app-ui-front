@@ -62,12 +62,12 @@ const CustomMenu = ({brandDetails, outletDetails}) => {
         setIsLoading(true);
         try {
             const data = await cancellablePromise(
-                getBrandCustomMenuRequest(domain)
+                getBrandCustomMenuRequest(domain, brandId)
             );
             console.log("getBrandCustomMenu=====>", data);
             let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
             resData = await resData.map(async (customMenu) => {
-                customMenu.items = await getCustomMenuItems(customMenu.descriptor.name);
+                customMenu.items = await getCustomMenuItems(customMenu.id);
                 return customMenu;
             })
             setCustomMenu(data.data);

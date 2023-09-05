@@ -35,11 +35,11 @@ export const getBrandDetailsRequest = (brandId) => {
  * function to get brand details
  * @returns
  */
-export const getBrandCustomMenuRequest = (domain) => {
+export const getBrandCustomMenuRequest = (domain, brandId) => {
     return new Promise(async (resolve, reject) => {
         try {
             // const data = await getCall(`/clientApis/v2/custom-menus?domain=${domain}`);
-            const data = await getCall(`/protocol/custom-menus?domain=${domain}`);
+            const data = await getCall(`/protocol/custom-menus?domain=${domain}&provider=${brandId}`);
             return resolve(data);
         } catch (err) {
             return reject(err);

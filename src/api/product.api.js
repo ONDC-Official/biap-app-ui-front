@@ -10,9 +10,10 @@ export const getAllProductRequest = (data) => {
     const productName = data?.searchData?.productName || "";
     const subCategoryName = data?.searchData?.subCategoryName || "";
     const providerIds = data?.searchData?.brandId || "";
+    const customMenu = data?.searchData?.customMenu || "";
     return new Promise(async (resolve, reject) => {
         try {
-            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}${subCategoryName?`&categoryIds=${subCategoryName}`:''}${productName?`&productName=${productName}`:""}${providerIds?`&providerIds=${providerIds}`:""}`
+            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}${subCategoryName?`&categoryIds=${subCategoryName}`:''}${productName?`&productName=${productName}`:""}${providerIds?`&providerIds=${providerIds}`:""}${customMenu?`&customMenu=${customMenu}`:""}`
             const data = await getCall(`/clientApis/v2/search${quaryParams}`);
             return resolve(data.response);
         } catch (err) {
