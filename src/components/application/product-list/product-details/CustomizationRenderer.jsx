@@ -137,6 +137,7 @@ const CustomizationRenderer = (props) => {
       const itemDetails = customization.item_details;
       const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
       const childTag = itemDetails.tags.find((tag) => tag.code === "child");
+      const vegNonVegTag = itemDetails.tags.find((tag) => tag.code === "veg_nonveg");
 
       return {
         id: itemDetails.id,
@@ -145,6 +146,7 @@ const CustomizationRenderer = (props) => {
         inStock: itemDetails.quantity.available.count > 0,
         parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
         child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
+        vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",
       };
     });
     return customizations;
@@ -218,15 +220,13 @@ const CustomizationRenderer = (props) => {
       initializeCustomizationState();
       setIsInitialized(true);
     }
-  }, [customizationGroups, customizations, isInitialized]);
+  }, [isInitialized, customizationGroups, customizations]);
 
-  const renderVegNonVegTag = () => {
-    const category = "veg";
-
+  const renderVegNonVegTag = (category = "veg") => {
     const getTagColor = () => {
       if (category === "veg") {
         return "#008001";
-      } else if (category == "nonVeg") {
+      } else if (category == "non_veg") {
         return "red";
       } else {
         return "red";
@@ -256,6 +256,8 @@ const CustomizationRenderer = (props) => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
 
+      console.log(cg);
+
       return (
         <>
           <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
@@ -271,7 +273,7 @@ const CustomizationRenderer = (props) => {
                     <div onClick={() => handleCustomizationSelect(c, parseInt(level))}>
                       <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: 1 }}>
                         <Grid container noWrap xs={8}>
-                          {renderVegNonVegTag()}
+                          {renderVegNonVegTag(c.vegNonVeg)}
                           <Typography variant="body1" sx={{ fontWeight: 600 }}>
                             {c.name}
                           </Typography>

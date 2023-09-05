@@ -96,13 +96,11 @@ const ProductDetails = () => {
       },
     };
 
-    //  console.log(payload);
-
     const res = await postCall(url, payload);
     history.push("/application/cart");
   };
 
-  //   fetch product details
+  // fetch product details
   useEffect(() => {
     let productId = params.id;
     getProductDetails(productId);
@@ -114,12 +112,27 @@ const ProductDetails = () => {
     const grocery = "ONDC:RET10";
 
     if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) {
-      const category = "veg";
+      const tags = productPayload.item_details.tags;
+      let category = "veg";
+
+      for (let i = 0; i < tags.length; i++) {
+        if (tags[i].code === "veg_nonveg") {
+          const vegNonVegValue = tags[i].list[0].value;
+
+          if (vegNonVegValue === "yes") {
+            category = "veg";
+          } else if (vegNonVegValue === "no") {
+            category = "nonveg";
+          } else if (vegNonVegValue === "egg") {
+            category = "egg";
+          }
+        }
+      }
 
       const getTagColor = () => {
         if (category === "veg") {
           return "#008001";
-        } else if (category == "nonVeg") {
+        } else if (category == "nonveg") {
           return "red";
         } else {
           return "red";
