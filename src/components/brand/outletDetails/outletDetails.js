@@ -58,6 +58,11 @@ const OutletDetails = () => {
             );
             data.timings = ``;
             data.isOpen = false;
+            data.circle.gps = data.circle.gps.split(',');
+            data.circle.gps = {
+                lat: data.circle.gps[0],
+                lng: data.circle.gps[1]
+            }
             if(data.time.range.start && data.time.range.end){
                 data.timings = `${moment(data.time.range.start, 'hhmm').format('h:mm a')} - ${moment(data.time.range.end, 'hhmm').format('h:mm a')}`
                 const time = moment(new Date(), 'hh:mm');
@@ -147,7 +152,7 @@ const OutletDetails = () => {
                                     alt={`map-img-${outletDetails?.id}`}
                                 />
                                 {/*<PlacePickerMap*/}
-                                {/*    location={{}}*/}
+                                {/*    location={outletDetails?.circle?.gps}*/}
                                 {/*/>*/}
                             </div>
                             <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
