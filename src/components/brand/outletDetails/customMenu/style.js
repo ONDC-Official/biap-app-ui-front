@@ -49,7 +49,9 @@ const useStyles = makeStyles({
         background: '#fff'
     },
     itemImage: {
-        margin: 'auto !important'
+        margin: 'auto !important',
+        height: '100% !important',
+        width: '100% !important',
     },
     vegNonvegIcon: {
         position: 'absolute !important',
@@ -61,6 +63,50 @@ const useStyles = makeStyles({
     progressBarContainer: {
         textAlign: 'center !important',
         marginTop: '16px !important',
+    },
+    menuButtonContainer: {
+        textAlign: 'center',
+        marginTop: '16px !important'
+    },
+    menuFloatingButton: {
+        // position: "absolute !important",
+        // bottom: 0
+    },
+    menuIcon: {
+        marginRight: '10px !important',
+        height: '29px !important',
+        width: '29px !important',
+    },
+    dialogMenuName: {
+        fontSize: '16px !important',
+        fontWeight: '400 !important',
+        lineHeight: '24px !important',
+        cursor: 'pointer',
+        marginBottom: '24px !important',
+        width: '350px !important'
+    },
+    isActiveMenu: {
+        color: `${palette.primary.main} !important`,
+        fontSize: '20px !important',
+        fontWeight: '500 !important',
+    },
+    dialogMenuItemName: {
+        fontSize: '16px !important',
+        fontWeight: '400 !important',
+        lineHeight: '24px !important',
+        cursor: 'pointer',
+        marginBottom: '24px !important',
+        marginLeft: '15px !important',
+        width: '335px !important'
+    },
+    plusIcon: {
+        background: `${palette.primary.light}`,
+        marginLeft: '10px !important',
+        borderRadius: '50px !important'
+    },
+    itemsCount: {
+        float: 'right',
+        fontWeight: '600 !important',
     }
 });
 

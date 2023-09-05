@@ -12,10 +12,24 @@ import VegIcon from '../../../../assets/images/veg.svg'
 import NonVegIcon from '../../../../assets/images/nonveg.svg'
 import {ReactComponent as CustomiseIcon} from '../../../../assets/images/customise.svg'
 import {ReactComponent as PlusIcon} from '../../../../assets/images/plus.svg'
+import no_image_found from "../../../../assets/images/no_image_found.png";
 
-const MenuItem = ({item}) => {
+const MenuItem = (props) => {
     const classes = useStyles();
-    console.log("item=====>", item.isVeg?"Veg":"NonVeg")
+    const {
+        product,
+        productId,
+        price,
+        bpp_id,
+        location_id,
+        bpp_provider_id,
+        bpp_provider_descriptor,
+        show_quantity_button = true,
+        onUpdateCart = () => { },
+    } = props;
+    const { descriptor, isVeg } = product;
+    const { name: product_name, images, short_desc: product_description } = descriptor;
+
     const renderVegNonvegIcon = (isVeg) => {
         console.log("renderVegNonvegIcon===========>", isVeg)
         if(isVeg){
@@ -29,23 +43,25 @@ const MenuItem = ({item}) => {
         <Grid container spacing={3}>
             <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5}>
                 <Typography variant="h6" className={classes.itemNameTypo}>
-                    {item.name}
+                    {product_name}
                 </Typography>
                 <Typography variant="h5" className={classes.itemPriceTypo}>
-                    {item.price}
+                    {`₹${Number.isInteger(Number(price?.value))
+                        ? Number(price?.value).toFixed(2)
+                        : Number(price?.value).toFixed(2)}`}
                 </Typography>
                 <Typography variant="body1" className={classes.itemDescriptionTypo}>
-                    {item.description}
+                    {product_description}
                 </Typography>
             </Grid>
             <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
                 <Card className={classes.itemCard}>
                     <img
                         className={classes.itemImage}
-                        src={ItemImage}
-                        alt={`item-ind-${item.id}`}
+                        src={images?.length > 0 ? images[0] : no_image_found}
+                        alt={`item-ind-${productId}`}
                     />
-                    {renderVegNonvegIcon(item.isVeg)}
+                    {renderVegNonvegIcon(isVeg)}
                 </Card>
                 <div className={classes.cardAction}>
                     <Button
