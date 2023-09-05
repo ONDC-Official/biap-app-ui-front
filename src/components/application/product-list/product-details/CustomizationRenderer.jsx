@@ -256,8 +256,6 @@ const CustomizationRenderer = (props) => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
 
-      console.log(cg);
-
       return (
         <>
           <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
