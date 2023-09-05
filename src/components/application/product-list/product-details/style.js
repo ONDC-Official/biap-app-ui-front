@@ -166,6 +166,12 @@ const useStyles = makeStyles({
     height: "10px",
     width: "10px",
   },
+  emptySpace: {
+    height: "80vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
 
 export default useStyles;

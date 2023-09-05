@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import useStyles from "./style";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
@@ -13,6 +13,7 @@ import { getValueFromCookie } from "../../../../utils/cookies";
 import { Link, useLocation, useHistory, useParams } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
+import Loading from "../../../shared/loading/loading";
 
 const additionalProductDetails = {
   "style code": "Bell & Ross Nightlum",
@@ -30,7 +31,6 @@ const ProductDetails = () => {
   const top = useRef(null);
   const classes = useStyles();
   const history = useHistory();
-  const location = useLocation();
   const params = useParams();
   const { cancellablePromise } = useCancellablePromise();
 
@@ -48,12 +48,16 @@ const ProductDetails = () => {
   };
 
   const getProductDetails = async (productId) => {
-    const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
-    const { item_details } = data.response;
+    try {
+      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+      const { item_details } = data.response;
 
-    setProductPayload(data.response);
-    setProductDetails(item_details);
-    setActiveImage(item_details?.descriptor?.images[0]);
+      setProductPayload(data.response);
+      setProductDetails(item_details);
+      setActiveImage(item_details?.descriptor?.images[0]);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }
   };
 
   const calculateSubtotal = () => {
@@ -100,8 +104,6 @@ const ProductDetails = () => {
 
   //   fetch product details
   useEffect(() => {
-    //  let pathname = location.pathname;
-    //  let parts = pathname.split("/");
     let productId = params.id;
     getProductDetails(productId);
     top.current?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
@@ -169,57 +171,63 @@ const ProductDetails = () => {
   };
 
   return (
-    <div ref={top}>
-      <div className={classes.breadCrumbs} onClick={() => {}}>
-        <Breadcrumbs aria-label="breadcrumb">
-          <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
-            Home
-          </MuiLink>
-          {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>
+    <>
+      {productPayload == null ? (
+        <div className={classes.emptySpace}>
+          <Loading />
+        </div>
+      ) : (
+        <div ref={top}>
+          <div className={classes.breadCrumbs} onClick={() => {}}>
+            <Breadcrumbs aria-label="breadcrumb">
+              <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
+                Home
+              </MuiLink>
+              {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>
             {productPayload?.item_details?.category_id}
           </MuiLink> */}
-          <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
-        </Breadcrumbs>
-      </div>
+              <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
+            </Breadcrumbs>
+          </div>
 
-      <Grid container className={classes.detailsContainer}>
-        <Grid item xs={7}>
-          <div className={classes.imgContainer}>
-            <img className={classes.productImg} src={activeImage} />
-          </div>
-          <div className={classes.moreImagesContainer}>
-            {productDetails?.descriptor?.images.map((item, idx) => {
-              return (
-                <div
-                  style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
-                  className={classes.moreImages}
-                  onClick={() => handleImageClick(item)}
-                >
-                  <div className={classes.greyContainer}>
-                    <img className={classes.moreImage} src={item} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Grid>
-        <Grid item xs={5}>
-          <Card className={classes.productCard}>
-            {renderVegNonVegTag()}
-            {renderStockStatus()}
-            <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
-              {productDetails?.descriptor?.name}
-            </Typography>
-            <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}>
-              ₹ {productDetails?.price?.value}
-            </Typography>
-            <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
-            <VariationsRenderer
-              productPayload={productPayload}
-              variationState={variationState}
-              setVariationState={setVariationState}
-            />
-            {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
+          <Grid container className={classes.detailsContainer}>
+            <Grid item xs={7}>
+              <div className={classes.imgContainer}>
+                <img className={classes.productImg} src={activeImage} />
+              </div>
+              <div className={classes.moreImagesContainer}>
+                {productDetails?.descriptor?.images.map((item, idx) => {
+                  return (
+                    <div
+                      style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                      className={classes.moreImages}
+                      onClick={() => handleImageClick(item)}
+                    >
+                      <div className={classes.greyContainer}>
+                        <img className={classes.moreImage} src={item} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Grid>
+            <Grid item xs={5}>
+              <Card className={classes.productCard}>
+                {renderVegNonVegTag()}
+                {renderStockStatus()}
+                <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
+                  {productDetails?.descriptor?.name}
+                </Typography>
+                <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}>
+                  ₹ {productDetails?.price?.value}
+                </Typography>
+                <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
+                <VariationsRenderer
+                  productPayload={productPayload}
+                  variationState={variationState}
+                  setVariationState={setVariationState}
+                />
+                {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
               <Typography variant="body" color="#1D1D1D">
                 Select size
               </Typography>
@@ -280,64 +288,69 @@ const ProductDetails = () => {
               })}
             </div> */}
 
-            {!true && (
-              <Grid container justifyContent="center" className={classes.outOfStock}>
-                <Typography variant="body" color="#D83232">
-                  Item is out of Stock
-                </Typography>
-              </Grid>
-            )}
-
-            <CustomizationRenderer
-              productPayload={productPayload}
-              customization_state={customization_state}
-              setCustomizationState={setCustomizationState}
-            />
-
-            <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
-              <Button
-                variant="contained"
-                sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
-                onClick={addToCart}
-              >
-                Add to cart
-              </Button>
-              <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
-                Order now
-              </Button>
-            </Grid>
-          </Card>
-        </Grid>
-      </Grid>
-      <Grid container className={classes.productDetailsSection}>
-        <Grid item xs={7} className={classes.productDetailsLeft}>
-          <Accordion elevation={0} square defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}>
-              <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 600 }}>
-                Product Details
-              </Typography>
-              <Divider />
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: "20px 0" }}>
-              {Object.keys(additionalProductDetails).map((key) => (
-                <Grid container className={classes.keyValueContainer}>
-                  <Grid xs={3}>
-                    <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
-                      {key}
+                {!true && (
+                  <Grid container justifyContent="center" className={classes.outOfStock}>
+                    <Typography variant="body" color="#D83232">
+                      Item is out of Stock
                     </Typography>
                   </Grid>
-                  <Grid xs={8}>
-                    <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
-                      {additionalProductDetails[key]}
-                    </Typography>
-                  </Grid>
+                )}
+
+                <CustomizationRenderer
+                  productPayload={productPayload}
+                  customization_state={customization_state}
+                  setCustomizationState={setCustomizationState}
+                />
+
+                <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
+                    onClick={addToCart}
+                  >
+                    Add to cart
+                  </Button>
+                  <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
+                    Order now
+                  </Button>
                 </Grid>
-              ))}
-            </AccordionDetails>
-          </Accordion>
-        </Grid>
-      </Grid>
-    </div>
+              </Card>
+            </Grid>
+          </Grid>
+          <Grid container className={classes.productDetailsSection}>
+            <Grid item xs={7} className={classes.productDetailsLeft}>
+              <Accordion elevation={0} square defaultExpanded>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}
+                >
+                  <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 600 }}>
+                    Product Details
+                  </Typography>
+                  <Divider />
+                </AccordionSummary>
+                <AccordionDetails sx={{ padding: "20px 0" }}>
+                  {Object.keys(additionalProductDetails).map((key) => (
+                    <Grid container className={classes.keyValueContainer}>
+                      <Grid xs={3}>
+                        <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+                          {key}
+                        </Typography>
+                      </Grid>
+                      <Grid xs={8}>
+                        <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+                          {additionalProductDetails[key]}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  ))}
+                </AccordionDetails>
+              </Accordion>
+            </Grid>
+          </Grid>
+        </div>
+      )}
+    </>
   );
 };
 
