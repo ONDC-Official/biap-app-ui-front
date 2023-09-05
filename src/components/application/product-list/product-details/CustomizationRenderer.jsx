@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import useStyles from "./style";
-import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import { Accordion, AccordionDetails, AccordionSummary, Divider, Grid, Radio, Typography } from "@mui/material";

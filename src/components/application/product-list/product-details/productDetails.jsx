@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import useStyles from "./style";
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
 import MuiLink from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
@@ -130,6 +132,11 @@ const ProductDetails = () => {
       }
     };
 
+    const FnB = "ONDC:RET11";
+    const grocery = "ONDC:RET10";
+
+    if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) return null;
+
     return (
       <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
         <div className={classes.square} style={{ borderColor: getTagColor() }}>
@@ -140,6 +147,25 @@ const ProductDetails = () => {
         </Typography>
       </Grid>
     );
+  };
+
+  const renderStockStatus = () => {
+    if (parseInt(productDetails?.quantity?.available?.count) > 1) {
+      return (
+        <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
+          <DoneIcon color="success" fontSize="small" /> In stock
+        </Typography>
+      );
+    } else {
+      return (
+        <Grid container alignItems="center">
+          <CloseIcon color="error" fontSize="small" />
+          <Typography variant="body" color="#D83232">
+            Out of Stock
+          </Typography>
+        </Grid>
+      );
+    }
   };
 
   return (
@@ -180,18 +206,7 @@ const ProductDetails = () => {
         <Grid item xs={5}>
           <Card className={classes.productCard}>
             {renderVegNonVegTag()}
-            {/* {true ? (
-              <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
-                <DoneIcon color="success" fontSize="small" /> In stock
-              </Typography>
-            ) : (
-              <Grid container alignItems="center">
-                <CloseIcon color="error" fontSize="small" />
-                <Typography variant="body" color="#D83232">
-                  Out of Stock
-                </Typography>
-              </Grid>
-            )} */}
+            {renderStockStatus()}
             <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
               {productDetails?.descriptor?.name}
             </Typography>
