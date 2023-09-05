@@ -288,7 +288,7 @@ const ProductDetails = () => {
               })}
             </div> */}
 
-                {!true && (
+                {!parseInt(productDetails?.quantity?.available?.count) >= 1 && (
                   <Grid container justifyContent="center" className={classes.outOfStock}>
                     <Typography variant="body" color="#D83232">
                       Item is out of Stock
@@ -307,10 +307,15 @@ const ProductDetails = () => {
                     variant="contained"
                     sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
                     onClick={addToCart}
+                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
                   >
                     Add to cart
                   </Button>
-                  <Button variant="outlined" sx={{ flex: 1, textTransform: "none" }}>
+                  <Button
+                    variant="outlined"
+                    sx={{ flex: 1, textTransform: "none" }}
+                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
+                  >
                     Order now
                   </Button>
                 </Grid>
