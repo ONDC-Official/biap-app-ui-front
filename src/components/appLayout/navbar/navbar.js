@@ -4,10 +4,10 @@ import useStyles from "./style";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Divider from '@mui/material/Divider';
-import Badge from '@mui/material/Badge';
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Divider from "@mui/material/Divider";
+import Badge from "@mui/material/Badge";
 
 import logo from "../../../assets/images/AppLogo.png";
 import { ReactComponent as LocationIcon } from "../../../assets/images/location.svg";
@@ -24,7 +24,7 @@ import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 
 import { restoreToDefault } from "../../../constants/restoreDefaultAddress";
-import {getValueFromCookie, AddCookie, removeCookie, deleteAllCookies} from "../../../utils/cookies";
+import { getValueFromCookie, AddCookie, removeCookie, deleteAllCookies } from "../../../utils/cookies";
 import { search_types } from "../../../constants/searchTypes";
 
 import ModalComponent from "../../common/Modal";
@@ -34,17 +34,17 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { address_types } from "../../../constants/address-types";
 import { SearchContext } from "../../../context/searchContext";
 import { AddressContext } from "../../../context/addressContext";
-import {getAllDeliveryAddressRequest} from '../../../api/address.api';
-import {getUser, isLoggedIn} from "../../../utils/validateToken";
-import {getCall} from "../../../api/axios";
+import { getAllDeliveryAddressRequest } from "../../../api/address.api";
+import { getUser, isLoggedIn } from "../../../utils/validateToken";
+import { getCall } from "../../../api/axios";
 
-import {categoryList} from '../../../constants/categories';
+import { categoryList } from "../../../constants/categories";
 
-const NavBar = ({isCheckout=false}) => {
+const NavBar = ({ isCheckout = false }) => {
   const classes = useStyles();
   const history = useHistory();
   const locationData = useLocation();
-  const user  = getUser();
+  const user = getUser();
   const useQuery = () => {
     const { search } = locationData;
     return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -141,7 +141,7 @@ const NavBar = ({isCheckout=false}) => {
       setSearchedLocation(search_context.location);
       setSearchData(() => ({
         type: search_context.search.type,
-        value: query.size > 0 &&searchProductName ? searchProductName : "",
+        value: query.size > 0 && searchProductName ? searchProductName : "",
       }));
       setLocationData(() => search_context.location);
     } else {
@@ -159,7 +159,7 @@ const NavBar = ({isCheckout=false}) => {
   const getCartItemsCount = async () => {
     const url = `/clientApis/v2/cart/${user.id}`;
     const res = await getCall(url);
-    console.log("getCartItemsCount=====>", res.length)
+    console.log("getCartItemsCount=====>", res.length);
     setCartItemsCount(res.length);
   };
 
@@ -176,14 +176,13 @@ const NavBar = ({isCheckout=false}) => {
   useEffect(() => {
     getLastEnteredValues();
     getCartItemsCount();
-    const anchor = (document).querySelector(
-        '#back-to-top-anchor',
-    );
+    const anchor = document.querySelector("#back-to-top-anchor");
     if (anchor) {
       anchor.scrollIntoView({
-        block: 'center',
+        block: "center",
       });
-    }else{}
+    } else {
+    }
   }, [locationData]);
 
   const setCriteriaLatLng = () => {
@@ -244,10 +243,10 @@ const NavBar = ({isCheckout=false}) => {
         tag: location?.tag,
       });
       let search_context_data = getValueFromCookie("search_context");
-      search_context_data = Object.assign({}, JSON.parse(search_context));
+      search_context_data = search_context_data ? Object.assign({}, JSON.parse(search_context_data)) : {};
       // generating context for search
       const search_context = {
-        search: search_context_data.search,
+        search: search_context_data?.search || "",
         location: {
           ...searchedLocation,
           name: location?.name,
@@ -295,276 +294,247 @@ const NavBar = ({isCheckout=false}) => {
     }
   };
 
-    const updateSearchParams = () => {
-        const categoryName = query.get("c");
-        const subCategoryName = query.get("sc");
-        const params = new URLSearchParams({});
-        if(locationData.pathname !== "/application/products"){
-            history.push(`/application/products?s=${search.value}`)
-        }else{
-            if(search.value){
-                params.set('s', search.value)
-            }
-            if(categoryName){
-                params.set('c', categoryName)
-            }
-            if(subCategoryName){
-                params.set('sc', subCategoryName)
-            }else{}
-            history.replace({ pathname: locationData.pathname, search: params.toString() })
-        }
-    };
+  const updateSearchParams = () => {
+    const categoryName = query.get("c");
+    const subCategoryName = query.get("sc");
+    const params = new URLSearchParams({});
+    if (locationData.pathname !== "/application/products") {
+      history.push(`/application/products?s=${search.value}`);
+    } else {
+      if (search.value) {
+        params.set("s", search.value);
+      }
+      if (categoryName) {
+        params.set("c", categoryName);
+      }
+      if (subCategoryName) {
+        params.set("sc", subCategoryName);
+      } else {
+      }
+      history.replace({ pathname: locationData.pathname, search: params.toString() });
+    }
+  };
 
   return (
     <>
-    <AppBar position="absolute">
-      <Toolbar className={classes.headerContainer}>
-        <img
-          src={logo}
-          alt="logo"
-          className={classes.appLogo}
-          onClick={() => {
-            // removeCookie("search_context");
-            history.push("/application/products");
-          }}
-        />
-        {
-          !isCheckout && (
-              <>
-                <div className={classes.addressContainer} onClick={() => setSelectAddressModal(true)}>
-                  <LocationIcon />
-                  <Typography variant="body2" className={classes.addressTypo}>
-                    Deliver to <b>{searchedLocation?.pincode}</b>
-                  </Typography>
-                  <AddressDownIcon />
-                </div>
-                <div className={classes.inputContainer}>
-                  <Paper component="form" className={classes.inputForm}>
-                    <IconButton
-                        type="button"
-                        disabled
-                        // className={classes.searchIcon}
-                        aria-label="search"
-                        // onClick={() => {
-                        //     setSearchData(() => search);
-                        //     history.push(`/products?s=${search.value}`);
-                        // }}
-                    >
-                      <SearchIcon />
-                    </IconButton>
-                    <InputBase
-                        fullWidth
-                        className={classes.inputBase}
-                        placeholder="Search..."
-                        inputProps={{ "aria-label": "Search..." }}
-                        value={search?.value || ""}
-                        onKeyDown={(e) => {
-                          if(e.keyCode == 13){
-                            e.preventDefault()
-                            setSearchData(() => search);
-                            // history.push(`/products?s=${search.value}`);
-                            updateSearchParams();
-                          }
-                        }}
-                        onChange={(e) => {
-                          const searchValue = e.target.value;
-                          let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
-                          searchDataUpdate.value = searchValue;
-                          setSearch(searchDataUpdate);
-                          // generating context for search
-                          const search_context = {
-                            search: searchDataUpdate,
-                            location: searchedLocation,
-                          };
-                          // setSearchData(() => searchDataUpdate);
-                          AddCookie("search_context", JSON.stringify(search_context));
-                        }}
-                    />
-                    <IconButton
-                      className={classes.listIcon}
-                      onClick={handleClickCategoryMenu}
-                      id="basic-button-cat"
-                      aria-controls={openCategoryMenu ? 'basic-menu-cat' : undefined}
-                      aria-haspopup="true"
-                      aria-expanded={openCategoryMenu ? 'true' : undefined}
-
-                    >
-                      <ListIcon />
-                    </IconButton>
-                    <Menu
-                        className={classes.userMenu}
-                        id="basic-menu-cat"
-                        anchorEl={anchorElCaregoryMenu}
-                        open={openCategoryMenu}
-                        onClose={handleCloseCategoryMenu}
-                        MenuListProps={{
-                          'aria-labelledby': 'basic-button-cat',
-                        }}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'right',
-                        }}
-                        transformOrigin={{
-                          vertical: 'top',
-                          horizontal: 'right',
-                        }}
-                    >
-                      {
-                        categoryList.map((cat, catIndex) => {
-                          return (
-                              <MenuItem key={`cat-index-${catIndex}`} onClick={handleCloseCategoryMenu}>
-                                {cat.name}
-                              </MenuItem>
-                          )
-                        })
-                      }
-
-                    </Menu>
-                  </Paper>
-                </div>
-                <div className={classes.favourite}>
-                  <HeartIcon />
-                  <Typography variant="body2" className={classes.favouriteTypo}>
-                    List
-                  </Typography>
-                </div>
-                <div className={classes.cart}>
-                  <Link to="/application/cart">
-                    <Badge color="error" badgeContent={cartItemsCount}>
-                      <CartIcon />
-                    </Badge>
-                    <Typography variant="body2" className={classes.cartTypo}>
-                      Cart
-                    </Typography>
-                  </Link>
-                </div>
-                <div
-                  className={classes.user}
-                  id="basic-button"
-                  aria-controls={openUserMenu ? 'basic-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={openUserMenu ? 'true' : undefined}
-                  onClick={handleClickUserMenu}
-                >
-                  <UserIcon />
-                  <Typography variant="body2" className={classes.userTypo}>
-                    {isLoggedIn() && user ? user.name: 'User'}
-                  </Typography>
-                </div>
-                <Menu
-                    className={classes.userMenu}
-                    id="basic-menu"
-                    anchorEl={anchorElUserMenu}
-                    open={openUserMenu}
-                    onClose={handleCloseUserMenu}
-                    MenuListProps={{
-                      'aria-labelledby': 'basic-button',
-                    }}
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                >
-                  <MenuItem
-                      onClick={() => {}}
-                  >
-                    My Profile
-                  </MenuItem>
-                  <MenuItem
-                      onClick={() => {
-                        history.push(`/application/orders`)
-                      }}
-                  >
-                    Order History
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem
-                      onClick={() => {}}
-                  >
-                    Support
-                  </MenuItem>
-                  <MenuItem
-                      onClick={() => {
-                        deleteAllCookies();
-                        localStorage.removeItem("product_list");
-                        localStorage.removeItem("cartItems");
-                        history.replace("/");
-                      }}
-                  >
-                    Logout
-                  </MenuItem>
-                </Menu>
-              </>
-            )
-        }
-        {
-          isCheckout && (
-              <>
-                <div className={classes.inputContainer}></div>
-                <div className={classes.user}>
-                  <UserIcon />
-                  <Typography variant="body2" className={classes.userTypo}>
-                    User
-                  </Typography>
-                </div>
-              </>
-          )
-        }
-      </Toolbar>
-      {selectAddressModal && (
-        <ModalComponent
-          open={selectAddressModal}
-          onClose={() => {
-            setSelectAddressModal(false);
-          }}
-          title="Select Address"
-        >
-          <SelectAddress
-            addresses={addressList}
-            onSelectAddress={(pin) => {
-              fetchLatLongFromEloc(pin);
-            }}
-            onClose={() => setSelectAddressModal(false)}
-            setAddAddress={() => {
-              setSelectAddressModal(false);
-              setToggleAddressModal({
-                actionType: "add",
-                toggle: true,
-                address: restoreToDefault(),
-              });
-            }}
-            setUpdateAddress={(address) => {
-              setSelectAddressModal(false);
-              setToggleAddressModal({
-                actionType: "edit",
-                toggle: true,
-                address: address,
-              });
+      <AppBar position="absolute">
+        <Toolbar className={classes.headerContainer}>
+          <img
+            src={logo}
+            alt="logo"
+            className={classes.appLogo}
+            onClick={() => {
+              // removeCookie("search_context");
+              history.push("/application/products");
             }}
           />
-        </ModalComponent>
-      )}
-      {toggleAddressModal.toggle && (
-        <ModalComponent
-          open={toggleAddressModal.toggle}
-          onClose={() => {
-            setToggleAddressModal({
-              actionType: "",
-              toggle: false,
-              address: restoreToDefault(),
-            });
-            setSelectAddressModal(true);
-          }}
-          title={`${toggleAddressModal.actionType === "edit" ? `Update Delivery Address` : `Add Delivery Address`}`}
-        >
-          <AddressForm
-            action_type={toggleAddressModal.actionType}
-            address_type={address_types.delivery}
-            selectedAddress={toggleAddressModal.address}
+          {!isCheckout && (
+            <>
+              <div className={classes.addressContainer} onClick={() => setSelectAddressModal(true)}>
+                <LocationIcon />
+                <Typography variant="body2" className={classes.addressTypo}>
+                  Deliver to <b>{searchedLocation?.pincode}</b>
+                </Typography>
+                <AddressDownIcon />
+              </div>
+              <div className={classes.inputContainer}>
+                <Paper component="form" className={classes.inputForm}>
+                  <IconButton
+                    type="button"
+                    disabled
+                    // className={classes.searchIcon}
+                    aria-label="search"
+                    // onClick={() => {
+                    //     setSearchData(() => search);
+                    //     history.push(`/products?s=${search.value}`);
+                    // }}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                  <InputBase
+                    fullWidth
+                    className={classes.inputBase}
+                    placeholder="Search..."
+                    inputProps={{ "aria-label": "Search..." }}
+                    value={search?.value || ""}
+                    onKeyDown={(e) => {
+                      if (e.keyCode == 13) {
+                        e.preventDefault();
+                        setSearchData(() => search);
+                        // history.push(`/products?s=${search.value}`);
+                        updateSearchParams();
+                      }
+                    }}
+                    onChange={(e) => {
+                      const searchValue = e.target.value;
+                      let searchDataUpdate = Object.assign({}, JSON.parse(JSON.stringify(search)));
+                      searchDataUpdate.value = searchValue;
+                      setSearch(searchDataUpdate);
+                      // generating context for search
+                      const search_context = {
+                        search: searchDataUpdate,
+                        location: searchedLocation,
+                      };
+                      // setSearchData(() => searchDataUpdate);
+                      AddCookie("search_context", JSON.stringify(search_context));
+                    }}
+                  />
+                  <IconButton
+                    className={classes.listIcon}
+                    onClick={handleClickCategoryMenu}
+                    id="basic-button-cat"
+                    aria-controls={openCategoryMenu ? "basic-menu-cat" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={openCategoryMenu ? "true" : undefined}
+                  >
+                    <ListIcon />
+                  </IconButton>
+                  <Menu
+                    className={classes.userMenu}
+                    id="basic-menu-cat"
+                    anchorEl={anchorElCaregoryMenu}
+                    open={openCategoryMenu}
+                    onClose={handleCloseCategoryMenu}
+                    MenuListProps={{
+                      "aria-labelledby": "basic-button-cat",
+                    }}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                  >
+                    {categoryList.map((cat, catIndex) => {
+                      return (
+                        <MenuItem key={`cat-index-${catIndex}`} onClick={handleCloseCategoryMenu}>
+                          {cat.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Menu>
+                </Paper>
+              </div>
+              <div className={classes.favourite}>
+                <HeartIcon />
+                <Typography variant="body2" className={classes.favouriteTypo}>
+                  List
+                </Typography>
+              </div>
+              <div className={classes.cart}>
+                <Link to="/application/cart">
+                  <Badge color="error" badgeContent={cartItemsCount}>
+                    <CartIcon />
+                  </Badge>
+                  <Typography variant="body2" className={classes.cartTypo}>
+                    Cart
+                  </Typography>
+                </Link>
+              </div>
+              <div
+                className={classes.user}
+                id="basic-button"
+                aria-controls={openUserMenu ? "basic-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={openUserMenu ? "true" : undefined}
+                onClick={handleClickUserMenu}
+              >
+                <UserIcon />
+                <Typography variant="body2" className={classes.userTypo}>
+                  {isLoggedIn() && user ? user.name : "User"}
+                </Typography>
+              </div>
+              <Menu
+                className={classes.userMenu}
+                id="basic-menu"
+                anchorEl={anchorElUserMenu}
+                open={openUserMenu}
+                onClose={handleCloseUserMenu}
+                MenuListProps={{
+                  "aria-labelledby": "basic-button",
+                }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                <MenuItem onClick={() => {}}>My Profile</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    history.push(`/application/orders`);
+                  }}
+                >
+                  Order History
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={() => {}}>Support</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    deleteAllCookies();
+                    localStorage.removeItem("product_list");
+                    localStorage.removeItem("cartItems");
+                    history.replace("/");
+                  }}
+                >
+                  Logout
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+          {isCheckout && (
+            <>
+              <div className={classes.inputContainer}></div>
+              <div className={classes.user}>
+                <UserIcon />
+                <Typography variant="body2" className={classes.userTypo}>
+                  User
+                </Typography>
+              </div>
+            </>
+          )}
+        </Toolbar>
+        {selectAddressModal && (
+          <ModalComponent
+            open={selectAddressModal}
+            onClose={() => {
+              setSelectAddressModal(false);
+            }}
+            title="Select Address"
+          >
+            <SelectAddress
+              addresses={addressList}
+              onSelectAddress={(pin) => {
+                fetchLatLongFromEloc(pin);
+              }}
+              onClose={() => setSelectAddressModal(false)}
+              setAddAddress={() => {
+                setSelectAddressModal(false);
+                setToggleAddressModal({
+                  actionType: "add",
+                  toggle: true,
+                  address: restoreToDefault(),
+                });
+              }}
+              setUpdateAddress={(address) => {
+                setSelectAddressModal(false);
+                setToggleAddressModal({
+                  actionType: "edit",
+                  toggle: true,
+                  address: address,
+                });
+              }}
+            />
+          </ModalComponent>
+        )}
+        {toggleAddressModal.toggle && (
+          <ModalComponent
+            open={toggleAddressModal.toggle}
             onClose={() => {
               setToggleAddressModal({
                 actionType: "",
@@ -573,34 +543,48 @@ const NavBar = ({isCheckout=false}) => {
               });
               setSelectAddressModal(true);
             }}
-            onAddAddress={(address) => {
-              setToggleAddressModal({
-                actionType: "",
-                toggle: false,
-                address: restoreToDefault(),
-              });
-              setAddressList([...addressList, address]);
-              setSelectAddressModal(true);
-            }}
-            onUpdateAddress={(address) => {
-              const updatedAddress = addressList.map((d) => {
-                if (d.id === address.id) {
-                  return address;
-                }
-                return d;
-              });
-              setAddressList(updatedAddress);
-              setToggleAddressModal({
-                actionType: "",
-                toggle: false,
-                address: restoreToDefault(),
-              });
-              setSelectAddressModal(true);
-            }}
-          />
-        </ModalComponent>
-      )}
-    </AppBar>
+            title={`${toggleAddressModal.actionType === "edit" ? `Update Delivery Address` : `Add Delivery Address`}`}
+          >
+            <AddressForm
+              action_type={toggleAddressModal.actionType}
+              address_type={address_types.delivery}
+              selectedAddress={toggleAddressModal.address}
+              onClose={() => {
+                setToggleAddressModal({
+                  actionType: "",
+                  toggle: false,
+                  address: restoreToDefault(),
+                });
+                setSelectAddressModal(true);
+              }}
+              onAddAddress={(address) => {
+                setToggleAddressModal({
+                  actionType: "",
+                  toggle: false,
+                  address: restoreToDefault(),
+                });
+                setAddressList([...addressList, address]);
+                setSelectAddressModal(true);
+              }}
+              onUpdateAddress={(address) => {
+                const updatedAddress = addressList.map((d) => {
+                  if (d.id === address.id) {
+                    return address;
+                  }
+                  return d;
+                });
+                setAddressList(updatedAddress);
+                setToggleAddressModal({
+                  actionType: "",
+                  toggle: false,
+                  address: restoreToDefault(),
+                });
+                setSelectAddressModal(true);
+              }}
+            />
+          </ModalComponent>
+        )}
+      </AppBar>
     </>
   );
 };
