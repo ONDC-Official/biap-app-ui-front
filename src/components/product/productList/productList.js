@@ -112,6 +112,9 @@ const ProductList = () => {
             );
             console.log("getAllFilters=====>", data)
             let filtersData = data.data;
+            filtersData = Object.values(
+                filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {})
+            );
 
             for (let filter of filtersData) {
                 const values = await getFilterValues(filter.code);
