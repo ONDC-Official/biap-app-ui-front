@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import useStyles from "./styles";
 import { useHistory, Link } from "react-router-dom";
 import { CartContext } from "../../../context/cartContext";
@@ -7,19 +7,35 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
-import { deleteCall, getCall, putCall } from "../../../api/axios";
-import { getValueFromCookie } from "../../../utils/cookies";
+import { deleteCall, getCall, postCall, putCall } from "../../../api/axios";
+import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
 import Loading from "../../shared/loading/loading";
+import { constructQouteObject } from "../../../api/utils/constructRequestObject";
+import useCancellablePromise from "../../../api/cancelRequest";
+import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
+import { v4 as uuidv4 } from "uuid";
+import { AddressContext } from "../../../context/addressContext";
 
 export default function Cart() {
   const ref = useRef(null);
   const classes = useStyles();
   const history = useHistory();
+  const addressContext = useContext(AddressContext);
   let user = JSON.parse(getValueFromCookie("user"));
+  const { cancellablePromise } = useCancellablePromise();
+  const transaction_id = getValueFromCookie("transaction_id");
+
+  const responseRef = useRef([]);
+  const eventTimeOutRef = useRef([]);
+  const updatedCartItems = useRef([]);
+  const [getQuoteLoading, setGetQuoteLoading] = useState(true);
+  const [toggleInit, setToggleInit] = useState(false);
+  const [eventData, setEventData] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [haveDistinctProviders, setHaveDistinctProviders] = useState(false);
+  const [errorMessageTimeOut, setErrorMessageTimeOut] = useState("Fetching details for this product");
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -331,12 +347,182 @@ export default function Cart() {
           </Typography>
         </Grid> */}
 
-        <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }} disabled={haveDistinctProviders}>
+        <Button
+          variant="contained"
+          sx={{ marginTop: 1, marginBottom: 2 }}
+          disabled={haveDistinctProviders}
+          onClick={() => {
+            if (cartItems.length > 0) {
+              let c = cartItems;
+              c = c.map((item) => {
+                return item.item;
+              });
+
+              const request_object = constructQouteObject(c);
+              console.log("request_object", request_object);
+              getQuote(request_object[0]);
+              //   getProviderIds(request_object);
+            }
+          }}
+        >
           Checkout
         </Button>
       </Card>
     );
   };
+
+  const getProviderIds = (request_object) => {
+    let providers = [];
+    request_object.map((cartItem) => {
+      cartItem.map((item) => {
+        providers.push(item.provider.id);
+      });
+    });
+    const ids = [...new Set(providers)];
+    AddCookie("providerIds", ids);
+    return ids;
+  };
+
+  const getQuote = useCallback(async (items, searchContextData = null) => {
+    responseRef.current = [];
+
+    try {
+      const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
+      let domain = "";
+      const updatedItems = items.map((item) => {
+        domain = item.domain;
+        return item;
+      });
+      let selectPayload = {
+        context: {
+          transaction_id: uuidv4(),
+          domain: domain,
+          city: search_context.location.city,
+          state: search_context.location.state,
+        },
+        message: {
+          cart: {
+            items: updatedItems,
+          },
+          fulfillments: [
+            {
+              end: {
+                location: {
+                  gps: `${search_context?.location?.lat}, ${search_context?.location?.lng}`,
+                  address: {
+                    area_code: `${search_context?.location?.pincode}`,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+      console.log("select payload:", selectPayload);
+      const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
+      //Error handling workflow eg, NACK
+      const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+      if (isNACK) {
+        alert(isNACK.error.message);
+        setGetQuoteLoading(false);
+      } else {
+        // fetch through events
+        onFetchQuote(
+          data?.map((txn) => {
+            const { context } = txn;
+            return context?.message_id;
+          })
+        );
+      }
+    } catch (err) {
+      alert(err?.response?.data?.error?.message);
+      console.log(err?.response?.data?.error);
+      setGetQuoteLoading(false);
+      history.replace("/application/products");
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  function onFetchQuote(message_id) {
+    eventTimeOutRef.current = [];
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    message_id.forEach((id) => {
+      let es = new window.EventSourcePolyfill(
+        `${process.env.REACT_APP_BASE_URL}clientApis/events/v2?messageId=${id}`,
+        header
+      );
+      es.addEventListener("on_select", (e) => {
+        const { messageId } = JSON.parse(e.data);
+
+        onGetQuote(messageId);
+      });
+      const timer = setTimeout(() => {
+        eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+          eventSource.close();
+          clearTimeout(timer);
+        });
+        if (responseRef.current.length <= 0) {
+          setGetQuoteLoading(false);
+          alert("Cannot fetch details for this product");
+          history.replace("/application/products");
+          return;
+        }
+        const request_object = constructQouteObject(cartItems);
+        if (responseRef.current.length !== request_object.length) {
+          alert("Cannot fetch details for some product those products will be ignored!");
+          setErrorMessageTimeOut("Cannot fetch details for this product");
+        }
+        setToggleInit(true);
+      }, SSE_TIMEOUT);
+
+      eventTimeOutRef.current = [
+        ...eventTimeOutRef.current,
+        {
+          eventSource: es,
+          timer,
+        },
+      ];
+
+      console.log("cartItems", cartItems);
+      console.log("updatedcartItems", updatedCartItems);
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+      localStorage.setItem("updatedCartItems", JSON.stringify(updatedCartItems));
+
+      // history.push(`/application/checkout`);
+    });
+  }
+
+  const onGetQuote = useCallback(async (message_id) => {
+    try {
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_select?messageIds=${message_id}`));
+      responseRef.current = [...responseRef.current, data[0]];
+
+      setEventData((eventData) => [...eventData, data[0]]);
+
+      // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
+      data[0].message.quote.items.forEach((item) => {
+        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.id === item.id);
+        if (findItemIndexFromCart > -1) {
+          updatedCartItems.current[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[findItemIndexFromCart].fulfillments = data[0].message.quote.fulfillments;
+        }
+
+        console.log("cart", cartItems);
+        console.log("updated cart", updatedCartItems.current);
+      });
+    } catch (err) {
+      alert(err.message);
+      setGetQuoteLoading(false);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div ref={ref}>

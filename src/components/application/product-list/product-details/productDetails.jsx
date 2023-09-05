@@ -109,6 +109,7 @@ const ProductDetails = () => {
       local_id: productPayload.local_id,
       bpp_id: productPayload.bpp_details.bpp_id,
       bpp_uri: productPayload.context.bpp_uri,
+      domain: productPayload.context.domain,
       quantity: {
         count: 1,
       },

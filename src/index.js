@@ -12,20 +12,18 @@ import { CartContextProvider } from "./context/cartContext";
 import { SearchContextProvider } from "./context/searchContext";
 
 ReactDOM.render(
-    <React.StrictMode>
-        <ToastProvider>
-            <ErrorBoundary>
-                {/*<CartContextProvider>*/}
-                {/*    <AddressContextProvider>*/}
-                {/*        <SearchContextProvider>*/}
-                            <App/>
-                {/*        </SearchContextProvider>*/}
-                {/*    </AddressContextProvider>*/}
-                {/*</CartContextProvider>*/}
-            </ErrorBoundary>
-        </ToastProvider>
-    </React.StrictMode>,
-    document.getElementById("root")
+  <ToastProvider>
+    <ErrorBoundary>
+      {/*<CartContextProvider>*/}
+      {/*    <AddressContextProvider>*/}
+      {/*        <SearchContextProvider>*/}
+      <App />
+      {/*        </SearchContextProvider>*/}
+      {/*    </AddressContextProvider>*/}
+      {/*</CartContextProvider>*/}
+    </ErrorBoundary>
+  </ToastProvider>,
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function
