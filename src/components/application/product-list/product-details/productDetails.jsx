@@ -72,13 +72,42 @@ const ProductDetails = () => {
     return subtotal;
   };
 
+  const getCustomizations = () => {
+    const { customisation_items } = productPayload;
+    const customizations = [];
+    const levels = Object.keys(customization_state);
+
+    for (const level of levels) {
+      if (customization_state[level].selected[0]) {
+        let customization = customisation_items.find(
+          (item) => item.local_id == customization_state[level].selected[0].id
+        );
+
+        if (customization) {
+          customization = {
+            ...customization,
+            quantity: {
+              count: 1,
+            },
+          };
+        }
+        customizations.push(customization);
+      }
+    }
+
+    return customizations;
+  };
+
   const addToCart = async () => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
     const subtotal = productDetails.price.value + calculateSubtotal();
+    const customisations = getCustomizations();
+
     const payload = {
       id: productPayload.id,
+      local_id: productPayload.local_id,
       bpp_id: productPayload.bpp_details.bpp_id,
       bpp_uri: productPayload.context.bpp_uri,
       quantity: {
@@ -94,6 +123,7 @@ const ProductDetails = () => {
         subtotal,
         ...productPayload.item_details,
       },
+      customisations,
     };
 
     const res = await postCall(url, payload);

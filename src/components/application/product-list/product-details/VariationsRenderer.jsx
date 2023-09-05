@@ -48,7 +48,7 @@ const VariationsRenderer = (props) => {
   };
 
   const getRelatedVariations = (variations) => {
-    const relatedItems = productPayload.related_items.map((item) => {
+    const relatedItems = productPayload?.related_items?.map((item) => {
       const attributes = item.attributes;
       const variationsInfo = {};
       variations.forEach((variation) => {
