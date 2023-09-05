@@ -96,39 +96,156 @@ const Products = ({brandDetails}) => {
     //     }
     // };
 
-    // const getAllFilters = async() => {
-    //     setIsLoading(true);
-    //     try {
-    //         const data = await cancellablePromise(
-    //             getAllFiltersRequest(subCategoryName)
-    //         );
-    //         console.log("getAllFilters=====>", data)
-    //         let filtersData = data.data;
-    //
-    //         for (let filter of filtersData) {
-    //             const values = await getFilterValues(filter.code);
-    //             const findIndex = filtersData.findIndex((item) => item.code === filter.code);
-    //             if(findIndex > -1){
-    //                 filtersData[findIndex].options = values;
-    //                 filtersData[findIndex].selectedValues = [];
-    //             }
-    //         }
-    //         let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
-    //         paginationData.searchData = filtersData;
-    //         setPaginationModel(paginationData);
-    //     } catch (err) {
-    //         // dispatch({
-    //         //     type: toast_actions.ADD_TOAST,
-    //         //     payload: {
-    //         //         id: Math.floor(Math.random() * 100),
-    //         //         type: toast_types.error,
-    //         //         message: err?.message,
-    //         //     },
-    //         // });
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
+    const getAllFilters = async() => {
+        // setIsLoading(true);
+        // try {
+        //     const data = await cancellablePromise(
+        //         getAllFiltersRequest(subCategoryName)
+        //     );
+        //     console.log("getAllFilters=====>", data)
+        //     let filtersData = data.data;
+        //
+        //     for (let filter of filtersData) {
+        //         const values = await getFilterValues(filter.code);
+        //         const findIndex = filtersData.findIndex((item) => item.code === filter.code);
+        //         if(findIndex > -1){
+        //             filtersData[findIndex].options = values;
+        //             filtersData[findIndex].selectedValues = [];
+        //         }
+        //     }
+        //     let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+        //     paginationData.searchData = filtersData;
+        //     setPaginationModel(paginationData);
+        // } catch (err) {
+        //     // dispatch({
+        //     //     type: toast_actions.ADD_TOAST,
+        //     //     payload: {
+        //     //         id: Math.floor(Math.random() * 100),
+        //     //         type: toast_types.error,
+        //     //         message: err?.message,
+        //     //     },
+        //     // });
+        // } finally {
+        //     setIsLoading(false);
+        // }
+
+        let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+        paginationData.searchData = [
+            {
+                "id": "brand",
+                "category": "Men's Topwear",
+                "code": "brand",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "Raymond",
+                        "name": "Raymond"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "gender",
+                "category": "Men's Topwear",
+                "code": "gender",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "Male",
+                        "name": "Male"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "pattern",
+                "category": "Men's Topwear",
+                "code": "pattern",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "Checked",
+                        "name": "Checked"
+                    },
+                    {
+                        "id": "Striped",
+                        "name": "Striped"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "material",
+                "category": "Men's Topwear",
+                "code": "material",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "cotton",
+                        "name": "cotton"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "color",
+                "category": "Men's Topwear",
+                "code": "color",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "black",
+                        "name": "black"
+                    },
+                    {
+                        "id": "red",
+                        "name": "red"
+                    }
+                ],
+                "selectedValues": []
+            },
+            {
+                "id": "size",
+                "category": "Men's Topwear",
+                "code": "size",
+                "domain": "ONDC:RET12",
+                "sub_category1": null,
+                "sub_category2": null,
+                "sub_category3": null,
+                "options": [
+                    {
+                        "id": "L",
+                        "name": "L"
+                    },
+                    {
+                        "id": "M",
+                        "name": "M"
+                    },
+                    {
+                        "id": "S",
+                        "name": "S"
+                    }
+                ],
+                "selectedValues": []
+            }
+        ];
+        setPaginationModel(paginationData);
+    };
 
     useEffect(() => {
         if(brandId && locationData){
@@ -137,7 +254,7 @@ const Products = ({brandDetails}) => {
                 getAllProducts(brandId, customMenuId);
             }else{
                 getAllProducts(brandId, "");
-                // getAllFilters();
+                getAllFilters();
             }
         }
     }, [brandId, locationData]);
