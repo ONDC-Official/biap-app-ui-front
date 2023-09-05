@@ -237,10 +237,11 @@ const ProductDetails = () => {
 
   const renderItemDetails = () => {
     const data = {
-      "Available on COD": productPayload.item_details?.["@ondc/org/available_on_cod"].toString(),
-      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString(),
+      "Available on COD":
+        productPayload.item_details?.["@ondc/org/available_on_cod"].toString() === "true" ? "Yes" : "No",
+      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString() === "true" ? "Yes" : "No",
       "Return window value": productPayload.item_details?.["@ondc/org/return_window"],
-      Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString(),
+      Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString() === "true" ? "Yes" : "No",
       "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
       "Manufacturer name":
         productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
