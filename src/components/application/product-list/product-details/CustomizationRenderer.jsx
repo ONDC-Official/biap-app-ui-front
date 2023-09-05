@@ -2,7 +2,16 @@ import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import { Accordion, AccordionDetails, AccordionSummary, Divider, Grid, Radio, Typography } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Typography,
+} from "@mui/material";
+import Radio from "../../../common/Radio";
 
 const CustomizationRenderer = (props) => {
   const { productPayload, customization_state, setCustomizationState } = props;
@@ -284,7 +293,11 @@ const CustomizationRenderer = (props) => {
                           <Radio
                             size="small"
                             checked={cg.selected.includes(c)}
-                            onChange={() => handleCustomizationSelect(c, parseInt(level))}
+                            onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                            onChange={(e) => {
+                              e.preventDefault();
+                              handleCustomizationSelect(c, parseInt(level));
+                            }}
                           />
                         </Grid>
                       </Grid>

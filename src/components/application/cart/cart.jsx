@@ -151,6 +151,23 @@ export default function Cart() {
     );
   };
 
+  const getCustomizations = (cartItem) => {
+    if (cartItem.item.customisations) {
+      const customisations = cartItem.item.customisations;
+
+      return customisations.map((c) => {
+        return (
+          <Grid container sx={{ marginTop: 1 }}>
+            <Typography>{c.item_details.descriptor.name} &nbsp;</Typography>
+            <Typography>₹{c.item_details.price.value}</Typography>
+          </Grid>
+        );
+      });
+    }
+
+    return null;
+  };
+
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
       return (
@@ -186,6 +203,7 @@ export default function Cart() {
                   </Grid>
                 </Grid>
               </Grid>
+              {getCustomizations(cartItem)}
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
@@ -268,7 +286,7 @@ export default function Cart() {
         <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
-            Subtotal
+            Cart Subtotal
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹{getCartSubtotal()}

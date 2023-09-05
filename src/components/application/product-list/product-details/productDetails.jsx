@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
@@ -28,7 +28,6 @@ const additionalProductDetails = {
 };
 
 const ProductDetails = () => {
-  const top = useRef(null);
   const classes = useStyles();
   const history = useHistory();
   const params = useParams();
@@ -134,7 +133,6 @@ const ProductDetails = () => {
   useEffect(() => {
     let productId = params.id;
     getProductDetails(productId);
-    top.current?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
   }, [params]);
 
   const renderVegNonVegTag = () => {
@@ -220,7 +218,7 @@ const ProductDetails = () => {
           <Loading />
         </div>
       ) : (
-        <div ref={top}>
+        <div>
           <div className={classes.breadCrumbs} onClick={() => {}}>
             <Breadcrumbs aria-label="breadcrumb">
               <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
