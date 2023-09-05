@@ -164,6 +164,7 @@ export default function Cart() {
                       className={classes.moreImage}
                       alt="product-image"
                       src={cartItem?.item?.product?.descriptor?.images[0]}
+                      onClick={() => history.push(`/application/products/${cartItem.item.id}`)}
                     />
                   </div>
                 </div>
@@ -273,7 +274,7 @@ export default function Cart() {
             ₹{getCartSubtotal()}
           </Typography>
         </Grid>
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Grid xs={8}>
             <Typography variant="subtitle1" className={classes.summaryLabel}>
               Shipping
@@ -285,32 +286,32 @@ export default function Cart() {
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹0
           </Typography>
-        </Grid>
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        </Grid> */}
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             Tax
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹0
           </Typography>
-        </Grid>
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        </Grid> */}
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             GST (10%)
           </Typography>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             ₹0
           </Typography>
-        </Grid>
-        <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        </Grid> */}
+        {/* <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} /> */}
+        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             Order Total
           </Typography>
           <Typography variant="subtitle1" sx={{ fontSize: 18, fontWeight: 600 }}>
             ₹{getCartSubtotal()}
           </Typography>
-        </Grid>
+        </Grid> */}
 
         <Button variant="contained" sx={{ marginTop: 1, marginBottom: 2 }} disabled={haveDistinctProviders}>
           Checkout
