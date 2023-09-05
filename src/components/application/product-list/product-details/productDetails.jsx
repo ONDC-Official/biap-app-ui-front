@@ -109,6 +109,7 @@ const ProductDetails = () => {
       local_id: productPayload.local_id,
       bpp_id: productPayload.bpp_details.bpp_id,
       bpp_uri: productPayload.context.bpp_uri,
+      domain: productPayload.context.domain,
       quantity: {
         count: 1,
       },
@@ -163,7 +164,7 @@ const ProductDetails = () => {
         } else if (category == "nonveg") {
           return "red";
         } else {
-          return "red";
+          return "#008001";
         }
       };
 
@@ -209,6 +210,53 @@ const ProductDetails = () => {
         </Grid>
       );
     }
+  };
+
+  const renderAttributeDetails = () => {
+    return Object.keys(productPayload?.attributes).map((key) => (
+      <Grid container className={classes.keyValueContainer}>
+        <Grid xs={3}>
+          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+            {key}
+          </Typography>
+        </Grid>
+        <Grid xs={8}>
+          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+            {productPayload?.attributes[key]}
+          </Typography>
+        </Grid>
+      </Grid>
+    ));
+  };
+
+  const renderItemDetails = () => {
+    const data = {
+      "Available on COD": productPayload.item_details?.["@ondc/org/available_on_cod"].toString(),
+      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString(),
+      "Return window value": productPayload.item_details?.["@ondc/org/return_window"],
+      Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString(),
+      "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
+      "Manufacturer name":
+        productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
+      "Manufacturer address":
+        productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.[
+          "manufacturer_or_packer_address"
+        ],
+    };
+    return Object.keys(data).map((key) => (
+      <Grid container className={classes.keyValueContainer}>
+        <Grid xs={3}>
+          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+            {key}
+          </Typography>
+        </Grid>
+        <Grid xs={8}>
+          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+            {data[key]}
+          </Typography>
+        </Grid>
+      </Grid>
+    ));
   };
 
   return (
@@ -376,20 +424,8 @@ const ProductDetails = () => {
                   <Divider />
                 </AccordionSummary>
                 <AccordionDetails sx={{ padding: "20px 0" }}>
-                  {Object.keys(productPayload?.attributes).map((key) => (
-                    <Grid container className={classes.keyValueContainer}>
-                      <Grid xs={3}>
-                        <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
-                          {key}
-                        </Typography>
-                      </Grid>
-                      <Grid xs={8}>
-                        <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
-                          {productPayload?.attributes[key]}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  ))}
+                  {renderAttributeDetails()}
+                  {renderItemDetails()}
                 </AccordionDetails>
               </Accordion>
             </Grid>
