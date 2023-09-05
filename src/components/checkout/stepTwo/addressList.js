@@ -10,7 +10,7 @@ import {AddCookie, removeCookie} from "../../../utils/cookies";
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 import {ReactComponent as EditIcon} from '../../../assets/images/edit.svg'
 
-const AddressList = ({addressList, label, setAddAddress, setUpdateAddress}) => {
+const AddressList = ({addressList, label, setAddAddress, setUpdateAddress, onSelectAddress}) => {
     const classes = useStyles();
     const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
 
@@ -53,9 +53,7 @@ const AddressList = ({addressList, label, setAddAddress, setUpdateAddress}) => {
                                     );
                                     setBillingAddress();
                                     removeCookie("billing_address");
-                                    // onSelectAddress(
-                                    //     onSetDeliveryAddress(id, descriptor, address)
-                                    // );
+                                    onSelectAddress();
                                 }}
                                 control={<Radio checked={deliveryAddress?.id === id}/>}
                                 label={

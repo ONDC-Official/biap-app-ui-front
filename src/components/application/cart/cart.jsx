@@ -387,6 +387,8 @@ export default function Cart() {
   };
 
   const getQuote = async (items, searchContextData = null) => {
+    const ttansactionId = uuidv4();
+    AddCookie("transaction_id", ttansactionId);
     responseRef.current = [];
     if(deliveryAddress){
       try {
@@ -399,7 +401,7 @@ export default function Cart() {
         });
         let selectPayload = {
           context: {
-            transaction_id: uuidv4(),
+            transaction_id: ttansactionId,
             domain: domain,
             city: deliveryAddress.location.address.city,
             state: deliveryAddress.location.address.state,
@@ -453,10 +455,6 @@ export default function Cart() {
 
   function onFetchQuote(message_id) {
     eventTimeOutRef.current = [];
-    console.log("cartItems", cartItems);
-    console.log("updatedcartItems", updatedCartItems);
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    localStorage.setItem("updatedCartItems", JSON.stringify(updatedCartItems.current));
 
     const token = getValueFromCookie("token");
     let header = {
@@ -503,7 +501,7 @@ export default function Cart() {
         },
       ];
 
-      history.push(`/application/checkout`);
+      // history.push(`/application/checkout`);
     });
   }
 
@@ -516,15 +514,19 @@ export default function Cart() {
 
       // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
       data[0].message.quote.items.forEach((item) => {
-        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.id === item.id);
+        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.item.product.id === item.id);
         if (findItemIndexFromCart > -1) {
-          updatedCartItems.current[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
-          updatedCartItems.current[findItemIndexFromCart].fulfillments = data[0].message.quote.fulfillments;
+          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments = data[0].message.quote.fulfillments;
         }
 
         console.log("cart", cartItems);
         console.log("updated cart", updatedCartItems.current);
       });
+
+      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems.current));
+      localStorage.setItem("updatedCartItems", JSON.stringify(responseRef.current));
+      history.push(`/application/checkout`);
     } catch (err) {
       alert(err.message);
       setGetQuoteLoading(false);
