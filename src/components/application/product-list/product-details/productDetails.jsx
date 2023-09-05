@@ -376,7 +376,7 @@ const ProductDetails = () => {
                   <Divider />
                 </AccordionSummary>
                 <AccordionDetails sx={{ padding: "20px 0" }}>
-                  {Object.keys(additionalProductDetails).map((key) => (
+                  {Object.keys(productPayload?.attributes).map((key) => (
                     <Grid container className={classes.keyValueContainer}>
                       <Grid xs={3}>
                         <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
@@ -385,7 +385,7 @@ const ProductDetails = () => {
                       </Grid>
                       <Grid xs={8}>
                         <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
-                          {additionalProductDetails[key]}
+                          {productPayload?.attributes[key]}
                         </Typography>
                       </Grid>
                     </Grid>
