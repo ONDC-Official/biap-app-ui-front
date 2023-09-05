@@ -37,9 +37,7 @@ const ProductDetails = () => {
   const [productPayload, setProductPayload] = useState(null);
   const [productDetails, setProductDetails] = useState({});
 
-  const [customization_state, setCustomizationState] = useState({
-    1: { options: [], selected: [] },
-  });
+  const [customization_state, setCustomizationState] = useState({});
   const [variationState, setVariationState] = useState([]);
 
   const [activeImage, setActiveImage] = useState("");
@@ -110,47 +108,49 @@ const ProductDetails = () => {
   }, [params]);
 
   const renderVegNonVegTag = () => {
-    const category = "veg";
-
-    const getTagColor = () => {
-      if (category === "veg") {
-        return "#008001";
-      } else if (category == "nonVeg") {
-        return "red";
-      } else {
-        return "red";
-      }
-    };
-
-    const getTextColor = () => {
-      if (category === "veg") {
-        return "#419E6A";
-      } else if (category == "nonVeg") {
-        return "red";
-      } else {
-        return "red";
-      }
-    };
-
     const FnB = "ONDC:RET11";
     const grocery = "ONDC:RET10";
 
-    if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) return null;
+    if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) {
+      const category = "veg";
 
-    return (
-      <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
-        <div className={classes.square} style={{ borderColor: getTagColor() }}>
-          <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
-        </div>
-        <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
-          Veg
-        </Typography>
-      </Grid>
-    );
+      const getTagColor = () => {
+        if (category === "veg") {
+          return "#008001";
+        } else if (category == "nonVeg") {
+          return "red";
+        } else {
+          return "red";
+        }
+      };
+
+      const getTextColor = () => {
+        if (category === "veg") {
+          return "#419E6A";
+        } else if (category == "nonVeg") {
+          return "red";
+        } else {
+          return "red";
+        }
+      };
+
+      return (
+        <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
+          <div className={classes.square} style={{ borderColor: getTagColor() }}>
+            <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+          </div>
+          <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
+            Veg
+          </Typography>
+        </Grid>
+      );
+    }
+
+    return null;
   };
 
   const renderStockStatus = () => {
-    if (parseInt(productDetails?.quantity?.available?.count) > 1) {
+    if (parseInt(productDetails?.quantity?.available?.count) >= 1) {
       return (
         <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
           <DoneIcon color="success" fontSize="small" /> In stock
