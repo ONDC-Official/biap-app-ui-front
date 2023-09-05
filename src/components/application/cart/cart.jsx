@@ -9,6 +9,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
 import { deleteCall, getCall, putCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
+import Loading from "../../shared/loading/loading";
 
 export default function Cart() {
   const ref = useRef(null);
@@ -47,16 +48,23 @@ export default function Cart() {
   };
 
   const getCartItems = async () => {
-    const url = `/clientApis/v2/cart/${user.id}`;
-    const res = await getCall(url);
-    setCartItems(res);
+    try {
+      setLoading(true);
+      const url = `/clientApis/v2/cart/${user.id}`;
+      const res = await getCall(url);
+      setCartItems(res);
+    } catch (error) {
+      console.log("Error fetching cart items:", error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateCartItem = async (itemId, increment) => {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const itemIndex = cartItems.findIndex((item) => item.item.id === itemId);
     if (itemIndex !== -1) {
-      setLoading(true);
       let updatedCartItem = cartItems[itemIndex];
       updatedCartItem.id = updatedCartItem.item.id;
 
@@ -319,21 +327,29 @@ export default function Cart() {
         </Typography>
       </div>
 
-      {cartItems.length === 0 ? (
-        emptyCartScreen()
+      {loading ? (
+        <div className={classes.loadingContainer}>
+          <Loading />
+        </div>
       ) : (
-        <Grid container className={classes.cartContainer}>
-          <Grid item xs={8}>
-            {renderTableHeads()}
-            <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
-              {renderProducts()}
-            </div>
-          </Grid>
+        <>
+          {cartItems.length === 0 ? (
+            emptyCartScreen()
+          ) : (
+            <Grid container className={classes.cartContainer}>
+              <Grid item xs={8}>
+                {renderTableHeads()}
+                <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+                  {renderProducts()}
+                </div>
+              </Grid>
 
-          <Grid item xs={4}>
-            {renderSummaryCard()}
-          </Grid>
-        </Grid>
+              <Grid item xs={4}>
+                {renderSummaryCard()}
+              </Grid>
+            </Grid>
+          )}
+        </>
       )}
     </div>
   );

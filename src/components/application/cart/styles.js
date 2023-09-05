@@ -121,6 +121,12 @@ const useStyles = makeStyles({
     fontWeight: "500 !important",
     color: "#C89A04",
   },
+  loadingContainer: {
+    height: "70vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
 
 export default useStyles;
