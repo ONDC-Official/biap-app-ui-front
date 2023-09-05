@@ -8,14 +8,14 @@ const VariationsRenderer = (props) => {
   const classes = useStyles();
   const history = useHistory();
 
-  const [currentProductId, setCurrentProductId] = useState("");
   const [variationGroups, setVariationGroups] = useState([]);
   const [variations, setVariations] = useState([]);
   const [initialVariationState, setInitialVariationState] = useState({});
+  const [isUOM, setIsUOM] = useState(false);
 
   const getVariationGroups = () => {
     const attrTags = productPayload.categories[0].tags;
-    const groupInfo = [];
+    const groupInfo = new Set(); // Use a Set to store unique items
 
     for (const tag of attrTags) {
       if (tag.code === "attr") {
@@ -27,24 +27,50 @@ const VariationsRenderer = (props) => {
           const name = nameParts[nameParts.length - 1];
           const seq = parseInt(seqTag.value);
 
-          groupInfo.push({ name, seq });
+          // Create an object to represent the item
+          const item = { name, seq };
+
+          // Convert the object to a JSON string to ensure uniqueness
+          const itemString = JSON.stringify(item);
+
+          // Check if the item already exists in the Set
+          if (!groupInfo.has(itemString)) {
+            // If it doesn't exist, add it to the Set
+            groupInfo.add(itemString);
+          }
         }
       }
     }
 
-    setVariationGroups(groupInfo);
-    getRelatedVariations(groupInfo);
-    getInitialVariationState(groupInfo);
+    // Convert the Set back to an array if needed
+    const uniqueGroupInfo = Array.from(groupInfo).map((itemString) => JSON.parse(itemString));
+
+    // Use uniqueGroupInfo as needed
+    setVariationGroups(uniqueGroupInfo);
+    getRelatedVariations(uniqueGroupInfo);
+    getInitialVariationState(uniqueGroupInfo);
   };
 
   const getInitialVariationState = (groupInfo) => {
-    const newState = {};
-    groupInfo.forEach((group) => {
-      const attributeName = group.name;
-      const attributeValue = productPayload.attributes[attributeName];
-      newState[attributeName] = attributeValue;
-    });
-    setInitialVariationState(newState);
+    const parentId = productPayload.item_details.parent_item_id;
+
+    const tags = productPayload.categories.find((item) => item.id == parentId).tags;
+    const attr = tags.find((tag) => tag.code === "attr");
+    const name = attr.list.find((a) => a.code === "name");
+
+    if (name.value === "item.quantity.unitized.measure") {
+      setInitialVariationState({ isUOM: true });
+      setIsUOM(true);
+    } else {
+      setIsUOM(false);
+      const newState = {};
+      groupInfo.forEach((group) => {
+        const attributeName = group.name;
+        const attributeValue = productPayload.attributes[attributeName];
+        newState[attributeName] = attributeValue;
+      });
+      setInitialVariationState(newState);
+    }
   };
 
   const getRelatedVariations = (variations) => {
@@ -182,18 +208,21 @@ const VariationsRenderer = (props) => {
     setVariationState(updatedVariationState);
   };
 
+  const handleUOMClick = (groupData, option) => {
+    const toFind = option.split(" ")[0];
+    const product = productPayload.related_items.find((item) => {
+      const value = item.item_details.quantity.unitized.measure.value;
+      if (parseInt(value) === parseInt(toFind)) return item;
+    });
+
+    history.push(`/application/products/${product?.id}`);
+  };
+
   useEffect(() => {
     if (productPayload) {
       getVariationGroups();
-      setCurrentProductId(productPayload.id);
     }
   }, [productPayload]);
-
-  useEffect(() => {
-    if (currentProductId != "") {
-      history.push(`/application/products/${currentProductId}`);
-    }
-  }, [currentProductId]);
 
   // initialize variaitions state.
   useEffect(() => {
@@ -204,38 +233,51 @@ const VariationsRenderer = (props) => {
         const groupName = group.name;
         const groupId = group.seq;
 
-        const groupData = {
+        let groupData = {
           id: groupId,
           productId: "",
           name: groupName,
-          selected: [initialVariationState[groupName]],
+          selected: [],
           options: [],
         };
 
-        if (index === 0) {
-          variations.forEach((variation) => {
-            groupData.productId = variation.id;
+        if (initialVariationState?.isUOM == true) {
+          const selectedOption = productPayload.item_details.quantity.unitized?.measure;
+          groupData.selected = [`${selectedOption.value} ${selectedOption.unit}`];
 
-            if (!groupData.options.includes(variation[groupName])) {
-              groupData.options.push(variation[groupName]);
-            }
+          productPayload.related_items.map((item) => {
+            const option = item.item_details.quantity.unitized.measure;
+            groupData.options.push(`${option.value} ${option.unit}`);
           });
         } else {
-          const prevGroupName = variationGroups[index - 1].name;
-          const prevGroupSelection = initialVariationState[prevGroupName];
+          groupData.selected = [initialVariationState[groupName]];
 
-          variations.forEach((variation) => {
-            groupData.productId = variation.id;
-            if (variation[prevGroupName] === prevGroupSelection) {
+          if (index === 0) {
+            variations.forEach((variation) => {
+              groupData.productId = variation.id;
+
               if (!groupData.options.includes(variation[groupName])) {
                 groupData.options.push(variation[groupName]);
               }
-            }
-          });
-        }
+            });
+          } else {
+            const prevGroupName = variationGroups[index - 1].name;
+            const prevGroupSelection = initialVariationState[prevGroupName];
 
+            variations.forEach((variation) => {
+              groupData.productId = variation.id;
+              if (variation[prevGroupName] === prevGroupSelection) {
+                if (!groupData.options.includes(variation[groupName])) {
+                  groupData.options.push(variation[groupName]);
+                }
+              }
+            });
+          }
+        }
         result[groupId] = groupData;
       });
+
+      // console.log(result);
 
       setVariationState(result);
     }
@@ -261,7 +303,11 @@ const VariationsRenderer = (props) => {
                   }
                   style={{ marginTop: "8px", marginBottom: "16px" }}
                   onClick={() => {
-                    handleVariationClick(groupData, option);
+                    if (isUOM) {
+                      handleUOMClick(groupData, option);
+                    } else {
+                      handleVariationClick(groupData, option);
+                    }
                   }}
                 >
                   <Typography variant="body1" color={groupData.selected.includes(option) ? "white" : "#686868"}>

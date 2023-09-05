@@ -178,13 +178,19 @@ const ProductDetails = () => {
         }
       };
 
+      const map = {
+        veg: "Veg",
+        nonveg: "Non Veg",
+        egg: "EGG",
+      };
+
       return (
         <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
           <div className={classes.square} style={{ borderColor: getTagColor() }}>
             <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
           </div>
           <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
-            Veg
+            {map[category]}
           </Typography>
         </Grid>
       );
