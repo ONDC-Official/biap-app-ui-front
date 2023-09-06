@@ -7,6 +7,18 @@ const useStyles = makeStyles({
     },
     orderHistoryTypo: {
         fontSize: '32px !important'
+    },
+    loaderContainer: {
+        marginTop: '100px !important'
+    },
+    paginationContainer: {
+        marginTop: '24px !important',
+        // marginBottom: '24px !important',
+    },
+    pagination: {
+        '& ul': {
+            justifyContent: 'center !important'
+        }
     }
 });
 
