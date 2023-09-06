@@ -364,7 +364,7 @@ export default function Cart() {
               const request_object = constructQouteObject(c);
               console.log("request_object", request_object);
               getQuote(request_object[0]);
-              //   getProviderIds(request_object);
+                getProviderIds(request_object[0]);
             }
           }}
         >
@@ -377,9 +377,8 @@ export default function Cart() {
   const getProviderIds = (request_object) => {
     let providers = [];
     request_object.map((cartItem) => {
-      cartItem.map((item) => {
-        providers.push(item.provider.id);
-      });
+      console.log("SET PROVIDER IDS cartItem=====>", cartItem)
+      providers.push(cartItem.provider.local_id);
     });
     const ids = [...new Set(providers)];
     AddCookie("providerIds", ids);
@@ -427,8 +426,9 @@ export default function Cart() {
         console.log("select payload:", selectPayload);
         const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
         //Error handling workflow eg, NACK
-        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+        const isNACK = data.find((item) => item.error && item?.message?.ack?.status === "NACK");
         if (isNACK) {
+
           alert(isNACK.error.message);
           setGetQuoteLoading(false);
         } else {
