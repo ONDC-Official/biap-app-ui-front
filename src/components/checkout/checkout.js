@@ -244,9 +244,12 @@ const Checkout = () => {
                 // getValueFromCookie("checkout_details") || "{}"
                 localStorage.getItem("checkout_details") || "{}"
             );
+            let c = cartItems.map((item) => {
+                return item.item;
+            });
             const requestObject = constructQouteObject(
-                cartItems.filter(({ provider }) =>
-                    successOrderIds.includes(provider.id.toString())
+                c.filter(({ provider }) =>
+                    successOrderIds.includes(provider.local_id.toString())
                 )
             );
             if (responseRef.current.length === requestObject.length) {
