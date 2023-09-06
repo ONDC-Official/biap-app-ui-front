@@ -354,7 +354,7 @@ const Checkout = () => {
         try {
             const search_context = JSON.parse(getValueFromCookie("search_context"));
             const queryParams = items.map((item, index) => {
-                    return ({
+                return ({
                         // pass the map of parent order id and transaction id
                         context: {
                             domain: item.domain,
@@ -367,7 +367,7 @@ const Checkout = () => {
                         },
                         message: {
                             payment: {
-                                paid_amount: Number(productQuotesForCheckout[index]?.price?.value),
+                                paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
                                 type:
                                     method === payment_methods.COD
                                         ? "ON-FULFILLMENT"
@@ -377,17 +377,18 @@ const Checkout = () => {
                                 paymentGatewayEnabled: false //TODO: we send false for, if we enabled jusPay the we will handle.
                             },
                             quote: {
-                                ...productQuotesForCheckout[index],
+                                ...productQuotesForCheckout[0],
                                 price: {
-                                    currency: productQuotesForCheckout[index].price.currency,
-                                    value: String(productQuotesForCheckout[index].price.value),
+                                    currency: productQuotesForCheckout[0].price.currency,
+                                    value: String(productQuotesForCheckout[0].price.value),
                                 },
                             },
                             providers: getItemProviderId(item),
                         },
                     })
                 }
-            )
+            );
+
             const data = await cancellablePromise(
                 postCall(
                     "clientApis/v2/confirm_order",
