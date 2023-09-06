@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import useStyles from "./style";
 
 import Grid from '@mui/material/Grid';
@@ -17,13 +17,19 @@ import StepTwoContent from './stepTwo/stepTwoContent';
 import StepThreeLabel from './stepThree/stepThreeLabel';
 import StepThreeContent from './stepThree/stepThreeContent';
 
-import {Link, Redirect} from 'react-router-dom';
+import {Link, Redirect, useHistory} from 'react-router-dom';
 import Box from "@mui/material/Box";
 import {constructQouteObject} from "../../api/utils/constructRequestObject";
 import styles from "../../styles/cart/cartView.module.scss";
+import {payment_methods} from "../../constants/payment-methods";
+import {getValueFromCookie, removeCookie} from "../../utils/cookies";
+import {getCall, postCall} from "../../api/axios";
+import useCancellablePromise from "../../api/cancelRequest";
+import {SSE_TIMEOUT} from "../../constants/sse-waiting-time";
 
 const Checkout = () => {
     const classes = useStyles();
+    const history = useHistory();
 
     const steps = ["Customer", "Add Address", "Payment"];
     const [activeStep, setActiveStep] = useState(0);
@@ -34,6 +40,18 @@ const Checkout = () => {
         total_payable: 0,
     });
     const [initLoading, setInitLoading] = useState(false);
+
+
+
+    const [activePaymentMethod, setActivePaymentMethod] = useState(
+        payment_methods.COD
+    );
+    const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
+    const responseRef = useRef([]);
+    const eventTimeOutRef = useRef([]);
+    const [eventData, setEventData] = useState([]);
+    // HOOKS
+    const { cancellablePromise } = useCancellablePromise();
 
     useEffect(() => {
         const cartItemsData = JSON.parse(localStorage.getItem("cartItems"));
@@ -204,11 +222,193 @@ const Checkout = () => {
                             const {message} = item;
                             return message?.quote?.provider?.id.toString();
                         })}
+                        activePaymentMethod={activePaymentMethod}
+                        setActivePaymentMethod={(value) => {
+                            setActivePaymentMethod(value)
+                        }}
                     />
                 )
             default:
                 return <>stepLabel</>
         }
+    };
+
+
+
+
+    useEffect(() => {
+        if (responseRef.current.length > 0) {
+            setConfirmOrderLoading(false);
+            // fetch request object length and compare it with the response length
+            const { productQuotes, successOrderIds } = JSON.parse(
+                // getValueFromCookie("checkout_details") || "{}"
+                localStorage.getItem("checkout_details") || "{}"
+            );
+            const requestObject = constructQouteObject(
+                cartItems.filter(({ provider }) =>
+                    successOrderIds.includes(provider.id.toString())
+                )
+            );
+            if (responseRef.current.length === requestObject.length) {
+                // redirect to order listing page.
+                // remove parent_order_id, search_context from cookies
+                removeCookie("transaction_id");
+                removeCookie("parent_order_id");
+                removeCookie("search_context");
+                removeCookie("delivery_address");
+                removeCookie("billing_address");
+                // removeCookie("checkout_details");
+                localStorage.removeItem("checkout_details");
+                removeCookie("parent_and_transaction_id_map");
+                removeCookie("LatLongInfo");
+                setCartItems([]);
+                history.replace("/application/orders");
+            }
+        }
+        // eslint-disable-next-line
+    }, [eventData]);
+
+    // on confirm order Api
+    const onConfirmOrder = async (message_id) => {
+        try {
+            const data = await cancellablePromise(
+                getCall(`clientApis/v2/on_confirm_order?messageIds=${message_id}`)
+            );
+            responseRef.current = [...responseRef.current, data[0]];
+            setEventData((eventData) => [...eventData, data[0]]);
+        } catch (err) {
+            // dispatchError(err.message);
+            setConfirmOrderLoading(false);
+        }
+        // eslint-disable-next-line
+    };
+
+    // use this function to confirm the order
+    function onConfirm(message_id) {
+        eventTimeOutRef.current = [];
+        const token = getValueFromCookie("token");
+        let header = {
+            headers: {
+                ...(token && {
+                    Authorization: `Bearer ${token}`,
+                }),
+            },
+        };
+        message_id.forEach((id) => {
+            let es = new window.EventSourcePolyfill(
+                `${process.env.REACT_APP_BASE_URL}clientApis/events/v2?messageId=${id}`,
+                header
+            );
+            es.addEventListener("on_confirm", (e) => {
+                const { messageId } = JSON.parse(e.data);
+                onConfirmOrder(messageId);
+            });
+            const timer = setTimeout(() => {
+                eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+                    eventSource.close();
+                    clearTimeout(timer);
+                });
+                // check if all the orders got cancled
+                if (responseRef.current.length <= 0) {
+                    setConfirmOrderLoading(false);
+                    // dispatchError(
+                    //     "Cannot fetch details for this product Please try again!"
+                    // );
+                    return;
+                }
+            }, SSE_TIMEOUT);
+
+            eventTimeOutRef.current = [
+                ...eventTimeOutRef.current,
+                {
+                    eventSource: es,
+                    timer,
+                },
+            ];
+        });
+    };
+    const getItemProviderId = (item) => {
+        const providers = getValueFromCookie("providerIds").split(",");
+        let provider = {};
+        if (providers.includes(item.provider.local_id)) {
+            provider = {
+                id: item.provider.local_id,
+                locations: item.provider.locations.map((location) => location.local_id)
+            };
+        }else{}
+
+        return provider;
+    };
+    const confirmOrder = async (items, method) => {
+        responseRef.current = [];
+        const parentOrderIDMap = new Map(
+            JSON.parse(getValueFromCookie("parent_and_transaction_id_map"))
+        );
+        const { productQuotes: productQuotesForCheckout } = JSON.parse(
+            // getValueFromCookie("checkout_details") || "{}"
+            localStorage.getItem("checkout_details") || "{}"
+        );
+        try {
+            const search_context = JSON.parse(getValueFromCookie("search_context"));
+            const queryParams = items.map((item, index) => {
+                    return ({
+                        // pass the map of parent order id and transaction id
+                        context: {
+                            domain: item.domain,
+                            city: search_context.location.name,
+                            state: search_context.location.state,
+                            parent_order_id: parentOrderIDMap.get(item?.provider?.id)
+                                .parent_order_id,
+                            transaction_id: parentOrderIDMap.get(item?.provider?.id)
+                                .transaction_id,
+                        },
+                        message: {
+                            payment: {
+                                paid_amount: Number(productQuotesForCheckout[index]?.price?.value),
+                                type:
+                                    method === payment_methods.COD
+                                        ? "ON-FULFILLMENT"
+                                        : "ON-ORDER",
+                                transaction_id: parentOrderIDMap.get(item?.provider?.id)
+                                    .transaction_id,
+                                paymentGatewayEnabled: false //TODO: we send false for, if we enabled jusPay the we will handle.
+                            },
+                            quote: {
+                                ...productQuotesForCheckout[index],
+                                price: {
+                                    currency: productQuotesForCheckout[index].price.currency,
+                                    value: String(productQuotesForCheckout[index].price.value),
+                                },
+                            },
+                            providers: getItemProviderId(item),
+                        },
+                    })
+                }
+            )
+            const data = await cancellablePromise(
+                postCall(
+                    "clientApis/v2/confirm_order",
+                    queryParams
+                )
+            );
+            //Error handling workflow eg, NACK
+            const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+            if (isNACK) {
+                // dispatchError(isNACK.error.message);
+                setConfirmOrderLoading(false);
+            } else {
+                onConfirm(
+                    data?.map((txn) => {
+                        const { context } = txn;
+                        return context?.message_id;
+                    })
+                );
+            }
+        } catch (err) {
+            // dispatchError(err.message);
+            setConfirmOrderLoading(false);
+        }
+        // eslint-disable-next-line
     };
 
     if(cartItems === null || updatedCartItems === null){
@@ -348,6 +548,38 @@ const Checkout = () => {
                                 className={classes.proceedToBuy}
                                 fullWidth
                                 variant="contained"
+                                onClick={() => {
+                                    const { productQuotes, successOrderIds } = JSON.parse(
+                                        // getValueFromCookie("checkout_details") || "{}"
+                                        localStorage.getItem("checkout_details") || "{}"
+                                    );
+                                    console.log("successOrderIds=====>", successOrderIds)
+                                    setConfirmOrderLoading(true);
+                                    let c = cartItems.map((item) => {
+                                        return item.item;
+                                    });
+                                    console.log("c=====>", c)
+                                    if (activePaymentMethod === payment_methods.JUSPAY) {
+                                        // setTogglePaymentGateway(true);
+                                        // setLoadingSdkForPayment(true);
+                                        // initiateSDK();
+                                        const request_object = constructQouteObject(
+                                            c.filter(({ provider }) =>
+                                                successOrderIds.includes(provider.local_id.toString())
+                                            )
+                                        );
+                                        confirmOrder(request_object[0], payment_methods.JUSPAY);
+                                    } else {
+                                        console.log("cartItems=====>", cartItems)
+                                        const request_object = constructQouteObject(
+                                            c.filter(({ provider }) =>
+                                                successOrderIds.includes(provider.local_id.toString())
+                                            )
+                                        );
+                                        console.log("request_object=====>", request_object)
+                                        confirmOrder(request_object[0], payment_methods.COD);
+                                    }
+                                }}
                             >
                                 Proceed to Buy
                             </Button>

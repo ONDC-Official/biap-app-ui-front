@@ -9,11 +9,9 @@ import prepaid from '../../../assets/images/prepaid.png'
 import {ReactComponent as CheckedIcon} from '../../../assets/images/checked.svg'
 import {payment_methods} from "../../../constants/payment-methods";
 
-const StepThreeContent = () => {
+const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod}) => {
     const classes = useStyles();
-    const [activePaymentMethod, setActivePaymentMethod] = useState(
-        payment_methods.COD
-    );
+
     return (
         <Grid container spacing={3}>
             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>

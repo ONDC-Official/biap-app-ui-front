@@ -56,6 +56,13 @@ const MuiButton = {
             color: palette.common.white,
             '& svg path': {
                 stroke: palette.common.white,
+            },
+            '&:hover': {
+                backgroundColor: palette.primary.dark,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         outlinedSecondary: {
@@ -78,6 +85,13 @@ const MuiButton = {
             color: palette.common.white,
             '& svg path': {
                 stroke: palette.common.white,
+            },
+            '&:hover': {
+                backgroundColor: palette.primary.dark,
+                color: palette.common.white,
+                '& svg path': {
+                    stroke: palette.common.white,
+                }
             }
         },
         outlinedSuccess: {
