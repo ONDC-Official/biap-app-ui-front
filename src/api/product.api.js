@@ -7,14 +7,31 @@ import { getCall } from "./axios";
 export const getAllProductRequest = (data) => {
     const pageNumber = data.page;
     const limit = data.pageSize;
-    const productName = data?.searchData?.productName || "";
-    const subCategoryName = data?.searchData?.subCategoryName || "";
+    let productName = data?.searchData?.productName || "";
+    let subCategoryName = data?.searchData?.subCategoryName || "";
     const providerIds = data?.searchData?.brandId || "";
     const customMenu = data?.searchData?.customMenu || "";
+    let params = {
+        limit: limit,
+        pageNumber: pageNumber,
+    };
+    if(subCategoryName){
+        subCategoryName = subCategoryName.replace("And", "&");
+        params.categoryIds = subCategoryName;
+    }
+    if(productName){
+        productName = productName.replace("And", "&");
+        params.productName = productName;
+    }
+    if(providerIds){
+        params.providerIds = providerIds;
+    }
+    if(customMenu){
+        params.customMenu = customMenu;
+    }else{}
     return new Promise(async (resolve, reject) => {
         try {
-            const quaryParams = `?limit=${limit}&pageNumber=${pageNumber}${subCategoryName?`&categoryIds=${subCategoryName}`:''}${productName?`&productName=${productName}`:""}${providerIds?`&providerIds=${providerIds}`:""}${customMenu?`&customMenu=${customMenu}`:""}`
-            const data = await getCall(`/clientApis/v2/search${quaryParams}`);
+            const data = await getCall(`/clientApis/v2/search`, params);
             return resolve(data.response);
         } catch (err) {
             return reject(err);
@@ -27,10 +44,13 @@ export const getAllProductRequest = (data) => {
  * @returns
  */
 export const getAllFiltersRequest = (subCatName) => {
+    let subCategoryName = subCatName.replace("And", "&");
+    let params = {
+        category: subCategoryName,
+    };
     return new Promise(async (resolve, reject) => {
         try {
-            const quaryParams = `?category=${subCatName}`
-            const data = await getCall(`/clientApis/v2/attributes${quaryParams}`);
+            const data = await getCall(`/clientApis/v2/attributes`, params);
             return resolve(data.response);
         } catch (err) {
             return reject(err);
@@ -43,10 +63,14 @@ export const getAllFiltersRequest = (subCatName) => {
  * @returns
  */
 export const getAllFilterValuesRequest = (attributeCode, subCatName) => {
+    let subCategoryName = subCatName.replace("And", "&");
+    let params = {
+        attribute_code: attributeCode,
+        category: subCategoryName,
+    };
     return new Promise(async (resolve, reject) => {
         try {
-            const quaryParams = `?attribute_code=${attributeCode}&category=${subCatName}`
-            const data = await getCall(`/clientApis/v2/attributeValues${quaryParams}`);
+            const data = await getCall(`/clientApis/v2/attributeValues`, params);
             return resolve(data.response);
         } catch (err) {
             return reject(err);
