@@ -25,6 +25,11 @@ import CustomizationRenderer from "../../../application/product-list/product-det
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { getCall, postCall } from "../../../../api/axios";
 import Loading from "../../../shared/loading/loading";
+import {
+  formatCustomizationGroups,
+  formatCustomizations,
+  initializeCustomizationState,
+} from "../../../application/product-list/product-details/utils";
 
 const CustomMenu = ({ brandDetails, outletDetails }) => {
   const classes = useStyles();
@@ -89,6 +94,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
       setProductLoading(true);
       const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
       setProductPayload(data.response);
+      return data.response;
     } catch (error) {
       console.error("Error fetching product details:", error);
     } finally {
@@ -108,17 +114,16 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
     return subtotal;
   };
 
-  const getCustomizations = () => {
+  const getCustomizations = async (productPayload, customization_state) => {
     const { customisation_items } = productPayload;
-    console.log("getCustomizations", customisation_items);
     const customizations = [];
     const levels = Object.keys(customization_state);
 
     for (const level of levels) {
-      if (customization_state[level].selected[0]) {
-        let customization = customisation_items.find(
-          (item) => item.local_id == customization_state[level].selected[0].id
-        );
+      const selectedItems = customization_state[level].selected;
+
+      for (const selectedItem of selectedItems) {
+        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
 
         if (customization) {
           customization = {
@@ -127,47 +132,51 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
               count: 1,
             },
           };
+          customizations.push(customization);
         }
-        customizations.push(customization);
       }
     }
 
     return customizations;
   };
 
-  const addToCart = async () => {
+  const addToCart = async (productPayload, isDefault = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
     const subtotal = productPayload?.item_details?.price?.value + calculateSubtotal();
-    const customisations = getCustomizations();
 
-    const payload = {
-      id: productPayload.id,
-      local_id: productPayload.local_id,
-      bpp_id: productPayload.bpp_details.bpp_id,
-      bpp_uri: productPayload.context.bpp_uri,
-      domain: productPayload.context.domain,
-      quantity: {
-        count: itemQty,
-      },
-      provider: {
-        id: productPayload.bpp_details.bpp_id,
-        locations: productPayload.locations,
-        ...productPayload.provider_details,
-      },
-      product: {
+    const groups = await formatCustomizationGroups(productPayload.customisation_groups);
+    const cus = await formatCustomizations(productPayload.customisation_items);
+    const newState = await initializeCustomizationState(groups, cus, customization_state);
+
+    getCustomizations(productPayload, isDefault ? newState : customization_state).then((customisations) => {
+      const payload = {
         id: productPayload.id,
-        subtotal,
-        ...productPayload.item_details,
-      },
-      customisations,
-    };
+        local_id: productPayload.local_id,
+        bpp_id: productPayload.bpp_details.bpp_id,
+        bpp_uri: productPayload.context.bpp_uri,
+        domain: productPayload.context.domain,
+        quantity: {
+          count: itemQty,
+        },
+        provider: {
+          id: productPayload.bpp_details.bpp_id,
+          locations: productPayload.locations,
+          ...productPayload.provider_details,
+        },
+        product: {
+          id: productPayload.id,
+          subtotal,
+          ...productPayload.item_details,
+        },
+        customisations,
+      };
 
-    console.log("addToCartPayload:", payload);
-
-    //  const res = await postCall(url, payload);
-    //  history.push("/application/cart");
+      postCall(url, payload);
+      setCustomizationState({});
+      history.push("/application/cart");
+    });
   };
 
   useEffect(() => {
@@ -249,6 +258,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                 <ModalComponent
                   open={customizationModal}
                   onClose={() => {
+                    setCustomizationState({});
                     setCustomizationModal(false);
                   }}
                   title="Customize"
@@ -286,7 +296,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                             onClick={() => setItemQty(itemQty + 1)}
                           />
                         </Grid>
-                        <Button variant="contained" sx={{ flex: 1 }} onClick={addToCart}>
+                        <Button variant="contained" sx={{ flex: 1 }} onClick={() => addToCart(productPayload)}>
                           Add Item Total- ₹{(productPayload?.item_details?.price.value + calculateSubtotal()) * itemQty}
                         </Button>
                       </Grid>

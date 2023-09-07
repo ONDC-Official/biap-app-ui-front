@@ -77,10 +77,10 @@ const ProductDetails = () => {
     const levels = Object.keys(customization_state);
 
     for (const level of levels) {
-      if (customization_state[level].selected[0]) {
-        let customization = customisation_items.find(
-          (item) => item.local_id == customization_state[level].selected[0].id
-        );
+      const selectedItems = customization_state[level].selected;
+
+      for (const selectedItem of selectedItems) {
+        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
 
         if (customization) {
           customization = {
@@ -89,8 +89,8 @@ const ProductDetails = () => {
               count: 1,
             },
           };
+          customizations.push(customization);
         }
-        customizations.push(customization);
       }
     }
 
@@ -125,6 +125,8 @@ const ProductDetails = () => {
       },
       customisations,
     };
+
+    //  console.log("payload", payload);
 
     const res = await postCall(url, payload);
     history.push("/application/cart");
@@ -323,7 +325,8 @@ const ProductDetails = () => {
                   variationState={variationState}
                   setVariationState={setVariationState}
                 />
-                {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
+                <>
+                  {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
               <Typography variant="body" color="#1D1D1D">
                 Select size
               </Typography>
@@ -383,6 +386,7 @@ const ProductDetails = () => {
                 );
               })}
             </div> */}
+                </>
 
                 {!parseInt(productDetails?.quantity?.available?.count) >= 1 && (
                   <Grid container justifyContent="center" className={classes.outOfStock}>

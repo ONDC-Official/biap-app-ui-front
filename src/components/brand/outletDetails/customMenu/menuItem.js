@@ -79,7 +79,7 @@ const MenuItem = (props) => {
             endIcon={<PlusIcon />}
             className={classes.addToCartIcon}
             onClick={() => {
-              getProductDetails(productId).then(() => handleAddToCart());
+              getProductDetails(productId).then((data) => handleAddToCart(data, true));
             }}
           >
             Add to cart
@@ -90,8 +90,8 @@ const MenuItem = (props) => {
             color="success"
             endIcon={<CustomiseIcon />}
             onClick={() => {
-              setCustomizationModal(true);
               getProductDetails(productId);
+              setCustomizationModal(true);
             }}
           >
             Customise
