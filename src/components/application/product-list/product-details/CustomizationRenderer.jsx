@@ -142,7 +142,7 @@ const CustomizationRenderer = (props) => {
   };
 
   const formatCustomizations = (customisation_items) => {
-    const customizations = customisation_items.map((customization) => {
+    const customizations = customisation_items?.map((customization) => {
       const itemDetails = customization.item_details;
       const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
       const childTag = itemDetails.tags.find((tag) => tag.code === "child");
@@ -171,7 +171,7 @@ const CustomizationRenderer = (props) => {
 
   // initialize customization state
   useEffect(() => {
-    if (!isInitialized && customizationGroups.length > 0 && customizations.length > 0) {
+    if (!isInitialized && customizationGroups?.length > 0 && customizations?.length > 0) {
       const initializeCustomizationState = () => {
         let firstGroup = null;
         for (const group of customizationGroups) {
