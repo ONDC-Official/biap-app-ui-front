@@ -5,7 +5,8 @@ import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
 
-import prepaid from '../../../assets/images/prepaid.png'
+import {ReactComponent as Prepaid} from '../../../assets/images/prepaid.svg'
+import {ReactComponent as CashOnDelivery} from '../../../assets/images/cashOnDelivery.svg'
 import {ReactComponent as CheckedIcon} from '../../../assets/images/checked.svg'
 import {payment_methods} from "../../../constants/payment-methods";
 
@@ -19,7 +20,8 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod}) => {
                     className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.COD?classes.activeCard:""}`}
                     onClick={() => setActivePaymentMethod(payment_methods.COD)}
                 >
-                    <img className={classes.paymentImage} src={prepaid} alt="Cash on delivery"/>
+                    {/*<img className={classes.paymentImage} src={cashOnDelivery} alt="Cash on delivery"/>*/}
+                    <CashOnDelivery className={classes.paymentImage} />
                     {
                         activePaymentMethod === payment_methods.COD && (
                             <CheckedIcon className={classes.checkedIcon} />
@@ -35,7 +37,8 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod}) => {
                     className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.JUSPAY?classes.activeCard:""}`}
                     onClick={() => setActivePaymentMethod(payment_methods.JUSPAY)}
                 >
-                    <img className={classes.paymentImage} src={prepaid} alt="Prepaid"/>
+                    {/*<img className={classes.paymentImage} src={prepaid} alt="Prepaid"/>*/}
+                    <Prepaid className={classes.paymentImage} />
                     {
                         activePaymentMethod === payment_methods.JUSPAY && (
                             <CheckedIcon className={classes.checkedIcon} />

@@ -16,6 +16,7 @@ import Brand from "../brand/brand";
 import OutletDetails from "../brand/outletDetails/outletDetails";
 import Checkout from "../checkout/checkout";
 import Orders from "../orders/orders";
+import OrderDetails from "../orders/orderDetails/orderDetails";
 // import InitializeOrder from "./initialize-order/initializeOrder";
 // import MyTickets from "./my-tickets/myTickets";
 
@@ -65,6 +66,11 @@ export default function Application() {
             <PrivateRoute path={"/application/orders"}>
               <AppLayout>
                 <Orders />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute path={"/application/order/:orderId"}>
+              <AppLayout>
+                <OrderDetails />
               </AppLayout>
             </PrivateRoute>
 

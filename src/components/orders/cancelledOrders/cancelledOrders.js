@@ -31,7 +31,7 @@ const CancelledOrders = () => {
     useEffect(() => {
         const data = [
             {
-                name: 'Burger King', deliveryTime: '42', address: 'Sector 28, Chandigarh', price: '999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Cancelled', domain: 'ONDC:RET11',
+                id: '1', name: 'Burger King', deliveryTime: '42', address: 'Sector 28, Chandigarh', price: '999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Cancelled', domain: 'ONDC:RET11',
                 items: [
                     { id: '1', name: 'Veg Whopper + Paneer Royale + Crispy Veg', isVeg: true },
                     { id: '2', name: 'Veg Whopper + Paneer Royale + Crispy', isVeg: false },

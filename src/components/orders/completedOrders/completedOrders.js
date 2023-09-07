@@ -31,13 +31,13 @@ const CompletedOrders = () => {
     useEffect(() => {
         const data = [
             {
-                name: 'H&M', deliveryTime: 'On Saturday', address: 'Sector 28, Chandigarh', price: '1999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Delivered', domain: 'ONDC:RET12',
+                id: '1', name: 'H&M', deliveryTime: 'On Saturday', address: 'Sector 28, Chandigarh', price: '1999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Delivered', domain: 'ONDC:RET12',
                 items: [
                     { id: '1', name: 'Embroidered Handloom Cotton Silk Saree' },
                 ]
             },
             {
-                name: 'Burger King', deliveryTime: '42', address: 'Sector 28, Chandigarh', price: '999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Delivered', domain: 'ONDC:RET11',
+                id: '2', name: 'Burger King', deliveryTime: '42', address: 'Sector 28, Chandigarh', price: '999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Delivered', domain: 'ONDC:RET11',
                 items: [
                     { id: '1', name: 'Veg Whopper + Paneer Royale + Crispy Veg', isVeg: true },
                     { id: '2', name: 'Veg Whopper + Paneer Royale + Crispy', isVeg: false },
