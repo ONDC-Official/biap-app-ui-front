@@ -32,6 +32,7 @@ const MenuItem = (props) => {
     handleAddToCart,
     setCustomizationModal,
     getProductDetails,
+    productLoading,
   } = props;
   const { descriptor, isVeg } = product;
   const { name: product_name, images, short_desc: product_description } = descriptor;
@@ -81,6 +82,7 @@ const MenuItem = (props) => {
             onClick={() => {
               getProductDetails(productId).then((data) => handleAddToCart(data, true));
             }}
+            disabled={productLoading}
           >
             Add to cart
           </Button>

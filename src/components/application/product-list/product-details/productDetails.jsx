@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useStyles from "./style";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
@@ -14,11 +14,13 @@ import { Link, useHistory, useParams } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
+import { CartContext } from "../../../../context/cartContext";
 
 const ProductDetails = () => {
   const classes = useStyles();
   const history = useHistory();
   const params = useParams();
+  const { fetchCartItems } = useContext(CartContext);
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
@@ -115,6 +117,7 @@ const ProductDetails = () => {
     };
 
     const res = await postCall(url, payload);
+    fetchCartItems();
     if (navigate) {
       history.push("/application/cart");
     }
@@ -394,7 +397,7 @@ const ProductDetails = () => {
                   <Button
                     variant="contained"
                     sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
-                    onClick={addToCart}
+                    onClick={() => addToCart(false)}
                     disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
                   >
                     Add to cart

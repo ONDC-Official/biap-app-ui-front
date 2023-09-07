@@ -15,12 +15,15 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { v4 as uuidv4 } from "uuid";
 import { AddressContext } from "../../../context/addressContext";
+import { CartContext } from "../../../context/cartContext";
 
 export default function Cart() {
   const ref = useRef(null);
   const classes = useStyles();
   const history = useHistory();
   const { deliveryAddress } = useContext(AddressContext);
+  const { fetchCartItems } = useContext(CartContext);
+
   let user = JSON.parse(getValueFromCookie("user"));
   const { cancellablePromise } = useCancellablePromise();
   const transaction_id = getValueFromCookie("transaction_id");
@@ -106,6 +109,7 @@ export default function Cart() {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const res = await deleteCall(url);
     getCartItems();
+    fetchCartItems();
   };
 
   useEffect(() => {

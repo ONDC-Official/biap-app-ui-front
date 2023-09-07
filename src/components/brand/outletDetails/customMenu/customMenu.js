@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import useStyles from "./style";
 import { useParams, useHistory } from "react-router-dom";
 
@@ -30,12 +30,14 @@ import {
   formatCustomizations,
   initializeCustomizationState,
 } from "../../../application/product-list/product-details/utils";
+import { CartContext } from "../../../../context/cartContext";
 
 const CustomMenu = ({ brandDetails, outletDetails }) => {
   const classes = useStyles();
   const history = useHistory();
   const { brandId, outletId } = useParams();
 
+  const { fetchCartItems } = useContext(CartContext);
   const [isLoading, setIsLoading] = useState(false);
   const [customMenu, setCustomMenu] = useState(false);
   const [menuModal, setMenuModal] = useState(false);
@@ -141,6 +143,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   };
 
   const addToCart = async (productPayload, isDefault = false) => {
+    setProductLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
@@ -173,9 +176,17 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
         customisations,
       };
 
-      postCall(url, payload);
-      setCustomizationState({});
-      setCustomizationModal(false);
+      postCall(url, payload)
+        .then(() => {
+          fetchCartItems();
+          setCustomizationState({});
+          setCustomizationModal(false);
+          setProductLoading(false);
+        })
+        .catch((error) => {
+          console.log(error);
+          setProductLoading(false);
+        });
     });
   };
 
@@ -226,6 +237,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                               handleAddToCart={addToCart}
                               setCustomizationModal={setCustomizationModal}
                               getProductDetails={getProductDetails}
+                              productLoading={productLoading}
                             />
                           </Grid>
                         ))}
@@ -260,6 +272,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                   onClose={() => {
                     setCustomizationModal(false);
                     setCustomizationState({});
+                    fetchCartItems();
                   }}
                   title="Customize"
                 >
@@ -297,7 +310,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                           />
                         </Grid>
                         <Button variant="contained" sx={{ flex: 1 }} onClick={() => addToCart(productPayload)}>
-                          Add Item Total- ₹{(productPayload?.item_details?.price.value + calculateSubtotal()) * itemQty}
+                          Add Item Total- ₹{(productPayload?.item_details?.price.value + calculateSubtotal()) * itemQty}{" "}
                         </Button>
                       </Grid>
                     </>

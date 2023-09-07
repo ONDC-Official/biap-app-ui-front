@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useStyles from "./style";
 import { Link, useLocation, useParams, useHistory } from "react-router-dom";
 import Grid from "@mui/material/Grid";
@@ -21,10 +21,13 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
 import { getValueFromCookie } from "../../../utils/cookies";
 import { postCall } from "../../../api/axios";
+import { CartContext } from "../../../context/cartContext";
 
 const Products = ({ brandDetails }) => {
   const classes = useStyles();
   const history = useHistory();
+  const { fetchCartItems } = useContext(CartContext);
+
   const { brandId } = useParams();
   const { descriptor } = brandDetails;
   const { name: brandName, images } = descriptor;
@@ -301,6 +304,7 @@ const Products = ({ brandDetails }) => {
     };
 
     const res = await postCall(url, payload);
+    fetchCartItems();
   };
 
   return (
