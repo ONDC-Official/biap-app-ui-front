@@ -175,7 +175,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
 
       postCall(url, payload);
       setCustomizationState({});
-      history.push("/application/cart");
+      setCustomizationModal(false);
     });
   };
 
@@ -258,8 +258,8 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                 <ModalComponent
                   open={customizationModal}
                   onClose={() => {
-                    setCustomizationState({});
                     setCustomizationModal(false);
+                    setCustomizationState({});
                   }}
                   title="Customize"
                 >

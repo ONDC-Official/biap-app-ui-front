@@ -300,9 +300,7 @@ const Products = ({ brandDetails }) => {
       customisations: [],
     };
 
-    console.log("payload", payload);
     const res = await postCall(url, payload);
-    history.push("/application/cart");
   };
 
   return (

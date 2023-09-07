@@ -10,22 +10,10 @@ import { getCall, postCall } from "../../../../api/axios";
 import CustomizationRenderer from "./CustomizationRenderer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
-import { Link, useLocation, useHistory, useParams } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
-
-const additionalProductDetails = {
-  "style code": "Bell & Ross Nightlum",
-  pattern: "Embroidered",
-  "pack of": 1,
-  ocassion: "Party & Festive, Wedding",
-  "Decorative Material": "zari",
-  "fabric care": "Dry Clean for the first wash, thereafter Hand Wash",
-  "Construction Type": "Woven",
-  "other details":
-    "Make a distinct style statement wearing this Cotton silk woven Saree from the Villagius. Designed to perfection, this saree will soon become your favorite . The stylishly designed saree Solid prints makes it a true value for money. Made from Cotton Silk this saree measures 5.5 m and comes with a 0.80 m blouse piece.",
-};
 
 const ProductDetails = () => {
   const classes = useStyles();
@@ -97,7 +85,7 @@ const ProductDetails = () => {
     return customizations;
   };
 
-  const addToCart = async () => {
+  const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
@@ -126,10 +114,10 @@ const ProductDetails = () => {
       customisations,
     };
 
-    //  console.log("payload", payload);
-
     const res = await postCall(url, payload);
-    history.push("/application/cart");
+    if (navigate) {
+      history.push("/application/cart");
+    }
   };
 
   // fetch product details
@@ -415,6 +403,7 @@ const ProductDetails = () => {
                     variant="outlined"
                     sx={{ flex: 1, textTransform: "none" }}
                     disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
+                    onClick={() => addToCart(true)}
                   >
                     Order now
                   </Button>
