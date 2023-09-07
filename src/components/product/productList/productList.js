@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import useStyles from './style';
-import {Link, useLocation} from "react-router-dom";
+import {Link, useHistory, useLocation} from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -27,6 +27,7 @@ import {
 const ProductList = () => {
     const classes = useStyles();
     const locationData = useLocation();
+    const history = useHistory();
 
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
@@ -156,6 +157,16 @@ const ProductList = () => {
         setPaginationModel(data);
     };
 
+    const updateQueryParams = () => {
+        const params = new URLSearchParams({});
+        if(searchProductName){
+            params.set("s", searchProductName);
+        }
+        if(categoryName){
+            params.set("c", categoryName);
+        }else{}
+        history.replace({ pathname: `/application/products`, search: params.toString() })
+    };
     return (
         <Grid container spacing={3} className={classes.productContainer}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -167,10 +178,11 @@ const ProductList = () => {
                         {
                             categoryName && (
                                 <MuiLink
-                                    // component={Link}
+                                    component="div"
                                     underline="hover"
                                     color="inherit"
                                     // to={`/category/${categoryName}`}
+                                    onClick={updateQueryParams}
                                     href={`/application/products?${searchProductName?`s=${searchProductName}&`:""}${categoryName?`c=${categoryName}`:""}`}
                                 >
                                     {categoryName}
