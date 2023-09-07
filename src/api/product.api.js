@@ -4,31 +4,7 @@ import { getCall } from "./axios";
  * function to get all products
  * @returns
  */
-export const getAllProductRequest = (data) => {
-    const pageNumber = data.page;
-    const limit = data.pageSize;
-    let productName = data?.searchData?.productName || "";
-    let subCategoryName = data?.searchData?.subCategoryName || "";
-    const providerIds = data?.searchData?.brandId || "";
-    const customMenu = data?.searchData?.customMenu || "";
-    let params = {
-        limit: limit,
-        pageNumber: pageNumber,
-    };
-    if(subCategoryName){
-        subCategoryName = subCategoryName.replace("And", "&");
-        params.categoryIds = subCategoryName;
-    }
-    if(productName){
-        productName = productName.replace("And", "&");
-        params.productName = productName;
-    }
-    if(providerIds){
-        params.providerIds = providerIds;
-    }
-    if(customMenu){
-        params.customMenu = customMenu;
-    }else{}
+export const getAllProductRequest = (params) => {
     return new Promise(async (resolve, reject) => {
         try {
             const data = await getCall(`/clientApis/v2/search`, params);
@@ -43,11 +19,15 @@ export const getAllProductRequest = (data) => {
  * function to get all filters
  * @returns
  */
-export const getAllFiltersRequest = (subCatName) => {
-    let subCategoryName = subCatName.replace("And", "&");
-    let params = {
-        category: subCategoryName,
-    };
+export const getAllFiltersRequest = (subCatName=null, providerId=null) => {
+    let params = {};
+    if(subCatName){
+        let subCategoryName = subCatName.replace("And", "&");
+        params.category = subCategoryName;
+    }
+    if(providerId){
+        params.provider = providerId;
+    }else{}
     return new Promise(async (resolve, reject) => {
         try {
             const data = await getCall(`/clientApis/v2/attributes`, params);
@@ -62,12 +42,17 @@ export const getAllFiltersRequest = (subCatName) => {
  * function to get all filters
  * @returns
  */
-export const getAllFilterValuesRequest = (attributeCode, subCatName) => {
-    let subCategoryName = subCatName.replace("And", "&");
+export const getAllFilterValuesRequest = (attributeCode, subCatName = null, providerId = null) => {
     let params = {
         attribute_code: attributeCode,
-        category: subCategoryName,
     };
+    if(subCatName){
+        let subCategoryName = subCatName.replace("And", "&");
+        params.category = subCategoryName;
+    }
+    if(providerId){
+        params.provider = providerId;
+    }else{}
     return new Promise(async (resolve, reject) => {
         try {
             const data = await getCall(`/clientApis/v2/attributeValues`, params);

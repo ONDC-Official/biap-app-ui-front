@@ -52,11 +52,22 @@ const Products = ({brandDetails}) => {
     const getAllProducts = async(brandId, customMenuId) => {
         setIsLoading(true);
         try {
-            const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
-            paginationData.searchData.brandId = brandId || "";
-            paginationData.searchData.customMenu = customMenuId || "";
+            let paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData = paginationData.searchData.filter((item) => item.selectedValues.length > 0);
+            paginationData.searchData = paginationData.searchData.reduce(function(r, e) {
+                r[e.code] = e.selectedValues.join();
+                return r;
+            }, {});
+            paginationData.searchData.pageNumber = paginationData.page;
+            paginationData.searchData.limit = paginationData.pageSize;
+            if(brandId){
+                paginationData.searchData.providerIds = brandId || "";
+            }
+            if(customMenuId){
+                paginationData.searchData.customMenu = customMenuId || "";
+            }else{}
             const data = await cancellablePromise(
-                getAllProductRequest(paginationData)
+                getAllProductRequest(paginationData.searchData)
             );
             console.log("getAllProducts=====>", data)
             setProducts(data.data);
@@ -75,189 +86,68 @@ const Products = ({brandDetails}) => {
         }
     };
 
-    // const getFilterValues = async(attributeCode) => {
-    //     try {
-    //         const data = await cancellablePromise(
-    //             getAllFilterValuesRequest(attributeCode, subCategoryName)
-    //         );
-    //         console.log("getFilterValues=====>", data);
-    //         let filterValues = data.data;
-    //         filterValues = filterValues.map((value) => {
-    //             const createObj = {
-    //                 id: value,
-    //                 name: value,
-    //             }
-    //             return createObj
-    //         })
-    //         return filterValues
-    //     }  catch (err) {
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
+    const getFilterValues = async(attributeCode) => {
+        try {
+            const data = await cancellablePromise(
+                getAllFilterValuesRequest(attributeCode, "", brandId)
+            );
+            console.log("getFilterValues=====>", data);
+            let filterValues = data.data;
+            filterValues = filterValues.map((value) => {
+                const createObj = {
+                    id: value,
+                    name: value,
+                }
+                return createObj
+            })
+            return filterValues
+        }  catch (err) {
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const getAllFilters = async() => {
-        // setIsLoading(true);
-        // try {
-        //     const data = await cancellablePromise(
-        //         getAllFiltersRequest(subCategoryName)
-        //     );
-        //     console.log("getAllFilters=====>", data)
-        //     let filtersData = data.data;
-        //
-        //     for (let filter of filtersData) {
-        //         const values = await getFilterValues(filter.code);
-        //         const findIndex = filtersData.findIndex((item) => item.code === filter.code);
-        //         if(findIndex > -1){
-        //             filtersData[findIndex].options = values;
-        //             filtersData[findIndex].selectedValues = [];
-        //         }
-        //     }
-        //     let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
-        //     paginationData.searchData = filtersData;
-        //     setPaginationModel(paginationData);
-        // } catch (err) {
-        //     // dispatch({
-        //     //     type: toast_actions.ADD_TOAST,
-        //     //     payload: {
-        //     //         id: Math.floor(Math.random() * 100),
-        //     //         type: toast_types.error,
-        //     //         message: err?.message,
-        //     //     },
-        //     // });
-        // } finally {
-        //     setIsLoading(false);
-        // }
+        setIsLoading(true);
+        try {
+            const data = await cancellablePromise(
+                getAllFiltersRequest('', brandId )
+            );
+            console.log("getAllFilters=====>", data)
+            let filtersData = data.data;
 
-        let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
-        paginationData.searchData = [
-            {
-                "id": "brand",
-                "category": "Men's Topwear",
-                "code": "brand",
-                "domain": "ONDC:RET12",
-                "sub_category1": null,
-                "sub_category2": null,
-                "sub_category3": null,
-                "options": [
-                    {
-                        "id": "Raymond",
-                        "name": "Raymond"
-                    }
-                ],
-                "selectedValues": []
-            },
-            {
-                "id": "gender",
-                "category": "Men's Topwear",
-                "code": "gender",
-                "domain": "ONDC:RET12",
-                "sub_category1": null,
-                "sub_category2": null,
-                "sub_category3": null,
-                "options": [
-                    {
-                        "id": "Male",
-                        "name": "Male"
-                    }
-                ],
-                "selectedValues": []
-            },
-            {
-                "id": "pattern",
-                "category": "Men's Topwear",
-                "code": "pattern",
-                "domain": "ONDC:RET12",
-                "sub_category1": null,
-                "sub_category2": null,
-                "sub_category3": null,
-                "options": [
-                    {
-                        "id": "Checked",
-                        "name": "Checked"
-                    },
-                    {
-                        "id": "Striped",
-                        "name": "Striped"
-                    }
-                ],
-                "selectedValues": []
-            },
-            {
-                "id": "material",
-                "category": "Men's Topwear",
-                "code": "material",
-                "domain": "ONDC:RET12",
-                "sub_category1": null,
-                "sub_category2": null,
-                "sub_category3": null,
-                "options": [
-                    {
-                        "id": "cotton",
-                        "name": "cotton"
-                    }
-                ],
-                "selectedValues": []
-            },
-            {
-                "id": "color",
-                "category": "Men's Topwear",
-                "code": "color",
-                "domain": "ONDC:RET12",
-                "sub_category1": null,
-                "sub_category2": null,
-                "sub_category3": null,
-                "options": [
-                    {
-                        "id": "black",
-                        "name": "black"
-                    },
-                    {
-                        "id": "red",
-                        "name": "red"
-                    }
-                ],
-                "selectedValues": []
-            },
-            {
-                "id": "size",
-                "category": "Men's Topwear",
-                "code": "size",
-                "domain": "ONDC:RET12",
-                "sub_category1": null,
-                "sub_category2": null,
-                "sub_category3": null,
-                "options": [
-                    {
-                        "id": "L",
-                        "name": "L"
-                    },
-                    {
-                        "id": "M",
-                        "name": "M"
-                    },
-                    {
-                        "id": "S",
-                        "name": "S"
-                    }
-                ],
-                "selectedValues": []
+            for (let filter of filtersData) {
+                const values = await getFilterValues(filter.code);
+                const findIndex = filtersData.findIndex((item) => item.code === filter.code);
+                if(findIndex > -1){
+                    filtersData[findIndex].options = values;
+                    filtersData[findIndex].selectedValues = [];
+                }
             }
-        ];
-        setPaginationModel(paginationData);
+            let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData = filtersData;
+            setPaginationModel(paginationData);
+        } catch (err) {
+            // dispatch({
+            //     type: toast_actions.ADD_TOAST,
+            //     payload: {
+            //         id: Math.floor(Math.random() * 100),
+            //         type: toast_types.error,
+            //         message: err?.message,
+            //     },
+            // });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
-        if(brandId && locationData){
-            const customMenuId = query.get("cm");
-            if(customMenuId){
-                getAllProducts(brandId, customMenuId);
-            }else{
-                getAllProducts(brandId, "");
-                getAllFilters();
-            }
-        }
-    }, [brandId, locationData]);
+        getAllProducts(brandId, "");
+    }, [paginationModel]);
+
+    useEffect(() => {
+        getAllFilters();
+    }, []);
 
     useEffect(() => {
         if(locationData){
@@ -271,7 +161,7 @@ const Products = ({brandDetails}) => {
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
         data.searchData[filterIndex].selectedValues = value;
-        data.page = 0;
+        data.page = 1;
         data.pageSize = 10;
         setPaginationModel(data);
     };

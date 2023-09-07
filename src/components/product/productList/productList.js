@@ -61,11 +61,22 @@ const ProductList = () => {
     const getAllProducts = async(searchName) => {
         setIsLoading(true);
         try {
-            const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
-            paginationData.searchData.productName = searchName || "";
-            paginationData.searchData.subCategoryName = subCategoryName || "";
+            let paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData = paginationData.searchData.filter((item) => item.selectedValues.length > 0);
+            paginationData.searchData = paginationData.searchData.reduce(function(r, e) {
+                r[e.code] = e.selectedValues.join();
+                return r;
+            }, {});
+            paginationData.searchData.pageNumber = paginationData.page;
+            paginationData.searchData.limit = paginationData.pageSize;
+            if(searchName){
+                paginationData.searchData.productName = searchName || "";
+            }else{}
+            if(subCategoryName){
+                paginationData.searchData.categoryIds = subCategoryName || "";
+            }else{}
             const data = await cancellablePromise(
-                getAllProductRequest(paginationData)
+                getAllProductRequest(paginationData.searchData)
             );
             console.log("getAllProducts=====>", data)
             setProducts(data.data);
@@ -144,15 +155,19 @@ const ProductList = () => {
 
     useEffect(() => {
         if(subCategoryName){
-            getAllProducts();
+            // getAllProducts();
             getAllFilters();
         }
     }, [subCategoryName]);
 
+    useEffect(() => {
+        getAllProducts();
+    }, [paginationModel]);
+
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
         data.searchData[filterIndex].selectedValues = value;
-        data.page = 0;
+        data.page = 1;
         data.pageSize = 10;
         setPaginationModel(data);
     };
