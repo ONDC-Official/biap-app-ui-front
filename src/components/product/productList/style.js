@@ -14,12 +14,30 @@ const useStyles = makeStyles({
         display: 'flex',
         height: '334px !important',
         borderRadius: '12px !important',
-        position: 'relative !important'
+        position: 'relative !important',
+        "&:hover $productImage": {
+            filter: 'blur(5px)'
+        },
+        "&:hover $buyNowButton": {
+            display: 'block !Important'
+        }
+    },
+    buyNowButton: {
+      display: 'none !important',
+        position: 'absolute !important',
+        bottom: 10,
+        right: '50%',
+        left: '50%',
+        // marginRight: '20px !important',
+        // marginLeft: '20px !important',
+        width: '320px !important',
+        transform: 'translate(-50%, -50%)'
     },
     productImage: {
         margin: 'auto !important',
         maxHeight: '95%',
         maxWidth: '95%',
+
     },
     cartIcon: {
         position: 'absolute !important',

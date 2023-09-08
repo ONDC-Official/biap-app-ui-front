@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import useStyles from "./style";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import React, {useState, useEffect, useContext} from 'react';
+import useStyles from './style';
+import {Link, useHistory, useLocation} from "react-router-dom";
+
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -21,8 +22,9 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
 import { getCall, postCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
-import {
-  formatCustomizationGroups,
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
+import {formatCustomizationGroups,
   formatCustomizations,
   initializeCustomizationState,
 } from "../../application/product-list/product-details/utils";
@@ -91,14 +93,14 @@ const ProductList = () => {
       setProducts(data.data);
       setTotalProductCount(data.count);
     } catch (err) {
-      // dispatch({
-      //     type: toast_actions.ADD_TOAST,
-      //     payload: {
-      //         id: Math.floor(Math.random() * 100),
-      //         type: toast_types.error,
-      //         message: err?.message,
-      //     },
-      // });
+      dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: err?.message,
+          },
+      });
     } finally {
       setIsLoading(false);
     }
