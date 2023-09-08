@@ -11,6 +11,7 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import { useHistory } from "react-router-dom";
 import { postCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
+import { Button } from "@mui/material";
 
 const ProductGridView = (props) => {
   const classes = useStyles();
@@ -45,7 +46,7 @@ const ProductGridView = (props) => {
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
-              getProductDetails(productId).then((data) => handleAddToCart(data, true));
+              getProductDetails(productId).then((data) => handleAddToCart(data, false));
             }}
             color="inherit"
             className={classes.cartIcon}
@@ -53,6 +54,17 @@ const ProductGridView = (props) => {
             <CartIcon />
           </IconButton>
         </Tooltip>
+        <Button
+          fullWidth
+          className={classes.buyNowButton}
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation();
+            getProductDetails(productId).then((data) => handleAddToCart(data, true, true));
+          }}
+        >
+          Buy Now
+        </Button>
       </Card>
       <Typography component="div" variant="body" className={classes.productNameTypo}>
         {product_name}

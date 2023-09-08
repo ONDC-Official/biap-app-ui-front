@@ -20,7 +20,7 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
 import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
 import { getValueFromCookie } from "../../../utils/cookies";
-import { postCall } from "../../../api/axios";
+import { getCall, postCall } from "../../../api/axios";
 import { CartContext } from "../../../context/cartContext";
 
 const Products = ({ brandDetails }) => {
@@ -38,6 +38,8 @@ const Products = ({ brandDetails }) => {
   };
   let query = useQuery();
 
+  const [productLoading, setProductLoading] = useState(false);
+  const [productPayload, setProductPayload] = useState(null);
   const [viewType, setViewType] = useState("grid");
   const [products, setProducts] = useState([]);
   const [totalProductCount, setTotalProductCount] = useState(0);
@@ -163,6 +165,53 @@ const Products = ({ brandDetails }) => {
     setPaginationModel(data);
   };
 
+  const getProductDetails = async (productId) => {
+    try {
+      setProductLoading(true);
+      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+      setProductPayload(data.response);
+      return data.response;
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    } finally {
+      setProductLoading(false);
+    }
+  };
+
+  const handleAddToCart = async (productPayload, navigate) => {
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}`;
+
+    const subtotal = productPayload.item_details.price.value;
+    const payload = {
+      id: productPayload.id,
+      local_id: productPayload.local_id,
+      bpp_id: productPayload.bpp_details.bpp_id,
+      bpp_uri: productPayload.context.bpp_uri,
+      domain: productPayload.context.domain,
+      quantity: {
+        count: 1,
+      },
+      provider: {
+        id: productPayload.bpp_details.bpp_id,
+        locations: productPayload.locations,
+        ...productPayload.provider_details,
+      },
+      product: {
+        id: productPayload.id,
+        subtotal,
+        ...productPayload.item_details,
+      },
+      customisations: [],
+    };
+
+    const res = await postCall(url, payload);
+    if (navigate) {
+      history.push("/application/cart");
+    }
+    fetchCartItems();
+  };
+
   return (
     <Grid container spacing={3} className={classes.productContainer}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -252,7 +301,7 @@ const Products = ({ brandDetails }) => {
                             location_id={productItem?.location_details ? productItem.location_details?.id : ""}
                             bpp_provider_id={productItem?.provider_details?.id}
                             handleAddToCart={() => {
-                              handleAddToCart(productItem);
+                              // handleAddToCart(productItem);
                             }}
                           />
                         </Grid>
@@ -271,6 +320,7 @@ const Products = ({ brandDetails }) => {
                             handleAddToCart={() => {
                               handleAddToCart(productItem);
                             }}
+                            getProductDetails={getProductDetails}
                           />
                         </Grid>
                       );

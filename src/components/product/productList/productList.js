@@ -1,7 +1,6 @@
-import React, {useState, useEffect, useContext} from 'react';
-import useStyles from './style';
-import {Link, useHistory, useLocation} from "react-router-dom";
-
+import React, { useState, useEffect, useContext } from "react";
+import useStyles from "./style";
+import { Link, useHistory, useLocation } from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -22,9 +21,10 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
 import { getCall, postCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
-import {ToastContext} from "../../../context/toastContext";
-import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
-import {formatCustomizationGroups,
+import { ToastContext } from "../../../context/toastContext";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import {
+  formatCustomizationGroups,
   formatCustomizations,
   initializeCustomizationState,
 } from "../../application/product-list/product-details/utils";
@@ -34,6 +34,7 @@ const ProductList = () => {
   const classes = useStyles();
   const locationData = useLocation();
   const history = useHistory();
+
   const { fetchCartItems } = useContext(CartContext);
   const [productPayload, setProductPayload] = useState(null);
   const [customization_state, setCustomizationState] = useState({});
@@ -48,6 +49,7 @@ const ProductList = () => {
     pageSize: 10,
     searchData: [],
   });
+  const dispatch = useContext(ToastContext);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -94,12 +96,12 @@ const ProductList = () => {
       setTotalProductCount(data.count);
     } catch (err) {
       dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: err?.message,
-          },
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.message,
+        },
       });
     } finally {
       setIsLoading(false);
@@ -228,7 +230,7 @@ const ProductList = () => {
     return customizations;
   };
 
-  const addToCart = async (productPayload, isDefault = false) => {
+  const addToCart = async (productPayload, isDefault = false, navigate = false) => {
     setProductLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
@@ -270,6 +272,7 @@ const ProductList = () => {
           fetchCartItems();
           setCustomizationState({});
           setProductLoading(false);
+          if (navigate) history.push("/application/cart");
         })
         .catch((error) => {
           console.log(error);
