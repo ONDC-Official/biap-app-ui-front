@@ -43,7 +43,7 @@ export default function Cart() {
   const getCartSubtotal = () => {
     let subtotal = 0;
     cartItems.map((cartItem) => {
-      subtotal += cartItem.item.product.subtotal;
+      subtotal += cartItem?.item?.product?.subtotal * cartItem?.item?.quantity?.count;
     });
     return subtotal;
   };
