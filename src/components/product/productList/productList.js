@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import useStyles from './style';
-import {Link, useLocation} from "react-router-dom";
+import {Link, useHistory, useLocation} from "react-router-dom";
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -27,6 +27,7 @@ import {
 const ProductList = () => {
     const classes = useStyles();
     const locationData = useLocation();
+    const history = useHistory();
 
     const [viewType, setViewType] = useState("grid");
     const [products, setProducts] = useState([]);
@@ -60,11 +61,22 @@ const ProductList = () => {
     const getAllProducts = async(searchName) => {
         setIsLoading(true);
         try {
-            const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
-            paginationData.searchData.productName = searchName || "";
-            paginationData.searchData.subCategoryName = subCategoryName || "";
+            let paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.searchData = paginationData.searchData.filter((item) => item.selectedValues.length > 0);
+            paginationData.searchData = paginationData.searchData.reduce(function(r, e) {
+                r[e.code] = e.selectedValues.join();
+                return r;
+            }, {});
+            paginationData.searchData.pageNumber = paginationData.page;
+            paginationData.searchData.limit = paginationData.pageSize;
+            if(searchName){
+                paginationData.searchData.productName = searchName || "";
+            }else{}
+            if(subCategoryName){
+                paginationData.searchData.categoryIds = subCategoryName || "";
+            }else{}
             const data = await cancellablePromise(
-                getAllProductRequest(paginationData)
+                getAllProductRequest(paginationData.searchData)
             );
             console.log("getAllProducts=====>", data)
             setProducts(data.data);
@@ -143,19 +155,33 @@ const ProductList = () => {
 
     useEffect(() => {
         if(subCategoryName){
-            getAllProducts();
+            // getAllProducts();
             getAllFilters();
         }
     }, [subCategoryName]);
 
+    useEffect(() => {
+        getAllProducts();
+    }, [paginationModel]);
+
     const handleChangeFilter = (filterIndex, value) => {
         const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
         data.searchData[filterIndex].selectedValues = value;
-        data.page = 0;
+        data.page = 1;
         data.pageSize = 10;
         setPaginationModel(data);
     };
 
+    const updateQueryParams = () => {
+        const params = new URLSearchParams({});
+        if(searchProductName){
+            params.set("s", searchProductName);
+        }
+        if(categoryName){
+            params.set("c", categoryName);
+        }else{}
+        history.replace({ pathname: `/application/products`, search: params.toString() })
+    };
     return (
         <Grid container spacing={3} className={classes.productContainer}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -167,10 +193,11 @@ const ProductList = () => {
                         {
                             categoryName && (
                                 <MuiLink
-                                    // component={Link}
+                                    component="div"
                                     underline="hover"
                                     color="inherit"
                                     // to={`/category/${categoryName}`}
+                                    onClick={updateQueryParams}
                                     href={`/application/products?${searchProductName?`s=${searchProductName}&`:""}${categoryName?`c=${categoryName}`:""}`}
                                 >
                                     {categoryName}

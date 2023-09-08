@@ -11,11 +11,12 @@ function unAuthorizedResponse() {
   window.location.pathname = "/";
 }
 
-export function getCall(url) {
+export function getCall(url, params = null) {
   const token = Cookies.get("token");
   return new Promise(async (resolve, reject) => {
     try {
       const response = await axios.get(url, {
+        params: params,
         headers: { ...(token && { Authorization: `Bearer ${token}` }) },
       });
       return resolve(response.data);
