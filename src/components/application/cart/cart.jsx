@@ -102,6 +102,7 @@ export default function Cart() {
       console.log("after update:", res);
       setLoading(false);
       getCartItems();
+      fetchCartItems();
     }
   };
 

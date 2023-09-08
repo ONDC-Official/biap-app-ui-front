@@ -9,7 +9,17 @@ export const CartContext = createContext({
 });
 
 export function CartContextProvider({ children }) {
-  let user = JSON.parse(getValueFromCookie("user"));
+  let user = {};
+  const userCookie = getValueFromCookie("user");
+
+  if (userCookie) {
+    try {
+      user = JSON.parse(userCookie);
+    } catch (error) {
+      console.log("Error parsing user cookie:", error);
+    }
+  }
+
   const [cartItems, setCartItems] = useState([]);
 
   const getCartItems = async () => {
@@ -23,7 +33,7 @@ export function CartContextProvider({ children }) {
   };
 
   useEffect(() => {
-    getCartItems();
+    if (!!Object.keys(user).length) getCartItems();
   }, []);
 
   return (

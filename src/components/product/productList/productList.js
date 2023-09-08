@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import useStyles from "./style";
 import { Link, useLocation } from "react-router-dom";
 
@@ -19,10 +19,23 @@ import { ReactComponent as GridViewIcon } from "../../../assets/images/gridView.
 
 import useCancellablePromise from "../../../api/cancelRequest";
 import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
+import { getCall, postCall } from "../../../api/axios";
+import { getValueFromCookie } from "../../../utils/cookies";
+import {
+  formatCustomizationGroups,
+  formatCustomizations,
+  initializeCustomizationState,
+} from "../../application/product-list/product-details/utils";
+import { CartContext } from "../../../context/cartContext";
 
 const ProductList = () => {
   const classes = useStyles();
   const locationData = useLocation();
+  const { fetchCartItems } = useContext(CartContext);
+
+  const [productPayload, setProductPayload] = useState(null);
+  const [customization_state, setCustomizationState] = useState({});
+  const [productLoading, setProductLoading] = useState(false);
 
   const [viewType, setViewType] = useState("grid");
   const [products, setProducts] = useState([]);
@@ -49,7 +62,6 @@ const ProductList = () => {
   useEffect(() => {
     if (locationData) {
       const searchName = query.get("s");
-      console.log("history.location.search again=====>", searchName);
       getAllProducts(searchName);
     }
   }, [locationData]);
@@ -60,7 +72,6 @@ const ProductList = () => {
       paginationData.searchData.productName = searchName || "";
       paginationData.searchData.subCategoryName = subCategoryName || "";
       const data = await cancellablePromise(getAllProductRequest(paginationData));
-      console.log("getAllProducts=====>", data);
       setProducts(data.data);
       setTotalProductCount(data.count);
     } catch (err) {
@@ -142,6 +153,107 @@ const ProductList = () => {
     data.page = 0;
     data.pageSize = 10;
     setPaginationModel(data);
+  };
+
+  const getProductDetails = async (productId) => {
+    try {
+      setProductLoading(true);
+      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+      setProductPayload(data.response);
+      return data.response;
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    } finally {
+      setProductLoading(false);
+    }
+  };
+
+  const calculateSubtotal = () => {
+    let subtotal = 0;
+
+    for (const level in customization_state) {
+      const selectedOptions = customization_state[level].selected;
+      if (selectedOptions.length > 0) {
+        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
+      }
+    }
+    return subtotal;
+  };
+
+  const getCustomizations = async (productPayload, customization_state) => {
+    const { customisation_items } = productPayload;
+    const customizations = [];
+    const levels = Object.keys(customization_state);
+
+    for (const level of levels) {
+      const selectedItems = customization_state[level].selected;
+
+      for (const selectedItem of selectedItems) {
+        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
+
+        if (customization) {
+          customization = {
+            ...customization,
+            quantity: {
+              count: 1,
+            },
+          };
+          customizations.push(customization);
+        }
+      }
+    }
+
+    return customizations;
+  };
+
+  const addToCart = async (productPayload, isDefault = false) => {
+    setProductLoading(true);
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}`;
+
+    const subtotal = productPayload?.item_details?.price?.value + calculateSubtotal();
+
+    const groups = await formatCustomizationGroups(productPayload.customisation_groups);
+    const cus = await formatCustomizations(productPayload.customisation_items);
+    const newState = await initializeCustomizationState(groups, cus, customization_state);
+
+    getCustomizations(productPayload, isDefault ? newState : customization_state).then((customisations) => {
+      const payload = {
+        id: productPayload.id,
+        local_id: productPayload.local_id,
+        bpp_id: productPayload.bpp_details.bpp_id,
+        bpp_uri: productPayload.context.bpp_uri,
+        domain: productPayload.context.domain,
+        quantity: {
+          count: 1,
+        },
+        provider: {
+          id: productPayload.bpp_details.bpp_id,
+          locations: productPayload.locations,
+          ...productPayload.provider_details,
+        },
+        product: {
+          id: productPayload.id,
+          subtotal,
+          ...productPayload.item_details,
+        },
+      };
+
+      if (customisations.length > 0) {
+        payload.customisations = customisations;
+      }
+
+      postCall(url, payload)
+        .then(() => {
+          fetchCartItems();
+          setCustomizationState({});
+          setProductLoading(false);
+        })
+        .catch((error) => {
+          console.log(error);
+          setProductLoading(false);
+        });
+    });
   };
 
   return (
@@ -247,6 +359,9 @@ const ProductList = () => {
                             bpp_id={productItem?.bpp_details?.bpp_id}
                             location_id={productItem?.location_details ? productItem.location_details?.id : ""}
                             bpp_provider_id={productItem?.provider_details?.id}
+                            getProductDetails={getProductDetails}
+                            handleAddToCart={addToCart}
+                            productLoading={productLoading}
                           />
                         </Grid>
                       );
@@ -254,7 +369,6 @@ const ProductList = () => {
                       return (
                         <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
                           <ProductGridView
-                            productPayload={productItem}
                             product={productItem?.item_details}
                             productId={productItem.id}
                             price={productItem?.item_details?.price}
@@ -262,6 +376,9 @@ const ProductList = () => {
                             bpp_id={productItem?.bpp_details?.bpp_id}
                             location_id={productItem?.location_details ? productItem.location_details?.id : ""}
                             bpp_provider_id={productItem?.provider_details?.id}
+                            getProductDetails={getProductDetails}
+                            handleAddToCart={addToCart}
+                            productLoading={productLoading}
                           />
                         </Grid>
                       );

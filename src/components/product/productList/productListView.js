@@ -23,6 +23,8 @@ const ProductListView = (props) => {
     show_quantity_button = true,
     onUpdateCart = () => {},
     handleAddToCart = () => {},
+    getProductDetails,
+    productLoading,
   } = props;
   const { id, descriptor, provider_details } = product;
   const { name: provider_name } = bpp_provider_descriptor;
@@ -62,7 +64,14 @@ const ProductListView = (props) => {
           <Button className={classes.addToCartBtn} variant="contained">
             Buy Now
           </Button>
-          <Button className={classes.addToCartBtn} variant="outlined" onClick={handleAddToCart}>
+          <Button
+            className={classes.addToCartBtn}
+            variant="outlined"
+            onClick={(e) => {
+              e.stopPropagation();
+              getProductDetails(productId).then((data) => handleAddToCart(data, true));
+            }}
+          >
             Add to cart
           </Button>
         </div>

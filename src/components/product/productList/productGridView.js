@@ -26,6 +26,8 @@ const ProductGridView = (props) => {
     show_quantity_button = true,
     onUpdateCart = () => {},
     handleAddToCart = () => {},
+    getProductDetails,
+    productLoading,
   } = props;
   const { id, descriptor, provider_details } = product;
   const { name: provider_name } = bpp_provider_descriptor;
@@ -43,7 +45,7 @@ const ProductGridView = (props) => {
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
-              handleAddToCart();
+              getProductDetails(productId).then((data) => handleAddToCart(data, true));
             }}
             color="inherit"
             className={classes.cartIcon}
