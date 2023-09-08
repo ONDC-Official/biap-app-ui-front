@@ -68,9 +68,13 @@ const ProductDetails = () => {
 
     for (const level of levels) {
       const selectedItems = customization_state[level].selected;
+      let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
 
       for (const selectedItem of selectedItems) {
         let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
+        if (has_special_instruction) {
+          customization.special_instructions = "";
+        }
 
         if (customization) {
           customization = {
@@ -116,6 +120,7 @@ const ProductDetails = () => {
       customisations,
     };
 
+    console.log(payload);
     const res = await postCall(url, payload);
     fetchCartItems();
     if (navigate) {

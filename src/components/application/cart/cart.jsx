@@ -89,11 +89,13 @@ export default function Cart() {
       let updatedCartItem = items[itemIndex];
       updatedCartItem.id = updatedCartItem.item.id;
 
-      if (increment) {
-        updatedCartItem.item.quantity.count += 1;
-      } else {
-        if (updatedCartItem.item.quantity.count > 1) {
-          updatedCartItem.item.quantity.count -= 1;
+      if (increment !== null) {
+        if (increment) {
+          updatedCartItem.item.quantity.count += 1;
+        } else {
+          if (updatedCartItem.item.quantity.count > 1) {
+            updatedCartItem.item.quantity.count -= 1;
+          }
         }
       }
 
@@ -109,6 +111,18 @@ export default function Cart() {
   const deleteCartItem = async (itemId) => {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const res = await deleteCall(url);
+    getCartItems();
+    fetchCartItems();
+  };
+
+  const updateSpecialInstructions = async (item) => {
+    //  setLoading(true);
+    const url = `/clientApis/v2/cart/${user.id}/${item.id}`;
+    const itemIndex = cartItems?.findIndex((ci) => ci.item.id === item.id);
+    let updatedItem = cartItems[itemIndex];
+
+    const res = await putCall(url, updatedItem);
+    setLoading(false);
     getCartItems();
     fetchCartItems();
   };
@@ -191,6 +205,59 @@ export default function Cart() {
     return null;
   };
 
+  const renderSpecialInstructions = (item) => {
+    const hasSpecialInstructions = item?.customisations?.find((c) => {
+      if (c.hasOwnProperty("special_instructions")) {
+        return c;
+      }
+    });
+
+    console.log("hasSpecialInstructions", hasSpecialInstructions);
+
+    const handleChange = (e) => {
+      const updatedCart = [...cartItems];
+      const itemIndex = updatedCart.findIndex((ci) => ci.item.id === item.id);
+
+      if (itemIndex !== -1) {
+        const itemToUpdate = { ...updatedCart[itemIndex] };
+        const customizationIndex = itemToUpdate.item.customisations.findIndex((c) =>
+          c.hasOwnProperty("special_instructions")
+        );
+
+        if (customizationIndex !== -1) {
+          itemToUpdate.item.customisations[customizationIndex].special_instructions = e.target.value;
+          updatedCart[itemIndex] = itemToUpdate;
+          setCartItems(updatedCart);
+        }
+      }
+    };
+    if (!hasSpecialInstructions) return null;
+    return (
+      <div style={{ position: "relative" }}>
+        <TextField
+          fullWidth
+          multiline
+          rows={3}
+          size="small"
+          placeholder="Write here"
+          sx={{ padding: "2px 4px" }}
+          value={hasSpecialInstructions.special_instructions || ""}
+          onChange={handleChange}
+        />
+        <Button
+          className={classes.updateBtn}
+          variant="text"
+          size="small"
+          onClick={() => {
+            updateCartItem(item.id, null);
+          }}
+        >
+          Update
+        </Button>
+      </div>
+    );
+  };
+
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
       return (
@@ -254,14 +321,7 @@ export default function Cart() {
               </Typography>
             </Grid>
             <Grid item xs={4}>
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                size="small"
-                placeholder="Write here"
-                sx={{ padding: "6px 12px" }}
-              />
+              {renderSpecialInstructions(cartItem.item)}
 
               <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
                 <Button

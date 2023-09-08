@@ -128,7 +128,7 @@ const CustomizationRenderer = (props) => {
       const inputTypeConfig = configTags.find((tag) => tag.code === "input").value;
       const seqConfig = configTags.find((tag) => tag.code === "seq").value;
 
-      return {
+      const customizationObj = {
         id: group.local_id,
         name: group.descriptor.name,
         inputType: inputTypeConfig,
@@ -136,6 +136,12 @@ const CustomizationRenderer = (props) => {
         maxQuantity: parseInt(maxConfig),
         seq: parseInt(seqConfig),
       };
+
+      if (inputTypeConfig === "input") {
+        customizationObj.special_instructions = "";
+      }
+
+      return customizationObj;
     });
 
     return formattedCustomizationGroups;
@@ -195,6 +201,10 @@ const CustomizationRenderer = (props) => {
                 options: [],
                 selected: [],
               };
+
+              if (group.hasOwnProperty("special_instructions")) {
+                newState[level].special_instructions = "";
+              }
               newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
 
               // Skip selecting an option for non-mandatory groups (minQuantity === 0)
@@ -220,6 +230,8 @@ const CustomizationRenderer = (props) => {
               currentGroup = null;
             }
           }
+
+          console.log(newState);
 
           setCustomizationState(newState);
         }
