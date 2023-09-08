@@ -61,7 +61,14 @@ const ProductListView = (props) => {
             View details
           </MuiLink>
 
-          <Button className={classes.addToCartBtn} variant="contained">
+          <Button
+            className={classes.addToCartBtn}
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation();
+              getProductDetails(productId).then((data) => handleAddToCart(data, true, true));
+            }}
+          >
             Buy Now
           </Button>
           <Button
