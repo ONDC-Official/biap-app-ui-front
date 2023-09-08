@@ -100,8 +100,28 @@ const NavBar = ({ isCheckout = false }) => {
   const handleClickCategoryMenu = (event) => {
     setAnchorElCategoryMenu(event.currentTarget);
   };
-  const handleCloseCategoryMenu = () => {
+  const handleCloseCategoryMenu = (routeName) => {
     setAnchorElCategoryMenu(null);
+    if(routeName){
+      const searchName = query.get("s");
+      const subCategoryName = query.get("sc");
+      const params = new URLSearchParams({});
+      if (searchName) {
+        params.set("s", searchName);
+      }
+      if (routeName) {
+        params.set("c", routeName);
+      }
+      if (subCategoryName) {
+        params.set("sc", subCategoryName);
+      } else {
+      }
+      if (locationData.pathname !== "/application/products") {
+        history.push({pathname: locationData.pathname, search: params.toString()});
+      } else {
+        history.replace({pathname: locationData.pathname, search: params.toString()});
+      }
+    }
   };
 
   // use this function to fetch existing address of the user
@@ -394,7 +414,7 @@ const NavBar = ({ isCheckout = false }) => {
                     id="basic-menu-cat"
                     anchorEl={anchorElCaregoryMenu}
                     open={openCategoryMenu}
-                    onClose={handleCloseCategoryMenu}
+                    onClose={() => handleCloseCategoryMenu("")}
                     MenuListProps={{
                       "aria-labelledby": "basic-button-cat",
                     }}
@@ -409,7 +429,7 @@ const NavBar = ({ isCheckout = false }) => {
                   >
                     {categoryList.map((cat, catIndex) => {
                       return (
-                        <MenuItem key={`cat-index-${catIndex}`} onClick={handleCloseCategoryMenu}>
+                        <MenuItem selected={cat?.routeName === query.get("c")} key={`cat-index-${catIndex}`} onClick={() => handleCloseCategoryMenu(cat.routeName)}>
                           {cat.name}
                         </MenuItem>
                       );
