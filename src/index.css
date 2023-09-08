@@ -44,3 +44,8 @@ code {
 body{
   background: #fff !important;
 }
+
+.MuiSnackbar-root{
+  top: 90px !important;
+  right: 25px !important;
+}

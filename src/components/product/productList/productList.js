@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import useStyles from './style';
 import {Link, useHistory, useLocation} from "react-router-dom";
 
@@ -23,6 +23,8 @@ import {
     getAllFiltersRequest,
     getAllFilterValuesRequest
 } from '../../../api/product.api';
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
 const ProductList = () => {
     const classes = useStyles();
@@ -38,6 +40,7 @@ const ProductList = () => {
         pageSize: 10,
         searchData: []
     });
+    const dispatch = useContext(ToastContext);
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
@@ -70,7 +73,7 @@ const ProductList = () => {
             paginationData.searchData.pageNumber = paginationData.page;
             paginationData.searchData.limit = paginationData.pageSize;
             if(searchName){
-                paginationData.searchData.productName = searchName || "";
+                paginationData.searchData.name = searchName || "";
             }else{}
             if(subCategoryName){
                 paginationData.searchData.categoryIds = subCategoryName || "";
@@ -82,14 +85,14 @@ const ProductList = () => {
             setProducts(data.data);
             setTotalProductCount(data.count);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setIsLoading(false);
         }
