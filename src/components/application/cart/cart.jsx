@@ -81,10 +81,10 @@ export default function Cart() {
     }
   };
 
-  const updateCartItem = async (itemId, increment) => {
-    const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
+  const updateCartItem = async (itemId, increment, uniqueId) => {
+    const url = `/clientApis/v2/cart/${user.id}/${uniqueId}`;
     const items = cartItems.concat([]);
-    const itemIndex = items.findIndex((item) => item.item.id === itemId);
+    const itemIndex = items.findIndex((item) => item._id === uniqueId);
     if (itemIndex !== -1) {
       let updatedCartItem = items[itemIndex];
       updatedCartItem.id = updatedCartItem.item.id;
@@ -111,18 +111,6 @@ export default function Cart() {
   const deleteCartItem = async (itemId) => {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const res = await deleteCall(url);
-    getCartItems();
-    fetchCartItems();
-  };
-
-  const updateSpecialInstructions = async (item) => {
-    //  setLoading(true);
-    const url = `/clientApis/v2/cart/${user.id}/${item.id}`;
-    const itemIndex = cartItems?.findIndex((ci) => ci.item.id === item.id);
-    let updatedItem = cartItems[itemIndex];
-
-    const res = await putCall(url, updatedItem);
-    setLoading(false);
     getCartItems();
     fetchCartItems();
   };
@@ -205,31 +193,22 @@ export default function Cart() {
     return null;
   };
 
-  const renderSpecialInstructions = (item) => {
-    const hasSpecialInstructions = item?.customisations?.find((c) => {
+  const renderSpecialInstructions = (item, id) => {
+    const cartItem = cartItems.find((ci) => ci._id == id);
+    const hasSpecialInstructions = cartItem?.item?.customisations?.find((c) => {
       if (c.hasOwnProperty("special_instructions")) {
         return c;
       }
     });
 
-    console.log("hasSpecialInstructions", hasSpecialInstructions);
-
     const handleChange = (e) => {
       const updatedCart = [...cartItems];
-      const itemIndex = updatedCart.findIndex((ci) => ci.item.id === item.id);
+      const itemIndex = updatedCart.findIndex((ci) => ci._id === id);
 
-      if (itemIndex !== -1) {
-        const itemToUpdate = { ...updatedCart[itemIndex] };
-        const customizationIndex = itemToUpdate.item.customisations.findIndex((c) =>
-          c.hasOwnProperty("special_instructions")
-        );
-
-        if (customizationIndex !== -1) {
-          itemToUpdate.item.customisations[customizationIndex].special_instructions = e.target.value;
-          updatedCart[itemIndex] = itemToUpdate;
-          setCartItems(updatedCart);
-        }
-      }
+      let itemToUpdate = updatedCart[itemIndex];
+      itemToUpdate.item.customisations[0].special_instructions = e.target.value;
+      updatedCart[itemIndex] = itemToUpdate;
+      setCartItems(updatedCart);
     };
     if (!hasSpecialInstructions) return null;
     return (
@@ -241,7 +220,7 @@ export default function Cart() {
           size="small"
           placeholder="Write here"
           sx={{ padding: "2px 4px" }}
-          value={hasSpecialInstructions.special_instructions || ""}
+          value={hasSpecialInstructions?.special_instructions}
           onChange={handleChange}
         />
         <Button
@@ -249,7 +228,7 @@ export default function Cart() {
           variant="text"
           size="small"
           onClick={() => {
-            updateCartItem(item.id, null);
+            updateCartItem(id, null, id);
           }}
         >
           Update
@@ -307,11 +286,11 @@ export default function Cart() {
                 </Typography>
                 <KeyboardArrowUpIcon
                   className={classes.qtyArrowUp}
-                  onClick={() => updateCartItem(cartItem.item.id, true)}
+                  onClick={() => updateCartItem(cartItem.item.id, true, cartItem._id)}
                 />
                 <KeyboardArrowDownIcon
                   className={classes.qtyArrowDown}
-                  onClick={() => updateCartItem(cartItem.item.id, false)}
+                  onClick={() => updateCartItem(cartItem.item.id, false, cartItem._id)}
                 />
               </div>
             </Grid>
@@ -321,14 +300,14 @@ export default function Cart() {
               </Typography>
             </Grid>
             <Grid item xs={4}>
-              {renderSpecialInstructions(cartItem.item)}
+              {renderSpecialInstructions(cartItem.item, cartItem._id)}
 
               <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
                 <Button
                   variant="text"
                   startIcon={<DeleteOutlineIcon size="small" />}
                   color="error"
-                  onClick={() => deleteCartItem(cartItem?.item?.id)}
+                  onClick={() => deleteCartItem(cartItem._id)}
                 >
                   <Typography>Delete</Typography>
                 </Button>
@@ -428,7 +407,7 @@ export default function Cart() {
               const request_object = constructQouteObject(c);
               console.log("request_object", request_object);
               getQuote(request_object[0]);
-                getProviderIds(request_object[0]);
+              getProviderIds(request_object[0]);
             }
           }}
         >
@@ -441,7 +420,7 @@ export default function Cart() {
   const getProviderIds = (request_object) => {
     let providers = [];
     request_object.map((cartItem) => {
-      console.log("SET PROVIDER IDS cartItem=====>", cartItem)
+      console.log("SET PROVIDER IDS cartItem=====>", cartItem);
       providers.push(cartItem.provider.local_id);
     });
     const ids = [...new Set(providers)];
@@ -492,7 +471,6 @@ export default function Cart() {
         //Error handling workflow eg, NACK
         const isNACK = data.find((item) => item.error && item?.message?.ack?.status === "NACK");
         if (isNACK) {
-
           alert(isNACK.error.message);
           setGetQuoteLoading(false);
         } else {
