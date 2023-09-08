@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import useStyles from "./styles";
 import { useHistory, Link } from "react-router-dom";
-import { CartContext } from "../../../context/cartContext";
+
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -15,12 +15,15 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { v4 as uuidv4 } from "uuid";
 import { AddressContext } from "../../../context/addressContext";
+import { CartContext } from "../../../context/cartContext";
 
 export default function Cart() {
   const ref = useRef(null);
   const classes = useStyles();
   const history = useHistory();
-  const {deliveryAddress} = useContext(AddressContext);
+  const { deliveryAddress } = useContext(AddressContext);
+  const { fetchCartItems } = useContext(CartContext);
+
   let user = JSON.parse(getValueFromCookie("user"));
   const { cancellablePromise } = useCancellablePromise();
   const transaction_id = getValueFromCookie("transaction_id");
@@ -64,7 +67,6 @@ export default function Cart() {
   };
 
   const getCartItems = async () => {
-    console.log("11111====>")
     try {
       setLoading(true);
       const url = `/clientApis/v2/cart/${user.id}`;
@@ -87,11 +89,13 @@ export default function Cart() {
       let updatedCartItem = items[itemIndex];
       updatedCartItem.id = updatedCartItem.item.id;
 
-      if (increment) {
-        updatedCartItem.item.quantity.count += 1;
-      } else {
-        if (updatedCartItem.item.quantity.count > 1) {
-          updatedCartItem.item.quantity.count -= 1;
+      if (increment !== null) {
+        if (increment) {
+          updatedCartItem.item.quantity.count += 1;
+        } else {
+          if (updatedCartItem.item.quantity.count > 1) {
+            updatedCartItem.item.quantity.count -= 1;
+          }
         }
       }
 
@@ -100,6 +104,7 @@ export default function Cart() {
       console.log("after update:", res);
       setLoading(false);
       getCartItems();
+      fetchCartItems();
     }
   };
 
@@ -107,6 +112,19 @@ export default function Cart() {
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const res = await deleteCall(url);
     getCartItems();
+    fetchCartItems();
+  };
+
+  const updateSpecialInstructions = async (item) => {
+    //  setLoading(true);
+    const url = `/clientApis/v2/cart/${user.id}/${item.id}`;
+    const itemIndex = cartItems?.findIndex((ci) => ci.item.id === item.id);
+    let updatedItem = cartItems[itemIndex];
+
+    const res = await putCall(url, updatedItem);
+    setLoading(false);
+    getCartItems();
+    fetchCartItems();
   };
 
   useEffect(() => {
@@ -187,6 +205,59 @@ export default function Cart() {
     return null;
   };
 
+  const renderSpecialInstructions = (item) => {
+    const hasSpecialInstructions = item?.customisations?.find((c) => {
+      if (c.hasOwnProperty("special_instructions")) {
+        return c;
+      }
+    });
+
+    console.log("hasSpecialInstructions", hasSpecialInstructions);
+
+    const handleChange = (e) => {
+      const updatedCart = [...cartItems];
+      const itemIndex = updatedCart.findIndex((ci) => ci.item.id === item.id);
+
+      if (itemIndex !== -1) {
+        const itemToUpdate = { ...updatedCart[itemIndex] };
+        const customizationIndex = itemToUpdate.item.customisations.findIndex((c) =>
+          c.hasOwnProperty("special_instructions")
+        );
+
+        if (customizationIndex !== -1) {
+          itemToUpdate.item.customisations[customizationIndex].special_instructions = e.target.value;
+          updatedCart[itemIndex] = itemToUpdate;
+          setCartItems(updatedCart);
+        }
+      }
+    };
+    if (!hasSpecialInstructions) return null;
+    return (
+      <div style={{ position: "relative" }}>
+        <TextField
+          fullWidth
+          multiline
+          rows={3}
+          size="small"
+          placeholder="Write here"
+          sx={{ padding: "2px 4px" }}
+          value={hasSpecialInstructions.special_instructions || ""}
+          onChange={handleChange}
+        />
+        <Button
+          className={classes.updateBtn}
+          variant="text"
+          size="small"
+          onClick={() => {
+            updateCartItem(item.id, null);
+          }}
+        >
+          Update
+        </Button>
+      </div>
+    );
+  };
+
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
       return (
@@ -246,18 +317,11 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                ₹{parseInt(cartItem?.item?.quantity?.count) * parseInt(cartItem?.item?.product?.subtotal)}
+                ₹ {parseInt(cartItem?.item?.quantity?.count) * parseInt(cartItem?.item?.product?.subtotal)}
               </Typography>
             </Grid>
             <Grid item xs={4}>
-              <TextField
-                fullWidth
-                multiline
-                rows={2}
-                size="small"
-                placeholder="Write here"
-                sx={{ padding: "6px 12px" }}
-              />
+              {renderSpecialInstructions(cartItem.item)}
 
               <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
                 <Button
@@ -355,7 +419,7 @@ export default function Cart() {
           sx={{ marginTop: 1, marginBottom: 2 }}
           disabled={haveDistinctProviders}
           onClick={() => {
-            console.log("Checkout=====>", cartItems)
+            console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {
               let c = cartItems.map((item) => {
                 return item.item;
@@ -389,7 +453,7 @@ export default function Cart() {
     const ttansactionId = uuidv4();
     AddCookie("transaction_id", ttansactionId);
     responseRef.current = [];
-    if(deliveryAddress){
+    if (deliveryAddress) {
       try {
         const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
         let domain = "";
@@ -434,10 +498,10 @@ export default function Cart() {
         } else {
           // fetch through events
           onFetchQuote(
-              data?.map((txn) => {
-                const { context } = txn;
-                return context?.message_id;
-              })
+            data?.map((txn) => {
+              const { context } = txn;
+              return context?.message_id;
+            })
           );
         }
       } catch (err) {
@@ -446,8 +510,8 @@ export default function Cart() {
         setGetQuoteLoading(false);
         history.replace("/application/products");
       }
-    }else{
-      alert("Please select address")
+    } else {
+      alert("Please select address");
     }
 
     // eslint-disable-next-line
@@ -517,7 +581,8 @@ export default function Cart() {
         const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.item.product.id === item.id);
         if (findItemIndexFromCart > -1) {
           updatedCartItems.current[findItemIndexFromCart].item.product.fulfillment_id = item.fulfillment_id;
-          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments = data[0].message.quote.fulfillments;
+          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments =
+            data[0].message.quote.fulfillments;
         }
 
         console.log("cart", cartItems);

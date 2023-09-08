@@ -39,6 +39,7 @@ import { getUser, isLoggedIn } from "../../../utils/validateToken";
 import { getCall } from "../../../api/axios";
 
 import { categoryList } from "../../../constants/categories";
+import { CartContext } from "../../../context/cartContext";
 
 const NavBar = ({ isCheckout = false }) => {
   const classes = useStyles();
@@ -85,7 +86,7 @@ const NavBar = ({ isCheckout = false }) => {
   const openUserMenu = Boolean(anchorElUserMenu);
   const [anchorElCaregoryMenu, setAnchorElCategoryMenu] = useState(null);
   const openCategoryMenu = Boolean(anchorElCaregoryMenu);
-  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const { cartItems } = useContext(CartContext);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -156,13 +157,6 @@ const NavBar = ({ isCheckout = false }) => {
     }
   }
 
-  const getCartItemsCount = async () => {
-    const url = `/clientApis/v2/cart/${user.id}`;
-    const res = await getCall(url);
-    console.log("getCartItemsCount=====>", res.length);
-    setCartItemsCount(res.length);
-  };
-
   useEffect(() => {
     getLastEnteredValues();
     fetchDeliveryAddress();
@@ -175,7 +169,6 @@ const NavBar = ({ isCheckout = false }) => {
 
   useEffect(() => {
     getLastEnteredValues();
-    getCartItemsCount();
     const anchor = document.querySelector("#back-to-top-anchor");
     if (anchor) {
       anchor.scrollIntoView({
@@ -425,7 +418,7 @@ const NavBar = ({ isCheckout = false }) => {
               </div>
               <div className={classes.cart}>
                 <Link to="/application/cart">
-                  <Badge color="error" badgeContent={cartItemsCount}>
+                  <Badge color="error" badgeContent={cartItems.length}>
                     <CartIcon />
                   </Badge>
                   <Typography variant="body2" className={classes.cartTypo}>
