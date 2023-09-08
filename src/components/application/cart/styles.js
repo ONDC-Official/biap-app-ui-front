@@ -114,6 +114,7 @@ const useStyles = makeStyles({
     background: "rgba(249, 197, 28, 0.17)",
     padding: "8px 16px",
     width: "max-content",
+    marginTop: "20px",
   },
   infoText: {
     fontFamily: "Inter !important",
@@ -126,6 +127,11 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+  },
+  updateBtn: {
+    position: "absolute !important",
+    right: 12,
+    bottom: 7,
   },
 });
 

@@ -16,14 +16,14 @@ const moreImageContainer = (size, borderColor) => ({
 const useStyles = makeStyles({
   breadCrumbs: {
     backgroundColor: palette.background.paper,
-    height: 50,
+    height: 70,
     display: "flex",
     alignItems: "center",
     paddingLeft: 40,
     color: "grey",
   },
   detailsContainer: {
-    backgroundColor: palette.background.main,
+    backgroundColor: "#f9f9f9",
     position: "relative",
     paddingBottom: "6rem",
   },

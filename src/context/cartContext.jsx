@@ -1,85 +1,47 @@
 import { createContext, useState, useEffect } from "react";
+import { getCall } from "../api/axios";
+import { getValueFromCookie } from "../utils/cookies";
 
 export const CartContext = createContext({
   cartItems: [],
-  setCartItems: () => { },
-  onRemoveProduct: () => { },
-  onReduceQuantity: () => { },
-  onAddQuantity: () => { },
-  onAddProduct: () => { },
-  onUpdateProduct: () => { }
+  setCartItems: () => {},
+  getCartItems: () => {},
 });
 
 export function CartContextProvider({ children }) {
-  const parsedCartItems = JSON.parse(localStorage.getItem("cartItems") || "{}");
-  const [cartItems, setCartItems] = useState(
-    parsedCartItems.length > 0 ? parsedCartItems : []
-  );
+  let user = {};
+  const userCookie = getValueFromCookie("user");
+
+  if (userCookie) {
+    try {
+      user = JSON.parse(userCookie);
+    } catch (error) {
+      console.log("Error parsing user cookie:", error);
+    }
+  }
+
+  const [cartItems, setCartItems] = useState([]);
+
+  const getCartItems = async () => {
+    try {
+      const url = `/clientApis/v2/cart/${user.id}`;
+      const res = await getCall(url);
+      setCartItems(res);
+    } catch (error) {
+      console.log("Error fetching cart items:", error);
+    }
+  };
 
   useEffect(() => {
-    // localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
+    if (!!Object.keys(user).length) getCartItems();
+  }, []);
 
-  // use this function to remove the product from cart
-  function removeProductFromCart(id) {
-    setCartItems(cartItems.filter((item) => item.id !== id));
-  }
-
-  // use this function to reduce the quantity of the product;
-  function reduceQuantityOfProduct(id) {
-    const updatedProducts = cartItems.map((item) => {
-      if (item.id === id) {
-        return { ...item, quantity: { count: item.quantity.count - 1 } };
-      }
-      return { ...item };
-    });
-    // find the product and check if quantity is now 0
-    const product = updatedProducts.find((item) => item.id === id);
-    // if the quantity is 0 than we will remove from list
-    if (product.quantity.count === 0) {
-      const filteredProducts = cartItems.filter((product) => product.id !== id);
-      setCartItems(filteredProducts);
-      return;
-    }
-    setCartItems(updatedProducts);
-  }
-
-  // use this function to add quantity of product
-  function addQuantityOfProduct(id) {
-    const updatedProducts = cartItems.map((item) => {
-      if (item.id === id) {
-        return { ...item, quantity: { count: item.quantity.count + 1 } };
-      }
-      return { ...item };
-    });
-    setCartItems(updatedProducts);
-  }
-
-  function onAddProductsToCart(value) {
-    setCartItems([...cartItems, value]);
-  }
-
-  function onUpdateProductToCart(items, fulfillments) {
-    let updatedProducts = Object.assign([], cartItems);
-    items.forEach(item => {
-      const findItemIndexFromCart = updatedProducts.findIndex((prod) => prod.id === item.id);
-      if (findItemIndexFromCart > -1) {
-        updatedProducts[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
-        updatedProducts[findItemIndexFromCart].fulfillments = fulfillments;
-      }
-    });
-    setCartItems(updatedProducts);
-  }
   return (
     <CartContext.Provider
       value={{
         cartItems,
         setCartItems,
-        onRemoveProduct: removeProductFromCart,
-        onReduceQuantity: reduceQuantityOfProduct,
-        onAddQuantity: addQuantityOfProduct,
-        onAddProduct: onAddProductsToCart,
-        onUpdateProduct: onUpdateProductToCart
+        fetchCartItems: getCartItems,
       }}
     >
       {children}
