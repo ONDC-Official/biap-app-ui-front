@@ -18,17 +18,38 @@ const OrderCard = ({data, orderDetails}) => {
     const history = useHistory();
     const {provider, items, createdAt, quote, state} = orderDetails;
     const {descriptor} = provider;
-    const renderItemsName = (items) => {
+    const renderItemsName = (quoteBreakup, items) => {
+        const filterItems = quoteBreakup.filter((item) => item["@ondc/org/title_type"] === "item")
         return (
             <>
                 {
-                    items.map((item, itemIndex) => {
-                        const {product} = item;
+                    filterItems.map((item, itemIndex) => {
+                        const findItem = items.find((prod) => prod.id === item["@ondc/org/item_id"]);
+                        console.log("findItem=========>", findItem)
+                        const findVegNonvegTag = findItem?.product?.tags.find((tag) => tag.code === "veg_nonveg");
+                        let isVeg = false;
+                        if(findVegNonvegTag){
+                            const tag = findVegNonvegTag.list[0];
+                            if(tag.code === "veg" && tag.value === "yes"){
+                                isVeg = true;
+                            }else{
+                                isVeg = false;
+                            }
+                        }else{}
+                        console.log("findVegNonvegTag=====>", findVegNonvegTag)
                         return (
                             <span key={`veg-nonveg-${itemIndex}`}>
-                            {item?.isVeg ? <VegIcon className={classes.vegNonVegIcon}/> :
-                                <NonVegIcon className={classes.vegNonVegIcon}/>}
-                                <span className={classes.itemTypo}>{product?.descriptor?.name}</span>
+                                {
+                                    findVegNonvegTag
+                                    ?(
+                                        <>
+                                            {
+                                                isVeg?<VegIcon className={classes.vegNonVegIcon}/>:<NonVegIcon className={classes.vegNonVegIcon}/>
+                                            }
+                                        </>
+                                    ):<></>
+                                }
+                                <span className={classes.itemTypo}>{item?.title}</span>
                             </span>
                         );
 
@@ -63,7 +84,7 @@ const OrderCard = ({data, orderDetails}) => {
                     {data?.address}
                 </Typography>
                 <Typography variant="body1" className={classes.itemNameTypo}>
-                    {renderItemsName(items)}
+                    {renderItemsName(quote.breakup, items)}
                 </Typography>
                 <Typography variant="h4" className={classes.priceTypo}>
                     <span className={classes.priceTypoLabel}>{`Total Paid: `}</span>

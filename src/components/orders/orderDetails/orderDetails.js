@@ -37,7 +37,7 @@ const OrderDetails = () => {
         setIsLoading(true);
         try {
             const data = await cancellablePromise(
-                getOrderDetailsRequest("2023-09-08-341722")
+                getOrderDetailsRequest(orderId)
             );
             console.log("getOrderDetails=====>", data);
             setOrderDetails(data[0]);
