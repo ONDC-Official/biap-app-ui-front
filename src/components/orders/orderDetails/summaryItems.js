@@ -2,7 +2,7 @@ import React from 'react';
 import useStyles from "./style";
 import Typography from "@mui/material/Typography";
 
-const SummaryItems = ({items}) => {
+const SummaryItems = ({items, hideHeader = false}) => {
     const classes = useStyles();
 
     // const items = [
@@ -12,28 +12,48 @@ const SummaryItems = ({items}) => {
     // ]
     return (
         <div>
-            <div className={classes.itemSummaryHeaderContainer}>
-                <Typography variant="body1" className={classes.itemSummaryHeaderLabel}>
-                    Quantity & Item Name
-                </Typography>
-                <Typography variant="body" className={classes.itemSummaryHeaderValue}>
-                    Total
-                </Typography>
-            </div>
             {
-                items?.breakup.map((item, itemIndex) => (
-                    <div key={`item-idx-${itemIndex}`} className={classes.itemContainer}>
-                        <Typography variant="body1" className={classes.itemLabel}>
-                            {`${item["@ondc/org/item_quantity"]?.count} x ${item?.title}`}
+                !hideHeader && (
+                    <div className={classes.itemSummaryHeaderContainer}>
+                        <Typography variant="body1" className={classes.itemSummaryHeaderLabel}>
+                            Quantity & Item Name
                         </Typography>
-                        <Typography variant="body1" className={classes.itemValue}>
-                            {item.price.value}
+                        <Typography variant="body" className={classes.itemSummaryHeaderValue}>
+                            Total
                         </Typography>
+                    </div>
+                )
+            }
+            {
+                items.map((item, itemIndex) => (
+                    <div key={`item-idx-${itemIndex}`}>
+                        {
+                            item["@ondc/org/title_type"] === "customization"
+                                ? (
+                                    <div className={classes.itemContainer}>
+                                        <Typography variant="subtitle2" className={classes.customizationLabel}>
+                                            {`${item?.title}`}
+                                        </Typography>
+                                        <Typography variant="subtitle2" className={classes.customizationValue}>
+                                            {item.price.value}
+                                        </Typography>
+                                    </div>
+                                ) : (
+                                    <div className={classes.itemContainer}>
+                                        <Typography variant="body1" className={hideHeader?classes.summaryItemLabel:classes.itemLabel}>
+                                            {`${item["@ondc/org/title_type"] === "item"?item["@ondc/org/item_quantity"]?.count+" x":""} ${item?.title}`}
+                                        </Typography>
+                                        <Typography variant="body1" className={hideHeader?classes.summaryItemValue:classes.itemValue}>
+                                            {item.price.value}
+                                        </Typography>
+                                    </div>
+                                )
+                        }
                     </div>
                 ))
             }
         </div>
-    )
+    );
 
 };
 
