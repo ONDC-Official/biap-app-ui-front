@@ -289,31 +289,27 @@ const CustomizationRenderer = (props) => {
               <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
                 {cg.options.map((c) => (
                   <>
-                    <div onClick={() => handleCustomizationSelect(c, parseInt(level))}>
-                      <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: 1 }}>
-                        <Grid container noWrap xs={8}>
-                          {renderVegNonVegTag(c.vegNonVeg)}
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                            {c.name}
-                          </Typography>
-                        </Grid>
-                        <Grid container xs={3} justifyContent="flex-end">
-                          <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
-                            <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                            {c.price}
-                          </Typography>
-                          <Radio
-                            size="small"
-                            checked={cg.selected.includes(c)}
+                    <FormControlLabel
+                        className={classes.formControlLabel}
+                        onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                        control={<Radio checked={cg.selected.includes(c)}/>}
+                        label={
+                          <div
+                            className={classes.radioTypoContainer}
                             onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                            onChange={(e) => {
-                              e.preventDefault();
-                              handleCustomizationSelect(c, parseInt(level));
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    </div>
+                          >
+                            {renderVegNonVegTag(c.vegNonVeg)}
+                            <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                              {c.name}
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
+                              <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                              {c.price}
+                            </Typography>
+                          </div>
+                        }
+                        labelPlacement="start"
+                    />
                   </>
                 ))}
               </Grid>
