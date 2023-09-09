@@ -10,9 +10,11 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import {ReactComponent as VegIcon} from "../../../assets/images/veg.svg";
 import {ReactComponent as NonVegIcon} from "../../../assets/images/nonveg.svg";
 import Typography from "@mui/material/Typography";
+import {useHistory} from "react-router-dom";
 
 const OrderCard = ({orderDetails}) => {
     const classes = useStyles();
+    const history = useHistory();
 
     const renderItemsName = (items) => {
         const itemsName = items.map((item) => item.name);
@@ -94,6 +96,9 @@ const OrderCard = ({orderDetails}) => {
                     <Button
                         className={classes.viewSummaryButton}
                         variant="outlined"
+                        onClick={() => {
+                            history.push(`/application/order/${orderDetails.id}`)
+                        }}
                     >
                         View summary
                     </Button>

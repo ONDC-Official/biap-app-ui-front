@@ -39,6 +39,7 @@ import { getUser, isLoggedIn } from "../../../utils/validateToken";
 import { getCall } from "../../../api/axios";
 
 import { categoryList } from "../../../constants/categories";
+import { CartContext } from "../../../context/cartContext";
 
 const NavBar = ({ isCheckout = false }) => {
   const classes = useStyles();
@@ -85,7 +86,7 @@ const NavBar = ({ isCheckout = false }) => {
   const openUserMenu = Boolean(anchorElUserMenu);
   const [anchorElCaregoryMenu, setAnchorElCategoryMenu] = useState(null);
   const openCategoryMenu = Boolean(anchorElCaregoryMenu);
-  const [cartItemsCount, setCartItemsCount] = useState(0);
+  const { cartItems } = useContext(CartContext);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -100,8 +101,28 @@ const NavBar = ({ isCheckout = false }) => {
   const handleClickCategoryMenu = (event) => {
     setAnchorElCategoryMenu(event.currentTarget);
   };
-  const handleCloseCategoryMenu = () => {
+  const handleCloseCategoryMenu = (routeName) => {
     setAnchorElCategoryMenu(null);
+    if(routeName){
+      const searchName = query.get("s");
+      const subCategoryName = query.get("sc");
+      const params = new URLSearchParams({});
+      if (searchName) {
+        params.set("s", searchName);
+      }
+      if (routeName) {
+        params.set("c", routeName);
+      }
+      if (subCategoryName) {
+        params.set("sc", subCategoryName);
+      } else {
+      }
+      if (locationData.pathname !== "/application/products") {
+        history.push({pathname: locationData.pathname, search: params.toString()});
+      } else {
+        history.replace({pathname: locationData.pathname, search: params.toString()});
+      }
+    }
   };
 
   // use this function to fetch existing address of the user
@@ -156,13 +177,6 @@ const NavBar = ({ isCheckout = false }) => {
     }
   }
 
-  const getCartItemsCount = async () => {
-    const url = `/clientApis/v2/cart/${user.id}`;
-    const res = await getCall(url);
-    console.log("getCartItemsCount=====>", res.length);
-    setCartItemsCount(res.length);
-  };
-
   useEffect(() => {
     getLastEnteredValues();
     fetchDeliveryAddress();
@@ -175,7 +189,6 @@ const NavBar = ({ isCheckout = false }) => {
 
   useEffect(() => {
     getLastEnteredValues();
-    getCartItemsCount();
     const anchor = document.querySelector("#back-to-top-anchor");
     if (anchor) {
       anchor.scrollIntoView({
@@ -394,7 +407,7 @@ const NavBar = ({ isCheckout = false }) => {
                     id="basic-menu-cat"
                     anchorEl={anchorElCaregoryMenu}
                     open={openCategoryMenu}
-                    onClose={handleCloseCategoryMenu}
+                    onClose={() => handleCloseCategoryMenu("")}
                     MenuListProps={{
                       "aria-labelledby": "basic-button-cat",
                     }}
@@ -409,7 +422,7 @@ const NavBar = ({ isCheckout = false }) => {
                   >
                     {categoryList.map((cat, catIndex) => {
                       return (
-                        <MenuItem key={`cat-index-${catIndex}`} onClick={handleCloseCategoryMenu}>
+                        <MenuItem selected={cat?.routeName === query.get("c")} key={`cat-index-${catIndex}`} onClick={() => handleCloseCategoryMenu(cat.routeName)}>
                           {cat.name}
                         </MenuItem>
                       );
@@ -425,7 +438,7 @@ const NavBar = ({ isCheckout = false }) => {
               </div>
               <div className={classes.cart}>
                 <Link to="/application/cart">
-                  <Badge color="error" badgeContent={cartItemsCount}>
+                  <Badge color="error" badgeContent={cartItems.length}>
                     <CartIcon />
                   </Badge>
                   <Typography variant="body2" className={classes.cartTypo}>

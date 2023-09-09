@@ -14,13 +14,13 @@ import { SearchContextProvider } from "./context/searchContext";
 ReactDOM.render(
   <ToastProvider>
     <ErrorBoundary>
-      {/*<CartContextProvider>*/}
-      {/*    <AddressContextProvider>*/}
-      {/*        <SearchContextProvider>*/}
-      <App />
-      {/*        </SearchContextProvider>*/}
-      {/*    </AddressContextProvider>*/}
-      {/*</CartContextProvider>*/}
+      <CartContextProvider>
+        {/*    <AddressContextProvider>*/}
+        {/*        <SearchContextProvider>*/}
+        <App />
+        {/*        </SearchContextProvider>*/}
+        {/*    </AddressContextProvider>*/}
+      </CartContextProvider>
     </ErrorBoundary>
   </ToastProvider>,
   document.getElementById("root")

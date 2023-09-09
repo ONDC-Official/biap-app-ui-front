@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useStyles from "./style";
 import CloseIcon from "@mui/icons-material/Close";
 import DoneIcon from "@mui/icons-material/Done";
@@ -10,27 +10,17 @@ import { getCall, postCall } from "../../../../api/axios";
 import CustomizationRenderer from "./CustomizationRenderer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
-import { Link, useLocation, useHistory, useParams } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
-
-const additionalProductDetails = {
-  "style code": "Bell & Ross Nightlum",
-  pattern: "Embroidered",
-  "pack of": 1,
-  ocassion: "Party & Festive, Wedding",
-  "Decorative Material": "zari",
-  "fabric care": "Dry Clean for the first wash, thereafter Hand Wash",
-  "Construction Type": "Woven",
-  "other details":
-    "Make a distinct style statement wearing this Cotton silk woven Saree from the Villagius. Designed to perfection, this saree will soon become your favorite . The stylishly designed saree Solid prints makes it a true value for money. Made from Cotton Silk this saree measures 5.5 m and comes with a 0.80 m blouse piece.",
-};
+import { CartContext } from "../../../../context/cartContext";
 
 const ProductDetails = () => {
   const classes = useStyles();
   const history = useHistory();
   const params = useParams();
+  const { fetchCartItems } = useContext(CartContext);
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
@@ -77,10 +67,14 @@ const ProductDetails = () => {
     const levels = Object.keys(customization_state);
 
     for (const level of levels) {
-      if (customization_state[level].selected[0]) {
-        let customization = customisation_items.find(
-          (item) => item.local_id == customization_state[level].selected[0].id
-        );
+      const selectedItems = customization_state[level].selected;
+      let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
+
+      for (const selectedItem of selectedItems) {
+        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
+        if (has_special_instruction) {
+          customization.special_instructions = "";
+        }
 
         if (customization) {
           customization = {
@@ -89,15 +83,15 @@ const ProductDetails = () => {
               count: 1,
             },
           };
+          customizations.push(customization);
         }
-        customizations.push(customization);
       }
     }
 
     return customizations;
   };
 
-  const addToCart = async () => {
+  const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
@@ -127,8 +121,12 @@ const ProductDetails = () => {
       customisations,
     };
 
+    console.log(payload);
     const res = await postCall(url, payload);
-    history.push("/application/cart");
+    fetchCartItems();
+    if (navigate) {
+      history.push("/application/cart");
+    }
   };
 
   // fetch product details
@@ -324,7 +322,8 @@ const ProductDetails = () => {
                   variationState={variationState}
                   setVariationState={setVariationState}
                 />
-                {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
+                <>
+                  {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
               <Typography variant="body" color="#1D1D1D">
                 Select size
               </Typography>
@@ -384,6 +383,7 @@ const ProductDetails = () => {
                 );
               })}
             </div> */}
+                </>
 
                 {!parseInt(productDetails?.quantity?.available?.count) >= 1 && (
                   <Grid container justifyContent="center" className={classes.outOfStock}>
@@ -403,7 +403,7 @@ const ProductDetails = () => {
                   <Button
                     variant="contained"
                     sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
-                    onClick={addToCart}
+                    onClick={() => addToCart(false)}
                     disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
                   >
                     Add to cart
@@ -412,6 +412,7 @@ const ProductDetails = () => {
                     variant="outlined"
                     sx={{ flex: 1, textTransform: "none" }}
                     disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
+                    onClick={() => addToCart(true)}
                   >
                     Order now
                   </Button>

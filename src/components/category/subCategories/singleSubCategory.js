@@ -17,10 +17,14 @@ const SingleSubCategory = ({data}) => {
     let query = useQuery();
     const categoryName = query.get("c");
     const updateQueryParams = () => {
+        const params = new URLSearchParams({});
         if(locationData.search === "" && query.get("c") === null){
-            history.push(`/application/products?sc=${data.value}`)
+            params.set("sc", data.value);
+            history.push({ pathname: `/application/products`, search: params.toString() })
         }else{
-            history.push(`/application/products?c=${categoryName}&sc=${data.value}`)
+            params.set("c", categoryName);
+            params.set("sc", data.value);
+            history.push({ pathname: `/application/products`, search: params.toString() })
         }
     };
 
