@@ -178,7 +178,7 @@ const Products = ({ brandDetails }) => {
     }
   };
 
-  const handleAddToCart = async (productPayload, navigate) => {
+  const handleAddToCart = async (productPayload, isDefault = false, navigate) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 

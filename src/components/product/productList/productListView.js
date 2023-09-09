@@ -76,7 +76,7 @@ const ProductListView = (props) => {
             variant="outlined"
             onClick={(e) => {
               e.stopPropagation();
-              getProductDetails(productId).then((data) => handleAddToCart(data, false));
+              getProductDetails(productId).then((data) => handleAddToCart(data, true));
             }}
           >
             Add to cart
