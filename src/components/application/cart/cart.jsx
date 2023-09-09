@@ -54,6 +54,7 @@ export default function Cart() {
   const [productPayload, setProductPayload] = useState(null);
   const [customization_state, setCustomizationState] = useState({});
   const [productLoading, setProductLoading] = useState(false);
+  const [currentCartItem, setCurrentCartItem] = useState(null);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -135,6 +136,7 @@ export default function Cart() {
       setProductLoading(true);
       const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
       setProductPayload(data.response);
+      console.log("getProduct:", data.response);
       return data.response;
     } catch (error) {
       console.error("Error fetching product details:", error);
@@ -145,7 +147,7 @@ export default function Cart() {
 
   useEffect(() => {
     getCartItems();
-  }, []);
+  }, [openDrawer]);
 
   useEffect(() => {
     checkDistinctProviders();
@@ -303,6 +305,7 @@ export default function Cart() {
                     sx={{ marginTop: "4px" }}
                     onClick={() => {
                       getProductDetails(cartItem.item.id);
+                      setCurrentCartItem(cartItem._id);
                       setOpenDrawer(true);
                     }}
                   >
@@ -652,10 +655,12 @@ export default function Cart() {
                 }}
               >
                 <EditCustomizations
+                  cartItems={cartItems}
                   productPayload={productPayload}
                   customization_state={customization_state}
                   setCustomizationState={setCustomizationState}
                   setOpenDrawer={setOpenDrawer}
+                  currentCartItem={currentCartItem}
                 />
               </Drawer>
             </Grid>

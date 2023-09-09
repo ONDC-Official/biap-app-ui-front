@@ -1,12 +1,88 @@
-import React from "react";
+import React, { useContext } from "react";
+import { useHistory } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import useStyles from "../product-list/product-details/style";
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import CustomizationRenderer from "../product-list/product-details/CustomizationRenderer";
+import { getValueFromCookie } from "../../../utils/cookies";
+import { CartContext } from "../../../context/cartContext";
+import { putCall } from "../../../api/axios";
 
 const EditCustomizations = (props) => {
-  const { productPayload, customization_state, setCustomizationState, setOpenDrawer } = props;
+  const { cartItems, productPayload, customization_state, setCustomizationState, setOpenDrawer, currentCartItem } =
+    props;
+
   const classes = useStyles();
+  const history = useHistory();
+  const { fetchCartItems } = useContext(CartContext);
+  let user = {};
+  const userCookie = getValueFromCookie("user");
+
+  if (userCookie) {
+    try {
+      user = JSON.parse(userCookie);
+    } catch (error) {
+      console.log("Error parsing user cookie:", error);
+    }
+  }
+
+  const calculateSubtotal = () => {
+    let subtotal = 0;
+
+    for (const level in customization_state) {
+      const selectedOptions = customization_state[level].selected;
+      if (selectedOptions.length > 0) {
+        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
+      }
+    }
+    return subtotal;
+  };
+
+  const getCustomizations = () => {
+    const { customisation_items } = productPayload;
+    const customizations = [];
+    const levels = Object.keys(customization_state);
+
+    for (const level of levels) {
+      const selectedItems = customization_state[level].selected;
+      let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
+
+      for (const selectedItem of selectedItems) {
+        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
+        if (has_special_instruction) {
+          customization.special_instructions = "";
+        }
+
+        if (customization) {
+          customization = {
+            ...customization,
+            quantity: {
+              count: 1,
+            },
+          };
+          customizations.push(customization);
+        }
+      }
+    }
+
+    return customizations;
+  };
+
+  const updateCustomizations = async () => {
+    const url = `/clientApis/v2/cart/${user.id}/${currentCartItem}`;
+    const items = cartItems.concat([]);
+    const itemIndex = items.findIndex((item) => item._id === currentCartItem);
+    if (itemIndex !== -1) {
+      let updatedCartItem = items[itemIndex];
+      const updatedCustomizations = getCustomizations();
+      updatedCartItem.id = updatedCartItem.item.id;
+      updatedCartItem.item.customisations = updatedCustomizations;
+      updatedCartItem = updatedCartItem.item;
+      const res = await putCall(url, updatedCartItem);
+      setOpenDrawer(false);
+      fetchCartItems();
+    }
+  };
 
   const renderVegNonVegTag = () => {
     const FnB = "ONDC:RET11";
@@ -74,7 +150,7 @@ const EditCustomizations = (props) => {
   return (
     <Grid className={classes.editContainer}>
       <Grid className={classes.editDetails}>
-        <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: "20px" }}>
+        <Grid continer alignItems="center" justifyContent="space-between" sx={{ marginBottom: "20px" }}>
           <Typography variant="h4">Customise your food</Typography>
           <CloseIcon sx={{ cursor: "pointer" }} onClick={() => setOpenDrawer(false)} />
         </Grid>
@@ -95,10 +171,21 @@ const EditCustomizations = (props) => {
         </div>
       </Grid>
       <div className={classes.editBtns}>
-        <Button fullWidth variant="outlined" sx={{ marginRight: 1.4 }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          sx={{ marginRight: 1.4 }}
+          onClick={() => history.push(`/application/products/${productPayload.id}`)}
+        >
           View Details
         </Button>
-        <Button fullWidth variant="contained">
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={() => {
+            updateCustomizations();
+          }}
+        >
           Save
         </Button>
       </div>
