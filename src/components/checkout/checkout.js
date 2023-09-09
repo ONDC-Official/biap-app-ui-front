@@ -242,6 +242,10 @@ const Checkout = () => {
             setActivePaymentMethod={(value) => {
               setActivePaymentMethod(value);
             }}
+
+            cartItemsData={cartItems}
+            updatedCartItemsData={updatedCartItems}
+            updateInitLoading={(value) => setInitLoading(value)}
           />
         );
       default:
@@ -526,50 +530,6 @@ const Checkout = () => {
                   )}
                 </div>
               ))}
-              {/*<div*/}
-              {/*    className={classes.summaryItemContainer}*/}
-              {/*>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemLabel}>*/}
-              {/*        Subtotal*/}
-              {/*    </Typography>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemValue}>*/}
-              {/*        ₹4,300.00*/}
-              {/*    </Typography>*/}
-              {/*</div>*/}
-              {/*<div*/}
-              {/*    className={classes.summaryItemContainer}*/}
-              {/*>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemLabel}>*/}
-              {/*        Shipping*/}
-              {/*        <br />*/}
-              {/*        <Typography variant="subtitle2" className={classes.summaryItemLabelDescription}>*/}
-              {/*            (Standard Rate - Price may vary depending on the item/destination. TECS Staff will contact you.)*/}
-              {/*        </Typography>*/}
-              {/*    </Typography>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemValue}>*/}
-              {/*        ₹21.00*/}
-              {/*    </Typography>*/}
-              {/*</div>*/}
-              {/*<div*/}
-              {/*    className={classes.summaryItemContainer}*/}
-              {/*>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemLabel}>*/}
-              {/*        Tax*/}
-              {/*    </Typography>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemValue}>*/}
-              {/*        ₹1.91*/}
-              {/*    </Typography>*/}
-              {/*</div>*/}
-              {/*<div*/}
-              {/*    className={classes.summaryItemContainer}*/}
-              {/*>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemLabel}>*/}
-              {/*        GST (10%)*/}
-              {/*    </Typography>*/}
-              {/*    <Typography variant="body1" className={classes.summaryItemValue}>*/}
-              {/*        ₹1.91*/}
-              {/*    </Typography>*/}
-              {/*</div>*/}
               <Box component={"div"} className={classes.orderTotalDivider} />
               <div className={classes.summaryItemContainer}>
                 <Typography variant="body" className={classes.totalLabel}>
@@ -583,6 +543,7 @@ const Checkout = () => {
                 className={classes.proceedToBuy}
                 fullWidth
                 variant="contained"
+                disabled={activeStep !== 2 || initLoading}
                 onClick={() => {
                   const { productQuotes, successOrderIds } = JSON.parse(
                     // getValueFromCookie("checkout_details") || "{}"
