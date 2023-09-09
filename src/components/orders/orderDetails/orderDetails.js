@@ -23,6 +23,7 @@ const OrderDetails = () => {
     const history = useHistory();
     const {orderId} = useParams();
     const [isLoading, setIsLoading] = useState(false);
+    const [orderDetails, setOrderDetails] = useState(null);
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
@@ -38,7 +39,8 @@ const OrderDetails = () => {
             const data = await cancellablePromise(
                 getOrderDetailsRequest("2023-09-08-341722")
             );
-            console.log("getAllOrders=====>", data);
+            console.log("getOrderDetails=====>", data);
+            setOrderDetails(data[0]);
         } catch (err) {
             // dispatch({
             //     type: toast_actions.ADD_TOAST,
@@ -88,10 +90,14 @@ const OrderDetails = () => {
                                 component={"div"}
                                 className={classes.divider}
                             />
-                            <CustomerDetails />
+                            <CustomerDetails
+                                orderDetails={orderDetails}
+                            />
                         </Grid>
                         <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
-                            <OrderSummary />
+                            <OrderSummary
+                                orderDetails={orderDetails}
+                            />
                         </Grid>
                     </>
                 )

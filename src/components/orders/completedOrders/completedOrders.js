@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from "./style";
 
 import Grid from '@mui/material/Grid';
@@ -12,6 +12,8 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import {getAllOrdersRequest} from '../../../api/orders.api';
 import Pagination from '@mui/material/Pagination';
 import Loading from "../../shared/loading/loading";
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
 const CompletedOrders = () => {
     const classes = useStyles();
@@ -24,27 +26,12 @@ const CompletedOrders = () => {
         pageSize: 10,
         searchData: []
     });
+    const dispatch = useContext(ToastContext);
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
     useEffect(() => {
-        const data = [
-            {
-                id: '1', name: 'H&M', deliveryTime: 'On Saturday', address: 'Sector 28, Chandigarh', price: '1999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Delivered', domain: 'ONDC:RET12',
-                items: [
-                    { id: '1', name: 'Embroidered Handloom Cotton Silk Saree' },
-                ]
-            },
-            {
-                id: '2', name: 'Burger King', deliveryTime: '42', address: 'Sector 28, Chandigarh', price: '999.00', orderDateTime: '11 Aug 2023 at 5:05pm', images: [orderImage], status: 'Delivered', domain: 'ONDC:RET11',
-                items: [
-                    { id: '1', name: 'Veg Whopper + Paneer Royale + Crispy Veg', isVeg: true },
-                    { id: '2', name: 'Veg Whopper + Paneer Royale + Crispy', isVeg: false },
-                ]
-            }
-        ];
-        setOrderList(data);
         getAllOrders();
     }, []);
 
@@ -57,21 +44,25 @@ const CompletedOrders = () => {
                 getAllOrdersRequest(paginationData)
             );
             console.log("getAllOrders=====>", data);
-            // setOrderList(data.orders);
-            setTotalOrdersCount(data.totalCount)
+            setOrderList(data.orders);
+            setTotalOrdersCount(data.totalCount);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        getAllOrders()
+    }, [paginationModel]);
 
     return (
         <Grid container spacing={3}>

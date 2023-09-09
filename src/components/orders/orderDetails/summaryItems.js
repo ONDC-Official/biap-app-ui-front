@@ -2,14 +2,14 @@ import React from 'react';
 import useStyles from "./style";
 import Typography from "@mui/material/Typography";
 
-const SummaryItems = () => {
+const SummaryItems = ({items}) => {
     const classes = useStyles();
 
-    const items = [
-        {id: '1', name: 'The Veg Chicken Burger', price: '₹900.00', quantity: '1'},
-        {id: '2', name: 'Tomato Roll', price: '₹230.00', quantity: '2'},
-        {id: '3', name: 'Non - Veg Chicken', price: '₹320.00', quantity: '1'}
-    ]
+    // const items = [
+    //     {id: '1', name: 'The Veg Chicken Burger', price: '₹900.00', quantity: '1'},
+    //     {id: '2', name: 'Tomato Roll', price: '₹230.00', quantity: '2'},
+    //     {id: '3', name: 'Non - Veg Chicken', price: '₹320.00', quantity: '1'}
+    // ]
     return (
         <div>
             <div className={classes.itemSummaryHeaderContainer}>
@@ -21,13 +21,13 @@ const SummaryItems = () => {
                 </Typography>
             </div>
             {
-                items.map((item, itemIndex) => (
+                items?.breakup.map((item, itemIndex) => (
                     <div key={`item-idx-${itemIndex}`} className={classes.itemContainer}>
                         <Typography variant="body1" className={classes.itemLabel}>
-                            {`${item.quantity} x ${item.name}`}
+                            {`${item["@ondc/org/item_quantity"]?.count} x ${item?.title}`}
                         </Typography>
                         <Typography variant="body1" className={classes.itemValue}>
-                            {item.price}
+                            {item.price.value}
                         </Typography>
                     </div>
                 ))
