@@ -46,6 +46,7 @@ const CancelledOrders = () => {
         setIsLoading(true);
         try {
             const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.status="Cancelled";
             const data = await cancellablePromise(
                 getAllOrdersRequest(paginationData)
             );

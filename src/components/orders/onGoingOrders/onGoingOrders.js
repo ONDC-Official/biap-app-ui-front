@@ -45,7 +45,8 @@ const OnGoingOrders = () => {
     const getAllOrders = async() => {
         setIsLoading(true);
         try {
-            const paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            let paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
+            paginationData.status="Created,Accepted";
             const data = await cancellablePromise(
                 getAllOrdersRequest(paginationData)
             );
