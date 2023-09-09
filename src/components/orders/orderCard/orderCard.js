@@ -11,68 +11,71 @@ import {ReactComponent as VegIcon} from "../../../assets/images/veg.svg";
 import {ReactComponent as NonVegIcon} from "../../../assets/images/nonveg.svg";
 import Typography from "@mui/material/Typography";
 import {useHistory} from "react-router-dom";
+import moment from "moment/moment";
 
-const OrderCard = ({orderDetails}) => {
+const OrderCard = ({data, orderDetails}) => {
     const classes = useStyles();
     const history = useHistory();
-
+    const {provider, items, createdAt, quote, state} = orderDetails;
+    const {descriptor} = provider;
     const renderItemsName = (items) => {
-        const itemsName = items.map((item) => item.name);
-
         return (
             <>
                 {
-                    items.map((item) => (
-                        <>
-                            {item.isVeg ? <VegIcon className={classes.vegNonVegIcon}/> :
+                    items.map((item, itemIndex) => {
+                        const {product} = item;
+                        return (
+                            <span key={`veg-nonveg-${itemIndex}`}>
+                            {item?.isVeg ? <VegIcon className={classes.vegNonVegIcon}/> :
                                 <NonVegIcon className={classes.vegNonVegIcon}/>}
-                            <span className={classes.itemTypo}>{item.name}</span>
-                        </>
-                    ))
+                                <span className={classes.itemTypo}>{product?.descriptor?.name}</span>
+                            </span>
+                        );
+
+                    })
                 }
             </>
-        )
-        return itemsName.join(", ");
+        );
     };
     return (
         <Grid container spacing={0} className={classes.orderItemContainer}>
             <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
                 <Card className={classes.orderCard}>
-                    <img className={classes.orderImage} src={orderDetails?.images?.length > 0 ? orderDetails?.images[0] : no_image_found} alt={`sub-cat-img-${orderDetails?.id}`}/>
+                    <img className={classes.orderImage} src={descriptor?.images?.length > 0 ? descriptor?.images[0] : no_image_found} alt={`sub-cat-img-${data?.id}`}/>
                 </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5} className={classes.orderDetailsTypo}>
                 <Typography component="div" variant="h5" className={classes.productNameTypoList}>
-                    {orderDetails?.name}
-                    <Typography component="span" variant="body1" className={classes.deliveryTimeTypo}>
-                        {`Delivery ${orderDetails?.domain === "ONDC:RET11"?"time":""}:`}
-                        <Typography component="span" variant="body1" color="primary" className={classes.deliveryTimeTypoValue}>
-                            {` ${orderDetails?.deliveryTime} ${orderDetails?.domain === "ONDC:RET11"?"mins":""}`}
-                        </Typography>
-                    </Typography>
+                    {descriptor?.name}
+                    {/*<Typography component="span" variant="body1" className={classes.deliveryTimeTypo}>*/}
+                    {/*    {`Delivery ${data?.domain === "ONDC:RET11"?"time":""}:`}*/}
+                    {/*    <Typography component="span" variant="body1" color="primary" className={classes.deliveryTimeTypoValue}>*/}
+                    {/*        {` ${data?.deliveryTime} ${data?.domain === "ONDC:RET11"?"mins":""}`}*/}
+                    {/*    </Typography>*/}
+                    {/*</Typography>*/}
                     <Chip
                         className={classes.statusChip}
-                        color={orderDetails?.status === "Confirmed"?"primary":orderDetails?.status === "Delivered"?"success":orderDetails?.status === "Cancelled"?"error":"primary"}
-                        label={orderDetails?.status}
+                        color={state === "Confirmed" || state === "Created"?"primary":state === "Delivered"?"success":state === "Cancelled"?"error":"primary"}
+                        label={state}
                     />
                 </Typography>
                 <Typography variant="body1" className={classes.addressTypo}>
-                    {orderDetails?.address}
+                    {data?.address}
                 </Typography>
                 <Typography variant="body1" className={classes.itemNameTypo}>
-                    {renderItemsName(orderDetails?.items)}
+                    {renderItemsName(items)}
                 </Typography>
                 <Typography variant="h4" className={classes.priceTypo}>
                     <span className={classes.priceTypoLabel}>{`Total Paid: `}</span>
-                    {`₹${Number.isInteger(Number(orderDetails?.price))
-                        ? Number(orderDetails?.price).toFixed(2)
-                        : Number(orderDetails?.price).toFixed(2)}`}
+                    {`₹${Number.isInteger(Number(quote?.price?.value))
+                        ? Number(quote?.price?.value).toFixed(2)
+                        : Number(quote?.price?.value).toFixed(2)}`}
                 </Typography>
                 <Typography component="div" variant="body1" className={classes.orderDateTime}>
-                    {`Ordered On: ${orderDetails?.orderDateTime}`}
+                    {`Ordered On: ${moment(createdAt).format("DD MMMM YYYY")} at ${moment(createdAt).format("hh:mma")}`}
 
                     {
-                        orderDetails.status === "Confirmed" && (
+                        data.status === "Confirmed" && (
                             <Button
                                 className={classes.trackOrderButton}
                                 variant="contained"
@@ -83,7 +86,7 @@ const OrderCard = ({orderDetails}) => {
                     }
 
                     {
-                        orderDetails.status === "Delivered" && (
+                        data.status === "Delivered" && (
                             <Button
                                 className={classes.downloadInvoiceButton}
                                 variant="outlined"
@@ -97,7 +100,7 @@ const OrderCard = ({orderDetails}) => {
                         className={classes.viewSummaryButton}
                         variant="outlined"
                         onClick={() => {
-                            history.push(`/application/order/${orderDetails.id}`)
+                            history.push(`/application/order/${orderDetails?.id}`)
                         }}
                     >
                         View summary

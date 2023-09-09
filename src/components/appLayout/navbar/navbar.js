@@ -118,7 +118,7 @@ const NavBar = ({ isCheckout = false }) => {
       } else {
       }
       if (locationData.pathname !== "/application/products") {
-        history.push({pathname: locationData.pathname, search: params.toString()});
+        history.push({pathname: "/application/products", search: params.toString()});
       } else {
         history.replace({pathname: locationData.pathname, search: params.toString()});
       }

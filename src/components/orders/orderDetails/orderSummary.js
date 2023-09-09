@@ -9,8 +9,9 @@ import Button from "@mui/material/Button";
 
 import OrderTimeline from './orderTimeline';
 import SummaryItems from './summaryItems';
+import moment from "moment";
 
-const OrderSummary = () => {
+const OrderSummary = ({orderDetails}) => {
     const classes = useStyles();
     const {orderId} = useParams();
     return (
@@ -22,13 +23,13 @@ const OrderSummary = () => {
                 className={classes.orderNumberTypo}
             >
                 {`Order Number: `}
-                <span className={classes.orderNumberTypoBold}>{orderId}</span>
+                <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
             </Typography>
             <Typography
                 variant="body1"
                 className={classes.orderOnTypo}
             >
-                Ordered On: 30/04/23 at 4:30pm | Payment: Cash | Item: 02
+                {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format("hh:mma")}`} | Payment: {orderDetails?.payment?.type} | Item: {orderDetails?.items.length}
             </Typography>
             <Box
                 component={"div"}
@@ -42,12 +43,20 @@ const OrderSummary = () => {
                 className={classes.orderSummaryDivider}
             />
 
-            <SummaryItems />
+            {
+                orderDetails?.quote && (
+                    <>
+                        <SummaryItems items={orderDetails?.quote} />
+                        <Box
+                            component={"div"}
+                            className={classes.orderSummaryDivider}
+                        />
+                    </>
+                )
+            }
 
-            <Box
-                component={"div"}
-                className={classes.orderSummaryDivider}
-            />
+
+
 
             <div
                 className={classes.summaryItemContainer}
