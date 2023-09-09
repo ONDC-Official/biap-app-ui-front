@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import useStyles from "./style";
 
 import Grid from '@mui/material/Grid'
@@ -16,6 +16,8 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import {restoreToDefault} from "../../../../constants/restoreDefaultAddress";
 import { address_types, address_tags } from "../../../../constants/address-types";
 import validator from "validator";
+import {ToastContext} from "../../../../context/toastContext";
+import {toast_actions, toast_types} from "../../../shared/toast/utils/toast";
 
 const AddressForm = (props) => {
     const classes = useStyles();
@@ -45,6 +47,7 @@ const AddressForm = (props) => {
         tag_error: "",
     });
     const { cancellablePromise } = useCancellablePromise();
+    const dispatch = useContext(ToastContext);
 
     const checkName = () => {
         if (validator.isEmpty(address?.name.trim())) {
@@ -186,14 +189,14 @@ const AddressForm = (props) => {
             if (err.response.status !== 500) {
                 message = err.response.data.message;
             } else { }
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: message,
+                },
+            });
             setAddress((address) => ({
                 ...address,
                 areaCode: "",
@@ -244,14 +247,14 @@ const AddressForm = (props) => {
             );
             onAddAddress(data);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setAddAddressLoading(false);
         }
@@ -294,14 +297,14 @@ const AddressForm = (props) => {
             );
             onAddAddress(data);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setAddAddressLoading(false);
         }
@@ -346,14 +349,14 @@ const AddressForm = (props) => {
             );
             onUpdateAddress(data);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setAddAddressLoading(false);
         }
@@ -396,14 +399,14 @@ const AddressForm = (props) => {
             );
             onUpdateAddress(data);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setAddAddressLoading(false);
         }
