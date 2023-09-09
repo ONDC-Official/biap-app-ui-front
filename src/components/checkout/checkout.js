@@ -600,7 +600,7 @@ const Checkout = () => {
                     // initiateSDK();
                     const request_object = constructQouteObject(
                       c.filter(({ provider }) =>
-                        successOrderIds?.includes(provider.local_id.toString())
+                        successOrderIds.includes(provider.local_id.toString())
                       )
                     );
                     confirmOrder(request_object[0], payment_methods.JUSPAY);
@@ -608,7 +608,7 @@ const Checkout = () => {
                     console.log("cartItems=====>", cartItems);
                     const request_object = constructQouteObject(
                       c.filter(({ provider }) =>
-                        successOrderIds?.includes(provider.local_id.toString())
+                        successOrderIds.includes(provider.local_id.toString())
                       )
                     );
                     console.log("request_object=====>", request_object);
