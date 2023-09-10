@@ -23,6 +23,24 @@ const OrderSummary = ({orderDetails}) => {
         return subtotal;
     };
 
+    const getItemsWithCustomizations = () => {
+        const breakup = orderDetails?.quote?.breakup;
+        let returnBreakup = [];
+        const filterItems = breakup.filter((item) => item["@ondc/org/title_type"] === "item");
+        const filterCustomizations = breakup.filter((item) => item["@ondc/org/title_type"] === "customization");
+        filterItems.forEach((item) => {
+            const itemId = item["@ondc/org/item_id"];
+            const filterCustomizationItems = filterCustomizations.filter((cust) => cust.item.parent_item_id === itemId);
+            returnBreakup.push(item);
+            if(filterCustomizationItems.length > 0){
+                filterCustomizationItems.forEach((custItem) => {
+                    returnBreakup.push(custItem);
+                })
+            }
+        });
+        return returnBreakup;
+    };
+
     return (
         <Card
             className={classes.orderSummaryCard}
@@ -38,7 +56,7 @@ const OrderSummary = ({orderDetails}) => {
                 variant="body1"
                 className={classes.orderOnTypo}
             >
-                {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format("hh:mma")}`} | Payment: {orderDetails?.payment?.type} | Item: {orderDetails?.items.length}
+                {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format("hh:mma")}`} | Payment: {orderDetails?.payment?.type === "ON-FULFILLMENT"?"Cash on delivery":"Prepaid"}
             </Typography>
             <Box
                 component={"div"}
@@ -56,7 +74,8 @@ const OrderSummary = ({orderDetails}) => {
                 orderDetails?.quote && (
                     <>
                         <SummaryItems
-                                items={orderDetails?.quote?orderDetails?.quote?.breakup.filter((item) => item["@ondc/org/title_type"] === "item" || item["@ondc/org/title_type"] === "customization"):[]}
+                                // items={orderDetails?.quote?orderDetails?.quote?.breakup.filter((item) => item["@ondc/org/title_type"] === "item" || item["@ondc/org/title_type"] === "customization"):[]}
+                                items={getItemsWithCustomizations()}
                         />
                         <Box
                             component={"div"}

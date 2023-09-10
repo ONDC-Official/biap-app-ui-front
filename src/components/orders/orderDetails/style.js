@@ -163,6 +163,11 @@ const useStyles = makeStyles({
         textAlign: "right",
         fontWeight: "600 !important",
     },
+    actionButtons:{
+        float: 'right',
+        marginLeft: '12px !important',
+        border: '1px solid rgba(0, 0, 0, 0.22) !important'
+    }
 });
 
 export default useStyles;
