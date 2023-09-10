@@ -305,7 +305,7 @@ export default function Cart() {
                     sx={{ marginTop: "4px" }}
                     onClick={() => {
                       getProductDetails(cartItem.item.id);
-                      setCurrentCartItem(cartItem._id);
+                      setCurrentCartItem(cartItem);
                       setOpenDrawer(true);
                     }}
                   >

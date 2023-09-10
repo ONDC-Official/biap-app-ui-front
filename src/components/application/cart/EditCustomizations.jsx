@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import useStyles from "../product-list/product-details/style";
-import { Button, Divider, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, IconButton, Typography } from "@mui/material";
 import CustomizationRenderer from "../product-list/product-details/CustomizationRenderer";
 import { getValueFromCookie } from "../../../utils/cookies";
 import { CartContext } from "../../../context/cartContext";
@@ -69,9 +69,9 @@ const EditCustomizations = (props) => {
   };
 
   const updateCustomizations = async () => {
-    const url = `/clientApis/v2/cart/${user.id}/${currentCartItem}`;
+    const url = `/clientApis/v2/cart/${user.id}/${currentCartItem._id}`;
     const items = cartItems.concat([]);
-    const itemIndex = items.findIndex((item) => item._id === currentCartItem);
+    const itemIndex = items.findIndex((item) => item._id === currentCartItem._id);
     if (itemIndex !== -1) {
       let updatedCartItem = items[itemIndex];
       const updatedCustomizations = getCustomizations();
@@ -150,9 +150,11 @@ const EditCustomizations = (props) => {
   return (
     <Grid className={classes.editContainer}>
       <Grid className={classes.editDetails}>
-        <Grid continer alignItems="center" justifyContent="space-between" sx={{ marginBottom: "20px" }}>
+        <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: "20px" }}>
           <Typography variant="h4">Customise your food</Typography>
-          <CloseIcon sx={{ cursor: "pointer" }} onClick={() => setOpenDrawer(false)} />
+          <IconButton color="inherit" onClick={() => setOpenDrawer(false)}>
+            <CloseIcon sx={{ cursor: "pointer" }} />
+          </IconButton>
         </Grid>
         {renderVegNonVegTag()}
         <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
@@ -167,6 +169,8 @@ const EditCustomizations = (props) => {
             productPayload={productPayload}
             customization_state={customization_state}
             setCustomizationState={setCustomizationState}
+            selectedCustomizations={currentCartItem?.item?.customisations}
+            // selectedCustomizations={null}
           />
         </div>
       </Grid>

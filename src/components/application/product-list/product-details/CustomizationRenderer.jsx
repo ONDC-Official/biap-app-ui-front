@@ -14,7 +14,7 @@ import {
 import Radio from "../../../common/Radio";
 
 const CustomizationRenderer = (props) => {
-  const { productPayload, customization_state, setCustomizationState } = props;
+  const { productPayload, customization_state, setCustomizationState, selectedCustomizations = null } = props;
 
   const classes = useStyles();
 
@@ -175,9 +175,14 @@ const CustomizationRenderer = (props) => {
     }
   }, [productPayload]);
 
-  // initialize customization state
+  // initialize customization state with default values
   useEffect(() => {
-    if (!isInitialized && customizationGroups?.length > 0 && customizations?.length > 0) {
+    if (
+      selectedCustomizations == null &&
+      !isInitialized &&
+      customizationGroups?.length > 0 &&
+      customizations?.length > 0
+    ) {
       const initializeCustomizationState = () => {
         let firstGroup = null;
         for (const group of customizationGroups) {
@@ -231,13 +236,148 @@ const CustomizationRenderer = (props) => {
             }
           }
 
-          console.log(newState);
+          console.log("fromScratch", newState);
 
           setCustomizationState(newState);
         }
       };
 
       setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
+      initializeCustomizationState();
+      setIsInitialized(true);
+    }
+  }, [isInitialized, customizationGroups, customizations]);
+
+  // initialize customization state with previously selected values
+  //   useEffect(() => {
+  //     if (!isInitialized && customizationGroups?.length > 0 && customizations?.length > 0) {
+  //       const initializeCustomizationState = () => {
+  //         const previouslySelected = formatCustomizations(selectedCustomizations);
+  //         let firstGroup = null;
+  //         for (const group of customizationGroups) {
+  //           if (group.seq === 1) {
+  //             firstGroup = group;
+  //             break;
+  //           }
+  //         }
+  //         if (firstGroup) {
+  //           let currentGroup = firstGroup.id;
+  //           let level = 1;
+  //           const newState = { ...customization_state };
+
+  //           while (currentGroup) {
+  //             const group = customizationGroups.find((group) => group.id === currentGroup);
+  //             if (group) {
+  //               newState[level] = {
+  //                 id: group.id,
+  //                 seq: group.seq,
+  //                 name: group.name,
+  //                 options: [],
+  //                 selected: [],
+  //               };
+
+  //               if (group.hasOwnProperty("special_instructions")) {
+  //                 newState[level].special_instructions = "";
+  //               }
+  //               newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+
+  //               previouslySelected.map((item) => console.log(item.parent));
+  //               let selectedCustomization = previouslySelected.find((opt) => opt.parent === currentGroup);
+
+  //               if (!selectedCustomization) {
+  //                 newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
+  //               } else {
+  //                 newState[level].selected = [selectedCustomization];
+  //               }
+
+  //               currentGroup = newState[level].selected[0]?.child || null;
+  //               level++;
+  //             } else {
+  //               currentGroup = null;
+  //             }
+  //           }
+
+  //           console.log("previouslySelected", newState);
+
+  //           setCustomizationState(newState);
+  //         }
+  //       };
+
+  //       setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
+  //       initializeCustomizationState();
+  //       setIsInitialized(true);
+  //     }
+  //   }, [isInitialized, customizationGroups, customizations]);
+
+  useEffect(() => {
+    if (
+      selectedCustomizations != null &&
+      !isInitialized &&
+      customizationGroups?.length > 0 &&
+      customizations?.length > 0
+    ) {
+      const initializeCustomizationState = () => {
+        let previouslySelected = formatCustomizations(selectedCustomizations);
+        let firstGroup = null;
+        for (const group of customizationGroups) {
+          if (group.seq === 1) {
+            firstGroup = group;
+            break;
+          }
+        }
+        if (firstGroup) {
+          let currentGroup = firstGroup.id;
+          let level = 1;
+          const newState = { ...customization_state };
+
+          while (currentGroup) {
+            const group = customizationGroups.find((group) => group.id === currentGroup);
+            if (group) {
+              newState[level] = {
+                id: group.id,
+                seq: group.seq,
+                name: group.name,
+                options: [],
+                selected: [],
+              };
+
+              if (group.hasOwnProperty("special_instructions")) {
+                newState[level].special_instructions = "";
+              }
+
+              // Filter customizations for the current group
+              const groupCustomizations = customizations.filter(
+                (customization) => customization.parent === currentGroup
+              );
+
+              // Check if there are previously selected customizations for this group
+              const previouslySelectedForGroup = previouslySelected.filter(
+                (customization) => customization.parent === currentGroup
+              );
+
+              // Select previously selected customizations if any
+              if (previouslySelectedForGroup.length > 0) {
+                newState[level].selected = previouslySelectedForGroup;
+              }
+
+              // Add all group customizations as options
+              newState[level].options = groupCustomizations;
+
+              currentGroup = newState[level].selected[0]?.child || null;
+              level++;
+            } else {
+              currentGroup = null;
+            }
+          }
+
+          console.log("edit", newState);
+
+          setCustomizationState(newState);
+        }
+      };
+
+      setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
+
       initializeCustomizationState();
       setIsInitialized(true);
     }
@@ -277,6 +417,8 @@ const CustomizationRenderer = (props) => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
 
+      console.log("cg:", cg.selected);
+
       return (
         <>
           <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
@@ -287,35 +429,44 @@ const CustomizationRenderer = (props) => {
             </AccordionSummary>
             <AccordionDetails sx={{ padding: "20px 0" }}>
               <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
-                {cg.options.map((c) => (
-                  <>
-                    <div onClick={() => handleCustomizationSelect(c, parseInt(level))}>
-                      <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: 1 }}>
-                        <Grid container noWrap xs={8}>
-                          {renderVegNonVegTag(c.vegNonVeg)}
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                            {c.name}
-                          </Typography>
+                {cg.options.map((c) => {
+                  let selected = false;
+                  cg.selected.map((item) => {
+                    if (item.id == c.id) {
+                      selected = true;
+                    }
+                  });
+                  return (
+                    <>
+                      <div onClick={() => handleCustomizationSelect(c, parseInt(level))}>
+                        <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: 1 }}>
+                          <Grid container noWrap xs={8}>
+                            {renderVegNonVegTag(c.vegNonVeg)}
+                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                              {c.name}
+                            </Typography>
+                          </Grid>
+                          <Grid container xs={3} justifyContent="flex-end">
+                            <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
+                              <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                              {c.price}
+                            </Typography>
+
+                            <Radio
+                              size="small"
+                              checked={selected}
+                              onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                handleCustomizationSelect(c, parseInt(level));
+                              }}
+                            />
+                          </Grid>
                         </Grid>
-                        <Grid container xs={3} justifyContent="flex-end">
-                          <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
-                            <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                            {c.price}
-                          </Typography>
-                          <Radio
-                            size="small"
-                            checked={cg.selected.includes(c)}
-                            onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                            onChange={(e) => {
-                              e.preventDefault();
-                              handleCustomizationSelect(c, parseInt(level));
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    </div>
-                  </>
-                ))}
+                      </div>
+                    </>
+                  );
+                })}
               </Grid>
             </AccordionDetails>
           </Accordion>
