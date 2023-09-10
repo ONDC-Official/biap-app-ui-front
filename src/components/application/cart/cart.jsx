@@ -204,7 +204,7 @@ export default function Cart() {
             </Typography>
           </Grid>
         </Grid>
-        <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
+        <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
       </Grid>
     );
   };
@@ -304,22 +304,6 @@ export default function Cart() {
         }
       };
 
-      const getTextColor = () => {
-        if (category === "veg") {
-          return "#419E6A";
-        } else if (category == "nonVeg") {
-          return "red";
-        } else {
-          return "red";
-        }
-      };
-
-      const map = {
-        veg: "Veg",
-        nonveg: "Non Veg",
-        egg: "EGG",
-      };
-
       return (
         <Grid container alignItems="center" className={classes.tagContainer}>
           <div className={classes.square} style={{ borderColor: getTagColor() }}>
@@ -378,7 +362,7 @@ export default function Cart() {
                         src={cartItem?.item?.provider?.descriptor?.symbol}
                       />
                     </div>
-                    <Typography variant="body1" color="#686868" sx={{ fontWeight: 500 }}>
+                    <Typography variant="subtitle1" color="#686868" sx={{ fontWeight: 500 }}>
                       {cartItem?.item?.provider?.descriptor?.name}
                     </Typography>
                   </Grid>
@@ -445,7 +429,7 @@ export default function Cart() {
               </div>
             </Grid>
           )}
-          <Divider sx={{ backgroundColor: "#CACDD8", margin: "20px 0", width: "98.5%" }} />
+          <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
         </Grid>
       );
     });
@@ -457,7 +441,7 @@ export default function Cart() {
         <Typography variant="h4" className={classes.summaryTypo}>
           Summary
         </Typography>
-        <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} />
+        <Divider sx={{ borderColor: "#616161", margin: "20px 0" }} />
         <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             Cart Subtotal
