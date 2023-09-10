@@ -650,6 +650,7 @@ export default function Cart() {
                 anchor={"right"}
                 open={openDrawer}
                 onClose={() => {
+                  setProductPayload(null);
                   setCustomizationState({});
                   setOpenDrawer(false);
                 }}
