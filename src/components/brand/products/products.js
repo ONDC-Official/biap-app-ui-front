@@ -178,7 +178,7 @@ const Products = ({ brandDetails }) => {
     }
   };
 
-  const handleAddToCart = async (productPayload, navigate) => {
+  const handleAddToCart = async (productPayload, isDefault = false, navigate) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
@@ -300,9 +300,8 @@ const Products = ({ brandDetails }) => {
                             bpp_id={productItem?.bpp_details?.bpp_id}
                             location_id={productItem?.location_details ? productItem.location_details?.id : ""}
                             bpp_provider_id={productItem?.provider_details?.id}
-                            handleAddToCart={() => {
-                              // handleAddToCart(productItem);
-                            }}
+                            handleAddToCart={handleAddToCart}
+                            getProductDetails={getProductDetails}
                           />
                         </Grid>
                       );
@@ -317,9 +316,7 @@ const Products = ({ brandDetails }) => {
                             bpp_id={productItem?.bpp_details?.bpp_id}
                             location_id={productItem?.location_details ? productItem.location_details?.id : ""}
                             bpp_provider_id={productItem?.provider_details?.id}
-                            handleAddToCart={() => {
-                              handleAddToCart(productItem);
-                            }}
+                            handleAddToCart={handleAddToCart}
                             getProductDetails={getProductDetails}
                           />
                         </Grid>

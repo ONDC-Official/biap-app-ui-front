@@ -2,11 +2,12 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import useStyles from "./styles";
 import { useHistory, Link } from "react-router-dom";
 
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Button, Card, Divider, Grid, TextField, Typography } from "@mui/material";
+import { Button, Card, Divider, Drawer, Grid, TextField, Typography } from "@mui/material";
 import { deleteCall, getCall, postCall, putCall } from "../../../api/axios";
 import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
 import Loading from "../../shared/loading/loading";
@@ -16,15 +17,24 @@ import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { v4 as uuidv4 } from "uuid";
 import { AddressContext } from "../../../context/addressContext";
 import { CartContext } from "../../../context/cartContext";
+import EditCustomizations from "./EditCustomizations";
 
 export default function Cart() {
-  const ref = useRef(null);
+  let user = {};
+  const userCookie = getValueFromCookie("user");
+
+  if (userCookie) {
+    try {
+      user = JSON.parse(userCookie);
+    } catch (error) {
+      console.log("Error parsing user cookie:", error);
+    }
+  }
   const classes = useStyles();
   const history = useHistory();
   const { deliveryAddress } = useContext(AddressContext);
   const { fetchCartItems } = useContext(CartContext);
 
-  let user = JSON.parse(getValueFromCookie("user"));
   const { cancellablePromise } = useCancellablePromise();
   const transaction_id = getValueFromCookie("transaction_id");
 
@@ -39,6 +49,12 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [haveDistinctProviders, setHaveDistinctProviders] = useState(false);
   const [errorMessageTimeOut, setErrorMessageTimeOut] = useState("Fetching details for this product");
+
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [productPayload, setProductPayload] = useState(null);
+  const [customization_state, setCustomizationState] = useState({});
+  const [productLoading, setProductLoading] = useState(false);
+  const [currentCartItem, setCurrentCartItem] = useState(null);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -115,10 +131,23 @@ export default function Cart() {
     fetchCartItems();
   };
 
+  const getProductDetails = async (productId) => {
+    try {
+      setProductLoading(true);
+      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+      setProductPayload(data.response);
+      console.log("getProduct:", data.response);
+      return data.response;
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    } finally {
+      setProductLoading(false);
+    }
+  };
+
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: "smooth" });
     getCartItems();
-  }, []);
+  }, [openDrawer]);
 
   useEffect(() => {
     checkDistinctProviders();
@@ -240,7 +269,7 @@ export default function Cart() {
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
       return (
-        <Grid>
+        <Grid key={cartItem._id}>
           <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
             <Grid item xs={4.3}>
               <Grid container>
@@ -270,6 +299,18 @@ export default function Cart() {
                       {cartItem?.item?.provider?.descriptor?.name}
                     </Typography>
                   </Grid>
+                  <Button
+                    size="small"
+                    startIcon={<EditOutlinedIcon size="small" />}
+                    sx={{ marginTop: "4px" }}
+                    onClick={() => {
+                      getProductDetails(cartItem.item.id);
+                      setCurrentCartItem(cartItem);
+                      setOpenDrawer(true);
+                    }}
+                  >
+                    Customise
+                  </Button>
                 </Grid>
               </Grid>
               {getCustomizations(cartItem)}
@@ -578,7 +619,7 @@ export default function Cart() {
   };
 
   return (
-    <div ref={ref}>
+    <div>
       <div className={classes.headingContainer}>
         <Typography variant="h3" className={classes.heading}>
           My Cart
@@ -605,6 +646,24 @@ export default function Cart() {
               <Grid item xs={4}>
                 {renderSummaryCard()}
               </Grid>
+              <Drawer
+                anchor={"right"}
+                open={openDrawer}
+                onClose={() => {
+                  setProductPayload(null);
+                  setCustomizationState({});
+                  setOpenDrawer(false);
+                }}
+              >
+                <EditCustomizations
+                  cartItems={cartItems}
+                  productPayload={productPayload}
+                  customization_state={customization_state}
+                  setCustomizationState={setCustomizationState}
+                  setOpenDrawer={setOpenDrawer}
+                  currentCartItem={currentCartItem}
+                />
+              </Drawer>
             </Grid>
           )}
         </>

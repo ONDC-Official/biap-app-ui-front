@@ -172,10 +172,34 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
   },
-
-
-
-
+  editContainer: {
+    width: 500,
+    padding: "26px 18px",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    flex: 1,
+  },
+  editDetails: {
+    flex: 1,
+    paddingBottom: "50px",
+    overflow: "scroll",
+    scrollbarWidth: "thin",
+    "&::-webkit-scrollbar": {
+      width: "0px",
+    },
+  },
+  editBtns: {
+    height: 70,
+    background: "#ffffff",
+    display: "flex",
+    alignItems: "center",
+    padding: "0 12px",
+    position: "absolute",
+    width: "100%",
+    left: 0,
+    bottom: 0,
+  },
   formControlLabel: {
     width: '100% !important',
     alignItems: 'center !important',
@@ -198,7 +222,6 @@ const useStyles = makeStyles({
     // gap: '13px',
     // padding: '0px 5px !important'
   },
-
 });
 
 export default useStyles;

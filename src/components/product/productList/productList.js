@@ -241,6 +241,7 @@ const ProductList = () => {
     const cus = await formatCustomizations(productPayload.customisation_items);
     const newState = await initializeCustomizationState(groups, cus, customization_state);
 
+    console.log("Payload", isDefault);
     getCustomizations(productPayload, isDefault ? newState : customization_state).then((customisations) => {
       const payload = {
         id: productPayload.id,
