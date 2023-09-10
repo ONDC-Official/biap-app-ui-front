@@ -272,6 +272,66 @@ export default function Cart() {
     );
   };
 
+  const renderVegNonVegTag = (cartItem) => {
+    const FnB = "ONDC:RET11";
+    const grocery = "ONDC:RET10";
+
+    if (cartItem?.item?.domain == grocery || cartItem?.item?.domain == FnB) {
+      const tags = cartItem?.item?.product?.tags;
+      let category = "veg";
+
+      for (let i = 0; i < tags.length; i++) {
+        if (tags[i].code === "veg_nonveg") {
+          const vegNonVegValue = tags[i].list[0].value;
+
+          if (vegNonVegValue === "yes") {
+            category = "veg";
+          } else if (vegNonVegValue === "no") {
+            category = "nonveg";
+          } else if (vegNonVegValue === "egg") {
+            category = "egg";
+          }
+        }
+      }
+
+      const getTagColor = () => {
+        if (category === "veg") {
+          return "#008001";
+        } else if (category == "nonveg") {
+          return "red";
+        } else {
+          return "#008001";
+        }
+      };
+
+      const getTextColor = () => {
+        if (category === "veg") {
+          return "#419E6A";
+        } else if (category == "nonVeg") {
+          return "red";
+        } else {
+          return "red";
+        }
+      };
+
+      const map = {
+        veg: "Veg",
+        nonveg: "Non Veg",
+        egg: "EGG",
+      };
+
+      return (
+        <Grid container alignItems="center" className={classes.tagContainer}>
+          <div className={classes.square} style={{ borderColor: getTagColor() }}>
+            <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+          </div>
+        </Grid>
+      );
+    }
+
+    return null;
+  };
+
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
       return (
@@ -287,13 +347,13 @@ export default function Cart() {
                       src={cartItem?.item?.product?.descriptor?.images[0]}
                       onClick={() => history.push(`/application/products/${cartItem.item.id}`)}
                     />
+                    {renderVegNonVegTag(cartItem)}
                   </div>
                 </div>
-                <Grid>
+                <Grid sx={{ maxWidth: "200px" }}>
                   <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
                     {cartItem?.item?.product?.descriptor?.name}
                   </Typography>
-
                   {getCustomizations(cartItem)}
                   <Grid
                     container

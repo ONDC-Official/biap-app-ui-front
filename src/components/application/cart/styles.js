@@ -44,6 +44,7 @@ const useStyles = makeStyles({
     ...moreImageContainer("100%", "#e7e7e7"),
     backgroundColor: "#e7e7e7",
     borderRadius: 8,
+    position: "relative",
   },
   moreImage: {
     height: 80,
@@ -132,6 +133,27 @@ const useStyles = makeStyles({
     position: "absolute !important",
     right: 12,
     bottom: 7,
+  },
+  square: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #008001",
+    width: 14,
+    height: 15,
+    marginRight: 6,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circle: {
+    backgroundColor: "#008001",
+    borderRadius: "50%",
+    height: "9px",
+    width: "9px",
+  },
+  tagContainer: {
+    position: "absolute",
+    top: 4,
+    left: 4,
   },
 });
 
