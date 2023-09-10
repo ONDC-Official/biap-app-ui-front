@@ -213,11 +213,13 @@ export default function Cart() {
     if (cartItem.item.customisations) {
       const customisations = cartItem.item.customisations;
 
-      return customisations.map((c) => {
+      return customisations.map((c, idx) => {
+        const isLastItem = idx === customisations.length - 1;
         return (
-          <Grid container sx={{ marginTop: 1 }}>
-            <Typography>{c.item_details.descriptor.name} &nbsp;</Typography>
-            <Typography>₹{c.item_details.price.value}</Typography>
+          <Grid container>
+            <Typography variant="subtitle1" color="#686868">
+              {c.item_details.descriptor.name} (₹{c.item_details.price.value}) {isLastItem ? "" : "+"}
+            </Typography>
           </Grid>
         );
       });
@@ -291,6 +293,23 @@ export default function Cart() {
                   <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
                     {cartItem?.item?.product?.descriptor?.name}
                   </Typography>
+
+                  {getCustomizations(cartItem)}
+                  <Grid
+                    container
+                    sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
+                    alignItems="center"
+                    onClick={() => {
+                      getProductDetails(cartItem.item.id);
+                      setCurrentCartItem(cartItem);
+                      setOpenDrawer(true);
+                    }}
+                  >
+                    <EditOutlinedIcon size="small" sx={{ color: "#196AAB", fontSize: 16, marginRight: "5px" }} />
+                    <Typography variant="subtitle1" color="#196AAB">
+                      Customise
+                    </Typography>
+                  </Grid>
                   <Grid container sx={{ marginTop: "4px" }} alignItems="center">
                     <div className={classes.logoContainer}>
                       <img
@@ -303,21 +322,9 @@ export default function Cart() {
                       {cartItem?.item?.provider?.descriptor?.name}
                     </Typography>
                   </Grid>
-                  <Button
-                    size="small"
-                    startIcon={<EditOutlinedIcon size="small" />}
-                    sx={{ marginTop: "4px" }}
-                    onClick={() => {
-                      getProductDetails(cartItem.item.id);
-                      setCurrentCartItem(cartItem);
-                      setOpenDrawer(true);
-                    }}
-                  >
-                    Customise
-                  </Button>
                 </Grid>
               </Grid>
-              {getCustomizations(cartItem)}
+              {/* {getCustomizations(cartItem)} */}
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>

@@ -34,8 +34,8 @@ const useStyles = makeStyles({
     fontWeight: "600 !important",
   },
   moreImages: {
-    ...moreImageContainer(95, "lightgrey"),
-    marginRight: 14,
+    ...moreImageContainer(110, "lightgrey"),
+    marginRight: "14px",
     borderRadius: 10,
     padding: 4,
     backgroundColor: "#ffffff",
