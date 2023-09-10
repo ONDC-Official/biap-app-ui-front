@@ -22,6 +22,8 @@ import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest }
 import { getValueFromCookie } from "../../../utils/cookies";
 import { getCall, postCall } from "../../../api/axios";
 import { CartContext } from "../../../context/cartContext";
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
 const Products = ({ brandDetails }) => {
   const classes = useStyles();
@@ -49,6 +51,7 @@ const Products = ({ brandDetails }) => {
     pageSize: 10,
     searchData: [],
   });
+  const dispatch = useContext(ToastContext);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -76,14 +79,14 @@ const Products = ({ brandDetails }) => {
       setProducts(data.data);
       setTotalProductCount(data.count);
     } catch (err) {
-      // dispatch({
-      //     type: toast_actions.ADD_TOAST,
-      //     payload: {
-      //         id: Math.floor(Math.random() * 100),
-      //         type: toast_types.error,
-      //         message: err?.message,
-      //     },
-      // });
+      dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: err?.message,
+          },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -127,14 +130,14 @@ const Products = ({ brandDetails }) => {
       paginationData.searchData = filtersData;
       setPaginationModel(paginationData);
     } catch (err) {
-      // dispatch({
-      //     type: toast_actions.ADD_TOAST,
-      //     payload: {
-      //         id: Math.floor(Math.random() * 100),
-      //         type: toast_types.error,
-      //         message: err?.message,
-      //     },
-      // });
+      dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: err?.message,
+          },
+      });
     } finally {
       setIsLoading(false);
     }

@@ -43,7 +43,7 @@ const CustomerDetails = ({orderDetails}) => {
                     Payment mode
                 </Typography>
                 <Typography component="div" variant="body" className={classes.customerDetailsValue}>
-                    {orderDetails?.payment?.type}
+                    {orderDetails?.payment?.type === "ON-FULFILLMENT"?"Cash on delivery":"Prepaid"}
                 </Typography>
             </Grid>
             <Grid item xs={12} sm={12} md={2} lg={2} xl={2}>
