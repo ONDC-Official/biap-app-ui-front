@@ -9,8 +9,15 @@ import { CartContext } from "../../../context/cartContext";
 import { putCall } from "../../../api/axios";
 
 const EditCustomizations = (props) => {
-  const { cartItems, productPayload, customization_state, setCustomizationState, setOpenDrawer, currentCartItem } =
-    props;
+  const {
+    cartItems,
+    productPayload,
+    setProductPayload,
+    customization_state,
+    setCustomizationState,
+    setOpenDrawer,
+    currentCartItem,
+  } = props;
 
   const classes = useStyles();
   const history = useHistory();
@@ -152,7 +159,13 @@ const EditCustomizations = (props) => {
       <Grid className={classes.editDetails}>
         <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: "20px" }}>
           <Typography variant="h4">Customise your food</Typography>
-          <IconButton color="inherit" onClick={() => setOpenDrawer(false)}>
+          <IconButton
+            color="inherit"
+            onClick={() => {
+              setProductPayload(null);
+              setOpenDrawer(false);
+            }}
+          >
             <CloseIcon sx={{ cursor: "pointer" }} />
           </IconButton>
         </Grid>
@@ -170,7 +183,6 @@ const EditCustomizations = (props) => {
             customization_state={customization_state}
             setCustomizationState={setCustomizationState}
             selectedCustomizations={currentCartItem?.item?.customisations}
-            // selectedCustomizations={null}
           />
         </div>
       </Grid>

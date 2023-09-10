@@ -174,7 +174,7 @@ const useStyles = makeStyles({
   },
   editContainer: {
     width: 500,
-    padding: "26px 18px",
+    padding: "8px 16px",
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -201,24 +201,24 @@ const useStyles = makeStyles({
     bottom: 0,
   },
   formControlLabel: {
-    width: '100% !important',
-    alignItems: 'center !important',
-    marginLeft: '0px !important',
-    marginBottom: '8px !important',
+    width: "100% !important",
+    alignItems: "center !important",
+    marginLeft: "0px !important",
+    marginBottom: "8px !important",
     "& .MuiFormControlLabel-label": {
       // marginLeft: '24px !important',
       "&.MuiTypography-root": {
-        flex: 1
+        flex: 1,
         // marginBottom: '5px !important'
-      }
+      },
     },
     "& .MuiRadio-root": {
       // marginTop: '2px !important'
-      width: '20px !important'
-    }
+      width: "20px !important",
+    },
   },
   radioTypoContainer: {
-    display: 'flex',
+    display: "flex",
     // gap: '13px',
     // padding: '0px 5px !important'
   },

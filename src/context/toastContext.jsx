@@ -1,9 +1,9 @@
 import React, { createContext, useReducer } from "react";
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 import { toast_actions } from "../components/shared/toast/utils/toast";
-import Slide from '@mui/material/Slide';
+import Slide from "@mui/material/Slide";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -18,7 +18,7 @@ export default function ToastProvider({ ...props }) {
   const [state, dispatch] = useReducer((state, action) => {
     switch (action.type) {
       case toast_actions.ADD_TOAST: {
-        handleRemoveToast(action.payload.id, 50000);
+        handleRemoveToast(action.payload.id, 5000);
         return [...state, action.payload];
       }
       case toast_actions.REMOVE_TOAST: {
@@ -46,12 +46,10 @@ export default function ToastProvider({ ...props }) {
             left: "15px",
             width: "100%",
             maxWidth: "400px",
-            wordBreak: 'normal'
+            wordBreak: "normal",
           }}
         >
-          <div
-            style={{ height: "90vh", overflowY: "auto", overflowX: "hidden" }}
-          >
+          <div style={{ height: "90vh", overflowY: "auto", overflowX: "hidden" }}>
             {state.map((toast) => {
               return (
                 <div className="p-2" key={toast.id}>
@@ -62,12 +60,17 @@ export default function ToastProvider({ ...props }) {
                   {/*  onRemove={() => handleRemoveToast(toast.id, 500)}*/}
                   {/*/>*/}
                   <Snackbar
-                    open={true} autoHideDuration={50000}
-                    onClose={() => handleRemoveToast(toast.id, 50000)}
-                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    open={true}
+                    autoHideDuration={5000}
+                    onClose={() => handleRemoveToast(toast.id, 200)}
+                    anchorOrigin={{ vertical: "top", horizontal: "right" }}
                     TransitionComponent={SlideTransition}
                   >
-                    <Alert onClose={() => handleRemoveToast(toast.id, 50000)} severity={toast.type} sx={{ width: '100%' }}>
+                    <Alert
+                      onClose={() => handleRemoveToast(toast.id, 200)}
+                      severity={toast.type}
+                      sx={{ width: "100%" }}
+                    >
                       {toast.message}
                     </Alert>
                   </Snackbar>

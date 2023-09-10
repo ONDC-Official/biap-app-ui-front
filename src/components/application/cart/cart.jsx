@@ -18,6 +18,8 @@ import { v4 as uuidv4 } from "uuid";
 import { AddressContext } from "../../../context/addressContext";
 import { CartContext } from "../../../context/cartContext";
 import EditCustomizations from "./EditCustomizations";
+import { ToastContext } from "../../../context/toastContext";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 
 export default function Cart() {
   let user = {};
@@ -32,6 +34,7 @@ export default function Cart() {
   }
   const classes = useStyles();
   const history = useHistory();
+  const dispatch = useContext(ToastContext);
   const { deliveryAddress } = useContext(AddressContext);
   const { fetchCartItems } = useContext(CartContext);
 
@@ -55,6 +58,7 @@ export default function Cart() {
   const [customization_state, setCustomizationState] = useState({});
   const [productLoading, setProductLoading] = useState(false);
   const [currentCartItem, setCurrentCartItem] = useState(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -395,49 +399,10 @@ export default function Cart() {
             ₹{getCartSubtotal()}
           </Typography>
         </Grid>
-        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
-          <Grid xs={8}>
-            <Typography variant="subtitle1" className={classes.summaryLabel}>
-              Shipping
-            </Typography>
-            <Typography variant="subtitle2" color="#A2A6B0">
-              (Standard Rate - Price may vary depending on the item/destination. TECS Staff will contact you.)
-            </Typography>
-          </Grid>
-          <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹0
-          </Typography>
-        </Grid> */}
-        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
-          <Typography variant="subtitle1" className={classes.summaryLabel}>
-            Tax
-          </Typography>
-          <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹0
-          </Typography>
-        </Grid> */}
-        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
-          <Typography variant="subtitle1" className={classes.summaryLabel}>
-            GST (10%)
-          </Typography>
-          <Typography variant="subtitle1" className={classes.summaryLabel}>
-            ₹0
-          </Typography>
-        </Grid> */}
-        {/* <Divider sx={{ background: "#CACDD8", margin: "20px 0" }} /> */}
-        {/* <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
-          <Typography variant="subtitle1" className={classes.summaryLabel}>
-            Order Total
-          </Typography>
-          <Typography variant="subtitle1" sx={{ fontSize: 18, fontWeight: 600 }}>
-            ₹{getCartSubtotal()}
-          </Typography>
-        </Grid> */}
-
         <Button
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
-          disabled={haveDistinctProviders}
+          disabled={haveDistinctProviders || checkoutLoading}
           onClick={() => {
             console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {
@@ -452,7 +417,7 @@ export default function Cart() {
             }
           }}
         >
-          Checkout
+          {checkoutLoading ? <Loading /> : "Checkout"}
         </Button>
       </Card>
     );
@@ -475,6 +440,7 @@ export default function Cart() {
     responseRef.current = [];
     if (deliveryAddress) {
       try {
+        setCheckoutLoading(true);
         const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
         let domain = "";
         const updatedItems = items.map((item) => {
@@ -512,7 +478,15 @@ export default function Cart() {
         //Error handling workflow eg, NACK
         const isNACK = data.find((item) => item.error && item?.message?.ack?.status === "NACK");
         if (isNACK) {
-          alert(isNACK.error.message);
+          setCheckoutLoading(false);
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: isNACK.error.message,
+            },
+          });
           setGetQuoteLoading(false);
         } else {
           // fetch through events
@@ -524,13 +498,29 @@ export default function Cart() {
           );
         }
       } catch (err) {
-        alert(err?.response?.data?.error?.message);
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: err?.response?.data?.error?.message,
+          },
+        });
         console.log(err?.response?.data?.error);
         setGetQuoteLoading(false);
         history.replace("/application/products");
+        setCheckoutLoading(false);
       }
     } else {
-      alert("Please select address");
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: "Please select address",
+        },
+      });
+      setCheckoutLoading(false);
     }
 
     // eslint-disable-next-line
@@ -564,13 +554,28 @@ export default function Cart() {
         });
         if (responseRef.current.length <= 0) {
           setGetQuoteLoading(false);
-          alert("Cannot fetch details for this product");
+          setCheckoutLoading(false);
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Cannot fetch details for this product",
+            },
+          });
           history.replace("/application/products");
           return;
         }
         const request_object = constructQouteObject(cartItems);
         if (responseRef.current.length !== request_object.length) {
-          alert("Cannot fetch details for some product those products will be ignored!");
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Cannot fetch details for some product those products will be ignored!",
+            },
+          });
           setErrorMessageTimeOut("Cannot fetch details for this product");
         }
         setToggleInit(true);
@@ -590,6 +595,7 @@ export default function Cart() {
 
   const onGetQuote = async (message_id) => {
     try {
+      setCheckoutLoading(true);
       const data = await cancellablePromise(getCall(`/clientApis/v2/on_select?messageIds=${message_id}`));
       responseRef.current = [...responseRef.current, data[0]];
 
@@ -612,7 +618,15 @@ export default function Cart() {
       localStorage.setItem("updatedCartItems", JSON.stringify(responseRef.current));
       history.push(`/application/checkout`);
     } catch (err) {
-      alert(err.message);
+      setCheckoutLoading(false);
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err.message,
+        },
+      });
       setGetQuoteLoading(false);
     }
     // eslint-disable-next-line
@@ -658,6 +672,7 @@ export default function Cart() {
                 <EditCustomizations
                   cartItems={cartItems}
                   productPayload={productPayload}
+                  setProductPayload={setProductPayload}
                   customization_state={customization_state}
                   setCustomizationState={setCustomizationState}
                   setOpenDrawer={setOpenDrawer}

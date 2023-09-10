@@ -236,8 +236,6 @@ const CustomizationRenderer = (props) => {
             }
           }
 
-          console.log("fromScratch", newState);
-
           setCustomizationState(newState);
         }
       };
@@ -247,67 +245,6 @@ const CustomizationRenderer = (props) => {
       setIsInitialized(true);
     }
   }, [isInitialized, customizationGroups, customizations]);
-
-  // initialize customization state with previously selected values
-  //   useEffect(() => {
-  //     if (!isInitialized && customizationGroups?.length > 0 && customizations?.length > 0) {
-  //       const initializeCustomizationState = () => {
-  //         const previouslySelected = formatCustomizations(selectedCustomizations);
-  //         let firstGroup = null;
-  //         for (const group of customizationGroups) {
-  //           if (group.seq === 1) {
-  //             firstGroup = group;
-  //             break;
-  //           }
-  //         }
-  //         if (firstGroup) {
-  //           let currentGroup = firstGroup.id;
-  //           let level = 1;
-  //           const newState = { ...customization_state };
-
-  //           while (currentGroup) {
-  //             const group = customizationGroups.find((group) => group.id === currentGroup);
-  //             if (group) {
-  //               newState[level] = {
-  //                 id: group.id,
-  //                 seq: group.seq,
-  //                 name: group.name,
-  //                 options: [],
-  //                 selected: [],
-  //               };
-
-  //               if (group.hasOwnProperty("special_instructions")) {
-  //                 newState[level].special_instructions = "";
-  //               }
-  //               newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
-
-  //               previouslySelected.map((item) => console.log(item.parent));
-  //               let selectedCustomization = previouslySelected.find((opt) => opt.parent === currentGroup);
-
-  //               if (!selectedCustomization) {
-  //                 newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
-  //               } else {
-  //                 newState[level].selected = [selectedCustomization];
-  //               }
-
-  //               currentGroup = newState[level].selected[0]?.child || null;
-  //               level++;
-  //             } else {
-  //               currentGroup = null;
-  //             }
-  //           }
-
-  //           console.log("previouslySelected", newState);
-
-  //           setCustomizationState(newState);
-  //         }
-  //       };
-
-  //       setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
-  //       initializeCustomizationState();
-  //       setIsInitialized(true);
-  //     }
-  //   }, [isInitialized, customizationGroups, customizations]);
 
   useEffect(() => {
     if (
@@ -370,8 +307,6 @@ const CustomizationRenderer = (props) => {
             }
           }
 
-          console.log("edit", newState);
-
           setCustomizationState(newState);
         }
       };
@@ -417,8 +352,6 @@ const CustomizationRenderer = (props) => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
 
-      console.log("cg:", cg.selected);
-
       return (
         <>
           <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
@@ -439,28 +372,29 @@ const CustomizationRenderer = (props) => {
                   return (
                     <>
                       <FormControlLabel
-                          className={classes.formControlLabel}
-                          onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                          control={<Radio checked={selected}/>}
-                          label={
-                            <div
-                              className={classes.radioTypoContainer}
-                              onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                            >
-                              {renderVegNonVegTag(c.vegNonVeg)}
-                              <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
-                                {c.name}
-                              </Typography>
-                              <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
-                                <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                                {c.price}
-                              </Typography>
-                            </div>
-                          }
-                          labelPlacement="start"
+                        className={classes.formControlLabel}
+                        onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                        control={<Radio checked={selected} />}
+                        label={
+                          <div
+                            className={classes.radioTypoContainer}
+                            onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                          >
+                            {renderVegNonVegTag(c.vegNonVeg)}
+                            <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                              {c.name}
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
+                              <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                              {c.price}
+                            </Typography>
+                          </div>
+                        }
+                        labelPlacement="start"
                       />
                     </>
-                ))}
+                  );
+                })}
               </Grid>
             </AccordionDetails>
           </Accordion>
