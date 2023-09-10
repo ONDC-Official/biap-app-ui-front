@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from './style';
 
 import Card from '@mui/material/Card';
@@ -11,6 +11,8 @@ import {useHistory} from "react-router-dom";
 import {getAllBrandsRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
 const BrandCard = ({data, index, onMouseOver}) => {
     const classes = useStyles();
@@ -36,6 +38,8 @@ const TopBrands = () => {
     const [brands, setBrands] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const dispatch = useContext(ToastContext);
+
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
 
@@ -48,14 +52,14 @@ const TopBrands = () => {
             console.log("getAllBrandsRequest=====>", data)
             setBrands(data.data);
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         } finally {
             setIsLoading(false);
         }

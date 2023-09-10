@@ -14,12 +14,15 @@ import axios from "axios";
 import { AddCookie, removeCookie } from "../../../../utils/cookies";
 import useStyles from "./style";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import {ToastContext} from "../../../../context/toastContext";
+import {toast_actions, toast_types} from "../../../shared/toast/utils/toast";
 
 const SelectAddress = ({
     addresses, onClose, setAddAddress, setUpdateAddress, onSelectAddress
 }) => {
     const classes = useStyles();
     const { deliveryAddress, setDeliveryAddress, setBillingAddress } = useContext(AddressContext);
+    const dispatch = useContext(ToastContext);
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
@@ -49,26 +52,26 @@ const SelectAddress = ({
             if (latitude && longitude) {
                 AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
             } else {
-                // dispatch({
-                //     type: toast_actions.ADD_TOAST,
-                //     payload: {
-                //         id: Math.floor(Math.random() * 100),
-                //         type: toast_types.error,
-                //         message:
-                //             "Cannot get latitude and longitude info for this pincode Please update the Address",
-                //     },
-                // });
+                dispatch({
+                    type: toast_actions.ADD_TOAST,
+                    payload: {
+                        id: Math.floor(Math.random() * 100),
+                        type: toast_types.error,
+                        message:
+                            "Cannot get latitude and longitude info for this pincode Please update the Address",
+                    },
+                });
                 setDeliveryAddress({});
             }
         } catch (err) {
-            // dispatch({
-            //     type: toast_actions.ADD_TOAST,
-            //     payload: {
-            //         id: Math.floor(Math.random() * 100),
-            //         type: toast_types.error,
-            //         message: err?.message,
-            //     },
-            // });
+            dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                    id: Math.floor(Math.random() * 100),
+                    type: toast_types.error,
+                    message: err?.message,
+                },
+            });
         }
     };
 

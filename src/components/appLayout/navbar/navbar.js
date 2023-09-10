@@ -40,6 +40,8 @@ import { getCall } from "../../../api/axios";
 
 import { categoryList } from "../../../constants/categories";
 import { CartContext } from "../../../context/cartContext";
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
 const NavBar = ({ isCheckout = false }) => {
   const classes = useStyles();
@@ -87,6 +89,19 @@ const NavBar = ({ isCheckout = false }) => {
   const [anchorElCaregoryMenu, setAnchorElCategoryMenu] = useState(null);
   const openCategoryMenu = Boolean(anchorElCaregoryMenu);
   const { cartItems } = useContext(CartContext);
+
+  const dispatch = useContext(ToastContext);
+  // function to dispatch error
+  function dispatchError(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
+  };
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -136,14 +151,14 @@ const NavBar = ({ isCheckout = false }) => {
         setAddressList([]);
         return;
       }
-      // dispatch({
-      //     type: toast_actions.ADD_TOAST,
-      //     payload: {
-      //         id: Math.floor(Math.random() * 100),
-      //         type: toast_types.error,
-      //         message: err?.message,
-      //     },
-      // });
+      dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: err?.message,
+          },
+      });
     } finally {
       setFetchDeliveryAddressLoading(false);
     }
@@ -275,7 +290,7 @@ const NavBar = ({ isCheckout = false }) => {
       AddCookie("search_context", JSON.stringify(search_context));
       setToggleLocationListCard(false);
     } catch (err) {
-      // dispatchError(err?.message);
+      dispatchError(err?.message);
     }
   };
 
@@ -303,7 +318,7 @@ const NavBar = ({ isCheckout = false }) => {
         }));
       }
     } catch (err) {
-      // dispatchError(err?.message);
+      dispatchError(err?.message);
     }
   };
 

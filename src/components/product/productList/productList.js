@@ -147,14 +147,14 @@ const ProductList = () => {
       paginationData.searchData = filtersData;
       setPaginationModel(paginationData);
     } catch (err) {
-      // dispatch({
-      //     type: toast_actions.ADD_TOAST,
-      //     payload: {
-      //         id: Math.floor(Math.random() * 100),
-      //         type: toast_types.error,
-      //         message: err?.message,
-      //     },
-      // });
+      dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: err?.message,
+          },
+      });
     } finally {
       setIsLoading(false);
     }

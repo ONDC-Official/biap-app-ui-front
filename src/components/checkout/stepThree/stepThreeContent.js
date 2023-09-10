@@ -17,6 +17,8 @@ import {AddressContext} from "../../../context/addressContext";
 import useCancellablePromise from "../../../api/cancelRequest";
 import Cookies from "js-cookie";
 import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
+import {ToastContext} from "../../../context/toastContext";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
 const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                               updateInitLoading, cartItemsData, updatedCartItemsData,
@@ -36,6 +38,19 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
     const responseRef = useRef([]);
     const eventTimeOutRef = useRef([]);
 
+    const dispatch = useContext(ToastContext);
+
+    // use this function to dispatch error
+    function dispatchToast(message, type) {
+        dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+                id: Math.floor(Math.random() * 100),
+                type,
+                message,
+            },
+        });
+    }
     // HOOKS
     const {cancellablePromise} = useCancellablePromise();
 
@@ -88,7 +103,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
 
             setUpdateCartItemsDataOnInitialize(oldData)
         } catch (err) {
-            // dispatchToast(toast_types.error, err.message);
+            dispatchToast(toast_types.error, err.message);
             setInitializeOrderLoading(false);
             updateInitLoading(false);
         }
@@ -126,7 +141,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                 // check if all the orders got cancled
                 if (responseRef.current.length <= 0) {
                     setInitializeOrderLoading(false);
-                    // dispatchToast(toast_types.error, "Cannot fetch details for this product Please try again!");
+                    dispatchToast(toast_types.error, "Cannot fetch details for this product Please try again!");
                     return;
                 }
                 // tale action to redirect them.
@@ -134,7 +149,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                     updatedCartItems.filter(({provider}) => responseReceivedIds.includes(provider.id.toString()))
                 );
                 if (requestObject.length !== responseRef.current.length) {
-                    // dispatchToast(toast_types.error, "Some orders are not initialized!");
+                    dispatchToast(toast_types.error, "Some orders are not initialized!");
                     // navigateToPayment();
 
                 }
@@ -201,7 +216,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
             //Error handling workflow eg, NACK
             const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
             if (isNACK) {
-                // dispatchToast(toast_types.error, isNACK.error.message);
+                dispatchToast(toast_types.error, isNACK.error.message);
                 setInitializeOrderLoading(false);
                 updateInitLoading(false);
             } else {
@@ -225,7 +240,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                 );
             }
         } catch (err) {
-            // dispatchToast(toast_types.error, err.message);
+            dispatchToast(toast_types.error, err.message);
             setInitializeOrderLoading(false);
             updateInitLoading(false);
         }

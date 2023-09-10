@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {useState, useEffect, useCallback, useRef, useContext} from "react";
 import useStyles from "./style";
 
 import Grid from "@mui/material/Grid";
@@ -26,6 +26,8 @@ import { getValueFromCookie, removeCookie } from "../../utils/cookies";
 import { getCall, postCall } from "../../api/axios";
 import useCancellablePromise from "../../api/cancelRequest";
 import { SSE_TIMEOUT } from "../../constants/sse-waiting-time";
+import {ToastContext} from "../../context/toastContext";
+import {toast_actions, toast_types} from "../shared/toast/utils/toast";
 
 const Checkout = () => {
   const classes = useStyles();
@@ -48,6 +50,8 @@ const Checkout = () => {
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
   const [eventData, setEventData] = useState([]);
+  const dispatch = useContext(ToastContext);
+
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -288,6 +292,18 @@ const Checkout = () => {
     // eslint-disable-next-line
   }, [eventData]);
 
+  // function to dispatch error
+  function dispatchError(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
+  }
+
   // on confirm order Api
   const onConfirmOrder = async (message_id) => {
     try {
@@ -297,7 +313,7 @@ const Checkout = () => {
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
     } catch (err) {
-      // dispatchError(err.message);
+      dispatchError(err.message);
       setConfirmOrderLoading(false);
     }
     // eslint-disable-next-line
@@ -331,9 +347,9 @@ const Checkout = () => {
         // check if all the orders got cancled
         if (responseRef.current.length <= 0) {
           setConfirmOrderLoading(false);
-          // dispatchError(
-          //     "Cannot fetch details for this product Please try again!"
-          // );
+          dispatchError(
+              "Cannot fetch details for this product Please try again!"
+          );
           return;
         }
       }, SSE_TIMEOUT);
@@ -412,7 +428,7 @@ const Checkout = () => {
         (item) => item.error && item.message.ack.status === "NACK"
       );
       if (isNACK) {
-        // dispatchError(isNACK.error.message);
+        dispatchError(isNACK.error.message);
         setConfirmOrderLoading(false);
       } else {
         onConfirm(
@@ -423,7 +439,7 @@ const Checkout = () => {
         );
       }
     } catch (err) {
-      // dispatchError(err.message);
+      dispatchError(err.message);
       setConfirmOrderLoading(false);
     }
     // eslint-disable-next-line
