@@ -9,10 +9,20 @@ import Button from "@mui/material/Button";
 
 import OrderTimeline from './orderTimeline';
 import SummaryItems from './summaryItems';
+import moment from "moment";
 
-const OrderSummary = () => {
+const OrderSummary = ({orderDetails}) => {
     const classes = useStyles();
-    const {orderId} = useParams();
+
+    const getSubTotal = (quote) => {
+        console.log("quote=====>", quote)
+        let subtotal = 0;
+        quote.forEach((item) => {
+            subtotal += parseInt(item?.price?.value)
+        });
+        return subtotal;
+    };
+
     return (
         <Card
             className={classes.orderSummaryCard}
@@ -22,13 +32,13 @@ const OrderSummary = () => {
                 className={classes.orderNumberTypo}
             >
                 {`Order Number: `}
-                <span className={classes.orderNumberTypoBold}>{orderId}</span>
+                <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
             </Typography>
             <Typography
                 variant="body1"
                 className={classes.orderOnTypo}
             >
-                Ordered On: 30/04/23 at 4:30pm | Payment: Cash | Item: 02
+                {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format("hh:mma")}`} | Payment: {orderDetails?.payment?.type} | Item: {orderDetails?.items.length}
             </Typography>
             <Box
                 component={"div"}
@@ -42,12 +52,19 @@ const OrderSummary = () => {
                 className={classes.orderSummaryDivider}
             />
 
-            <SummaryItems />
-
-            <Box
-                component={"div"}
-                className={classes.orderSummaryDivider}
-            />
+            {
+                orderDetails?.quote && (
+                    <>
+                        <SummaryItems
+                                items={orderDetails?.quote?orderDetails?.quote?.breakup.filter((item) => item["@ondc/org/title_type"] === "item" || item["@ondc/org/title_type"] === "customization"):[]}
+                        />
+                        <Box
+                            component={"div"}
+                            className={classes.orderSummaryDivider}
+                        />
+                    </>
+                )
+            }
 
             <div
                 className={classes.summaryItemContainer}
@@ -56,41 +73,27 @@ const OrderSummary = () => {
                     Subtotal
                 </Typography>
                 <Typography variant="body1" className={classes.summaryItemValue}>
-                    ₹4,300.00
+                    {getSubTotal(orderDetails?.quote?orderDetails?.quote?.breakup.filter((item) => item["@ondc/org/title_type"] === "item" || item["@ondc/org/title_type"] === "customization"):[])}
                 </Typography>
             </div>
+
+            <SummaryItems
+                hideHeader={true}
+                items={orderDetails?.quote?orderDetails?.quote?.breakup.filter((item) => item["@ondc/org/title_type"] !== "item" && item["@ondc/org/title_type"] !== "customization"):[]}
+            />
+
+            <Box
+                component={"div"}
+                className={classes.orderSummaryDivider}
+            />
             <div
                 className={classes.summaryItemContainer}
             >
-                <Typography variant="body1" className={classes.summaryItemLabel}>
-                    Shipping
-                    <br />
-                    <Typography variant="subtitle2" className={classes.summaryItemLabelDescription}>
-                        (Standard Rate - Price may vary depending on the item/destination. TECS Staff will contact you.)
-                    </Typography>
+                <Typography variant="body" className={classes.totalLabel}>
+                    Order Total
                 </Typography>
-                <Typography variant="body1" className={classes.summaryItemValue}>
-                    ₹21.00
-                </Typography>
-            </div>
-            <div
-                className={classes.summaryItemContainer}
-            >
-                <Typography variant="body1" className={classes.summaryItemLabel}>
-                    Tax
-                </Typography>
-                <Typography variant="body1" className={classes.summaryItemValue}>
-                    ₹1.91
-                </Typography>
-            </div>
-            <div
-                className={classes.summaryItemContainer}
-            >
-                <Typography variant="body1" className={classes.summaryItemLabel}>
-                    GST (10%)
-                </Typography>
-                <Typography variant="body1" className={classes.summaryItemValue}>
-                    ₹1.91
+                <Typography variant="h5" className={classes.totalValue}>
+                    {`₹${orderDetails?.quote?.price?.value || 0}`}
                 </Typography>
             </div>
             <div

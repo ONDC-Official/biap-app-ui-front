@@ -142,7 +142,27 @@ const useStyles = makeStyles({
     },
     cancelOrderButton: {
         flex: 1
-    }
+    },
+    customizationValue: {
+        width: "100px !important",
+        textAlign: "right",
+        color: "#A2A6B0 !important",
+    },
+    customizationLabel: {
+        color: "#A2A6B0 !important",
+        marginTop: "2px !important",
+        flex: 1,
+    },
+    totalLabel: {
+        flex: 1,
+        fontSize: "16px !important",
+        fontWeight: "600 !important",
+    },
+    totalValue: {
+        width: "100px !important",
+        textAlign: "right",
+        fontWeight: "600 !important",
+    },
 });
 
 export default useStyles;
