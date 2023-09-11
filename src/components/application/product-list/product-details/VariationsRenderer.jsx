@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 import { Grid, Typography } from "@mui/material";
 import { Link, useHistory } from "react-router-dom";
+import RightArrowIcon from '@mui/icons-material/ArrowForwardRounded';
+
+import ModalComponent from "../../../common/Modal";
 
 const VariationsRenderer = (props) => {
-  const { productPayload, variationState, setVariationState } = props;
+  const { productPayload, variationState, setVariationState, chartImage="", isFashion = false } = props;
   const classes = useStyles();
   const history = useHistory();
 
@@ -12,6 +15,7 @@ const VariationsRenderer = (props) => {
   const [variations, setVariations] = useState([]);
   const [initialVariationState, setInitialVariationState] = useState({});
   const [isUOM, setIsUOM] = useState(false);
+  const [openSizeChart, setOpenSizeChart] = useState(false);
 
   const getVariationGroups = () => {
     const attrTags = productPayload.categories[0].tags;
@@ -287,11 +291,17 @@ const VariationsRenderer = (props) => {
     return Object.keys(variationState).map((groupId) => {
       const groupData = variationState[groupId];
       const groupName = groupData.name;
-
+      console.log("groupName=====>",groupName)
       return (
         <div key={groupId}>
           <Typography variant="body" color="black" sx={{ fontWeight: 500, textTransform: "capitalize" }}>
             Available {groupName} Options
+            {
+              groupName === "size" && isFashion && (
+                    <span onClick={() => setOpenSizeChart(true)} className={classes.sizeChart}>Size Guide <RightArrowIcon /></span>
+                )
+            }
+
           </Typography>
           <Grid container>
             {groupData.options.map((option) => {
@@ -317,6 +327,23 @@ const VariationsRenderer = (props) => {
               );
             })}
           </Grid>
+          {
+            openSizeChart && chartImage && (
+                  <ModalComponent
+                      open={openSizeChart}
+                      onClose={() => {
+                        setOpenSizeChart(false);
+                      }}
+                      title="Size Chart"
+                  >
+                    <div
+                      className={classes.sizeChartContainer}
+                    >
+                      <img className={classes.sizeChartImage} src={chartImage} alt="size-chart" />
+                    </div>
+                  </ModalComponent>
+              )
+          }
         </div>
       );
     });

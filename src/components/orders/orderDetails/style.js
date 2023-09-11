@@ -60,6 +60,7 @@ const useStyles = makeStyles({
     map:{
         width: '100% !important',
         height: '483px !important',
+        borderRadius: '10px !important'
     },
 
     customerDetailsTypo:{

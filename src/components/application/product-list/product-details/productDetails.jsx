@@ -321,6 +321,8 @@ const ProductDetails = () => {
                   productPayload={productPayload}
                   variationState={variationState}
                   setVariationState={setVariationState}
+                  chartImage={productPayload?.attributes?.size_chart || ""}
+                  isFashion={productPayload?.context?.domain === "ONDC:RET12"}
                 />
                 <>
                   {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
