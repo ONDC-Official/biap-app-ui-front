@@ -9,6 +9,7 @@ import PaginationItem from '@mui/material/PaginationItem';
 import IconButton from '@mui/material/IconButton';
 import {ReactComponent as PreviousIcon} from '../../../assets/images/previous.svg';
 import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
+import {ReactComponent as AllIcon} from '../../../assets/images/all.svg';
 
 const SingleCategory = ({data, index}) => {
     // let { categoryName, subCategoryName } = useParams();
@@ -91,6 +92,7 @@ const CategoriesComponent = () => {
                     }}
                     boundaryCount={2}
                     renderItem={(item) => {
+                        console.log("item.type=====>", item.type)
                         if(item.type === "page"){
                             const subCatIndex = item.page - 1;
                             const subCat = subCatList[subCatIndex];
@@ -125,26 +127,50 @@ const CategoriesComponent = () => {
                             )
                         }else if(item.type === "previous"){
                             return (
-                                <IconButton
-                                    color="inherit" className={classes.actionButton}
-                                    onClick={() => {
-                                        const subCat = subCatList[item.page];
-                                        const params = new URLSearchParams({});
-                                        if(searchProductName){
-                                            params.set('s', searchProductName)
-                                        }
-                                        if(categoryName){
-                                            params.set('c', categoryName)
-                                        }
-                                        if(subCategoryName){
-                                            params.set('sc', subCat.value)
-                                        }else{}
-                                        history.replace({ pathname: locationData.pathname, search: params.toString() });
-                                    }}
-                                    disabled={item.page === -1}
-                                >
-                                    <PreviousIcon />
-                                </IconButton>
+                                <div className={classes.previousIconContainer}>
+                                    <div>
+                                        <IconButton
+                                            color="inherit" className={classes.actionButton}
+                                            onClick={() => {
+                                                const subCat = subCatList[item.page];
+                                                const params = new URLSearchParams({});
+                                                if(searchProductName){
+                                                    params.set('s', searchProductName)
+                                                }
+                                                if(categoryName){
+                                                    params.set('c', categoryName)
+                                                }
+                                                if(subCategoryName){
+                                                    params.set('sc', subCat.value)
+                                                }else{}
+                                                history.replace({ pathname: locationData.pathname, search: params.toString() });
+                                            }}
+                                            disabled={item.page === -1}
+                                        >
+                                            <PreviousIcon />
+                                        </IconButton>
+                                    </div>
+
+                                    <div
+                                        className={classes.allOptionsContainer}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            const params = new URLSearchParams({});
+                                            if(searchProductName){
+                                                params.set('s', searchProductName)
+                                            }
+                                            if(categoryName){
+                                                params.set('c', categoryName)
+                                            }
+                                            history.replace({ pathname: locationData.pathname, search: params.toString() });
+                                        }}
+                                    >
+                                        <AllIcon />
+                                        <Typography variant="body1" color="primary" className={classes.allNameTypo}>
+                                            All Options
+                                        </Typography>
+                                    </div>
+                                </div>
                             )
                         }else{
                             return (

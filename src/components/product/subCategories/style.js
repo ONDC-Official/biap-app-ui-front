@@ -11,12 +11,9 @@ const useStyles = makeStyles({
             gap: '29px',
             padding: '16px !important',
             justifyContent: 'center',
-            "& li > .MuiPaginationItem-ellipsis": {
-                // background: 'red !important',
-                display: 'none',
-                gap: '0px',
-                marginLeft: '-29px !important',
-                marginRight: '-29px !important'
+            "& li:has(.MuiPaginationItem-ellipsis)": {
+                background: 'red !important',
+                display: 'none'
             }
         },
     },
@@ -58,6 +55,20 @@ const useStyles = makeStyles({
     },
     pageEllipsisContainer: {
 
+    },
+    previousIconContainer: {
+        display: 'flex',
+        gap: '29px'
+    },
+    allOptionsContainer: {
+        textAlign: 'center',
+        cursor: 'pointer'
+    },
+    allNameTypo: {
+        fontWeight: '600 !important',
+        marginTop: '8px !important',
+        maxWidth: '50px',
+        height: '40px !important'
     }
 });
 
