@@ -30,7 +30,7 @@ const OrderCard = ({data, orderDetails}) => {
                         let isVeg = false;
                         if(findVegNonvegTag){
                             const tag = findVegNonvegTag.list[0];
-                            if(tag.code === "veg" && tag.value === "yes"){
+                            if(tag.code === "veg" && (tag.value === "yes" || tag.value === "Yes")){
                                 isVeg = true;
                             }else{
                                 isVeg = false;

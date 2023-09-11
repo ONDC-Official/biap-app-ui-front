@@ -103,7 +103,7 @@ const EditCustomizations = (props) => {
         if (tags[i].code === "veg_nonveg") {
           const vegNonVegValue = tags[i].list[0].value;
 
-          if (vegNonVegValue === "yes") {
+          if (vegNonVegValue === "yes" || vegNonVegValue === "Yes") {
             category = "veg";
           } else if (vegNonVegValue === "no") {
             category = "nonveg";

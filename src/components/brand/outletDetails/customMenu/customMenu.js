@@ -60,7 +60,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
       resData = resData.map((item) => {
         const findVegNonvegTag = item.item_details.tags.find((tag) => tag.code === "veg_nonveg");
         if (findVegNonvegTag) {
-          item.item_details.isVeg = findVegNonvegTag.list[0].value === "yes" ? true : false;
+          item.item_details.isVeg = (findVegNonvegTag.list[0].value === "yes" || findVegNonvegTag.list[0].value === "Yes") ? true : false;
         } else {
         }
         return item;
