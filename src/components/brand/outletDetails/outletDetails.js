@@ -145,15 +145,18 @@ const OutletDetails = () => {
                             <Typography variant="h4" className={classes.directionTypo}>
                                 Direction
                             </Typography>
-                            <div>
-                                <img
-                                    className={classes.mapImage}
-                                    src={map}
-                                    alt={`map-img-${outletDetails?.id}`}
-                                />
-                                {/*<PlacePickerMap*/}
-                                {/*    location={outletDetails?.circle?.gps}*/}
+                            <div style={{height: '275px'}} className={classes.mapImage}>
+                                {/*<img*/}
+                                {/*    className={classes.mapImage}*/}
+                                {/*    src={map}*/}
+                                {/*    alt={`map-img-${outletDetails?.id}`}*/}
                                 {/*/>*/}
+                                <PlacePickerMap
+                                    location={outletDetails?.circle?.gps}
+                                    setLocation={() => {
+
+                                    }}
+                                />
                             </div>
                             <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
                                 {`${outletDetails?.address?`${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`:"-"}`}

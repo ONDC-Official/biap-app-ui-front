@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import axios from "axios";
-// import ScriptTag from "react-script-tag";
+import ScriptTag from "react-script-tag";
 import "./PlacePickerMap.css";
 
 export default function MapPointer(props) {
@@ -19,9 +19,10 @@ export default function MapPointer(props) {
     const [script1Loaded, setScript1Loaded] = useState(false);
     const [script2Loaded, setScript2Loaded] = useState(false);
 
+    console.log("<===== location =====>", location)
     // fetch MMI API token
     useEffect(() => {
-        axios.post("/api/v1/auth/mmi/token").then((res) => {
+        axios.post("https://ref-seller-app-preprod.ondc.org/api/v1/auth/mmi/token").then((res) => {
             setApiKey(res.data.access_token);
         });
     }, []);
@@ -51,10 +52,12 @@ export default function MapPointer(props) {
         if (!mapInitialised) return;
         const options = {
             map,
-            callback: onChange,
-            search: true,
+            // callback: () => {},
+            search: false,
             closeBtn: false,
             topText: " ",
+            geolocation: false
+
         };
         options.location =
             location?.lat && location?.lng
@@ -66,18 +69,18 @@ export default function MapPointer(props) {
 
     return (
         <div style={{ width: "100%", height: "100%" }}>
-            {/*<ScriptTag*/}
-            {/*    isHydrating={true}*/}
-            {/*    type="text/javascript"*/}
-            {/*    src={`https://apis.mapmyindia.com/advancedmaps/v1/${apiKey}/map_load?v=1.3`}*/}
-            {/*    onLoad={() => setScript1Loaded(true)}*/}
-            {/*/>*/}
-            {/*<ScriptTag*/}
-            {/*    isHydrating={true}*/}
-            {/*    type="text/javascript"*/}
-            {/*    src={`https://apis.mapmyindia.com/advancedmaps/api/${apiKey}/map_sdk_plugins`}*/}
-            {/*    onLoad={() => setScript2Loaded(true)}*/}
-            {/*/>*/}
+            <ScriptTag
+                isHydrating={true}
+                type="text/javascript"
+                src={`https://apis.mapmyindia.com/advancedmaps/v1/${apiKey}/map_load?v=1.3`}
+                onLoad={() => setScript1Loaded(true)}
+            />
+            <ScriptTag
+                isHydrating={true}
+                type="text/javascript"
+                src={`https://apis.mapmyindia.com/advancedmaps/api/${apiKey}/map_sdk_plugins`}
+                onLoad={() => setScript2Loaded(true)}
+            />
             {script1Loaded && script2Loaded && <div id="map" ref={ref} />}
         </div>
     );

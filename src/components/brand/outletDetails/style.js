@@ -68,6 +68,7 @@ const useStyles = makeStyles({
     },
     mapImage: {
         width: '100% !important',
+        height: '375px !important',
         marginTop: '12px !important'
     },
     seeAllOutletTypo: {
