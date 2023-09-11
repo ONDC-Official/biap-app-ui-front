@@ -222,6 +222,17 @@ const useStyles = makeStyles({
     // gap: '13px',
     // padding: '0px 5px !important'
   },
+  sizeChart: {
+    color: palette.primary.main,
+    marginLeft: '20px !important',
+    cursor: 'pointer'
+  },
+  sizeChartContainer: {
+
+  },
+  sizeChartImage: {
+
+  }
 });
 
 export default useStyles;
