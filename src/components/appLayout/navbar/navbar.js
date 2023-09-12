@@ -156,7 +156,7 @@ const NavBar = ({ isCheckout = false }) => {
           payload: {
               id: Math.floor(Math.random() * 100),
               type: toast_types.error,
-              message: err?.message,
+              message: err?.response?.data?.error?.message,
           },
       });
     } finally {
@@ -290,7 +290,7 @@ const NavBar = ({ isCheckout = false }) => {
       AddCookie("search_context", JSON.stringify(search_context));
       setToggleLocationListCard(false);
     } catch (err) {
-      dispatchError(err?.message);
+      dispatchError(err?.response?.data?.error?.message);
     }
   };
 
@@ -318,7 +318,7 @@ const NavBar = ({ isCheckout = false }) => {
         }));
       }
     } catch (err) {
-      dispatchError(err?.message);
+      dispatchError(err?.response?.data?.error?.message);
     }
   };
 

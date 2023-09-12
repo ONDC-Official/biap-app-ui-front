@@ -69,7 +69,7 @@ const SelectAddress = ({
                 payload: {
                     id: Math.floor(Math.random() * 100),
                     type: toast_types.error,
-                    message: err?.message,
+                    message: err?.response?.data?.error?.message,
                 },
             });
         }
