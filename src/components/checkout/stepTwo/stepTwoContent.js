@@ -23,8 +23,9 @@ import {getCall, postCall} from "../../../api/axios";
 import {useHistory} from "react-router-dom";
 import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
 import {removeNullValues} from "../../../utils/helper";
-import {toast_types} from "../../shared/toast/utils/toast";
+import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 import Cookies from "js-cookie";
+import {ToastContext} from "../../../context/toastContext";
 
 const StepTwoContent = ({
                             cartItemsData,
@@ -47,7 +48,19 @@ const StepTwoContent = ({
         toggle: false,
         address: restoreToDefault(),
     });
+    const dispatch = useContext(ToastContext);
 
+    // use this function to dispatch error
+    function dispatchToast(type, message) {
+        dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+                id: Math.floor(Math.random() * 100),
+                type,
+                message,
+            },
+        });
+    };
 
     const transaction_id = getValueFromCookie("transaction_id");
     const responseRef = useRef([]);
@@ -122,7 +135,7 @@ const StepTwoContent = ({
             localStorage.setItem("updatedCartItems", JSON.stringify([...eventData, data[0]]));
             setUpdateCartItemsData([...eventData, data[0]]);
         } catch (err) {
-            alert(err.message);
+            dispatchToast(toast_types.error, err?.response?.data?.error?.message);
             setGetQuoteLoading(false);
         }
         // eslint-disable-next-line
@@ -156,13 +169,14 @@ const StepTwoContent = ({
                 });
                 if (responseRef.current.length <= 0) {
                     setGetQuoteLoading(false);
-                    alert("Cannot fetch details for this product");
+                    dispatchToast(toast_types.error, "Cannot fetch details for this product");
+
                     history.replace("/application/products");
                     return;
                 }
                 const request_object = constructQouteObject(cartItems);
                 if (responseRef.current.length !== request_object.length) {
-                    alert("Cannot fetch details for some product those products will be ignored!");
+                    dispatchToast(toast_types.error, "Cannot fetch details for some product those products will be ignored!");
                     setErrorMessageTimeOut("Cannot fetch details for this product");
                 }
                 setToggleInit(true);
@@ -221,7 +235,7 @@ const StepTwoContent = ({
                 //Error handling workflow eg, NACK
                 const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
                 if (isNACK) {
-                    alert(isNACK.error.message);
+                    dispatchToast(toast_types.error, isNACK.error.message);
                     setGetQuoteLoading(false);
                 } else {
                     // fetch through events
@@ -233,13 +247,12 @@ const StepTwoContent = ({
                     );
                 }
             } catch (err) {
-                alert(err?.response?.data?.error?.message);
                 console.log(err?.response?.data?.error);
                 setGetQuoteLoading(false);
                 history.replace("/application/products");
             }
         } else {
-            alert("Please select address")
+            dispatchToast(toast_types.error, "Please select address");
         }
     };
 

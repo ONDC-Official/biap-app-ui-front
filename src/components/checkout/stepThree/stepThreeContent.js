@@ -41,7 +41,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
     const dispatch = useContext(ToastContext);
 
     // use this function to dispatch error
-    function dispatchToast(message, type) {
+    function dispatchToast(type, message) {
         dispatch({
             type: toast_actions.ADD_TOAST,
             payload: {
@@ -68,7 +68,8 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
     }, [cartItemsData, updatedCartItemsData]);
 
     useEffect(() => {
-        if(cartItems){
+        console.log("<==============================================cartItems=====>", cartItems)
+        if(cartItems && cartItems.length > 0){
             handleInitializaOrder();
         }
     }, [cartItems]);
@@ -95,20 +96,20 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
         try {
             localStorage.setItem("selectedItems", JSON.stringify(updatedCartItems));
             const data = await cancellablePromise(getCall(`/clientApis/v2/on_initialize_order?messageIds=${message_id}`));
+            console.log("data[0]=====>", data[0]);
             responseRef.current = [...responseRef.current, data[0]];
             setEventData((eventData) => [...eventData, data[0]]);
 
             let oldData = updatedCartItems.current;
             oldData[0].message.quote.quote = data[0].message.order.quote;
 
-            setUpdateCartItemsDataOnInitialize(oldData)
+            setUpdateCartItemsDataOnInitialize(oldData);
+            handleSuccess();
         } catch (err) {
-            dispatchToast(toast_types.error, err.message);
+            dispatchToast(toast_types.error, err?.response?.data?.error?.message);
             setInitializeOrderLoading(false);
             updateInitLoading(false);
         }
-
-        handleSuccess();
         // eslint-disable-next-line
     };
 
@@ -240,7 +241,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                 );
             }
         } catch (err) {
-            dispatchToast(toast_types.error, err.message);
+            dispatchToast(toast_types.error, err?.response?.data?.error?.message);
             setInitializeOrderLoading(false);
             updateInitLoading(false);
         }

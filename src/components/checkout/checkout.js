@@ -28,6 +28,7 @@ import useCancellablePromise from "../../api/cancelRequest";
 import { SSE_TIMEOUT } from "../../constants/sse-waiting-time";
 import {ToastContext} from "../../context/toastContext";
 import {toast_actions, toast_types} from "../shared/toast/utils/toast";
+import Loading from "../shared/loading/loading";
 
 const Checkout = () => {
   const classes = useStyles();
@@ -250,6 +251,10 @@ const Checkout = () => {
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             updateInitLoading={(value) => setInitLoading(value)}
+            setUpdateCartItemsDataOnInitialize={(data) => {
+              setUpdatedCartItems(data);
+            }}
+
           />
         );
       default:
@@ -313,7 +318,7 @@ const Checkout = () => {
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
     } catch (err) {
-      dispatchError(err.message);
+      dispatchError(err?.response?.data?.error?.message);
       setConfirmOrderLoading(false);
     }
     // eslint-disable-next-line
@@ -439,7 +444,7 @@ const Checkout = () => {
         );
       }
     } catch (err) {
-      dispatchError(err.message);
+      dispatchError(err?.response?.data?.error?.message);
       setConfirmOrderLoading(false);
     }
     // eslint-disable-next-line
@@ -559,7 +564,7 @@ const Checkout = () => {
                 className={classes.proceedToBuy}
                 fullWidth
                 variant="contained"
-                disabled={activeStep !== 2 || initLoading}
+                disabled={confirmOrderLoading || initLoading || activeStep !== 2 }
                 onClick={() => {
                   const { productQuotes, successOrderIds } = JSON.parse(
                     // getValueFromCookie("checkout_details") || "{}"
@@ -593,7 +598,7 @@ const Checkout = () => {
                   }
                 }}
               >
-                Proceed to Buy
+                {confirmOrderLoading ? <Loading /> : "Proceed to Buy"}
               </Button>
             </Card>
           </Grid>

@@ -189,7 +189,7 @@ export default function InitializeOrder() {
         }
       });
     } catch (err) {
-      dispatchToast(err.message);
+      dispatchToast(err?.response?.data?.error?.message);
       setGetQuoteLoading(false);
     }
     // eslint-disable-next-line
