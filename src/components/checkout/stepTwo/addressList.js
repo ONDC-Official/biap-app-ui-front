@@ -42,18 +42,20 @@ const AddressList = ({addressList, label, setAddAddress, setUpdateAddress, onSel
                             <FormControlLabel
                                 className={classes.formControlLabel}
                                 onClick={() => {
-                                    setDeliveryAddress(() =>
-                                        onSetDeliveryAddress(id, descriptor, address)
-                                    );
-                                    AddCookie(
-                                        "delivery_address",
-                                        JSON.stringify(
+                                    if(deliveryAddress?.id !== id) {
+                                        setDeliveryAddress(() =>
                                             onSetDeliveryAddress(id, descriptor, address)
-                                        )
-                                    );
-                                    setBillingAddress();
-                                    removeCookie("billing_address");
-                                    onSelectAddress();
+                                        );
+                                        AddCookie(
+                                            "delivery_address",
+                                            JSON.stringify(
+                                                onSetDeliveryAddress(id, descriptor, address)
+                                            )
+                                        );
+                                        setBillingAddress();
+                                        removeCookie("billing_address");
+                                        onSelectAddress();
+                                    }
                                 }}
                                 control={<Radio checked={deliveryAddress?.id === id}/>}
                                 label={
@@ -70,6 +72,7 @@ const AddressList = ({addressList, label, setAddAddress, setUpdateAddress, onSel
                                             <EditIcon
                                                 onClick={(e) => {
                                                     e.preventDefault();
+                                                    e.stopPropagation();
                                                     setUpdateAddress({
                                                         id,
                                                         name: descriptor?.name,

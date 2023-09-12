@@ -182,8 +182,6 @@ const Checkout = () => {
     }
   }, [updatedCartItems]);
 
-  console.log("productsQuote************************", productsQuote);
-
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
@@ -219,8 +217,6 @@ const Checkout = () => {
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
-              console.log("updatedCartItems data=====>", updatedCartItems);
-              console.log("StepTwoContent data=====>", data);
               setUpdatedCartItems(data);
             }}
             setUpdateCartItemsDataOnInitialize={(data) => {
@@ -570,12 +566,10 @@ const Checkout = () => {
                     // getValueFromCookie("checkout_details") || "{}"
                     localStorage.getItem("checkout_details") || "{}"
                   );
-                  console.log("successOrderIds=====>", successOrderIds);
                   setConfirmOrderLoading(true);
                   let c = cartItems.map((item) => {
                     return item.item;
                   });
-                  console.log("c=====>", c);
                   if (activePaymentMethod === payment_methods.JUSPAY) {
                     // setTogglePaymentGateway(true);
                     // setLoadingSdkForPayment(true);
@@ -587,13 +581,11 @@ const Checkout = () => {
                     );
                     confirmOrder(request_object[0], payment_methods.JUSPAY);
                   } else {
-                    console.log("cartItems=====>", cartItems);
                     const request_object = constructQouteObject(
                       c.filter(({ provider }) =>
                         successOrderIds.includes(provider.local_id.toString())
                       )
                     );
-                    console.log("request_object=====>", request_object);
                     confirmOrder(request_object[0], payment_methods.COD);
                   }
                 }}

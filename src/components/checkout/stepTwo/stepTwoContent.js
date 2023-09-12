@@ -81,8 +81,7 @@ const StepTwoContent = ({
             setCartItems(cartItemsData)
         }
         if (updatedCartItemsData) {
-            updatedCartItems.current = updatedCartItemsData;
-            console.log("updatedCartItemsData uuuuuuuuuuuuuuu=====>", updatedCartItemsData)
+            updatedCartItems.current = cartItemsData;
         }
     }, [cartItemsData, updatedCartItemsData]);
 
@@ -132,8 +131,8 @@ const StepTwoContent = ({
             });
 
             localStorage.setItem("cartItems", JSON.stringify(updatedCartItems.current));
-            localStorage.setItem("updatedCartItems", JSON.stringify([...eventData, data[0]]));
-            setUpdateCartItemsData([...eventData, data[0]]);
+            localStorage.setItem("updatedCartItems", JSON.stringify([...[], data[0]]));
+            setUpdateCartItemsData([...[], data[0]]);
         } catch (err) {
             dispatchToast(toast_types.error, err?.response?.data?.error?.message);
             setGetQuoteLoading(false);
@@ -230,7 +229,6 @@ const StepTwoContent = ({
                         ],
                     },
                 };
-                console.log("select payload:", selectPayload);
                 const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
                 //Error handling workflow eg, NACK
                 const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
@@ -247,7 +245,6 @@ const StepTwoContent = ({
                     );
                 }
             } catch (err) {
-                console.log(err?.response?.data?.error);
                 setGetQuoteLoading(false);
                 history.replace("/application/products");
             }
@@ -263,7 +260,6 @@ const StepTwoContent = ({
             });
 
             const request_object = constructQouteObject(c);
-            console.log("request_object", request_object);
             getQuote(request_object[0]);
         }
     };
