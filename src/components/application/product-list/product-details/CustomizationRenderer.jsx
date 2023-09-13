@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import Radio from "../../../common/Radio";
+import Checkbox from "../../../common/Checkbox";
 
 const CustomizationRenderer = (props) => {
   const { productPayload, customization_state, setCustomizationState, selectedCustomizations = null } = props;
@@ -354,7 +355,7 @@ const CustomizationRenderer = (props) => {
   const renderCustomizations = () => {
     return Object.keys(customization_state).map((level) => {
       const cg = customization_state[level];
-
+      console.log("group", cg);
       return (
         <>
           <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
@@ -373,12 +374,19 @@ const CustomizationRenderer = (props) => {
                     }
                   });
 
+                  console.log("C", c);
                   return (
                     <>
                       <FormControlLabel
                         className={classes.formControlLabel}
                         onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                        control={<Radio checked={selected} disabled={!c.inStock} />}
+                        control={
+                          cg.seq === highestSeq ? (
+                            <Checkbox checked={selected} disabled={!c.inStock} />
+                          ) : (
+                            <Radio checked={selected} disabled={!c.inStock} />
+                          )
+                        }
                         label={
                           <>
                             <div
@@ -390,17 +398,12 @@ const CustomizationRenderer = (props) => {
                                 {c.name}
                               </Typography>
 
-                              <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2, minWidth: 30 }}>
-                                <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                                {c.price}
-                              </Typography>
                               {!c.inStock && (
                                 <div
                                   style={{
                                     border: "1px solid #D83232",
                                     padding: "2px 8px",
                                     borderRadius: "6px",
-                                    marginRight: 12,
                                   }}
                                 >
                                   <Typography color="#D83232" variant="subtitle1">
@@ -408,6 +411,13 @@ const CustomizationRenderer = (props) => {
                                   </Typography>
                                 </div>
                               )}
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: 600, marginRight: 2, minWidth: 50, textAlign: "right" }}
+                              >
+                                <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                                {c.price}
+                              </Typography>
                             </div>
                           </>
                         }

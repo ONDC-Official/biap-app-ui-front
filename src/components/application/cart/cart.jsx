@@ -235,7 +235,7 @@ export default function Cart() {
   const getPriceWithCustomisations = (cartItem) => {
     let basePrice = cartItem.item.product.price.value;
     let price = 0;
-    cartItem.item.customisations.map((c) => (price += c.item_details.price.value));
+    cartItem?.item?.customisations?.map((c) => (price += c.item_details.price.value));
 
     return basePrice + price;
   };
