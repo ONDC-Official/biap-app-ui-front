@@ -207,9 +207,9 @@ const ProductDetails = () => {
       );
     } else {
       return (
-        <Grid container alignItems="center">
+        <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
           <CloseIcon color="error" fontSize="small" />
-          <Typography variant="body" color="#D83232">
+          <Typography variant="body1" color="#D83232">
             Out of Stock
           </Typography>
         </Grid>
