@@ -24,6 +24,8 @@ const CustomizationRenderer = (props) => {
   const [highestSeq, setHighestSeq] = useState(0);
 
   const handleCustomizationSelect = (selectedOption, level) => {
+    if (!selectedOption.inStock) return;
+    console.log(selectedOption.inStock);
     const newState = { ...customization_state };
 
     // Check if the parent's customization group has minQuantity === 0
@@ -153,6 +155,7 @@ const CustomizationRenderer = (props) => {
       const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
       const childTag = itemDetails.tags.find((tag) => tag.code === "child");
       const vegNonVegTag = itemDetails.tags.find((tag) => tag.code === "veg_nonveg");
+      const isDefault = parentTag.list.find((tag) => tag.code === "default");
 
       return {
         id: itemDetails.id,
@@ -161,6 +164,7 @@ const CustomizationRenderer = (props) => {
         inStock: itemDetails.quantity.available.count > 0,
         parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
         child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
+        isDefault: isDefault.value === "Yes" || isDefault.value === "yes" ? true : false,
         vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",
       };
     });
@@ -369,26 +373,45 @@ const CustomizationRenderer = (props) => {
                       selected = true;
                     }
                   });
+
+                  console.log(c.name, c.inStock === true);
                   return (
                     <>
                       <FormControlLabel
                         className={classes.formControlLabel}
                         onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                        control={<Radio checked={selected} />}
+                        control={<Radio checked={selected} disabled={!c.inStock} />}
                         label={
-                          <div
-                            className={classes.radioTypoContainer}
-                            onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                          >
-                            {renderVegNonVegTag(c.vegNonVeg)}
-                            <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
-                              {c.name}
-                            </Typography>
-                            <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2 }}>
-                              <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                              {c.price}
-                            </Typography>
-                          </div>
+                          <>
+                            <div
+                              className={classes.radioTypoContainer}
+                              onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                            >
+                              {renderVegNonVegTag(c.vegNonVeg)}
+                              <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                                {c.name}
+                              </Typography>
+
+                              <Typography variant="body1" sx={{ fontWeight: 600, marginRight: 2, minWidth: 30 }}>
+                                <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                                {c.price}
+                              </Typography>
+                              {!c.inStock && (
+                                <div
+                                  style={{
+                                    border: "1px solid #D83232",
+                                    padding: "2px 8px",
+                                    borderRadius: "6px",
+                                    marginRight: 12,
+                                  }}
+                                >
+                                  <Typography color="#D83232" variant="subtitle1">
+                                    Out of Stock
+                                  </Typography>
+                                </div>
+                              )}
+                            </div>
+                          </>
                         }
                         labelPlacement="start"
                       />
