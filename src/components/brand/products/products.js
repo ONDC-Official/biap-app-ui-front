@@ -22,8 +22,8 @@ import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest }
 import { getValueFromCookie } from "../../../utils/cookies";
 import { getCall, postCall } from "../../../api/axios";
 import { CartContext } from "../../../context/cartContext";
-import {ToastContext} from "../../../context/toastContext";
-import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
+import { ToastContext } from "../../../context/toastContext";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 
 const Products = ({ brandDetails }) => {
   const classes = useStyles();
@@ -80,12 +80,12 @@ const Products = ({ brandDetails }) => {
       setTotalProductCount(data.count);
     } catch (err) {
       dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: err?.response?.data?.error?.message,
-          },
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
       });
     } finally {
       setIsLoading(false);
@@ -131,12 +131,12 @@ const Products = ({ brandDetails }) => {
       setPaginationModel(paginationData);
     } catch (err) {
       dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: err?.response?.data?.error?.message,
-          },
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
       });
     } finally {
       setIsLoading(false);
@@ -206,6 +206,8 @@ const Products = ({ brandDetails }) => {
         ...productPayload.item_details,
       },
       customisations: [],
+      hasCustomisations:
+        productPayload.hasOwnProperty("customisation_groups") && productPayload.customisation_groups.length > 0,
     };
 
     const res = await postCall(url, payload);

@@ -148,12 +148,12 @@ const ProductList = () => {
       setPaginationModel(paginationData);
     } catch (err) {
       dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: err?.response?.data?.error?.message,
-          },
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
       });
     } finally {
       setIsLoading(false);
@@ -241,7 +241,6 @@ const ProductList = () => {
     const cus = await formatCustomizations(productPayload.customisation_items);
     const newState = await initializeCustomizationState(groups, cus, customization_state);
 
-    console.log("Payload", isDefault);
     getCustomizations(productPayload, isDefault ? newState : customization_state).then((customisations) => {
       const payload = {
         id: productPayload.id,
@@ -262,6 +261,8 @@ const ProductList = () => {
           subtotal,
           ...productPayload.item_details,
         },
+        hasCustomisations:
+          productPayload.hasOwnProperty("customisation_groups") && productPayload.customisation_groups.length > 0,
       };
 
       if (customisations.length > 0) {

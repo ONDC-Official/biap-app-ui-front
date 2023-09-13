@@ -163,6 +163,7 @@ const EditCustomizations = (props) => {
             color="inherit"
             onClick={() => {
               setProductPayload(null);
+              setCustomizationState({});
               setOpenDrawer(false);
             }}
           >

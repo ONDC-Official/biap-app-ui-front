@@ -115,7 +115,7 @@ const useStyles = makeStyles({
     fontWeight: 500,
   },
   outOfStock: {
-    margin: "12px 0 24px 0",
+    margin: "12px 0 0px 0",
     padding: "6px",
     backgroundColor: "#FC95953D",
     borderRadius: 8,
@@ -224,15 +224,11 @@ const useStyles = makeStyles({
   },
   sizeChart: {
     color: palette.primary.main,
-    marginLeft: '20px !important',
-    cursor: 'pointer'
+    marginLeft: "20px !important",
+    cursor: "pointer",
   },
-  sizeChartContainer: {
-
-  },
-  sizeChartImage: {
-
-  }
+  sizeChartContainer: {},
+  sizeChartImage: {},
 });
 
 export default useStyles;
