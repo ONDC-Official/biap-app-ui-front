@@ -339,21 +339,23 @@ export default function Cart() {
                     {cartItem?.item?.product?.descriptor?.name}
                   </Typography>
                   {getCustomizations(cartItem)}
-                  <Grid
-                    container
-                    sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
-                    alignItems="center"
-                    onClick={() => {
-                      getProductDetails(cartItem.item.id);
-                      setCurrentCartItem(cartItem);
-                      setOpenDrawer(true);
-                    }}
-                  >
-                    <EditOutlinedIcon size="small" sx={{ color: "#196AAB", fontSize: 16, marginRight: "5px" }} />
-                    <Typography variant="subtitle1" color="#196AAB">
-                      Customise
-                    </Typography>
-                  </Grid>
+                  {cartItem.item.hasCustomisations && (
+                    <Grid
+                      container
+                      sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
+                      alignItems="center"
+                      onClick={() => {
+                        getProductDetails(cartItem.item.id);
+                        setCurrentCartItem(cartItem);
+                        setOpenDrawer(true);
+                      }}
+                    >
+                      <EditOutlinedIcon size="small" sx={{ color: "#196AAB", fontSize: 16, marginRight: "5px" }} />
+                      <Typography variant="subtitle1" color="#196AAB">
+                        Customise
+                      </Typography>
+                    </Grid>
+                  )}
                   <Grid container sx={{ marginTop: "4px" }} alignItems="center">
                     <div className={classes.logoContainer}>
                       <img

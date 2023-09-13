@@ -11,7 +11,7 @@ export const formatCustomizations = async (customisation_items) => {
       name: itemDetails.descriptor.name,
       price: itemDetails.price.value,
       inStock: itemDetails.quantity.available.count > 0,
-      isDefault: (isDefault.value === "Yes" || isDefault.value === "yes") ? true : false,
+      isDefault: isDefault.value === "Yes" || isDefault.value === "yes" ? true : false,
       parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
       child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
       vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",

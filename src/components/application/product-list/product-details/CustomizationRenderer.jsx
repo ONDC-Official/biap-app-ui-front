@@ -25,7 +25,6 @@ const CustomizationRenderer = (props) => {
 
   const handleCustomizationSelect = (selectedOption, level) => {
     if (!selectedOption.inStock) return;
-    console.log(selectedOption.inStock);
     const newState = { ...customization_state };
 
     // Check if the parent's customization group has minQuantity === 0
@@ -374,7 +373,6 @@ const CustomizationRenderer = (props) => {
                     }
                   });
 
-                  console.log(c.name, c.inStock === true);
                   return (
                     <>
                       <FormControlLabel

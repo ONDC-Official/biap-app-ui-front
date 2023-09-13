@@ -119,6 +119,7 @@ const ProductDetails = () => {
         ...productPayload.item_details,
       },
       customisations,
+      hasCustomisations: productPayload.hasOwnProperty("customisation_groups"),
     };
 
     console.log(payload);
