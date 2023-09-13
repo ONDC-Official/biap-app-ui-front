@@ -63,7 +63,11 @@ export default function Cart() {
   const getCartSubtotal = () => {
     let subtotal = 0;
     cartItems.map((cartItem) => {
-      subtotal += cartItem?.item?.product?.subtotal * cartItem?.item?.quantity?.count;
+      if (cartItem.item.hasCustomisations) {
+        subtotal += getPriceWithCustomisations(cartItem) * cartItem?.item?.quantity?.count;
+      } else {
+        subtotal += cartItem?.item?.product?.subtotal * cartItem?.item?.quantity?.count;
+      }
     });
     return subtotal;
   };
@@ -228,6 +232,14 @@ export default function Cart() {
     return null;
   };
 
+  const getPriceWithCustomisations = (cartItem) => {
+    let basePrice = cartItem.item.product.price.value;
+    let price = 0;
+    cartItem.item.customisations.map((c) => (price += c.item_details.price.value));
+
+    return basePrice + price;
+  };
+
   const renderSpecialInstructions = (item, id) => {
     const cartItem = cartItems.find((ci) => ci._id == id);
     const hasSpecialInstructions = cartItem?.item?.customisations?.find((c) => {
@@ -374,7 +386,9 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                ₹ {cartItem?.item?.product?.price?.value}
+                {cartItem.item.hasCustomisations
+                  ? `₹ ${getPriceWithCustomisations(cartItem)}`
+                  : `₹ ${cartItem?.item?.product?.price?.value}`}
               </Typography>
             </Grid>
             <Grid item xs={1.2}>
@@ -394,7 +408,9 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
-                ₹ {parseInt(cartItem?.item?.quantity?.count) * parseInt(cartItem?.item?.product?.subtotal)}
+                {cartItem.item.hasCustomisations
+                  ? `₹ ${parseInt(getPriceWithCustomisations(cartItem)) * parseInt(cartItem?.item?.quantity?.count)}`
+                  : `₹ ${parseInt(cartItem?.item?.product?.subtotal)}`}
               </Typography>
             </Grid>
             <Grid item xs={4}>
