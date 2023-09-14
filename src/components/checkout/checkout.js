@@ -505,13 +505,18 @@ const Checkout = () => {
                         >
                           <Typography
                             variant="body1"
-                            className={classes.summaryItemLabel}
+                            component="div"
+                            className={`${classes.summaryItemLabel} ${quote.textClass}`}
                           >
                             {quote?.title}
+                            <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                              {quote.quantityMessage}
+                            </p>
                           </Typography>
                           <Typography
                             variant="body1"
-                            className={classes.summaryItemValue}
+                            component="div"
+                            className={`${classes.summaryItemValue} ${quote.textClass}`}
                           >
                             {`₹${quote?.price}`}
                           </Typography>
@@ -523,13 +528,17 @@ const Checkout = () => {
                         >
                           <Typography
                             variant="subtitle2"
-                            className={classes.summaryItemLabelDescription}
+                            component="div"
+                            className={`${classes.summaryItemLabelDescription} ${quote.textClass}`}
                           >
                             {quote?.title}
+                            <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                              {quote.quantityMessage}
+                            </p>
                           </Typography>
                           <Typography
                             variant="subtitle2"
-                            className={classes.customizationValue}
+                            className={`${classes.customizationValue} ${quote.textClass}`}
                           >
                             {`₹${quote?.price}`}
                           </Typography>
