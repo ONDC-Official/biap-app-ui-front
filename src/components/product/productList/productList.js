@@ -407,7 +407,7 @@ const ProductList = () => {
                       );
                     } else {
                       return (
-                        <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
+                        <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={2} lg={2} xl={2}>
                           <ProductGridView
                             product={productItem?.item_details}
                             productId={productItem.id}
