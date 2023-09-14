@@ -1279,7 +1279,7 @@ const Checkout = () => {
         };
         // else generate quote of it
         if (message) {
-          //          message = m2;
+          //message = m2;
 
           if (message?.quote?.quote?.price?.value) {
             provider_payable += Number(message?.quote?.quote?.price?.value);

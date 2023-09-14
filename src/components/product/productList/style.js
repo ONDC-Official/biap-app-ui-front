@@ -12,7 +12,7 @@ const useStyles = makeStyles({
     boxShadow: "none !important",
     background: "#F5F5F5 !important",
     display: "flex",
-    height: "334px !important",
+    height: "261px !important",
     borderRadius: "12px !important",
     position: "relative !important",
     "&:hover $productImage": {
@@ -30,13 +30,14 @@ const useStyles = makeStyles({
     left: "50%",
     // marginRight: '20px !important',
     // marginLeft: '20px !important',
-    width: "280px !important",
+    width: "200px !important",
     transform: "translate(-50%, -50%)",
   },
   productImage: {
     margin: "auto !important",
     maxHeight: "95%",
     maxWidth: "95%",
+    borderRadius: '5px'
   },
   cartIcon: {
     position: "absolute !important",
@@ -85,6 +86,7 @@ const useStyles = makeStyles({
     boxShadow: "none !important",
     background: "#F5F5F5 !important",
     display: "flex",
+    height: "250px",
     minHeight: "250px !important",
     // width: '314px !important',
     borderRadius: "12px 0px 0px 12px !important",

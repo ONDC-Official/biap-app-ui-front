@@ -54,8 +54,9 @@ const NavBar = ({ isCheckout = false }) => {
   };
   let query = useQuery();
   const { setSearchData, setLocationData } = useContext(SearchContext);
-  const { setDeliveryAddress } = useContext(AddressContext);
+  const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
 
+  console.log("deliveryAddress=====>", deliveryAddress)
   useEffect(() => {}, [locationData]);
 
   // STATES
@@ -146,6 +147,13 @@ const NavBar = ({ isCheckout = false }) => {
     try {
       const data = await cancellablePromise(getAllDeliveryAddressRequest());
       setAddressList(data);
+      if(deliveryAddress === undefined && data.length === 0){
+        setToggleAddressModal({
+          actionType: "add",
+          toggle: true,
+          address: restoreToDefault(),
+        });
+      }
     } catch (err) {
       if (err.response.data.length > 0) {
         setAddressList([]);
@@ -527,9 +535,9 @@ const NavBar = ({ isCheckout = false }) => {
             </>
           )}
         </Toolbar>
-        {selectAddressModal && (
+        {(selectAddressModal || (deliveryAddress === undefined && addressList.length > 0)) && (
           <ModalComponent
-            open={selectAddressModal}
+            open={selectAddressModal || deliveryAddress === undefined}
             onClose={() => {
               setSelectAddressModal(false);
             }}
