@@ -76,6 +76,7 @@ const CategoriesComponent = () => {
                     count={subCatList.length}
                     page={page}
                     className={classes.categoriesContainer}
+                    boundaryCount={2}
                     onChange={(event, page) => {
                         const subCat = subCatList[page];
                         const params = new URLSearchParams({});
@@ -90,7 +91,6 @@ const CategoriesComponent = () => {
                         }else{}
                         history.replace({ pathname: locationData.pathname, search: params.toString() });
                     }}
-                    boundaryCount={2}
                     renderItem={(item) => {
                         console.log("item.type=====>", item.type)
                         if(item.type === "page"){
@@ -128,7 +128,7 @@ const CategoriesComponent = () => {
                         }else if(item.type === "previous"){
                             return (
                                 <div className={classes.previousIconContainer}>
-                                    <div>
+                                    <div style={{margin: 'auto'}}>
                                         <IconButton
                                             color="inherit" className={classes.actionButton}
                                             onClick={() => {

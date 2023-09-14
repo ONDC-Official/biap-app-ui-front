@@ -8,7 +8,7 @@ const useStyles = makeStyles({
     categoriesContainer: {
         "& ul": {
             display: 'flex',
-            gap: '29px',
+            gap: '16px',
             padding: '16px !important',
             justifyContent: 'center',
             "& li > .MuiPaginationItem-ellipsis": {

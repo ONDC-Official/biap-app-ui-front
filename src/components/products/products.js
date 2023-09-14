@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import CategoriesHeader from '../category/categories/categories';
 import SubCategoriesHeader from '../product/subCategories/subCategories';
 import SubCategories from '../category/subCategories/subCategories';
+import CategoryBrands from '../category/brands/brands';
 import ProductList from '../product/productList/productList';
 
 import Home from '../home/home';
@@ -63,6 +64,7 @@ const Products = () => {
             <>
                 <CategoriesHeader />
                 <SubCategories />
+                <CategoryBrands />
             </>
         )
     }

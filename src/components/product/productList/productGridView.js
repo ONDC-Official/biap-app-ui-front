@@ -46,7 +46,7 @@ const ProductGridView = (props) => {
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
-              getProductDetails(productId).then((data) => handleAddToCart(data, true));
+              // getProductDetails(productId).then((data) => handleAddToCart(data, true));
             }}
             color="inherit"
             className={classes.cartIcon}
@@ -60,7 +60,7 @@ const ProductGridView = (props) => {
           variant="contained"
           onClick={(e) => {
             e.stopPropagation();
-            getProductDetails(productId).then((data) => handleAddToCart(data, true, true));
+            // getProductDetails(productId).then((data) => handleAddToCart(data, true, true));
           }}
         >
           Buy Now
