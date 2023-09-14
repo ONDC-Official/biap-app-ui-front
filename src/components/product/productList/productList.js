@@ -133,6 +133,7 @@ const ProductList = () => {
       const data = await cancellablePromise(getAllFiltersRequest(subCategoryName));
       console.log("getAllFilters=====>", data);
       let filtersData = data.data;
+      filtersData = filtersData.filter((item) => item.code !== "size_chart");
       filtersData = Object.values(filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {}));
 
       for (let filter of filtersData) {
