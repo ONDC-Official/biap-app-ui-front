@@ -54,6 +54,14 @@ const useStyles = makeStyles({
     display: "flex",
     marginBottom: "10px",
   },
+  summaryDeliveryItemContainer: {
+    display: "flex",
+    marginBottom: "10px",
+  },
+  summaryQuoteItemContainer: {
+    display: "flex",
+    marginBottom: "3px",
+  },
   summaryItemLabel: {
     flex: 1,
     fontSize: "13px !important",
@@ -142,6 +150,20 @@ const useStyles = makeStyles({
     marginTop: "2px !important",
     flex: 1,
   },
+  subTotalLabel: {
+    flex: 1,
+    fontWeight: "600 !important",
+  },
+  summarySubtotalContainer:{
+    display: "flex",
+    marginBottom: "0px !important",
+    marginTop: '20px !important'
+  },
+  subTotalValue: {
+    width: "100px !important",
+    textAlign: "right",
+    fontWeight: "600 !important",
+  },
   totalLabel: {
     flex: 1,
     fontSize: "16px !important",
@@ -161,7 +183,7 @@ const useStyles = makeStyles({
   orderTotalDivider: {
     height: "1px",
     backgroundColor: "#CACDD8 !important",
-    marginTop: "40px",
+    marginTop: "20px",
     marginBottom: "15px",
   },
   proceedToBuy: {

@@ -1748,7 +1748,7 @@ const Checkout = () => {
   const renderDeliveryLine = (quote, key) => {
     return (
       <div
-        className={classes.summaryItemContainer}
+        className={classes.summaryDeliveryItemContainer}
         key={`d-quote-${key}-price`}
       >
         <Typography variant="body1" className={classes.summaryDeliveryLabel}>
@@ -1773,11 +1773,31 @@ const Checkout = () => {
     );
   };
 
+  const getDeliveryTotalAmount = (data) => {
+    let total = 0;
+    if(data.delivery){
+      total = total+parseInt(data.delivery.value);
+    }
+    if(data.discount){
+      total = total+parseInt(data.discount.value);
+    }
+    if(data.tax){
+      total = total+parseInt(data.tax.value);
+    }
+    if(data.packing){
+      total = total+parseInt(data.packing.value);
+    }
+    if(data.misc){
+      total = total+parseInt(data.misc.value);
+    }
+    return total;
+  }
+
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
       <div>
         <div
-          className={classes.summaryItemContainer}
+          className={classes.summaryQuoteItemContainer}
           key={`quote-${qIndex}-price`}
         >
           <Typography
@@ -1803,7 +1823,7 @@ const Checkout = () => {
         </div>
         {quote?.tax && (
           <div
-            className={classes.summaryItemContainer}
+            className={classes.summaryQuoteItemContainer}
             key={`quote-${qIndex}-tax`}
           >
             <Typography
@@ -1830,7 +1850,7 @@ const Checkout = () => {
         )}
         {quote?.discount && (
           <div
-            className={classes.summaryItemContainer}
+            className={classes.summaryQuoteItemContainer}
             key={`quote-${qIndex}-discount`}
           >
             <Typography
@@ -1856,69 +1876,81 @@ const Checkout = () => {
   };
 
   const renderItems = (provider, pindex) => {
+    console.log("providerproviderprovider===>", provider)
     return (
-      <div key={`pindex-${pindex}`}>
-        {Object.values(provider.items)
-          .filter((quote) => quote?.title !== "")
-          .map((quote, qIndex) => (
-            <div key={`quote-${qIndex}`}>
-              <div
-                className={classes.summaryItemContainer}
-                key={`quote-${qIndex}-title`}
-              >
-                <Typography
-                  variant="body1"
-                  className={classes.summaryItemLabel}
-                >
-                  {quote?.title}
-                </Typography>
-              </div>
-              {renderItemDetails(quote)}
-              {quote?.customizations && (
-                <div key={`quote-${qIndex}-customizations`}>
-                  <div
-                    className={classes.summaryItemContainer}
-                    key={`quote-${qIndex}-customizations`}
-                  >
-                    <Typography
-                      variant="body1"
-                      className={classes.summaryItemPriceLabel}
+        <div key={`pindex-${pindex}`}>
+          {Object.values(provider.items)
+              .filter((quote) => quote?.title !== "")
+              .map((quote, qIndex) => (
+                  <div key={`quote-${qIndex}`}>
+                    <div
+                        className={classes.summaryQuoteItemContainer}
+                        key={`quote-${qIndex}-title`}
                     >
-                      Customizations
-                    </Typography>
-                  </div>
-                  {Object.values(quote?.customizations).map(
-                    (customization, cIndex) => (
-                      <div>
-                        <div
-                          className={classes.summaryItemContainer}
-                          key={`quote-${qIndex}-customizations-${cIndex}`}
-                        >
-                          <Typography
-                            variant="body1"
-                            className={classes.summaryCustomizationLabel}
+                      <Typography
+                          variant="body1"
+                          className={`${classes.summaryItemLabel} ${quote.textClass}`}
+                      >
+                        {quote?.title}
+                        <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                          {quote.quantityMessage}
+                        </p>
+                      </Typography>
+                    </div>
+                    {renderItemDetails(quote)}
+                    {quote?.customizations && (
+                        <div key={`quote-${qIndex}-customizations`}>
+                          <div
+                              className={classes.summaryQuoteItemContainer}
+                              key={`quote-${qIndex}-customizations`}
                           >
-                            {customization.title}
-                          </Typography>
+                            <Typography
+                                variant="body1"
+                                className={classes.summaryItemPriceLabel}
+                            >
+                              Customizations
+                            </Typography>
+                          </div>
+                          {Object.values(quote?.customizations).map(
+                              (customization, cIndex) => (
+                                  <div>
+                                    <div
+                                        className={classes.summaryQuoteItemContainer}
+                                        key={`quote-${qIndex}-customizations-${cIndex}`}
+                                    >
+                                      <Typography
+                                          variant="body1"
+                                          className={classes.summaryCustomizationLabel}
+                                      >
+                                        {customization.title}
+                                      </Typography>
+                                    </div>
+                                    {renderItemDetails(customization, cIndex, true)}
+                                  </div>
+                              )
+                          )}
                         </div>
-                        {renderItemDetails(customization, cIndex, true)}
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        {provider.error && (
-          <Typography
-            variant="body1"
-            color="error"
-            className={classes.summaryItemLabel}
-          >
-            {provider.error}
-          </Typography>
-        )}
-      </div>
+                    )}
+                  </div>
+              ))}
+          <div className={classes.summarySubtotalContainer}>
+            <Typography variant="body2" className={classes.subTotalLabel}>
+              Total
+            </Typography>
+            <Typography variant="body2" className={classes.subTotalValue}>
+              {`₹${provider?.total_payable}`}
+            </Typography>
+          </div>
+          {provider.error && (
+              <Typography
+                  variant="body1"
+                  color="error"
+                  className={classes.summaryItemLabel}
+              >
+                {provider.error}
+              </Typography>
+          )}
+        </div>
     );
   };
 
@@ -1926,171 +1958,124 @@ const Checkout = () => {
     return <Redirect to={"/application/cart"} />;
   }
   return (
-    <>
-      <div className={classes.header}>
-        <Typography
-          component={Link}
-          underline="hover"
-          color="primary.main"
-          variant="body1"
-          className={classes.headerTypo}
-          to={`/application`}
-        >
-          BACK TO SHOP
-        </Typography>
-      </div>
-      <div className={classes.bodyContainer}>
-        <Grid container spacing={6}>
-          <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
-            <Stepper
-              activeStep={activeStep}
-              orientation="vertical"
-              connector={false}
-            >
-              {steps.map((step, index) => (
-                <Step key={step.label} className={classes.stepRoot}>
-                  <StepLabel className={classes.stepLabel}>
-                    {renderStepLabel(step, index)}
-                  </StepLabel>
-                  <StepContent
-                    className={
-                      activeStep === index
-                        ? classes.stepContent
-                        : classes.stepContentHidden
-                    }
-                  >
-                    {renderStepContent(step, index)}
-                  </StepContent>
-                </Step>
-              ))}
-            </Stepper>
-          </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Card className={classes.summaryCard}>
-              <Typography variant="h4">Summary</Typography>
-              <Box component={"div"} className={classes.divider} />
-              {productsQuote?.providers.map((provider, pindex) =>
-                renderItems(provider, pindex)
-              )}
-              <Box component={"div"} className={classes.divider} />
-              {productsQuote?.providers.map((provider, pindex) => (
-                <div key={`pindex-${pindex}`}>
-                  {provider.products
-                    .filter((quote) => quote?.title !== "")
-                    .map((quote, qIndex) =>
-                      !quote?.isCustomization ? (
-                        <div
-                          className={classes.summaryItemContainer}
-                          key={`quote-${qIndex}`}
-                        >
-                          <Typography
-                            variant="body1"
-                            component="div"
-                            className={`${classes.summaryItemLabel} ${quote.textClass}`}
-                          >
-                            {quote?.title}
-                            <p className={`${styles.ordered_from} ${quote.textClass}`}>
-                              {quote.quantityMessage}
-                            </p>
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            component="div"
-                            className={`${classes.summaryItemValue} ${quote.textClass}`}
-                          >
-                            {`₹${quote?.price}`}
-                          </Typography>
-                        </div>
-                      ) : (
-                        <div
-                          className={classes.summaryItemContainer}
-                          key={`quote-${qIndex}`}
-                        >
-                          <Typography
-                            variant="subtitle2"
-                            component="div"
-                            className={`${classes.summaryItemLabelDescription} ${quote.textClass}`}
-                          >
-                            {quote?.title}
-                            <p className={`${styles.ordered_from} ${quote.textClass}`}>
-                              {quote.quantityMessage}
-                            </p>
-                          </Typography>
-                          <Typography
-                            variant="subtitle2"
-                            className={`${classes.customizationValue} ${quote.textClass}`}
-                          >
-                            {`₹${quote?.price}`}
-                          </Typography>
-                        </div>
-                      )
-                    )}
-                  {provider.error && (
-                    <Typography
-                      variant="body1"
-                      color="error"
-                      className={classes.summaryItemLabel}
-                    >
-                      {provider.error}
-                    </Typography>
-                  )}
-                <div key={`d-pindex-${pindex}`}>
-                  {renderDeliveryCharges(provider.delivery)}
-                </div>
-                </div>
-              ))}
-              <Box component={"div"} className={classes.orderTotalDivider} />
-              <div className={classes.summaryItemContainer}>
-                <Typography variant="body" className={classes.totalLabel}>
-                  Order Total
-                </Typography>
-                <Typography variant="body" className={classes.totalValue}>
-                  {`₹${productsQuote?.total_payable}`}
-                </Typography>
-              </div>
-              <Button
-                className={classes.proceedToBuy}
-                fullWidth
-                variant="contained"
-                disabled={
-                  confirmOrderLoading || initLoading || activeStep !== 2
-                }
-                onClick={() => {
-                  const { productQuotes, successOrderIds } = JSON.parse(
-                    // getValueFromCookie("checkout_details") || "{}"
-                    localStorage.getItem("checkout_details") || "{}"
-                  );
-                  setConfirmOrderLoading(true);
-                  let c = cartItems.map((item) => {
-                    return item.item;
-                  });
-                  if (activePaymentMethod === payment_methods.JUSPAY) {
-                    // setTogglePaymentGateway(true);
-                    // setLoadingSdkForPayment(true);
-                    // initiateSDK();
-                    const request_object = constructQouteObject(
-                      c.filter(({ provider }) =>
-                        successOrderIds.includes(provider.local_id.toString())
-                      )
-                    );
-                    confirmOrder(request_object[0], payment_methods.JUSPAY);
-                  } else {
-                    const request_object = constructQouteObject(
-                      c.filter(({ provider }) =>
-                        successOrderIds.includes(provider.local_id.toString())
-                      )
-                    );
-                    confirmOrder(request_object[0], payment_methods.COD);
-                  }
-                }}
+      <>
+        <div className={classes.header}>
+          <Typography
+              component={Link}
+              underline="hover"
+              color="primary.main"
+              variant="body1"
+              className={classes.headerTypo}
+              to={`/application`}
+          >
+            BACK TO SHOP
+          </Typography>
+        </div>
+        <div className={classes.bodyContainer}>
+          <Grid container spacing={6}>
+            <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+              <Stepper
+                  activeStep={activeStep}
+                  orientation="vertical"
+                  connector={false}
               >
-                {confirmOrderLoading ? <Loading /> : "Proceed to Buy"}
-              </Button>
-            </Card>
+                {steps.map((step, index) => (
+                    <Step key={step.label} className={classes.stepRoot}>
+                      <StepLabel className={classes.stepLabel}>
+                        {renderStepLabel(step, index)}
+                      </StepLabel>
+                      <StepContent
+                          className={
+                            activeStep === index
+                                ? classes.stepContent
+                                : classes.stepContentHidden
+                          }
+                      >
+                        {renderStepContent(step, index)}
+                      </StepContent>
+                    </Step>
+                ))}
+              </Stepper>
+            </Grid>
+            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+              <Card className={classes.summaryCard}>
+                <Typography variant="h4">Summary</Typography>
+                <Box component={"div"} className={classes.divider}/>
+                {productsQuote?.providers.map((provider, pindex) =>
+                    renderItems(provider, pindex)
+                )}
+                <Box component={"div"} className={classes.divider}/>
+                {productsQuote?.providers.map((provider, pindex) => {
+                  console.log("provider=====>", provider)
+                  return (
+                      <div key={`pindex-${pindex}`}>
+                        <div key={`d-pindex-${pindex}`}>
+                          {renderDeliveryCharges(provider.delivery)}
+                        </div>
+
+                        <div className={classes.summarySubtotalContainer}>
+                          <Typography variant="body2" className={classes.subTotalLabel}>
+                            Total
+                          </Typography>
+                          <Typography variant="body2" className={classes.subTotalValue}>
+                            {`₹${getDeliveryTotalAmount(provider.delivery)}`}
+                          </Typography>
+                        </div>
+                      </div>
+                  )
+                })}
+                <Box component={"div"} className={classes.orderTotalDivider}/>
+                <div className={classes.summaryItemContainer}>
+                  <Typography variant="body" className={classes.totalLabel}>
+                    Order Total
+                  </Typography>
+                  <Typography variant="body" className={classes.totalValue}>
+                    {`₹${productsQuote?.total_payable}`}
+                  </Typography>
+                </div>
+                <Button
+                    className={classes.proceedToBuy}
+                    fullWidth
+                    variant="contained"
+                    disabled={
+                        confirmOrderLoading || initLoading || activeStep !== 2
+                    }
+                    onClick={() => {
+                      const {productQuotes, successOrderIds} = JSON.parse(
+                          // getValueFromCookie("checkout_details") || "{}"
+                          localStorage.getItem("checkout_details") || "{}"
+                      );
+                      setConfirmOrderLoading(true);
+                      let c = cartItems.map((item) => {
+                        return item.item;
+                      });
+                      if (activePaymentMethod === payment_methods.JUSPAY) {
+                        // setTogglePaymentGateway(true);
+                        // setLoadingSdkForPayment(true);
+                        // initiateSDK();
+                        const request_object = constructQouteObject(
+                            c.filter(({provider}) =>
+                                successOrderIds.includes(provider.local_id.toString())
+                            )
+                        );
+                        confirmOrder(request_object[0], payment_methods.JUSPAY);
+                      } else {
+                        const request_object = constructQouteObject(
+                            c.filter(({provider}) =>
+                                successOrderIds.includes(provider.local_id.toString())
+                            )
+                        );
+                        confirmOrder(request_object[0], payment_methods.COD);
+                      }
+                    }}
+                >
+                  {confirmOrderLoading ? <Loading/> : "Proceed to Buy"}
+                </Button>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
-      </div>
-    </>
+        </div>
+      </>
   );
 };
 
