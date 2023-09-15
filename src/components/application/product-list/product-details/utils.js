@@ -4,14 +4,15 @@ export const formatCustomizations = async (customisation_items) => {
     const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
     const childTag = itemDetails.tags.find((tag) => tag.code === "child");
     const vegNonVegTag = itemDetails.tags.find((tag) => tag.code === "veg_nonveg");
-    const isDefault = parentTag.list.find((tag) => tag.code === "default");
+    const isDefaultTag = parentTag?.list.find((tag) => tag.code === "default");
+    const isDefault = isDefaultTag?.value.toLowerCase() === "yes";
 
     return {
       id: itemDetails.id,
       name: itemDetails.descriptor.name,
       price: itemDetails.price.value,
       inStock: itemDetails.quantity.available.count > 0,
-      isDefault: isDefault.value === "Yes" || isDefault.value === "yes" ? true : false,
+      isDefault: isDefault ?? false,
       parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
       child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
       vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",

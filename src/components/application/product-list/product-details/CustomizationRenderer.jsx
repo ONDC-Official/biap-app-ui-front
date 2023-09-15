@@ -155,7 +155,8 @@ const CustomizationRenderer = (props) => {
       const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
       const childTag = itemDetails.tags.find((tag) => tag.code === "child");
       const vegNonVegTag = itemDetails.tags.find((tag) => tag.code === "veg_nonveg");
-      const isDefault = parentTag.list.find((tag) => tag.code === "default");
+      const isDefaultTag = parentTag.list.find((tag) => tag.code === "default");
+      const isDefault = isDefaultTag?.value.toLowerCase() === "yes";
 
       return {
         id: itemDetails.id,
@@ -164,7 +165,7 @@ const CustomizationRenderer = (props) => {
         inStock: itemDetails.quantity.available.count > 0,
         parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
         child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
-        isDefault: isDefault.value === "Yes" || isDefault.value === "yes" ? true : false,
+        isDefault: isDefault ?? false,
         vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",
       };
     });
