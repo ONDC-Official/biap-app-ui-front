@@ -80,6 +80,28 @@ export const getAllOutletsRequest = (brandId) => {
 };
 
 /**
+ * function to get all outlets
+ * @returns
+ */
+export const getAllOutletsFromCategoryAndLocationRequest = (params) => {
+    return new Promise(async (resolve, reject) => {
+        const reqParams = {
+            domain: params.domain,
+            latitude: params.lat,
+            longitude: params.lng,
+            radius: 1000
+        }
+        try {
+            // const data = await getCall(`/clientApis/v2/locations?provider=${brandId}`);
+            const data = await getCall(`/protocol/locations`, reqParams);
+            return resolve(data);
+        } catch (err) {
+            return reject(err);
+        }
+    });
+};
+
+/**
  * function to get outlet details
  * @returns
  */

@@ -14,6 +14,8 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import {ToastContext} from "../../../context/toastContext";
 import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 
+import Loading from "../../shared/loading/loading";
+
 const BrandCard = ({data, index, onMouseOver}) => {
     const classes = useStyles();
     const history = useHistory();
@@ -78,7 +80,7 @@ const TopBrands = () => {
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
                 {
                     isLoading
-                    ?<CircularProgress />
+                    ?<Loading />
                     :(
                         <>
                             {
