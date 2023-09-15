@@ -15,6 +15,7 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
+import moment from 'moment';
 
 const ProductDetails = () => {
   const classes = useStyles();
@@ -236,11 +237,21 @@ const ProductDetails = () => {
   };
 
   const renderItemDetails = () => {
+    let returnWindowValue = 0;
+    if(productPayload.item_details?.["@ondc/org/return_window"]){
+      // Create a duration object from the ISO 8601 string
+      const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
+
+      // Get the number of hours from the duration object
+      const hours = duration.asHours();
+      returnWindowValue = `${hours} ${hours>1?"hours": 'hour'}`;
+    }
+
     const data = {
       "Available on COD":
         productPayload.item_details?.["@ondc/org/available_on_cod"].toString() === "true" ? "Yes" : "No",
       Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString() === "true" ? "Yes" : "No",
-      "Return window value": productPayload.item_details?.["@ondc/org/return_window"],
+      "Return window value": returnWindowValue,
       Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString() === "true" ? "Yes" : "No",
       "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
       "Manufacturer name":
