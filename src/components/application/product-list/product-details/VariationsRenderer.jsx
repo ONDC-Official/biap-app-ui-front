@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 import { Grid, Typography } from "@mui/material";
 import { Link, useHistory } from "react-router-dom";
-import RightArrowIcon from '@mui/icons-material/ArrowForwardRounded';
+import RightArrowIcon from "@mui/icons-material/ArrowForwardRounded";
 
 import ModalComponent from "../../../common/Modal";
 
 const VariationsRenderer = (props) => {
-  const { productPayload, variationState, setVariationState, chartImage="", isFashion = false } = props;
+  const { productPayload, variationState, setVariationState, chartImage = "", isFashion = false } = props;
   const classes = useStyles();
   const history = useHistory();
 
@@ -16,43 +16,47 @@ const VariationsRenderer = (props) => {
   const [initialVariationState, setInitialVariationState] = useState({});
   const [isUOM, setIsUOM] = useState(false);
   const [openSizeChart, setOpenSizeChart] = useState(false);
+  const [noVariations, setNoVariations] = useState(false);
 
   const getVariationGroups = () => {
-    const attrTags = productPayload.categories[0].tags;
-    const groupInfo = new Set(); // Use a Set to store unique items
+    const parentId = productPayload.item_details.parent_item_id;
+    const parentData = productPayload.categories.find((item) => item.id === parentId);
 
-    for (const tag of attrTags) {
-      if (tag.code === "attr") {
-        const nameTag = tag.list.find((item) => item.code === "name");
-        const seqTag = tag.list.find((item) => item.code === "seq");
+    if (parentData) {
+      const attrTags = productPayload.categories[0].tags;
+      const groupInfo = new Set(); // Use a Set to store unique items
 
-        if (nameTag && seqTag) {
-          const nameParts = nameTag.value.split(".");
-          const name = nameParts[nameParts.length - 1];
-          const seq = parseInt(seqTag.value);
+      for (const tag of parentData.tags) {
+        if (tag.code === "attr") {
+          const nameTag = tag.list.find((item) => item.code === "name");
+          const seqTag = tag.list.find((item) => item.code === "seq");
 
-          // Create an object to represent the item
-          const item = { name, seq };
+          if (nameTag && seqTag) {
+            const nameParts = nameTag.value.split(".");
+            const name = nameParts[nameParts.length - 1];
+            const seq = parseInt(seqTag.value);
 
-          // Convert the object to a JSON string to ensure uniqueness
-          const itemString = JSON.stringify(item);
+            const item = { name, seq };
 
-          // Check if the item already exists in the Set
-          if (!groupInfo.has(itemString)) {
-            // If it doesn't exist, add it to the Set
-            groupInfo.add(itemString);
+            // Convert the object to a JSON string to ensure uniqueness
+            const itemString = JSON.stringify(item);
+
+            // Check if the item already exists in the Set
+            if (!groupInfo.has(itemString)) {
+              // If it doesn't exist, add it to the Set
+              groupInfo.add(itemString);
+            }
+
+            const uniqueGroupInfo = Array.from(groupInfo).map((itemString) => JSON.parse(itemString));
+            setVariationGroups(uniqueGroupInfo);
+            getRelatedVariations(uniqueGroupInfo);
+            getInitialVariationState(uniqueGroupInfo);
           }
         }
       }
+    } else {
+      setNoVariations(true);
     }
-
-    // Convert the Set back to an array if needed
-    const uniqueGroupInfo = Array.from(groupInfo).map((itemString) => JSON.parse(itemString));
-
-    // Use uniqueGroupInfo as needed
-    setVariationGroups(uniqueGroupInfo);
-    getRelatedVariations(uniqueGroupInfo);
-    getInitialVariationState(uniqueGroupInfo);
   };
 
   const getInitialVariationState = (groupInfo) => {
@@ -157,6 +161,12 @@ const VariationsRenderer = (props) => {
       }
     }
 
+    const isLastGroup = groupData.id === Object.keys(variationState).length;
+    if (!isLastGroup) {
+      const lastGroupId = Object.keys(variationState).length;
+      updatedVariationState[lastGroupId].selected = [];
+    }
+
     variationGroups.forEach((group, index) => {
       const groupName = group.name;
       const groupId = group.seq;
@@ -173,23 +183,6 @@ const VariationsRenderer = (props) => {
           newGroupData.productId = variation.productId;
           if (!newGroupData.options.includes(variation[groupName])) {
             newGroupData.options.push(variation[groupName]);
-          }
-        });
-      } else if (groupJustBeforeLast.id === groupData.id) {
-        const prevGroupName = updatedVariationState[index].name;
-        const prevGroupSelection = updatedVariationState[index].selected[0];
-        if (productPayload.attributes[groupName] === option) {
-          newGroupData.selected = [option];
-        } else {
-          newGroupData.selected = [];
-        }
-
-        variations.forEach((variation) => {
-          //  newGroupData.productId = variation.productId;
-          if (variation[prevGroupName] === prevGroupSelection) {
-            if (!newGroupData.options.includes(variation[groupName])) {
-              newGroupData.options.push(variation[groupName]);
-            }
           }
         });
       } else {
@@ -291,17 +284,15 @@ const VariationsRenderer = (props) => {
     return Object.keys(variationState).map((groupId) => {
       const groupData = variationState[groupId];
       const groupName = groupData.name;
-      console.log("groupName=====>",groupName)
       return (
         <div key={groupId}>
           <Typography variant="body" color="black" sx={{ fontWeight: 500, textTransform: "capitalize" }}>
             Available {groupName} Options
-            {
-              groupName === "size" && isFashion && (
-                    <span onClick={() => setOpenSizeChart(true)} className={classes.sizeChart}>Size Guide <RightArrowIcon /></span>
-                )
-            }
-
+            {groupName === "size" && isFashion && (
+              <span onClick={() => setOpenSizeChart(true)} className={classes.sizeChart}>
+                Size Guide <RightArrowIcon />
+              </span>
+            )}
           </Typography>
           <Grid container>
             {groupData.options.map((option) => {
@@ -327,23 +318,19 @@ const VariationsRenderer = (props) => {
               );
             })}
           </Grid>
-          {
-            openSizeChart && chartImage && (
-                  <ModalComponent
-                      open={openSizeChart}
-                      onClose={() => {
-                        setOpenSizeChart(false);
-                      }}
-                      title="Size Chart"
-                  >
-                    <div
-                      className={classes.sizeChartContainer}
-                    >
-                      <img className={classes.sizeChartImage} src={chartImage} alt="size-chart" />
-                    </div>
-                  </ModalComponent>
-              )
-          }
+          {openSizeChart && chartImage && (
+            <ModalComponent
+              open={openSizeChart}
+              onClose={() => {
+                setOpenSizeChart(false);
+              }}
+              title="Size Chart"
+            >
+              <div className={classes.sizeChartContainer}>
+                <img className={classes.sizeChartImage} src={chartImage} alt="size-chart" />
+              </div>
+            </ModalComponent>
+          )}
         </div>
       );
     });
