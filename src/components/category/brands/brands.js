@@ -48,8 +48,8 @@ const Brands = () => {
             try {
                 const reqParams = {
                     domain: findCategory.domain,
-                    lat: '77.0692', //sc.location.lat,
-                    lng: '28.679', //sc.location.lng
+                    lat: sc.location.lat,
+                    lng: sc.location.lng
                 };
                 const data = await cancellablePromise(
                     getAllOutletsFromCategoryAndLocationRequest(reqParams)
