@@ -35,11 +35,21 @@ const MenuItem = (props) => {
     productLoading,
   } = props;
   const { descriptor, isVeg } = product;
+
   const { name: product_name, images, short_desc: product_description } = descriptor;
   const history = useHistory();
 
   const renderVegNonvegIcon = (isVeg) => {
-    if (isVeg) {
+    const tags = product.tags;
+    let category = "veg";
+
+    for (let i = 0; i < tags.length; i++) {
+      if (tags[i].code === "veg_nonveg") {
+        category = tags[i].list[0].code;
+      }
+    }
+
+    if (category == "veg") {
       return <img src={VegIcon} alt={"veg-icon"} className={classes.vegNonvegIcon} />;
     } else {
       return <img src={NonVegIcon} alt={"nonveg-icon"} className={classes.vegNonvegIcon} />;

@@ -161,7 +161,7 @@ const ProductDetails = () => {
       const getTagColor = () => {
         if (category === "veg") {
           return "#008001";
-        } else if (category == "nonveg") {
+        } else if (category == "non_veg") {
           return "red";
         } else {
           return "#008001";
