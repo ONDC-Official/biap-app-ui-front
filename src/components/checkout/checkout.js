@@ -1279,7 +1279,7 @@ const Checkout = () => {
         };
         // else generate quote of it
         if (message) {
-          //message = m2;
+          //          message = m2;
 
           if (message?.quote?.quote?.price?.value) {
             provider_payable += Number(message?.quote?.quote?.price?.value);
@@ -1974,8 +1974,69 @@ const Checkout = () => {
               )}
               <Box component={"div"} className={classes.divider} />
               {productsQuote?.providers.map((provider, pindex) => (
+                <div key={`pindex-${pindex}`}>
+                  {provider.products
+                    .filter((quote) => quote?.title !== "")
+                    .map((quote, qIndex) =>
+                      !quote?.isCustomization ? (
+                        <div
+                          className={classes.summaryItemContainer}
+                          key={`quote-${qIndex}`}
+                        >
+                          <Typography
+                            variant="body1"
+                            component="div"
+                            className={`${classes.summaryItemLabel} ${quote.textClass}`}
+                          >
+                            {quote?.title}
+                            <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                              {quote.quantityMessage}
+                            </p>
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            component="div"
+                            className={`${classes.summaryItemValue} ${quote.textClass}`}
+                          >
+                            {`₹${quote?.price}`}
+                          </Typography>
+                        </div>
+                      ) : (
+                        <div
+                          className={classes.summaryItemContainer}
+                          key={`quote-${qIndex}`}
+                        >
+                          <Typography
+                            variant="subtitle2"
+                            component="div"
+                            className={`${classes.summaryItemLabelDescription} ${quote.textClass}`}
+                          >
+                            {quote?.title}
+                            <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                              {quote.quantityMessage}
+                            </p>
+                          </Typography>
+                          <Typography
+                            variant="subtitle2"
+                            className={`${classes.customizationValue} ${quote.textClass}`}
+                          >
+                            {`₹${quote?.price}`}
+                          </Typography>
+                        </div>
+                      )
+                    )}
+                  {provider.error && (
+                    <Typography
+                      variant="body1"
+                      color="error"
+                      className={classes.summaryItemLabel}
+                    >
+                      {provider.error}
+                    </Typography>
+                  )}
                 <div key={`d-pindex-${pindex}`}>
                   {renderDeliveryCharges(provider.delivery)}
+                </div>
                 </div>
               ))}
               <Box component={"div"} className={classes.orderTotalDivider} />
