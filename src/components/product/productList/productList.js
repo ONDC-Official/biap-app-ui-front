@@ -8,7 +8,6 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import ProductGridView from "./productGridView";
 import ProductListView from "./productListView";
@@ -29,11 +28,14 @@ import {
   initializeCustomizationState,
 } from "../../application/product-list/product-details/utils";
 import { CartContext } from "../../../context/cartContext";
+import {SearchContext} from "../../../context/searchContext";
+import Loading from "../../shared/loading/loading";
 
 const ProductList = () => {
   const classes = useStyles();
   const locationData = useLocation();
   const history = useHistory();
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { fetchCartItems } = useContext(CartContext);
   const [productPayload, setProductPayload] = useState(null);
@@ -69,7 +71,7 @@ const ProductList = () => {
       const searchName = query.get("s");
       getAllProducts(searchName);
     }
-  }, [locationData]);
+  }, [locationData, deliveryAddressLocation]);
 
   const getAllProducts = async (searchName) => {
     setIsLoading(true);
@@ -373,7 +375,7 @@ const ProductList = () => {
         <Grid container spacing={4}>
           {isLoading ? (
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-              <CircularProgress />
+              <Loading />
             </Grid>
           ) : (
             <>

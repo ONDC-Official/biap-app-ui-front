@@ -9,14 +9,12 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 
 import { ReactComponent as ExpandMoreIcon } from "../../../../assets/images/chevron-down.svg";
 import MenuItem from "./menuItem";
 import ModalComponent from "../../../common/Modal";
-import MenuModal from "./menuModal";
 import Loading from "../../../shared/loading/loading";
 
 import useCancellablePromise from "../../../../api/cancelRequest";

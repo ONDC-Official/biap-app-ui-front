@@ -16,12 +16,14 @@ import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, G
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
 import moment from 'moment';
+import {SearchContext} from "../../../../context/searchContext";
 
 const ProductDetails = () => {
   const classes = useStyles();
   const history = useHistory();
   const params = useParams();
   const { fetchCartItems } = useContext(CartContext);
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
@@ -135,7 +137,7 @@ const ProductDetails = () => {
   useEffect(() => {
     let productId = params.id;
     getProductDetails(productId);
-  }, [params]);
+  }, [params, deliveryAddressLocation]);
 
   const renderVegNonVegTag = () => {
     const FnB = "ONDC:RET11";

@@ -20,6 +20,7 @@ import { CartContext } from "../../../context/cartContext";
 import EditCustomizations from "./EditCustomizations";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import {SearchContext} from "../../../context/searchContext";
 
 export default function Cart() {
   let user = {};
@@ -37,6 +38,7 @@ export default function Cart() {
   const dispatch = useContext(ToastContext);
   const { deliveryAddress } = useContext(AddressContext);
   const { fetchCartItems } = useContext(CartContext);
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { cancellablePromise } = useCancellablePromise();
   const transaction_id = getValueFromCookie("transaction_id");
@@ -212,7 +214,7 @@ export default function Cart() {
     if(cartItems.length > 1){
       checkDifferentCategory();
     }
-  }, [cartItems.length]);
+  }, [cartItems.length, deliveryAddressLocation]);
 
   const emptyCartScreen = () => {
     return (

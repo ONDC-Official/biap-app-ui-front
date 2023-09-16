@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from './style';
 
 import Grid from "@mui/material/Grid";
@@ -20,11 +20,13 @@ import PlacePickerMap from '../../common/PlacePickerMap/PlacePickerMap';
 
 import {getBrandDetailsRequest, getOutletDetailsRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
+import {SearchContext} from "../../../context/searchContext";
 
 const OutletDetails = () => {
     const classes = useStyles();
     const {brandId, outletId} = useParams();
     const history = useHistory();
+    const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
     const [brandDetails, setBrandDetails] = useState(null);
     const [outletDetails, setOutletDetails] = useState(null);
@@ -81,7 +83,7 @@ const OutletDetails = () => {
         if(brandId){
             getBrandDetails();
         }
-    }, [brandId, outletId]);
+    }, [brandId, outletId, deliveryAddressLocation]);
 
     return (
         <Grid container spacing={4} className={classes.outletDetailsContainer}>

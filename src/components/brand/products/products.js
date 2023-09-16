@@ -7,7 +7,6 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import ProductGridView from "../../product/productList/productGridView";
 import ProductListView from "../../product/productList/productListView";
@@ -24,11 +23,13 @@ import { getCall, postCall } from "../../../api/axios";
 import { CartContext } from "../../../context/cartContext";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
-
+import {SearchContext} from "../../../context/searchContext";
+import Loading from "../../shared/loading/loading";
 const Products = ({ brandDetails }) => {
   const classes = useStyles();
   const history = useHistory();
   const { fetchCartItems } = useContext(CartContext);
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { brandId } = useParams();
   const { descriptor } = brandDetails;
@@ -152,7 +153,7 @@ const Products = ({ brandDetails }) => {
         getAllProducts(brandId, customMenuId);
       }
     }
-  }, [locationData]);
+  }, [locationData, deliveryAddressLocation]);
 
   useEffect(() => {
     getAllFilters();
@@ -280,7 +281,7 @@ const Products = ({ brandDetails }) => {
         <Grid container spacing={4}>
           {isLoading ? (
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-              <CircularProgress />
+              <Loading />
             </Grid>
           ) : (
             <>
