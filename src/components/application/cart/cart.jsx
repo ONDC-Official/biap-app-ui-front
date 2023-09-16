@@ -59,6 +59,7 @@ export default function Cart() {
   const [productLoading, setProductLoading] = useState(false);
   const [currentCartItem, setCurrentCartItem] = useState(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [isProductAvailableQuantityIsZero, setIsProductAvailableQuantityIsZero] = useState(false);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -189,8 +190,20 @@ export default function Cart() {
     getCartItems();
   }, [openDrawer]);
 
+  const checkAvailableQuantity = () => {
+    let quantityIsZero = false;
+    cartItems.forEach((item) => {
+      const availableQuantity = item.item.product.quantity.available;
+      if(availableQuantity && availableQuantity.count === 0){
+        quantityIsZero = true;
+      }
+    });
+    setIsProductAvailableQuantityIsZero(quantityIsZero)
+  };
+
   useEffect(() => {
     checkDistinctProviders();
+    checkAvailableQuantity();
   }, [cartItems.length]);
 
   const emptyCartScreen = () => {
@@ -504,7 +517,7 @@ export default function Cart() {
         <Button
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
-          disabled={haveDistinctProviders || checkoutLoading}
+          disabled={isProductAvailableQuantityIsZero || haveDistinctProviders || checkoutLoading}
           onClick={() => {
             console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {
