@@ -61,41 +61,94 @@ const ProductDetails = () => {
     return subtotal;
   };
 
+  let selectedCustomizationIds = [];
+
+  const getCustomization_ = (groupId) => {
+    let group = customization_state[groupId];
+    if (!group) return;
+
+    console.log("**1", group);
+    console.log("**2", group.selected);
+    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    group?.childs?.map((child) => {
+      getCustomization_(child);
+    });
+  };
+
   const getCustomizations = () => {
     const { customisation_items } = productPayload;
     const customizations = [];
     const levels = Object.keys(customization_state);
+    const firstGroupId = customization_state["firstGroup"].id;
 
-    for (const level of levels) {
-      const selectedItems = customization_state[level].selected;
-      let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
+    getCustomization_(firstGroupId);
+    console.log("selectedCustomizationIds**", selectedCustomizationIds);
 
-      for (const selectedItem of selectedItems) {
-        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
-        if (has_special_instruction) {
-          customization.special_instructions = "";
-        }
-
-        if (customization) {
-          customization = {
-            ...customization,
-            quantity: {
-              count: 1,
-            },
-          };
-          customizations.push(customization);
-        }
+    for (const cId of selectedCustomizationIds) {
+      let c = customisation_items.find((item) => item.local_id === cId);
+      if (c) {
+        c = {
+          ...c,
+          quantity: {
+            count: 1,
+          },
+        };
+        customizations.push(c);
       }
     }
 
+    //  for (const level of levels) {
+    //    const selectedItems = customization_state[level].selected;
+    //    let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
+
+    //    // for (const selectedItem of selectedItems) {
+    //    //   let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
+    //    //   if (has_special_instruction) {
+    //    //     customization.special_instructions = "";
+    //    //   }
+
+    //    //   if (customization) {
+    //    //     customization = {
+    //    //       ...customization,
+    //    //       quantity: {
+    //    //         count: 1,
+    //    //       },
+    //    //     };
+    //    //     customizations.push(customization);
+    //    //   }
+    //    // }
+    //  }
+
     return customizations;
   };
+
+  function findMinMaxSeq(customizationGroups) {
+    if (!customizationGroups || customizationGroups.length === 0) {
+      return { minSeq: undefined, maxSeq: undefined };
+    }
+
+    let minSeq = Infinity;
+    let maxSeq = -Infinity;
+
+    customizationGroups.forEach((group) => {
+      const seq = group.seq;
+      if (seq < minSeq) {
+        minSeq = seq;
+      }
+      if (seq > maxSeq) {
+        maxSeq = seq;
+      }
+    });
+
+    return { minSeq, maxSeq };
+  }
 
   const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
-    const subtotal = productDetails.price.value + calculateSubtotal();
+    //  const subtotal = productDetails.price.value + calculateSubtotal();
+    const subtotal = productDetails.price.value;
     const customisations = getCustomizations();
 
     const payload = {

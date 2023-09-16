@@ -238,7 +238,9 @@ const CustomizationRenderer = (props) => {
 
   useEffect(() => {
     const initializeCustomizationState = () => {
-      const customization_state = {};
+      const minSeq = findMinMaxSeq(customizationGroups).minSeq;
+      const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
+      const customization_state = { firstGroup };
 
       const processGroup = (id) => {
         const group = customizationGroups.find((item) => item.id === id);
@@ -271,10 +273,6 @@ const CustomizationRenderer = (props) => {
           }
         }
       };
-
-      // Find the first group with minimum seq
-      const minSeq = findMinMaxSeq(customizationGroups).minSeq;
-      const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
 
       if (firstGroup) {
         processGroup(firstGroup.id);
@@ -313,7 +311,9 @@ const CustomizationRenderer = (props) => {
       updatedCustomizationState1[groupId].selected = [selectedOption];
       updatedCustomizationState1[groupId].childs = customizationToGroupMap[selectedOption.id];
     } else {
-      updatedCustomizationState1[groupId].selected = [];
+      updatedCustomizationState1[groupId].selected = childCustomizations.filter(
+        (customization) => customization.isDefault
+      );
       updatedCustomizationState1[groupId].childs = []; // default selection logic
     }
 
