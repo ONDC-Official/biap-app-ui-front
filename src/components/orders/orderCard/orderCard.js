@@ -26,7 +26,7 @@ const OrderCard = ({data, orderDetails}) => {
                     filterItems.map((item, itemIndex) => {
                         const findItem = items.find((prod) => prod.id === item["@ondc/org/item_id"]);
                         console.log("findItem=========>", findItem)
-                        const findVegNonvegTag = findItem?.product?.tags.find((tag) => tag.code === "veg_nonveg");
+                        const findVegNonvegTag = undefined; //findItem?.product?.tags.find((tag) => tag.code === "veg_nonveg");
                         let isVeg = false;
                         if(findVegNonvegTag){
                             const tag = findVegNonvegTag.list[0];
