@@ -572,12 +572,14 @@ const NavBar = ({ isCheckout = false }) => {
           <ModalComponent
             open={toggleAddressModal.toggle}
             onClose={() => {
-              setToggleAddressModal({
-                actionType: "",
-                toggle: false,
-                address: restoreToDefault(),
-              });
-              setSelectAddressModal(true);
+              if(addressList.length > 0){
+                setToggleAddressModal({
+                  actionType: "",
+                  toggle: false,
+                  address: restoreToDefault(),
+                });
+                setSelectAddressModal(true);
+              }
             }}
             title={`${toggleAddressModal.actionType === "edit" ? `Update Delivery Address` : `Add Delivery Address`}`}
           >
