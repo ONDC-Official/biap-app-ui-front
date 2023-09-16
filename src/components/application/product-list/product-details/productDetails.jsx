@@ -243,8 +243,8 @@ const ProductDetails = () => {
       const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
 
       // Get the number of hours from the duration object
-      const hours = duration.asHours();
-      returnWindowValue = `${hours} ${hours>1?"hours": 'hour'}`;
+      const hours = duration.humanize();
+      returnWindowValue = `${hours}`;
     }
 
     const data = {
