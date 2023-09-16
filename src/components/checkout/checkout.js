@@ -1773,23 +1773,26 @@ const Checkout = () => {
     );
   };
 
-  const getDeliveryTotalAmount = (data) => {
+  const getDeliveryTotalAmount = (providers) => {
     let total = 0;
-    if(data.delivery){
-      total = total+parseInt(data.delivery.value);
-    }
-    if(data.discount){
-      total = total+parseInt(data.discount.value);
-    }
-    if(data.tax){
-      total = total+parseInt(data.tax.value);
-    }
-    if(data.packing){
-      total = total+parseInt(data.packing.value);
-    }
-    if(data.misc){
-      total = total+parseInt(data.misc.value);
-    }
+    providers.forEach((provider) => {
+      const data = provider.delivery;
+      if(data.delivery){
+        total = total+parseInt(data.delivery.value);
+      }
+      if(data.discount){
+        total = total+parseInt(data.discount.value);
+      }
+      if(data.tax){
+        total = total+parseInt(data.tax.value);
+      }
+      if(data.packing){
+        total = total+parseInt(data.packing.value);
+      }
+      if(data.misc){
+        total = total+parseInt(data.misc.value);
+      }
+    });
     return total;
   }
 
@@ -1875,8 +1878,23 @@ const Checkout = () => {
     );
   };
 
+  const getItemsTotal = (providers) => {
+    let finalTotal = 0;
+    if(providers){
+      providers.forEach((provider) => {
+        const items = Object.values(provider.items).filter((quote) => quote?.title !== "");
+        items.forEach((item) => {
+          finalTotal = finalTotal + parseInt(item.price.value);
+          Object.values(item.customizations).forEach((custItem) => {
+            finalTotal = finalTotal + parseInt(custItem.price.value);
+          })
+        })
+      })
+    }
+    return finalTotal;
+  };
+
   const renderItems = (provider, pindex) => {
-    console.log("providerproviderprovider===>", provider)
     return (
         <div key={`pindex-${pindex}`}>
           {Object.values(provider.items)
@@ -1933,14 +1951,14 @@ const Checkout = () => {
                     )}
                   </div>
               ))}
-          <div className={classes.summarySubtotalContainer}>
-            <Typography variant="body2" className={classes.subTotalLabel}>
-              Total
-            </Typography>
-            <Typography variant="body2" className={classes.subTotalValue}>
-              {`₹${provider?.total_payable}`}
-            </Typography>
-          </div>
+          {/*<div className={classes.summarySubtotalContainer}>*/}
+          {/*  <Typography variant="body2" className={classes.subTotalLabel}>*/}
+          {/*    Total*/}
+          {/*  </Typography>*/}
+          {/*  <Typography variant="body2" className={classes.subTotalValue}>*/}
+          {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
+          {/*  </Typography>*/}
+          {/*</div>*/}
           {provider.error && (
               <Typography
                   variant="body1"
@@ -2004,33 +2022,39 @@ const Checkout = () => {
                 {productsQuote?.providers.map((provider, pindex) =>
                     renderItems(provider, pindex)
                 )}
+                <div className={classes.summarySubtotalContainer}>
+                  <Typography variant="body2" className={classes.subTotalLabel}>
+                    Total
+                  </Typography>
+                  <Typography variant="body2" className={classes.subTotalValue}>
+                    {`₹${getItemsTotal(productsQuote?.providers)}`}
+                  </Typography>
+                </div>
                 <Box component={"div"} className={classes.divider}/>
                 {productsQuote?.providers.map((provider, pindex) => {
-                  console.log("provider=====>", provider)
                   return (
                       <div key={`pindex-${pindex}`}>
                         <div key={`d-pindex-${pindex}`}>
                           {renderDeliveryCharges(provider.delivery)}
                         </div>
-
-                        <div className={classes.summarySubtotalContainer}>
-                          <Typography variant="body2" className={classes.subTotalLabel}>
-                            Total
-                          </Typography>
-                          <Typography variant="body2" className={classes.subTotalValue}>
-                            {`₹${getDeliveryTotalAmount(provider.delivery)}`}
-                          </Typography>
-                        </div>
                       </div>
                   )
                 })}
+                <div className={classes.summarySubtotalContainer}>
+                  <Typography variant="body2" className={classes.subTotalLabel}>
+                    Total
+                  </Typography>
+                  <Typography variant="body2" className={classes.subTotalValue}>
+                    {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
+                  </Typography>
+                </div>
                 <Box component={"div"} className={classes.orderTotalDivider}/>
                 <div className={classes.summaryItemContainer}>
                   <Typography variant="body" className={classes.totalLabel}>
                     Order Total
                   </Typography>
                   <Typography variant="body" className={classes.totalValue}>
-                    {`₹${productsQuote?.total_payable}`}
+                    {`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}
                   </Typography>
                 </div>
                 <Button
