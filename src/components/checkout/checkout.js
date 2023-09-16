@@ -2054,7 +2054,8 @@ const Checkout = () => {
                     Order Total
                   </Typography>
                   <Typography variant="body" className={classes.totalValue}>
-                    {`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}
+                    {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
+                    {`₹${productsQuote?.total_payable}`}
                   </Typography>
                 </div>
                 <Button
