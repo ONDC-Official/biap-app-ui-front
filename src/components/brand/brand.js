@@ -5,12 +5,11 @@ import Categories from './categories/categories';
 import Products from './products/products';
 import Outlets from './outlets/outlets';
 
-import CircularProgress from '@mui/material/CircularProgress';
-
 import {getBrandDetailsRequest} from "../../api/brand.api";
 import useCancellablePromise from "../../api/cancelRequest";
 import {useParams} from "react-router-dom";
 
+import Loading from "../shared/loading/loading";
 const Brand = () => {
     const classes = useStyles();
     const {brandId} = useParams();
@@ -51,8 +50,7 @@ const Brand = () => {
             <div
                 className={classes.loader}
             >
-                <CircularProgress />
-                <div>Loading...</div>
+                <Loading />
             </div>
         )
     }else{

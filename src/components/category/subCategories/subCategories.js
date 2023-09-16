@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from './style';
 import {useHistory, useLocation, useParams} from "react-router-dom";
 
@@ -15,6 +15,7 @@ import PaginationItem from '@mui/material/PaginationItem';
 import IconButton from '@mui/material/IconButton';
 import {ReactComponent as PreviousIcon} from '../../../assets/images/previous.svg';
 import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
+import {SearchContext} from "../../../context/searchContext";
 
 const SubCaregoryCard = ({data, onMouseOver, isActive = false}) => {
     const classes = useStyles();
@@ -58,6 +59,7 @@ const SubCategories = () => {
     const [subCatList, setSubCatList] = useState([]);
     const locationData = useLocation();
     const [page, setPage] = useState(0);
+    const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
     const useQuery = () => {
         const { search } = locationData;
@@ -71,7 +73,7 @@ const SubCategories = () => {
             const options = PRODUCT_SUBCATEGORY[categoryName];
             setSubCatList(options || []);
         }
-    }, [categoryName]);
+    }, [categoryName, deliveryAddressLocation]);
 
     return (
         <Grid container spacing={3} className={classes.subCatContainerMain}>

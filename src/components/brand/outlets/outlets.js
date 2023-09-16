@@ -1,24 +1,26 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from './style';
 
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import MuiLink from '@mui/material/Link';
-import CircularProgress from '@mui/material/CircularProgress';
+import Loading from "../../shared/loading/loading";
 
 import {Link, useParams} from "react-router-dom";
-import OutletImage from '../../../assets/images/outlet.png';
 import SingleOutlet from "./singleOutlet";
 
 import {getAllOutletsRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
 import {getValueFromCookie} from "../../../utils/cookies";
+import {SearchContext} from "../../../context/searchContext";
 
 const Outlets = ({brandDetails}) => {
     const classes = useStyles();
     const {brandId} = useParams();
+    const { locationData: deliveryAddressLocation } = useContext(SearchContext);
+
     const {descriptor} = brandDetails;
     const {name: brandName, images} = descriptor;
 
@@ -48,7 +50,7 @@ const Outlets = ({brandDetails}) => {
 
     useEffect(() => {
         getAllOutlets();
-    }, [brandId]);
+    }, [brandId, deliveryAddressLocation]);
 
     return (
         <Grid container spacing={4} className={classes.outletsContainer}>
@@ -77,7 +79,7 @@ const Outlets = ({brandDetails}) => {
                         isLoading
                             ?(
                                 <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                                    <CircularProgress />
+                                    <Loading />
                                 </Grid>
                             ):(
                                 <>

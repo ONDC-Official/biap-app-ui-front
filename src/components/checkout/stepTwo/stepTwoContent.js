@@ -1,10 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react';
 import useStyles from "./style";
 
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '../../common/Radio';
 
@@ -26,7 +23,7 @@ import {removeNullValues} from "../../../utils/helper";
 import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
 import Cookies from "js-cookie";
 import {ToastContext} from "../../../context/toastContext";
-
+import Loading from "../../shared/loading/loading";
 const StepTwoContent = ({
                             cartItemsData,
                             updatedCartItemsData,
@@ -268,7 +265,7 @@ const StepTwoContent = ({
         <div>
             {
                 fetchDeliveryAddressLoading
-                    ? <CircularProgress/>
+                    ? <div><Loading/></div>
                     : (
                         <>
                             {

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from './style';
 import {useHistory, useLocation, useParams} from "react-router-dom";
 import {PRODUCT_SUBCATEGORY} from "../../../constants/categories";
@@ -10,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import {ReactComponent as PreviousIcon} from '../../../assets/images/previous.svg';
 import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
 import {ReactComponent as AllIcon} from '../../../assets/images/all.svg';
+import {SearchContext} from "../../../context/searchContext";
 
 const SingleCategory = ({data, index}) => {
     // let { categoryName, subCategoryName } = useParams();
@@ -46,6 +47,7 @@ const CategoriesComponent = () => {
     const [subCatList, setSubCatList] = useState([]);
     const [page, setPage] = useState(0);
     const locationData = useLocation();
+    const { locationData: deliveryAddressLocation } = useContext(SearchContext);
     const useQuery = () => {
         const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -60,7 +62,7 @@ const CategoriesComponent = () => {
             const options = PRODUCT_SUBCATEGORY[categoryName];
             setSubCatList(options || []);
         }
-    }, [categoryName, locationData]);
+    }, [categoryName, locationData, deliveryAddressLocation]);
 
     useEffect(() => {
         if(subCategoryName && subCatList.length > 0){

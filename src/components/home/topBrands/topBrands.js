@@ -5,7 +5,6 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import {useHistory} from "react-router-dom";
 import {getAllBrandsRequest} from "../../../api/brand.api";

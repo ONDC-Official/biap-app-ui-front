@@ -16,9 +16,11 @@ import {AddressContext} from "../../../context/addressContext";
 import {getValueFromCookie} from "../../../utils/cookies";
 
 import Loading from "../../shared/loading/loading";
+import {SearchContext} from "../../../context/searchContext";
 
 const Brands = () => {
     const classes = useStyles();
+    const { locationData: deliveryAddressLocation } = useContext(SearchContext);
     const [brands, setBrands] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -39,7 +41,7 @@ const Brands = () => {
         if(categoryName){
             getAllBrands(categoryName);
         }
-    }, [locationData]);
+    }, [locationData, deliveryAddressLocation]);
     const getAllBrands = async(categoryName) => {
         let sc = JSON.parse(getValueFromCookie("search_context") || {});
         const findCategory = categoryList.find((item) => item.routeName === categoryName);
