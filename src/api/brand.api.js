@@ -67,11 +67,16 @@ export const getCustomMenuItemsRequest = (menuName) => {
  * function to get all outlets
  * @returns
  */
-export const getAllOutletsRequest = (brandId) => {
+export const getAllOutletsRequest = (brandId, params) => {
     return new Promise(async (resolve, reject) => {
+        const reqParams = {
+            latitude: params.lat,
+            longitude: params.lng,
+            radius: 30
+        }
         try {
             // const data = await getCall(`/clientApis/v2/locations?provider=${brandId}`);
-            const data = await getCall(`/protocol/locations?provider=${brandId}`);
+            const data = await getCall(`/protocol/locations?provider=${brandId}`, reqParams);
             return resolve(data);
         } catch (err) {
             return reject(err);

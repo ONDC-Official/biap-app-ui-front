@@ -10,7 +10,13 @@ import Tooltip from "@mui/material/Tooltip";
 import Card from "@mui/material/Card";
 import no_image_found from "../../../assets/images/no_image_found.png";
 
-const SubCaregoryCard = ({data, onMouseOver}) => {
+import Pagination from '@mui/material/Pagination';
+import PaginationItem from '@mui/material/PaginationItem';
+import IconButton from '@mui/material/IconButton';
+import {ReactComponent as PreviousIcon} from '../../../assets/images/previous.svg';
+import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
+
+const SubCaregoryCard = ({data, onMouseOver, isActive = false}) => {
     const classes = useStyles();
     const history = useHistory();
     const locationData = useLocation();
@@ -34,7 +40,7 @@ const SubCaregoryCard = ({data, onMouseOver}) => {
     return (
         <>
             <Tooltip title={data.value}>
-                <Card className={classes.subCatCard} onMouseOver={onMouseOver} onClick={() => updateQueryParams()}>
+                <Card className={`${classes.subCatCard} ${isActive?classes.isActive:""}`} onMouseOver={onMouseOver} onClick={() => updateQueryParams()}>
                     <img className={classes.subCatImage} src={data.imageUrl ? data.imageUrl : no_image_found} alt={`sub-cat-img-${data.value}`}/>
                 </Card>
                 <Typography component="div" variant="subtitle1" className={classes.subCatNameTypo}>
@@ -48,9 +54,11 @@ const SubCaregoryCard = ({data, onMouseOver}) => {
 const SubCategories = () => {
     // let { categoryName } = useParams();
     const classes = useStyles();
-    const [activeSubCatIndex, setActiveSubCatIndex] = useState(1);
+    const [activeSubCatIndex, setActiveSubCatIndex] = useState(0);
     const [subCatList, setSubCatList] = useState([]);
     const locationData = useLocation();
+    const [page, setPage] = useState(0);
+
     const useQuery = () => {
         const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -73,22 +81,68 @@ const SubCategories = () => {
                 </Typography>
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.subCatContainer}>
-                {
-                    subCatList.map((item, ind) => (
-                        <SubCaregoryCard
-                            key={ind}
-                            data={item}
-                            onMouseOver={() => setActiveSubCatIndex(ind)}
-                        />
-                    ))
-                }
-            </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.dotsContainer}>
-                {
-                    subCatList.map((item, index) => (
-                        <span key={`dot-${index}`} className={activeSubCatIndex === index?classes.selectedDot:classes.dot} />
-                    ))
-                }
+                <Pagination
+                    count={subCatList.length}
+                    page={page}
+                    className={classes.categoriesContainer}
+                    boundaryCount={4}
+                    onChange={(event, page) => {
+                        setPage(page);
+                    }}
+                    renderItem={(item) => {
+                        console.log("item.type=====>", item.type)
+                        if(item.type === "page"){
+                            const subCatIndex = item.page - 1;
+                            const subCat = subCatList[subCatIndex];
+                            return (
+                                <SubCaregoryCard
+                                    data={subCat}
+                                    isActive={subCatIndex === activeSubCatIndex}
+                                    onMouseOver={() => {
+                                        setPage(subCatIndex+1);
+                                        setActiveSubCatIndex(subCatIndex);
+                                    }}
+                                />
+                            )
+                        }else if(item.type === "next"){
+                            return (
+                                <IconButton
+                                    color="inherit" className={classes.actionButton}
+                                    onClick={() => {
+                                        setPage(item.page+1)
+                                        setActiveSubCatIndex(activeSubCatIndex+1)
+                                    }}
+                                    disabled={subCatList.length === item.page}
+                                >
+                                    <NextIcon />
+                                </IconButton>
+                            )
+                        }else if(item.type === "previous"){
+                            return (
+                                <div className={classes.previousIconContainer}>
+                                    <div style={{margin: 'auto'}}>
+                                        <IconButton
+                                            color="inherit" className={classes.actionButton}
+                                            onClick={() => {
+                                                setPage(item.page-1)
+                                                setActiveSubCatIndex(activeSubCatIndex-1)
+                                            }}
+                                            disabled={item.page === -1}
+                                        >
+                                            <PreviousIcon />
+                                        </IconButton>
+                                    </div>
+                                </div>
+                            )
+                        }else{
+                            return (
+                                <PaginationItem
+                                    {...item}
+                                />
+                            )
+                        }
+                    }}
+                />
             </Grid>
         </Grid>
     )

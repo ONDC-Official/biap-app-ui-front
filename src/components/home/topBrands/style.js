@@ -46,6 +46,24 @@ const useStyles = makeStyles({
         borderRadius: '10px',
         display: 'inline-block',
         marginLeft: '5px'
+    },
+    categoriesContainer: {
+        "& ul": {
+            overflow: 'auto',
+            display: 'flex',
+            gap: '10px',
+            // padding: '16px !important',
+            justifyContent: 'center',
+            "& li:has(.MuiPaginationItem-ellipsis)": {
+                background: 'red !important',
+                display: 'none'
+            }
+        },
+        textAlign: 'center',
+        // margin: 'auto'
+    },
+    isActive: {
+        border: `2px solid ${palette.primary.main}`
     }
 });
 

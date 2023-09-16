@@ -14,6 +14,7 @@ import SingleOutlet from "./singleOutlet";
 import {getAllOutletsRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
+import {getValueFromCookie} from "../../../utils/cookies";
 
 const Outlets = ({brandDetails}) => {
     const classes = useStyles();
@@ -30,10 +31,14 @@ const Outlets = ({brandDetails}) => {
     const getAllOutlets = async() => {
         setIsLoading(true);
         try {
+            let sc = JSON.parse(getValueFromCookie("search_context") || {});
+            const reqParams = {
+                lat: sc.location.lat,
+                lng: sc.location.lng
+            };
             const data = await cancellablePromise(
-                getAllOutletsRequest(brandId)
+                getAllOutletsRequest(brandId, reqParams)
             );
-            console.log("getAllOutlets=====>", data.data);
             setOutlets(data.data);
         } catch (err) {
         } finally {
