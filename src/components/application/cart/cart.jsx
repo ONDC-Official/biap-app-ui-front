@@ -105,6 +105,18 @@ export default function Cart() {
     }
   };
 
+  // function to dispatch error
+  function dispatchError(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
+  }
+
   const updateCartItem = async (itemId, increment, uniqueId) => {
     const url = `/clientApis/v2/cart/${user.id}/${uniqueId}`;
     const items = cartItems.concat([]);
@@ -115,20 +127,40 @@ export default function Cart() {
 
       if (increment !== null) {
         if (increment) {
-          updatedCartItem.item.quantity.count += 1;
+          const productMaxQuantity = updatedCartItem?.item?.product?.quantity?.maximum;
+          if(productMaxQuantity){
+            if(updatedCartItem.item.quantity.count < productMaxQuantity.count){
+              updatedCartItem.item.quantity.count += 1;
+              updatedCartItem = updatedCartItem.item;
+              const res = await putCall(url, updatedCartItem);
+              console.log("after update:", res);
+              setLoading(false);
+              getCartItems();
+              fetchCartItems();
+            }else{
+              dispatchError(`Maximum allowed quantity is ${updatedCartItem.item.quantity.count}`)
+            }
+          }else{
+            updatedCartItem.item.quantity.count += 1;
+            updatedCartItem = updatedCartItem.item;
+            const res = await putCall(url, updatedCartItem);
+            console.log("after update:", res);
+            setLoading(false);
+            getCartItems();
+            fetchCartItems();
+          }
         } else {
           if (updatedCartItem.item.quantity.count > 1) {
             updatedCartItem.item.quantity.count -= 1;
+            updatedCartItem = updatedCartItem.item;
+            const res = await putCall(url, updatedCartItem);
+            console.log("after update:", res);
+            setLoading(false);
+            getCartItems();
+            fetchCartItems();
           }
         }
       }
-
-      updatedCartItem = updatedCartItem.item;
-      const res = await putCall(url, updatedCartItem);
-      console.log("after update:", res);
-      setLoading(false);
-      getCartItems();
-      fetchCartItems();
     }
   };
 
@@ -330,6 +362,7 @@ export default function Cart() {
 
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
+      console.log("cartItem=====>", cartItem)
       return (
         <Grid key={cartItem._id}>
           <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
