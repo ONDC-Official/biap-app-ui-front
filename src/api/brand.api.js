@@ -89,7 +89,7 @@ export const getAllOutletsFromCategoryAndLocationRequest = (params) => {
             domain: params.domain,
             latitude: params.lat,
             longitude: params.lng,
-            radius: 10000
+            radius: 30
         }
         try {
             // const data = await getCall(`/clientApis/v2/locations?provider=${brandId}`);
