@@ -60,6 +60,7 @@ export default function Cart() {
   const [currentCartItem, setCurrentCartItem] = useState(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [isProductAvailableQuantityIsZero, setIsProductAvailableQuantityIsZero] = useState(false);
+  const [isProductCategoryIsDifferent, setIsProductCategoryIsDifferent] = useState(false);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -201,9 +202,16 @@ export default function Cart() {
     setIsProductAvailableQuantityIsZero(quantityIsZero)
   };
 
+  const checkDifferentCategory = () => {
+    const everyEnvHasSameValue = cartItems.every( ({item}) => item.domain === cartItems[0].item.domain); // use proper name
+    setIsProductCategoryIsDifferent(!everyEnvHasSameValue);
+  };
   useEffect(() => {
     checkDistinctProviders();
     checkAvailableQuantity();
+    if(cartItems.length > 1){
+      checkDifferentCategory();
+    }
   }, [cartItems.length]);
 
   const emptyCartScreen = () => {
@@ -493,6 +501,17 @@ export default function Cart() {
               </div>
             </Grid>
           )}
+          {
+              idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
+                  <Grid>
+                    <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
+                      <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
+                        You are ordering from different category. Please check your order again.
+                      </Typography>
+                    </div>
+                  </Grid>
+              )
+          }
           <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
         </Grid>
       );
@@ -517,7 +536,7 @@ export default function Cart() {
         <Button
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
-          disabled={isProductAvailableQuantityIsZero || haveDistinctProviders || checkoutLoading}
+          disabled={isProductAvailableQuantityIsZero || isProductCategoryIsDifferent || haveDistinctProviders || checkoutLoading}
           onClick={() => {
             console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {
