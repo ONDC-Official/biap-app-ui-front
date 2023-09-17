@@ -324,7 +324,7 @@ const CustomizationRenderer = (props) => {
       selected: [],
       childs: [],
       isMandatory,
-      type: currentGroup.maxQuantity > 1 ? "Checkbox" : "Radio",
+      type: "Checkbox",
     };
     updatedCustomizationState1[groupId].options = [];
 
@@ -333,28 +333,31 @@ const CustomizationRenderer = (props) => {
 
     let childGroups = [];
     if (currentGroup.id === selectedGroup.id) {
-      childGroups = customizationToGroupMap[selectedOption.id];
       let new_selected_options = [];
       // if option is there then remove it here
-      if (currentGroupOldState.selected.find((optn) => optn.id == selectedOption.id)) {
-        console.log("**remove");
+      if (!isMandatory && currentGroupOldState.selected.find((optn) => optn.id == selectedOption.id)) {
+        console.log("**1");
         new_selected_options = [...currentGroupOldState["selected"]].filter((item) => item.id != selectedOption.id);
         updatedCustomizationState1[groupId].selected = new_selected_options;
       } else {
-        console.log("**add");
+        console.log("**2");
         // if option is not there then add it only if length is lenght is less than max Qty
-        if (currentGroup.maxQuantity > 1 && currentGroupOldState.selected.length < currentGroup.maxQuantity) {
-          console.log("**add1");
-          new_selected_options = [...currentGroupOldState["selected"], selectedOption];
-          updatedCustomizationState1[groupId].selected = new_selected_options;
+        if (currentGroup.maxQuantity === 1) {
+          console.log("**3");
+          childGroups = customizationToGroupMap[selectedOption.id];
+          updatedCustomizationState1[groupId].selected = [selectedOption];
         } else {
-          console.log("**add2");
-          console.log("currentGroupOldState.selected**", currentGroupOldState.selected);
-          updatedCustomizationState1[groupId].selected = currentGroupOldState.selected;
+          console.log("**4");
+          if (currentGroup.maxQuantity > 1 && currentGroupOldState.selected.length < currentGroup.maxQuantity) {
+            new_selected_options = [...currentGroupOldState["selected"], selectedOption];
+            updatedCustomizationState1[groupId].selected = new_selected_options;
+          } else {
+            updatedCustomizationState1[groupId].selected = currentGroupOldState.selected;
+          }
         }
       }
 
-      updatedCustomizationState1[groupId].childs = customizationToGroupMap[selectedOption.id];
+      updatedCustomizationState1[groupId].childs = childGroups;
     } else {
       const selectedCustomization = findSelectedCustomizationForGroup(
         updatedCustomizationState1[groupId],
@@ -364,12 +367,13 @@ const CustomizationRenderer = (props) => {
       updatedCustomizationState1[groupId].selected = selectedCustomization;
 
       if (selectedCustomization.length) {
-        childGroups = customizationToGroupMap[selectedCustomization.id];
+        childGroups = customizationToGroupMap[selectedCustomization[0].id];
+        console.log("**5", selectedCustomization[0].id);
         updatedCustomizationState1[groupId].childs = childGroups;
       }
     }
 
-    // updatedCustomizationState[groupId].childs = childGroups;
+    //  updatedCustomizationState1[groupId].childs = childGroups;
 
     // Recursively process child groups
     for (const childGroup of childGroups) {
@@ -435,11 +439,12 @@ const CustomizationRenderer = (props) => {
                     className={classes.formControlLabel}
                     onClick={() => handleClick(group, option)}
                     control={
-                      group.type === "Checkbox" ? (
-                        <Checkbox checked={selected} disabled={!option.inStock} />
-                      ) : (
-                        <Radio checked={selected} disabled={!option.inStock} />
-                      )
+                      //  group.type === "Checkbox" ? (
+                      //    <Checkbox checked={selected} disabled={!option.inStock} />
+                      //  ) : (
+                      //    <Radio checked={selected} disabled={!option.inStock} />
+                      //  )
+                      <Checkbox checked={selected} disabled={!option.inStock} />
                     }
                     label={
                       <>
