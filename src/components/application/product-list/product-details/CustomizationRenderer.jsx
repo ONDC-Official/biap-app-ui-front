@@ -246,6 +246,7 @@ const CustomizationRenderer = (props) => {
         const group = customizationGroups.find((item) => item.id === id);
         const groupId = group.id;
         const groupName = group.name;
+        const isMandatory = group.minQuantity > 0;
 
         customization_state[groupId] = {
           id: groupId,
@@ -254,13 +255,18 @@ const CustomizationRenderer = (props) => {
           options: [],
           selected: [],
           childs: [],
+          isMandatory,
           type: group.maxQuantity > 1 ? "Checkbox" : "Radio",
         };
 
         const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
 
         customization_state[groupId].options = childCustomizations;
-        customization_state[groupId].selected = childCustomizations.filter((customization) => customization.isDefault);
+        customization_state[groupId].selected = findSelectedCustomizationForGroup(
+          customization_state[groupId],
+          childCustomizations
+        );
+
         let childGroups =
           customization_state[groupId].selected[0]?.id != undefined
             ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
@@ -284,12 +290,31 @@ const CustomizationRenderer = (props) => {
     initializeCustomizationState();
   }, [customizationGroups, customizations, customizationToGroupMap]);
 
-  const processGroup = (groupId, updatedCustomizationState1, group, selectedOption) => {
-    const currentGroup = customizationGroups.find((item) => item.id === groupId);
+  const findSelectedCustomizationForGroup = (group, childCustomizations) => {
+    if (!group.isMandatory) return [];
+    let defaultCustomization = childCustomizations.filter(
+      (customization) => customization.isDefault && customization.inStock
+    );
 
+    if (defaultCustomization.length) {
+      return defaultCustomization;
+    } else {
+      return [childCustomizations.find((customization) => customization.inStock)];
+    }
+  };
+
+  const processGroup = (groupId, updatedCustomizationState1, selectedGroup, selectedOption) => {
+    const currentGroup = customizationGroups.find((item) => item.id === groupId);
+    //  console.log("param**", groupId);
+    //  console.log("param**", updatedCustomizationState1);
+    //  console.log("param**", selectedGroup);
+    //  console.log("param**", selectedOption);
     if (!currentGroup) return;
 
     const groupName = currentGroup.name;
+    const isMandatory = currentGroup.minQuantity > 0;
+
+    const currentGroupOldState = updatedCustomizationState1[currentGroup.id];
 
     updatedCustomizationState1[groupId] = {
       id: groupId,
@@ -298,6 +323,7 @@ const CustomizationRenderer = (props) => {
       options: [],
       selected: [],
       childs: [],
+      isMandatory,
       type: currentGroup.maxQuantity > 1 ? "Checkbox" : "Radio",
     };
     updatedCustomizationState1[groupId].options = [];
@@ -306,22 +332,48 @@ const CustomizationRenderer = (props) => {
     updatedCustomizationState1[groupId].options = childCustomizations;
 
     let childGroups = [];
-    if (currentGroup.id === group.id) {
+    if (currentGroup.id === selectedGroup.id) {
       childGroups = customizationToGroupMap[selectedOption.id];
-      updatedCustomizationState1[groupId].selected = [selectedOption];
+      let new_selected_options = [];
+      // if option is there then remove it here
+      if (currentGroupOldState.selected.find((optn) => optn.id == selectedOption.id)) {
+        console.log("**remove");
+        new_selected_options = [...currentGroupOldState["selected"]].filter((item) => item.id != selectedOption.id);
+        updatedCustomizationState1[groupId].selected = new_selected_options;
+      } else {
+        console.log("**add");
+        // if option is not there then add it only if length is lenght is less than max Qty
+        if (currentGroup.maxQuantity > 1 && currentGroupOldState.selected.length < currentGroup.maxQuantity) {
+          console.log("**add1");
+          new_selected_options = [...currentGroupOldState["selected"], selectedOption];
+          updatedCustomizationState1[groupId].selected = new_selected_options;
+        } else {
+          console.log("**add2");
+          console.log("currentGroupOldState.selected**", currentGroupOldState.selected);
+          updatedCustomizationState1[groupId].selected = currentGroupOldState.selected;
+        }
+      }
+
       updatedCustomizationState1[groupId].childs = customizationToGroupMap[selectedOption.id];
     } else {
-      updatedCustomizationState1[groupId].selected = childCustomizations.filter(
-        (customization) => customization.isDefault
+      const selectedCustomization = findSelectedCustomizationForGroup(
+        updatedCustomizationState1[groupId],
+        childCustomizations
       );
-      updatedCustomizationState1[groupId].childs = []; // default selection logic
+
+      updatedCustomizationState1[groupId].selected = selectedCustomization;
+
+      if (selectedCustomization.length) {
+        childGroups = customizationToGroupMap[selectedCustomization.id];
+        updatedCustomizationState1[groupId].childs = childGroups;
+      }
     }
 
     // updatedCustomizationState[groupId].childs = childGroups;
 
     // Recursively process child groups
     for (const childGroup of childGroups) {
-      processGroup(childGroup, updatedCustomizationState1, group, selectedOption);
+      processGroup(childGroup, updatedCustomizationState1, selectedGroup, selectedOption);
     }
 
     return updatedCustomizationState1;
@@ -383,7 +435,7 @@ const CustomizationRenderer = (props) => {
                     className={classes.formControlLabel}
                     onClick={() => handleClick(group, option)}
                     control={
-                      group.seq === highestSeq ? (
+                      group.type === "Checkbox" ? (
                         <Checkbox checked={selected} disabled={!option.inStock} />
                       ) : (
                         <Radio checked={selected} disabled={!option.inStock} />

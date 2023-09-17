@@ -67,8 +67,6 @@ const ProductDetails = () => {
     let group = customization_state[groupId];
     if (!group) return;
 
-    console.log("**1", group);
-    console.log("**2", group.selected);
     let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
     group?.childs?.map((child) => {
       getCustomization_(child);
@@ -82,7 +80,6 @@ const ProductDetails = () => {
     const firstGroupId = customization_state["firstGroup"].id;
 
     getCustomization_(firstGroupId);
-    console.log("selectedCustomizationIds**", selectedCustomizationIds);
 
     for (const cId of selectedCustomizationIds) {
       let c = customisation_items.find((item) => item.local_id === cId);
