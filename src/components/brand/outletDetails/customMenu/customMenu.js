@@ -48,6 +48,8 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const [productLoading, setProductLoading] = useState(false);
   const [itemQty, setItemQty] = useState(1);
 
+  const [customizationPrices, setCustomizationPrices] = useState(0);
+
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -105,20 +107,21 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
     }
   };
 
-  const calculateSubtotal = () => {
-    let subtotal = 0;
+  const calculateSubtotal = (groupId, customization_state) => {
+    let group = customization_state[groupId];
+    if (!group) return;
 
-    for (const level in customization_state) {
-      const selectedOptions = customization_state[level].selected;
-      if (selectedOptions.length > 0) {
-        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
-      }
-    }
-    return subtotal;
+    let prices = group.selected.map((s) => s.price);
+    setCustomizationPrices((prevState) => {
+      return prevState + prices.reduce((a, b) => a + b, 0);
+    });
+
+    group?.childs?.map((child) => {
+      calculateSubtotal(child, customization_state);
+    });
   };
 
   let selectedCustomizationIds = [];
-
   const getCustomization_ = (groupId, customization_state) => {
     let group = customization_state[groupId];
     if (!group) return;
@@ -154,18 +157,17 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
 
   const addToCart = async (productPayload, isDefault = false) => {
     console.log("productPayload", productPayload);
-    //  setProductLoading(true);
+    setProductLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
-
-    const subtotal =
-      // productPayload?.item_details?.price?.value + calculateSubtotal();
-      productPayload?.item_details?.price?.value;
-
     const groups = await formatCustomizationGroups(productPayload.customisation_groups);
     const cus = await formatCustomizations(productPayload.customisation_items);
     const newState = await initializeCustomizationState(groups, cus, customization_state);
-    const customisations = await getCustomizations(productPayload, isDefault ? newState : customization_state);
+    const customizationState = isDefault ? newState : customization_state;
+    const customisations = await getCustomizations(productPayload, customizationState);
+
+    calculateSubtotal(customizationState["firstGroup"].id, customizationState);
+    const subtotal = productPayload?.item_details?.price?.value + customizationPrices;
 
     const payload = {
       id: productPayload.id,
@@ -212,6 +214,14 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
       getBrandCustomMenu(brandDetails.domain);
     }
   }, [brandDetails]);
+
+  useEffect(() => {
+    if (customization_state && customization_state["firstGroup"]) {
+      console.log("USEEFFECT");
+      setCustomizationPrices(0);
+      calculateSubtotal(customization_state["firstGroup"]?.id, customization_state);
+    }
+  }, [customization_state]);
 
   return (
     <div>
@@ -327,8 +337,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                           />
                         </Grid>
                         <Button variant="contained" sx={{ flex: 1 }} onClick={() => addToCart(productPayload)}>
-                          {/* Add Item Total- ₹{(productPayload?.item_details?.price.value + calculateSubtotal()) * itemQty}{" "} */}
-                          Add Item Total- ₹{productPayload?.item_details?.price.value * itemQty}{" "}
+                          Add Item Total- ₹{(productPayload?.item_details?.price.value + customizationPrices) * itemQty}{" "}
                         </Button>
                       </Grid>
                     </>

@@ -32,6 +32,8 @@ const ProductDetails = () => {
   const [activeImage, setActiveImage] = useState("");
   const [activeSize, setActiveSize] = useState("");
 
+  const [customizationPrices, setCustomizationPrices] = useState(0);
+
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
   };
@@ -49,16 +51,18 @@ const ProductDetails = () => {
     }
   };
 
-  const calculateSubtotal = () => {
-    let subtotal = 0;
+  const calculateSubtotal = (groupId, customization_state) => {
+    let group = customization_state[groupId];
+    if (!group) return;
 
-    for (const level in customization_state) {
-      const selectedOptions = customization_state[level].selected;
-      if (selectedOptions.length > 0) {
-        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
-      }
-    }
-    return subtotal;
+    let prices = group.selected.map((s) => s.price);
+    setCustomizationPrices((prevState) => {
+      return prevState + prices.reduce((a, b) => a + b, 0);
+    });
+
+    group?.childs?.map((child) => {
+      calculateSubtotal(child, customization_state);
+    });
   };
 
   let selectedCustomizationIds = [];
@@ -94,28 +98,6 @@ const ProductDetails = () => {
       }
     }
 
-    //  for (const level of levels) {
-    //    const selectedItems = customization_state[level].selected;
-    //    let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
-
-    //    // for (const selectedItem of selectedItems) {
-    //    //   let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
-    //    //   if (has_special_instruction) {
-    //    //     customization.special_instructions = "";
-    //    //   }
-
-    //    //   if (customization) {
-    //    //     customization = {
-    //    //       ...customization,
-    //    //       quantity: {
-    //    //         count: 1,
-    //    //       },
-    //    //     };
-    //    //     customizations.push(customization);
-    //    //   }
-    //    // }
-    //  }
-
     return customizations;
   };
 
@@ -144,9 +126,9 @@ const ProductDetails = () => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
-    //  const subtotal = productDetails.price.value + calculateSubtotal();
-    const subtotal = productDetails.price.value;
     const customisations = getCustomizations();
+    calculateSubtotal(customization_state["firstGroup"].id, customization_state);
+    const subtotal = productPayload?.item_details?.price?.value + customizationPrices;
 
     const payload = {
       id: productPayload.id,
