@@ -90,7 +90,9 @@ const MenuItem = (props) => {
             endIcon={<PlusIcon />}
             className={classes.addToCartIcon}
             onClick={() => {
-              getProductDetails(productId).then((data) => handleAddToCart(data, true));
+              getProductDetails(productId).then((data) => {
+                handleAddToCart(data, true);
+              });
             }}
             disabled={productLoading}
           >

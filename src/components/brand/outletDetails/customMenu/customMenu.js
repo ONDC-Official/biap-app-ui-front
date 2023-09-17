@@ -18,10 +18,7 @@ import MenuItem from "./menuItem";
 import ModalComponent from "../../../common/Modal";
 import MenuModal from "./menuModal";
 
-import {
-  getBrandCustomMenuRequest,
-  getCustomMenuItemsRequest,
-} from "../../../../api/brand.api";
+import { getBrandCustomMenuRequest, getCustomMenuItemsRequest } from "../../../../api/brand.api";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { ReactComponent as MenuIcon } from "../../../../assets/images/menu.svg";
 import CustomizationRenderer from "../../../application/product-list/product-details/CustomizationRenderer";
@@ -57,21 +54,14 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const getCustomMenuItems = async (menuName) => {
     setIsLoading(true);
     try {
-      const data = await cancellablePromise(
-        getCustomMenuItemsRequest(menuName)
-      );
+      const data = await cancellablePromise(getCustomMenuItemsRequest(menuName));
       // setCustomMenu(data.data);
       let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
       resData = resData.map((item) => {
-        const findVegNonvegTag = item.item_details.tags.find(
-          (tag) => tag.code === "veg_nonveg"
-        );
+        const findVegNonvegTag = item.item_details.tags.find((tag) => tag.code === "veg_nonveg");
         if (findVegNonvegTag) {
           item.item_details.isVeg =
-            findVegNonvegTag.list[0].value === "yes" ||
-            findVegNonvegTag.list[0].value === "Yes"
-              ? true
-              : false;
+            findVegNonvegTag.list[0].value === "yes" || findVegNonvegTag.list[0].value === "Yes" ? true : false;
         } else {
         }
         return item;
@@ -87,15 +77,11 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const getBrandCustomMenu = async (domain) => {
     setIsLoading(true);
     try {
-      const data = await cancellablePromise(
-        getBrandCustomMenuRequest(domain, brandId)
-      );
+      const data = await cancellablePromise(getBrandCustomMenuRequest(domain, brandId));
       let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
       resData = await Promise.all(
         resData.map(async (singleCustomMenu) => {
-          singleCustomMenu.items = await getCustomMenuItems(
-            singleCustomMenu.id
-          );
+          singleCustomMenu.items = await getCustomMenuItems(singleCustomMenu.id);
           return singleCustomMenu;
         })
       );
@@ -109,9 +95,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(true);
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v2/items/${productId}`)
-      );
+      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
       setProductPayload(data.response);
       return data.response;
     } catch (error) {
@@ -127,103 +111,100 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
     for (const level in customization_state) {
       const selectedOptions = customization_state[level].selected;
       if (selectedOptions.length > 0) {
-        subtotal += selectedOptions.reduce(
-          (acc, option) => acc + option.price,
-          0
-        );
+        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
       }
     }
     return subtotal;
   };
 
+  let selectedCustomizationIds = [];
+
+  const getCustomization_ = (groupId, customization_state) => {
+    let group = customization_state[groupId];
+    if (!group) return;
+
+    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    group?.childs?.map((child) => {
+      getCustomization_(child, customization_state);
+    });
+  };
+
   const getCustomizations = async (productPayload, customization_state) => {
     const { customisation_items } = productPayload;
     const customizations = [];
-    const levels = Object.keys(customization_state);
+    const firstGroupId = customization_state["firstGroup"].id;
 
-    for (const level of levels) {
-      const selectedItems = customization_state[level].selected;
+    console.log("selectedCustomizationIds", customization_state);
+    getCustomization_(firstGroupId, customization_state);
 
-      for (const selectedItem of selectedItems) {
-        let customization = customisation_items.find(
-          (item) => item.local_id === selectedItem.id
-        );
-
-        if (customization) {
-          customization = {
-            ...customization,
-            quantity: {
-              count: 1,
-            },
-          };
-          customizations.push(customization);
-        }
+    for (const cId of selectedCustomizationIds) {
+      let c = customisation_items.find((item) => item.local_id === cId);
+      if (c) {
+        c = {
+          ...c,
+          quantity: {
+            count: 1,
+          },
+        };
+        customizations.push(c);
       }
     }
-
     return customizations;
   };
 
   const addToCart = async (productPayload, isDefault = false) => {
-    setProductLoading(true);
+    console.log("productPayload", productPayload);
+    //  setProductLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
     const subtotal =
-      productPayload?.item_details?.price?.value + calculateSubtotal();
+      // productPayload?.item_details?.price?.value + calculateSubtotal();
+      productPayload?.item_details?.price?.value;
 
-    const groups = await formatCustomizationGroups(
-      productPayload.customisation_groups
-    );
+    const groups = await formatCustomizationGroups(productPayload.customisation_groups);
     const cus = await formatCustomizations(productPayload.customisation_items);
-    const newState = await initializeCustomizationState(
-      groups,
-      cus,
-      customization_state
-    );
+    const newState = await initializeCustomizationState(groups, cus, customization_state);
+    const customisations = await getCustomizations(productPayload, isDefault ? newState : customization_state);
 
-    getCustomizations(
-      productPayload,
-      isDefault ? newState : customization_state
-    ).then((customisations) => {
-      const payload = {
+    const payload = {
+      id: productPayload.id,
+      local_id: productPayload.local_id,
+      bpp_id: productPayload.bpp_details.bpp_id,
+      bpp_uri: productPayload.context.bpp_uri,
+      domain: productPayload.context.domain,
+      tags: productPayload.item_details.tags,
+      quantity: {
+        count: itemQty,
+      },
+      provider: {
+        id: productPayload.bpp_details.bpp_id,
+        locations: productPayload.locations,
+        ...productPayload.provider_details,
+      },
+      product: {
         id: productPayload.id,
-        local_id: productPayload.local_id,
-        bpp_id: productPayload.bpp_details.bpp_id,
-        bpp_uri: productPayload.context.bpp_uri,
-        domain: productPayload.context.domain,
-        tags: productPayload.item_details.tags,
-        quantity: {
-          count: itemQty,
-        },
-        provider: {
-          id: productPayload.bpp_details.bpp_id,
-          locations: productPayload.locations,
-          ...productPayload.provider_details,
-        },
-        product: {
-          id: productPayload.id,
-          subtotal,
-          ...productPayload.item_details,
-        },
-        customisations,
-        hasCustomisations:
-          productPayload.hasOwnProperty("customisation_groups") &&
-          productPayload.customisation_groups.length > 0,
-      };
+        subtotal,
+        ...productPayload.item_details,
+      },
+      customisations,
+      hasCustomisations:
+        productPayload.hasOwnProperty("customisation_groups") && productPayload.customisation_groups.length > 0,
+    };
 
-      postCall(url, payload)
-        .then(() => {
-          fetchCartItems();
-          setCustomizationState({});
-          setCustomizationModal(false);
-          setProductLoading(false);
-        })
-        .catch((error) => {
-          console.log(error);
-          setProductLoading(false);
-        });
-    });
+    console.log("payload", payload);
+
+    postCall(url, payload)
+      .then(() => {
+        fetchCartItems();
+        setCustomizationState({});
+        setCustomizationModal(false);
+        setProductLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setProductLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -249,44 +230,26 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                   defaultExpanded={true}
                 >
                   <AccordionSummary
-                    expandIcon={
-                      <ExpandMoreIcon className={classes.expandIcon} />
-                    }
+                    expandIcon={<ExpandMoreIcon className={classes.expandIcon} />}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                   >
-                    <Typography variant="h5">{`${menu?.descriptor?.name} (${
-                      menu?.items?.length || 0
-                    })`}</Typography>
+                    <Typography variant="h5">{`${menu?.descriptor?.name} (${menu?.items?.length || 0})`}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     {menu.items.length > 0 ? (
                       <Grid container spacing={3}>
                         {menu.items.map((item, itemInd) => (
-                          <Grid
-                            item
-                            xs={12}
-                            sm={12}
-                            md={12}
-                            lg={12}
-                            xl={12}
-                            key={`menu-item-ind-${itemInd}`}
-                          >
+                          <Grid item xs={12} sm={12} md={12} lg={12} xl={12} key={`menu-item-ind-${itemInd}`}>
                             <MenuItem
                               productPayload={item}
                               setProductPayload={setProductPayload}
                               product={item?.item_details}
                               productId={item.id}
                               price={item?.item_details?.price}
-                              bpp_provider_descriptor={
-                                item?.provider_details?.descriptor
-                              }
+                              bpp_provider_descriptor={item?.provider_details?.descriptor}
                               bpp_id={item?.bpp_details?.bpp_id}
-                              location_id={
-                                item?.location_details
-                                  ? item.location_details?.id
-                                  : ""
-                              }
+                              location_id={item?.location_details ? item.location_details?.id : ""}
                               bpp_provider_id={item?.provider_details?.id}
                               handleAddToCart={addToCart}
                               setCustomizationModal={setCustomizationModal}
@@ -297,9 +260,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                         ))}
                       </Grid>
                     ) : (
-                      <Typography variant="body1">
-                        There is not items available in this menu
-                      </Typography>
+                      <Typography variant="body1">There is not items available in this menu</Typography>
                     )}
                   </AccordionDetails>
                 </Accordion>
@@ -365,15 +326,9 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                             onClick={() => setItemQty(itemQty + 1)}
                           />
                         </Grid>
-                        <Button
-                          variant="contained"
-                          sx={{ flex: 1 }}
-                          onClick={() => addToCart(productPayload)}
-                        >
-                          Add Item Total- ₹
-                          {(productPayload?.item_details?.price.value +
-                            calculateSubtotal()) *
-                            itemQty}{" "}
+                        <Button variant="contained" sx={{ flex: 1 }} onClick={() => addToCart(productPayload)}>
+                          {/* Add Item Total- ₹{(productPayload?.item_details?.price.value + calculateSubtotal()) * itemQty}{" "} */}
+                          Add Item Total- ₹{productPayload?.item_details?.price.value * itemQty}{" "}
                         </Button>
                       </Grid>
                     </>

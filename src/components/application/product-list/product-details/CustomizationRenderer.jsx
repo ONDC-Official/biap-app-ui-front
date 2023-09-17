@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Radio from "../../../common/Radio";
 import Checkbox from "../../../common/Checkbox";
+import { createCustomizationAndGroupMapping } from "./utils";
 
 const CustomizationRenderer = (props) => {
   const { productPayload, customization_state, setCustomizationState, selectedCustomizations = null } = props;
@@ -210,30 +211,9 @@ const CustomizationRenderer = (props) => {
   }, [productPayload]);
 
   useEffect(() => {
-    let newCustomizationGroupMappings = {};
-    let customizationToGroupMap = {};
-    customizations.forEach((customization) => {
-      const groupId = customization.parent;
-      const childId = customization.id;
-
-      customizationToGroupMap = {
-        ...customizationToGroupMap,
-        [customization.id]: customization.childs == undefined ? [] : customization.childs,
-      };
-
-      if (!newCustomizationGroupMappings[groupId]) {
-        newCustomizationGroupMappings[groupId] = new Set();
-      }
-      newCustomizationGroupMappings[groupId].add(childId);
-    });
-
-    const finalizedCustomizationGroupMappings = {};
-    for (const groupId in newCustomizationGroupMappings) {
-      finalizedCustomizationGroupMappings[groupId] = Array.from(newCustomizationGroupMappings[groupId]);
-    }
-
-    setCustomizationToGroupMap(customizationToGroupMap);
-    setGroupToCustomizationMap(finalizedCustomizationGroupMappings);
+    const mappings = createCustomizationAndGroupMapping(customizations);
+    setCustomizationToGroupMap(mappings.customizationToGroupMap);
+    setGroupToCustomizationMap(mappings.groupToCustomizationMap);
   }, [customizationGroups, customizations]);
 
   useEffect(() => {
@@ -437,7 +417,11 @@ const CustomizationRenderer = (props) => {
                 <>
                   <FormControlLabel
                     className={classes.formControlLabel}
-                    onClick={() => handleClick(group, option)}
+                    onClick={() => {
+                      if (option.inStock) {
+                        handleClick(group, option);
+                      }
+                    }}
                     control={
                       //  group.type === "Checkbox" ? (
                       //    <Checkbox checked={selected} disabled={!option.inStock} />
@@ -448,7 +432,10 @@ const CustomizationRenderer = (props) => {
                     }
                     label={
                       <>
-                        <div className={classes.radioTypoContainer} onClick={() => handleClick(group, option)}>
+                        <div
+                          className={classes.radioTypoContainer}
+                          //  onClick={() => handleClick(group, option)}
+                        >
                           {renderVegNonVegTag(option.vegNonVeg)}
                           <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
                             {option.name}
