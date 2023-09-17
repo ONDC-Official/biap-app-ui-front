@@ -40,8 +40,8 @@ import { getCall } from "../../../api/axios";
 
 import { categoryList } from "../../../constants/categories";
 import { CartContext } from "../../../context/cartContext";
-import {ToastContext} from "../../../context/toastContext";
-import {toast_actions, toast_types} from "../../shared/toast/utils/toast";
+import { ToastContext } from "../../../context/toastContext";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 
 const NavBar = ({ isCheckout = false }) => {
   const classes = useStyles();
@@ -56,7 +56,6 @@ const NavBar = ({ isCheckout = false }) => {
   const { setSearchData, setLocationData } = useContext(SearchContext);
   const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
 
-  console.log("deliveryAddress=====>", deliveryAddress)
   useEffect(() => {}, [locationData]);
 
   // STATES
@@ -102,7 +101,7 @@ const NavBar = ({ isCheckout = false }) => {
         message,
       },
     });
-  };
+  }
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -119,7 +118,7 @@ const NavBar = ({ isCheckout = false }) => {
   };
   const handleCloseCategoryMenu = (routeName) => {
     setAnchorElCategoryMenu(null);
-    if(routeName){
+    if (routeName) {
       const searchName = query.get("s");
       const subCategoryName = query.get("sc");
       const params = new URLSearchParams({});
@@ -134,9 +133,9 @@ const NavBar = ({ isCheckout = false }) => {
       } else {
       }
       if (locationData.pathname !== "/application/products") {
-        history.push({pathname: "/application/products", search: params.toString()});
+        history.push({ pathname: "/application/products", search: params.toString() });
       } else {
-        history.replace({pathname: locationData.pathname, search: params.toString()});
+        history.replace({ pathname: locationData.pathname, search: params.toString() });
       }
     }
   };
@@ -147,7 +146,7 @@ const NavBar = ({ isCheckout = false }) => {
     try {
       const data = await cancellablePromise(getAllDeliveryAddressRequest());
       setAddressList(data);
-      if(deliveryAddress === undefined && data.length === 0){
+      if (deliveryAddress === undefined && data.length === 0) {
         setToggleAddressModal({
           actionType: "add",
           toggle: true,
@@ -160,12 +159,12 @@ const NavBar = ({ isCheckout = false }) => {
         return;
       }
       dispatch({
-          type: toast_actions.ADD_TOAST,
-          payload: {
-              id: Math.floor(Math.random() * 100),
-              type: toast_types.error,
-              message: err?.response?.data?.error?.message,
-          },
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
       });
     } finally {
       setFetchDeliveryAddressLoading(false);
@@ -445,7 +444,11 @@ const NavBar = ({ isCheckout = false }) => {
                   >
                     {categoryList.map((cat, catIndex) => {
                       return (
-                        <MenuItem selected={cat?.routeName === query.get("c")} key={`cat-index-${catIndex}`} onClick={() => handleCloseCategoryMenu(cat.routeName)}>
+                        <MenuItem
+                          selected={cat?.routeName === query.get("c")}
+                          key={`cat-index-${catIndex}`}
+                          onClick={() => handleCloseCategoryMenu(cat.routeName)}
+                        >
                           {cat.name}
                         </MenuItem>
                       );

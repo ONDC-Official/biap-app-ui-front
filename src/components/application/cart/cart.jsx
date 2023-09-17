@@ -20,7 +20,7 @@ import { CartContext } from "../../../context/cartContext";
 import EditCustomizations from "./EditCustomizations";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
-import {SearchContext} from "../../../context/searchContext";
+import { SearchContext } from "../../../context/searchContext";
 
 export default function Cart() {
   let user = {};
@@ -132,8 +132,8 @@ export default function Cart() {
       if (increment !== null) {
         if (increment) {
           const productMaxQuantity = updatedCartItem?.item?.product?.quantity?.maximum;
-          if(productMaxQuantity){
-            if(updatedCartItem.item.quantity.count < productMaxQuantity.count){
+          if (productMaxQuantity) {
+            if (updatedCartItem.item.quantity.count < productMaxQuantity.count) {
               updatedCartItem.item.quantity.count += 1;
               updatedCartItem = updatedCartItem.item;
               const res = await putCall(url, updatedCartItem);
@@ -141,10 +141,10 @@ export default function Cart() {
               setLoading(false);
               getCartItems();
               fetchCartItems();
-            }else{
-              dispatchError(`Maximum allowed quantity is ${updatedCartItem.item.quantity.count}`)
+            } else {
+              dispatchError(`Maximum allowed quantity is ${updatedCartItem.item.quantity.count}`);
             }
-          }else{
+          } else {
             updatedCartItem.item.quantity.count += 1;
             updatedCartItem = updatedCartItem.item;
             const res = await putCall(url, updatedCartItem);
@@ -197,21 +197,21 @@ export default function Cart() {
     let quantityIsZero = false;
     cartItems.forEach((item) => {
       const availableQuantity = item.item.product.quantity.available;
-      if(availableQuantity && availableQuantity.count === 0){
+      if (availableQuantity && availableQuantity.count === 0) {
         quantityIsZero = true;
       }
     });
-    setIsProductAvailableQuantityIsZero(quantityIsZero)
+    setIsProductAvailableQuantityIsZero(quantityIsZero);
   };
 
   const checkDifferentCategory = () => {
-    const everyEnvHasSameValue = cartItems.every( ({item}) => item.domain === cartItems[0].item.domain); // use proper name
+    const everyEnvHasSameValue = cartItems.every(({ item }) => item.domain === cartItems[0].item.domain); // use proper name
     setIsProductCategoryIsDifferent(!everyEnvHasSameValue);
   };
   useEffect(() => {
     checkDistinctProviders();
     checkAvailableQuantity();
-    if(cartItems.length > 1){
+    if (cartItems.length > 1) {
       checkDifferentCategory();
     }
   }, [cartItems.length, deliveryAddressLocation]);
@@ -385,7 +385,7 @@ export default function Cart() {
 
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
-      console.log("cartItem=====>", cartItem)
+      console.log("cartItem=====>", cartItem);
       return (
         <Grid key={cartItem._id}>
           <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
@@ -413,6 +413,7 @@ export default function Cart() {
                       sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
                       alignItems="center"
                       onClick={() => {
+                        setCustomizationState(cartItem.item.customisationState);
                         getProductDetails(cartItem.item.id);
                         setCurrentCartItem(cartItem);
                         setOpenDrawer(true);
@@ -503,17 +504,15 @@ export default function Cart() {
               </div>
             </Grid>
           )}
-          {
-              idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
-                  <Grid>
-                    <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
-                      <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
-                        You are ordering from different category. Please check your order again.
-                      </Typography>
-                    </div>
-                  </Grid>
-              )
-          }
+          {idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
+            <Grid>
+              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
+                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
+                  You are ordering from different category. Please check your order again.
+                </Typography>
+              </div>
+            </Grid>
+          )}
           <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
         </Grid>
       );
@@ -538,7 +537,9 @@ export default function Cart() {
         <Button
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
-          disabled={isProductAvailableQuantityIsZero || isProductCategoryIsDifferent || haveDistinctProviders || checkoutLoading}
+          disabled={
+            isProductAvailableQuantityIsZero || isProductCategoryIsDifferent || haveDistinctProviders || checkoutLoading
+          }
           onClick={() => {
             console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {

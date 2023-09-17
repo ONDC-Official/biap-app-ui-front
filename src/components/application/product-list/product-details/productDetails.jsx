@@ -15,8 +15,8 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
-import moment from 'moment';
-import {SearchContext} from "../../../../context/searchContext";
+import moment from "moment";
+import { SearchContext } from "../../../../context/searchContext";
 
 const ProductDetails = () => {
   const classes = useStyles();
@@ -35,6 +35,8 @@ const ProductDetails = () => {
   const [activeImage, setActiveImage] = useState("");
   const [activeSize, setActiveSize] = useState("");
 
+  const [customizationPrices, setCustomizationPrices] = useState(0);
+
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
   };
@@ -52,54 +54,89 @@ const ProductDetails = () => {
     }
   };
 
-  const calculateSubtotal = () => {
-    let subtotal = 0;
+  const calculateSubtotal = (groupId, customization_state) => {
+    let group = customization_state[groupId];
+    if (!group) return;
 
-    for (const level in customization_state) {
-      const selectedOptions = customization_state[level].selected;
-      if (selectedOptions.length > 0) {
-        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
-      }
-    }
-    return subtotal;
+    let prices = group.selected.map((s) => s.price);
+    setCustomizationPrices((prevState) => {
+      return prevState + prices.reduce((a, b) => a + b, 0);
+    });
+
+    group?.childs?.map((child) => {
+      calculateSubtotal(child, customization_state);
+    });
+  };
+
+  let selectedCustomizationIds = [];
+
+  const getCustomization_ = (groupId) => {
+    let group = customization_state[groupId];
+    if (!group) return;
+
+    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    group?.childs?.map((child) => {
+      getCustomization_(child);
+    });
   };
 
   const getCustomizations = () => {
     const { customisation_items } = productPayload;
+
+    if (!customisation_items.length) return null;
     const customizations = [];
     const levels = Object.keys(customization_state);
+    const firstGroupId = customization_state["firstGroup"].id;
 
-    for (const level of levels) {
-      const selectedItems = customization_state[level].selected;
-      let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
+    getCustomization_(firstGroupId);
 
-      for (const selectedItem of selectedItems) {
-        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
-        if (has_special_instruction) {
-          customization.special_instructions = "";
-        }
-
-        if (customization) {
-          customization = {
-            ...customization,
-            quantity: {
-              count: 1,
-            },
-          };
-          customizations.push(customization);
-        }
+    for (const cId of selectedCustomizationIds) {
+      let c = customisation_items.find((item) => item.local_id === cId);
+      if (c) {
+        c = {
+          ...c,
+          quantity: {
+            count: 1,
+          },
+        };
+        customizations.push(c);
       }
     }
 
     return customizations;
   };
 
+  function findMinMaxSeq(customizationGroups) {
+    if (!customizationGroups || customizationGroups.length === 0) {
+      return { minSeq: undefined, maxSeq: undefined };
+    }
+
+    let minSeq = Infinity;
+    let maxSeq = -Infinity;
+
+    customizationGroups.forEach((group) => {
+      const seq = group.seq;
+      if (seq < minSeq) {
+        minSeq = seq;
+      }
+      if (seq > maxSeq) {
+        maxSeq = seq;
+      }
+    });
+
+    return { minSeq, maxSeq };
+  }
+
   const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
+    let subtotal = productPayload?.item_details?.price?.value;
 
-    const subtotal = productDetails.price.value + calculateSubtotal();
     const customisations = getCustomizations();
+    if (customisations) {
+      calculateSubtotal(customization_state["firstGroup"].id, customization_state);
+      subtotal += customizationPrices;
+    }
 
     const payload = {
       id: productPayload.id,
@@ -108,6 +145,7 @@ const ProductDetails = () => {
       bpp_uri: productPayload.context.bpp_uri,
       domain: productPayload.context.domain,
       tags: productPayload.item_details.tags,
+      customisationState: customization_state,
       quantity: {
         count: 1,
       },
@@ -122,7 +160,7 @@ const ProductDetails = () => {
         ...productPayload.item_details,
       },
       customisations,
-      hasCustomisations: productPayload.hasOwnProperty("customisation_groups"),
+      hasCustomisations: customisations ? true : false,
     };
 
     console.log(payload);
@@ -240,7 +278,7 @@ const ProductDetails = () => {
 
   const renderItemDetails = () => {
     let returnWindowValue = 0;
-    if(productPayload.item_details?.["@ondc/org/return_window"]){
+    if (productPayload.item_details?.["@ondc/org/return_window"]) {
       // Create a duration object from the ISO 8601 string
       const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
 

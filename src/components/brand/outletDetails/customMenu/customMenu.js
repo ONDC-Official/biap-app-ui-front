@@ -8,14 +8,11 @@ import Typography from "@mui/material/Typography";
 import ModalComponent from "../../../common/Modal";
 import MenuModal from "./menuModal";
 
-import {
-  getBrandCustomMenuRequest,
-  getCustomMenuItemsRequest,
-} from "../../../../api/brand.api";
+import { getBrandCustomMenuRequest, getCustomMenuItemsRequest } from "../../../../api/brand.api";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { ReactComponent as MenuIcon } from "../../../../assets/images/menu.svg";
 
-import MenuItems from './menuItems'
+import MenuItems from "./menuItems";
 import Loading from "../../../shared/loading/loading";
 
 const CustomMenu = ({ brandDetails, outletDetails }) => {
@@ -31,14 +28,12 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const getBrandCustomMenu = async (domain) => {
     setIsLoading(true);
     try {
-      const data = await cancellablePromise(
-        getBrandCustomMenuRequest(domain, brandId)
-      );
+      const data = await cancellablePromise(getBrandCustomMenuRequest(domain, brandId));
       let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
       resData = resData.map((singleCustomMenu) => {
-        singleCustomMenu.items = []
+        singleCustomMenu.items = [];
         return singleCustomMenu;
-      })
+      });
       customMenuRef.current = resData;
     } catch (err) {
     } finally {
@@ -55,11 +50,12 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const updateItemsOfCustomMenuRef = (customMenuId, items) => {
     let data = Object.assign([], JSON.parse(JSON.stringify(customMenuRef.current)));
     const findIndexFromId = data.findIndex((item) => item.id === customMenuId);
-    if(findIndexFromId > -1){
+    if (findIndexFromId > -1) {
       data[findIndexFromId].items = items;
-    }else{}
+    } else {
+    }
     customMenuRef.current = data;
-  }
+  };
 
   return (
     <div>
@@ -73,9 +69,9 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
             <>
               {customMenuRef.current.map((menu, ind) => (
                 <MenuItems
-                    key={`custom-menu-ind-${ind}`}
-                    customMenu={menu}
-                    updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
+                  key={`custom-menu-ind-${ind}`}
+                  customMenu={menu}
+                  updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
                 />
               ))}
               <div className={classes.menuButtonContainer}>

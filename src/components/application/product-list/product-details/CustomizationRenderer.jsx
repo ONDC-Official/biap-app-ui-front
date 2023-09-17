@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Radio from "../../../common/Radio";
 import Checkbox from "../../../common/Checkbox";
+import { createCustomizationAndGroupMapping } from "./utils";
 
 const CustomizationRenderer = (props) => {
   const { productPayload, customization_state, setCustomizationState, selectedCustomizations = null } = props;
@@ -23,6 +24,12 @@ const CustomizationRenderer = (props) => {
   const [customizationGroups, setCustomizationGroups] = useState([]);
   const [customizations, setCustomizations] = useState([]);
   const [highestSeq, setHighestSeq] = useState(0);
+
+  const [customizationToGroupMap, setCustomizationToGroupMap] = useState({});
+  const [groupToCustomizationMap, setGroupToCustomizationMap] = useState({});
+
+  console.log("customizationToGroupMap", customizationToGroupMap);
+  console.log("groupToCustomizationMap", groupToCustomizationMap);
 
   const handleCustomizationSelect = (selectedOption, level) => {
     if (!selectedOption.inStock) return;
@@ -153,10 +160,11 @@ const CustomizationRenderer = (props) => {
     const customizations = customisation_items?.map((customization) => {
       const itemDetails = customization.item_details;
       const parentTag = itemDetails.tags.find((tag) => tag.code === "parent");
-      const childTag = itemDetails.tags.find((tag) => tag.code === "child");
       const vegNonVegTag = itemDetails.tags.find((tag) => tag.code === "veg_nonveg");
       const isDefaultTag = parentTag.list.find((tag) => tag.code === "default");
       const isDefault = isDefaultTag?.value.toLowerCase() === "yes";
+      const childTag = itemDetails.tags.find((tag) => tag.code === "child");
+      const childs = childTag?.list.map((item) => item.value);
 
       return {
         id: itemDetails.id,
@@ -165,12 +173,34 @@ const CustomizationRenderer = (props) => {
         inStock: itemDetails.quantity.available.count > 0,
         parent: parentTag ? parentTag.list.find((tag) => tag.code === "id").value : null,
         child: childTag ? childTag.list.find((tag) => tag.code === "id").value : null,
+        childs: childs?.length > 0 ? childs : null,
         isDefault: isDefault ?? false,
         vegNonVeg: vegNonVegTag ? vegNonVegTag.list[0].code : "",
       };
     });
     return customizations;
   };
+
+  function findMinMaxSeq(customizationGroups) {
+    if (!customizationGroups || customizationGroups.length === 0) {
+      return { minSeq: undefined, maxSeq: undefined };
+    }
+
+    let minSeq = Infinity;
+    let maxSeq = -Infinity;
+
+    customizationGroups.forEach((group) => {
+      const seq = group.seq;
+      if (seq < minSeq) {
+        minSeq = seq;
+      }
+      if (seq > maxSeq) {
+        maxSeq = seq;
+      }
+    });
+
+    return { minSeq, maxSeq };
+  }
 
   useEffect(() => {
     if (productPayload) {
@@ -180,148 +210,169 @@ const CustomizationRenderer = (props) => {
     }
   }, [productPayload]);
 
-  // initialize customization state with default values
   useEffect(() => {
-    if (
-      selectedCustomizations == null &&
-      !isInitialized &&
-      customizationGroups?.length > 0 &&
-      customizations?.length > 0
-    ) {
+    const mappings = createCustomizationAndGroupMapping(customizations);
+    setCustomizationToGroupMap(mappings.customizationToGroupMap);
+    setGroupToCustomizationMap(mappings.groupToCustomizationMap);
+  }, [customizationGroups, customizations]);
+
+  console.log("customizations,", customizations);
+  console.log("customizationGroups,", customizationGroups);
+
+  useEffect(() => {
+    if (selectedCustomizations === null) {
       const initializeCustomizationState = () => {
-        let firstGroup = null;
-        for (const group of customizationGroups) {
-          if (group.seq === 1) {
-            firstGroup = group;
-            break;
-          }
-        }
-        if (firstGroup) {
-          let currentGroup = firstGroup.id;
-          let level = 1;
-          const newState = { ...customization_state };
+        const minSeq = findMinMaxSeq(customizationGroups).minSeq;
+        const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
+        const customization_state = { firstGroup };
 
-          while (currentGroup) {
-            const group = customizationGroups.find((group) => group.id === currentGroup);
-            if (group) {
-              newState[level] = {
-                id: group.id,
-                seq: group.seq,
-                name: group.name,
-                options: [],
-                selected: [],
-              };
+        const processGroup = (id) => {
+          const group = customizationGroups.find((item) => item.id === id);
+          const groupId = group.id;
+          const groupName = group.name;
+          const isMandatory = group.minQuantity > 0;
 
-              if (group.hasOwnProperty("special_instructions")) {
-                newState[level].special_instructions = "";
-              }
-              newState[level].options = customizations.filter((customization) => customization.parent === currentGroup);
+          customization_state[groupId] = {
+            id: groupId,
+            name: groupName,
+            seq: group.seq,
+            options: [],
+            selected: [],
+            childs: [],
+            isMandatory,
+            type: group.maxQuantity > 1 ? "Checkbox" : "Radio",
+          };
 
-              // Skip selecting an option for non-mandatory groups (minQuantity === 0)
-              if (group.minQuantity === 1) {
-                const selectedCustomization = newState[level].options.find((opt) => opt.isDefault && opt.inStock);
+          const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
 
-                // If no default option, select the first available option
-                if (!selectedCustomization) {
-                  newState[level].selected = [newState[level].options.find((opt) => opt.inStock)];
-                } else {
-                  newState[level].selected = [selectedCustomization];
-                }
-              }
+          customization_state[groupId].options = childCustomizations;
+          customization_state[groupId].selected = findSelectedCustomizationForGroup(
+            customization_state[groupId],
+            childCustomizations
+          );
 
-              currentGroup = newState[level].selected[0]?.child || null;
-              level++;
+          let childGroups =
+            customization_state[groupId].selected[0]?.id != undefined
+              ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
+              : [];
+          customization_state[groupId].childs = childGroups;
 
-              // If a non-mandatory group is encountered, break the loop
-              if (group.minQuantity === 0) {
-                break;
-              }
-            } else {
-              currentGroup = null;
+          if (childGroups) {
+            for (const childGroup of childGroups) {
+              processGroup(childGroup);
             }
           }
+        };
 
-          setCustomizationState(newState);
+        if (firstGroup) {
+          processGroup(firstGroup.id);
+          console.log("customization_state", customization_state);
+          setCustomizationState(customization_state);
         }
       };
 
-      setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
       initializeCustomizationState();
-      setIsInitialized(true);
     }
-  }, [isInitialized, customizationGroups, customizations]);
+  }, [customizationGroups, customizations, customizationToGroupMap]);
 
-  useEffect(() => {
-    if (
-      selectedCustomizations != null &&
-      !isInitialized &&
-      customizationGroups?.length > 0 &&
-      customizations?.length > 0
-    ) {
-      const initializeCustomizationState = () => {
-        let previouslySelected = formatCustomizations(selectedCustomizations);
-        let firstGroup = null;
-        for (const group of customizationGroups) {
-          if (group.seq === 1) {
-            firstGroup = group;
-            break;
+  const findSelectedCustomizationForGroup = (group, childCustomizations) => {
+    if (!group.isMandatory) return [];
+    let defaultCustomization = childCustomizations.filter(
+      (customization) => customization.isDefault && customization.inStock
+    );
+
+    if (defaultCustomization.length) {
+      return defaultCustomization;
+    } else {
+      return [childCustomizations.find((customization) => customization.inStock)];
+    }
+  };
+
+  const processGroup = (groupId, updatedCustomizationState1, selectedGroup, selectedOption) => {
+    const currentGroup = customizationGroups.find((item) => item.id === groupId);
+    //  console.log("param**", groupId);
+    //  console.log("param**", updatedCustomizationState1);
+    //  console.log("param**", selectedGroup);
+    //  console.log("param**", selectedOption);
+    if (!currentGroup) return;
+
+    const groupName = currentGroup.name;
+    const isMandatory = currentGroup.minQuantity > 0;
+
+    const currentGroupOldState = updatedCustomizationState1[currentGroup.id];
+
+    updatedCustomizationState1[groupId] = {
+      id: groupId,
+      name: groupName,
+      seq: currentGroup.seq,
+      options: [],
+      selected: [],
+      childs: [],
+      isMandatory,
+      type: "Checkbox",
+    };
+    updatedCustomizationState1[groupId].options = [];
+
+    const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
+    updatedCustomizationState1[groupId].options = childCustomizations;
+
+    let childGroups = [];
+    if (currentGroup.id === selectedGroup.id) {
+      let new_selected_options = [];
+      // if option is there then remove it here
+      if (!isMandatory && currentGroupOldState.selected.find((optn) => optn.id == selectedOption.id)) {
+        console.log("**1");
+        new_selected_options = [...currentGroupOldState["selected"]].filter((item) => item.id != selectedOption.id);
+        updatedCustomizationState1[groupId].selected = new_selected_options;
+      } else {
+        console.log("**2");
+        // if option is not there then add it only if length is lenght is less than max Qty
+        if (currentGroup.maxQuantity === 1) {
+          console.log("**3");
+          childGroups = customizationToGroupMap[selectedOption.id];
+          updatedCustomizationState1[groupId].selected = [selectedOption];
+        } else {
+          console.log("**4");
+          if (currentGroup.maxQuantity > 1 && currentGroupOldState.selected.length < currentGroup.maxQuantity) {
+            new_selected_options = [...currentGroupOldState["selected"], selectedOption];
+            updatedCustomizationState1[groupId].selected = new_selected_options;
+          } else {
+            updatedCustomizationState1[groupId].selected = currentGroupOldState.selected;
           }
         }
-        if (firstGroup) {
-          let currentGroup = firstGroup.id;
-          let level = 1;
-          const newState = { ...customization_state };
+      }
 
-          while (currentGroup) {
-            const group = customizationGroups.find((group) => group.id === currentGroup);
-            if (group) {
-              newState[level] = {
-                id: group.id,
-                seq: group.seq,
-                name: group.name,
-                options: [],
-                selected: [],
-              };
+      updatedCustomizationState1[groupId].childs = childGroups;
+    } else {
+      const selectedCustomization = findSelectedCustomizationForGroup(
+        updatedCustomizationState1[groupId],
+        childCustomizations
+      );
 
-              if (group.hasOwnProperty("special_instructions")) {
-                newState[level].special_instructions = "";
-              }
+      updatedCustomizationState1[groupId].selected = selectedCustomization;
 
-              // Filter customizations for the current group
-              const groupCustomizations = customizations.filter(
-                (customization) => customization.parent === currentGroup
-              );
-
-              // Check if there are previously selected customizations for this group
-              const previouslySelectedForGroup = previouslySelected.filter(
-                (customization) => customization.parent === currentGroup
-              );
-
-              // Select previously selected customizations if any
-              if (previouslySelectedForGroup.length > 0) {
-                newState[level].selected = previouslySelectedForGroup;
-              }
-
-              // Add all group customizations as options
-              newState[level].options = groupCustomizations;
-
-              currentGroup = newState[level].selected[0]?.child || null;
-              level++;
-            } else {
-              currentGroup = null;
-            }
-          }
-
-          setCustomizationState(newState);
-        }
-      };
-
-      setHighestSeq(Math.max(...customizationGroups.map((group) => group.seq)));
-
-      initializeCustomizationState();
-      setIsInitialized(true);
+      if (selectedCustomization.length) {
+        childGroups = customizationToGroupMap[selectedCustomization[0].id];
+        console.log("**5", selectedCustomization[0].id);
+        updatedCustomizationState1[groupId].childs = childGroups;
+      }
     }
-  }, [isInitialized, customizationGroups, customizations]);
+
+    //  updatedCustomizationState1[groupId].childs = childGroups;
+
+    // Recursively process child groups
+    for (const childGroup of childGroups) {
+      processGroup(childGroup, updatedCustomizationState1, selectedGroup, selectedOption);
+    }
+
+    return updatedCustomizationState1;
+  };
+
+  const handleClick = (group, selectedOption) => {
+    let updatedCustomizationState = { ...customization_state };
+    let updatedState = processGroup(group.id, updatedCustomizationState, group, selectedOption);
+    setCustomizationState(updatedState);
+  };
 
   const renderVegNonVegTag = (category = "veg") => {
     const getTagColor = () => {
@@ -353,86 +404,184 @@ const CustomizationRenderer = (props) => {
     );
   };
 
-  const renderCustomizations = () => {
-    return Object.keys(customization_state).map((level) => {
-      const cg = customization_state[level];
-      console.log("group", cg);
-      return (
-        <>
-          <Accordion elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ padding: 0, margin: 0 }}>
-              <Typography variant="body" color="black">
-                {cg.name}
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails sx={{ padding: "20px 0" }}>
-              <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
-                {cg.options.map((c) => {
-                  let selected = false;
-                  cg.selected.map((item) => {
-                    if (item.id == c.id) {
-                      selected = true;
+  const renderGroup = (param) => {
+    const group = customization_state[param?.id];
+
+    return (
+      <Accordion key={group?.id} elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ padding: 0, margin: 0 }}>
+          <Typography variant="body" color="black">
+            {group?.name}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ padding: "20px 0" }}>
+          <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
+            {group?.options?.map((option) => {
+              const selected = group?.selected?.some((selectedOption) => selectedOption?.id === option?.id);
+              return (
+                <>
+                  <FormControlLabel
+                    className={classes.formControlLabel}
+                    onClick={() => {
+                      if (option.inStock) {
+                        handleClick(group, option);
+                      }
+                    }}
+                    control={
+                      //  group.type === "Checkbox" ? (
+                      //    <Checkbox checked={selected} disabled={!option.inStock} />
+                      //  ) : (
+                      //    <Radio checked={selected} disabled={!option.inStock} />
+                      //  )
+                      <Checkbox checked={selected} disabled={!option.inStock} />
                     }
-                  });
+                    label={
+                      <>
+                        <div
+                          className={classes.radioTypoContainer}
+                          //  onClick={() => handleClick(group, option)}
+                        >
+                          {renderVegNonVegTag(option.vegNonVeg)}
+                          <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                            {option.name}
+                          </Typography>
 
-                  console.log("C", c);
-                  return (
-                    <>
-                      <FormControlLabel
-                        className={classes.formControlLabel}
-                        onClick={() => handleCustomizationSelect(c, parseInt(level))}
-                        control={
-                          cg.seq === highestSeq ? (
-                            <Checkbox checked={selected} disabled={!c.inStock} />
-                          ) : (
-                            <Radio checked={selected} disabled={!c.inStock} />
-                          )
-                        }
-                        label={
-                          <>
+                          {!option.inStock && (
                             <div
-                              className={classes.radioTypoContainer}
-                              onClick={() => handleCustomizationSelect(c, parseInt(level))}
+                              style={{
+                                border: "1px solid #D83232",
+                                padding: "2px 8px",
+                                borderRadius: "6px",
+                              }}
                             >
-                              {renderVegNonVegTag(c.vegNonVeg)}
-                              <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
-                                {c.name}
-                              </Typography>
-
-                              {!c.inStock && (
-                                <div
-                                  style={{
-                                    border: "1px solid #D83232",
-                                    padding: "2px 8px",
-                                    borderRadius: "6px",
-                                  }}
-                                >
-                                  <Typography color="#D83232" variant="subtitle1">
-                                    Out of Stock
-                                  </Typography>
-                                </div>
-                              )}
-                              <Typography
-                                variant="body1"
-                                sx={{ fontWeight: 600, marginRight: 2, minWidth: 50, textAlign: "right" }}
-                              >
-                                <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
-                                {c.price}
+                              <Typography color="#D83232" variant="subtitle1">
+                                Out of Stock
                               </Typography>
                             </div>
-                          </>
-                        }
-                        labelPlacement="start"
-                      />
-                    </>
-                  );
-                })}
-              </Grid>
-            </AccordionDetails>
-          </Accordion>
-        </>
-      );
+                          )}
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 600, marginRight: 2, minWidth: 50, textAlign: "right" }}
+                          >
+                            <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                            {option.price}
+                          </Typography>
+                        </div>
+                      </>
+                    }
+                    labelPlacement="start"
+                  />
+                </>
+              );
+            })}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
+
+  let elements = [];
+  const renderGroups = (group) => {
+    console.log("renderGroup", group);
+    if (!group) return;
+
+    elements.push(renderGroup(group));
+
+    let childs = customization_state[group?.id]?.childs;
+    if (!childs) return;
+
+    childs.map((child) => {
+      renderGroups(customization_state[child]);
     });
+  };
+
+  const renderCustomizations = () => {
+    const minSeq = findMinMaxSeq(customizationGroups).minSeq;
+    const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
+    renderGroups(firstGroup);
+
+    const renderGroup = (param) => {
+      const group = customization_state[param?.id];
+
+      return (
+        <Accordion key={group?.id} elevation={0} square defaultExpanded sx={{ margin: 0, minHeight: 48 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ padding: 0, margin: 0 }}>
+            <Typography variant="body" color="black">
+              {group?.name}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: "20px 0" }}>
+            <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
+              {group?.options?.map((option) => {
+                const selected = group?.selected?.some((selectedOption) => selectedOption?.id === option?.id);
+                return (
+                  <>
+                    <FormControlLabel
+                      className={classes.formControlLabel}
+                      onClick={() => handleClick(group, option)}
+                      control={
+                        group.seq === highestSeq ? (
+                          <Checkbox checked={selected} disabled={!option.inStock} />
+                        ) : (
+                          <Radio checked={selected} disabled={!option.inStock} />
+                        )
+                      }
+                      label={
+                        <>
+                          <div className={classes.radioTypoContainer} onClick={() => handleClick(group, option)}>
+                            {renderVegNonVegTag(option.vegNonVeg)}
+                            <Typography component="span" variant="body1" sx={{ fontWeight: 600, flex: 1 }}>
+                              {option.name}
+                            </Typography>
+
+                            {!option.inStock && (
+                              <div
+                                style={{
+                                  border: "1px solid #D83232",
+                                  padding: "2px 8px",
+                                  borderRadius: "6px",
+                                }}
+                              >
+                                <Typography color="#D83232" variant="subtitle1">
+                                  Out of Stock
+                                </Typography>
+                              </div>
+                            )}
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 600, marginRight: 2, minWidth: 50, textAlign: "right" }}
+                            >
+                              <CurrencyRupeeIcon sx={{ fontSize: 16, marginBottom: "2px" }} />
+                              {option.price}
+                            </Typography>
+                          </div>
+                        </>
+                      }
+                      labelPlacement="start"
+                    />
+                  </>
+                );
+              })}
+            </Grid>
+          </AccordionDetails>
+        </Accordion>
+      );
+    };
+
+    return (
+      <div>
+        {/* {renderGroup(currentGroup)} */}
+
+        {elements}
+
+        {/* {firstGroup && renderGroup(firstGroup)} */}
+        {/* {firstGroup &&
+          customization_state[firstGroup?.id]?.childs?.map((childGroupId) => {
+            const childGroup = customization_state[childGroupId];
+            return childGroup && renderGroup(childGroup);
+          })} */}
+      </div>
+    );
   };
 
   return <>{renderCustomizations()}</>;
