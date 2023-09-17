@@ -45,30 +45,36 @@ const EditCustomizations = (props) => {
     return subtotal;
   };
 
+  let selectedCustomizationIds = [];
+
+  const getCustomization_ = (groupId) => {
+    let group = customization_state[groupId];
+    if (!group) return;
+
+    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    group?.childs?.map((child) => {
+      getCustomization_(child);
+    });
+  };
+
   const getCustomizations = () => {
     const { customisation_items } = productPayload;
     const customizations = [];
     const levels = Object.keys(customization_state);
+    const firstGroupId = customization_state["firstGroup"].id;
 
-    for (const level of levels) {
-      const selectedItems = customization_state[level].selected;
-      let has_special_instruction = customization_state[level].hasOwnProperty("special_instructions");
+    getCustomization_(firstGroupId);
 
-      for (const selectedItem of selectedItems) {
-        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
-        if (has_special_instruction) {
-          customization.special_instructions = "";
-        }
-
-        if (customization) {
-          customization = {
-            ...customization,
-            quantity: {
-              count: 1,
-            },
-          };
-          customizations.push(customization);
-        }
+    for (const cId of selectedCustomizationIds) {
+      let c = customisation_items.find((item) => item.local_id === cId);
+      if (c) {
+        c = {
+          ...c,
+          quantity: {
+            count: 1,
+          },
+        };
+        customizations.push(c);
       }
     }
 
@@ -85,6 +91,9 @@ const EditCustomizations = (props) => {
       updatedCartItem.id = updatedCartItem.item.id;
       updatedCartItem.item.customisations = updatedCustomizations;
       updatedCartItem = updatedCartItem.item;
+      updatedCartItem.customisationState = customization_state;
+
+      console.log(updatedCartItem);
       const res = await putCall(url, updatedCartItem);
       setOpenDrawer(false);
       fetchCartItems();

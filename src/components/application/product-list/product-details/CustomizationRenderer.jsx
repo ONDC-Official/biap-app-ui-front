@@ -220,57 +220,59 @@ const CustomizationRenderer = (props) => {
   console.log("customizationGroups,", customizationGroups);
 
   useEffect(() => {
-    const initializeCustomizationState = () => {
-      const minSeq = findMinMaxSeq(customizationGroups).minSeq;
-      const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
-      const customization_state = { firstGroup };
+    if (selectedCustomizations === null) {
+      const initializeCustomizationState = () => {
+        const minSeq = findMinMaxSeq(customizationGroups).minSeq;
+        const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
+        const customization_state = { firstGroup };
 
-      const processGroup = (id) => {
-        const group = customizationGroups.find((item) => item.id === id);
-        const groupId = group.id;
-        const groupName = group.name;
-        const isMandatory = group.minQuantity > 0;
+        const processGroup = (id) => {
+          const group = customizationGroups.find((item) => item.id === id);
+          const groupId = group.id;
+          const groupName = group.name;
+          const isMandatory = group.minQuantity > 0;
 
-        customization_state[groupId] = {
-          id: groupId,
-          name: groupName,
-          seq: group.seq,
-          options: [],
-          selected: [],
-          childs: [],
-          isMandatory,
-          type: group.maxQuantity > 1 ? "Checkbox" : "Radio",
+          customization_state[groupId] = {
+            id: groupId,
+            name: groupName,
+            seq: group.seq,
+            options: [],
+            selected: [],
+            childs: [],
+            isMandatory,
+            type: group.maxQuantity > 1 ? "Checkbox" : "Radio",
+          };
+
+          const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
+
+          customization_state[groupId].options = childCustomizations;
+          customization_state[groupId].selected = findSelectedCustomizationForGroup(
+            customization_state[groupId],
+            childCustomizations
+          );
+
+          let childGroups =
+            customization_state[groupId].selected[0]?.id != undefined
+              ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
+              : [];
+          customization_state[groupId].childs = childGroups;
+
+          if (childGroups) {
+            for (const childGroup of childGroups) {
+              processGroup(childGroup);
+            }
+          }
         };
 
-        const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
-
-        customization_state[groupId].options = childCustomizations;
-        customization_state[groupId].selected = findSelectedCustomizationForGroup(
-          customization_state[groupId],
-          childCustomizations
-        );
-
-        let childGroups =
-          customization_state[groupId].selected[0]?.id != undefined
-            ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
-            : [];
-        customization_state[groupId].childs = childGroups;
-
-        if (childGroups) {
-          for (const childGroup of childGroups) {
-            processGroup(childGroup);
-          }
+        if (firstGroup) {
+          processGroup(firstGroup.id);
+          console.log("customization_state", customization_state);
+          setCustomizationState(customization_state);
         }
       };
 
-      if (firstGroup) {
-        processGroup(firstGroup.id);
-        console.log("customization_state", customization_state);
-        setCustomizationState(customization_state);
-      }
-    };
-
-    initializeCustomizationState();
+      initializeCustomizationState();
+    }
   }, [customizationGroups, customizations, customizationToGroupMap]);
 
   const findSelectedCustomizationForGroup = (group, childCustomizations) => {

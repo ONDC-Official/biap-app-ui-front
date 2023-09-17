@@ -162,6 +162,7 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
       bpp_uri: productPayload.context.bpp_uri,
       domain: productPayload.context.domain,
       tags: productPayload.item_details.tags,
+      customisationState: customizationState,
       quantity: {
         count: itemQty,
       },
@@ -176,8 +177,7 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
         ...productPayload.item_details,
       },
       customisations,
-      hasCustomisations:
-        productPayload.hasOwnProperty("customisation_groups") && productPayload.customisation_groups.length > 0,
+      hasCustomisations: true,
     };
 
     console.log("payload", payload);

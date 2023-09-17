@@ -15,8 +15,8 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
-import moment from 'moment';
-import {SearchContext} from "../../../../context/searchContext";
+import moment from "moment";
+import { SearchContext } from "../../../../context/searchContext";
 
 const ProductDetails = () => {
   const classes = useStyles();
@@ -82,6 +82,8 @@ const ProductDetails = () => {
 
   const getCustomizations = () => {
     const { customisation_items } = productPayload;
+
+    if (!customisation_items.length) return null;
     const customizations = [];
     const levels = Object.keys(customization_state);
     const firstGroupId = customization_state["firstGroup"].id;
@@ -128,10 +130,13 @@ const ProductDetails = () => {
   const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
+    let subtotal = productPayload?.item_details?.price?.value;
 
     const customisations = getCustomizations();
-    calculateSubtotal(customization_state["firstGroup"].id, customization_state);
-    const subtotal = productPayload?.item_details?.price?.value + customizationPrices;
+    if (customisations) {
+      calculateSubtotal(customization_state["firstGroup"].id, customization_state);
+      subtotal += customizationPrices;
+    }
 
     const payload = {
       id: productPayload.id,
@@ -140,6 +145,7 @@ const ProductDetails = () => {
       bpp_uri: productPayload.context.bpp_uri,
       domain: productPayload.context.domain,
       tags: productPayload.item_details.tags,
+      customisationState: customization_state,
       quantity: {
         count: 1,
       },
@@ -154,7 +160,7 @@ const ProductDetails = () => {
         ...productPayload.item_details,
       },
       customisations,
-      hasCustomisations: productPayload.hasOwnProperty("customisation_groups"),
+      hasCustomisations: customisations ? true : false,
     };
 
     console.log(payload);
@@ -272,7 +278,7 @@ const ProductDetails = () => {
 
   const renderItemDetails = () => {
     let returnWindowValue = 0;
-    if(productPayload.item_details?.["@ondc/org/return_window"]){
+    if (productPayload.item_details?.["@ondc/org/return_window"]) {
       // Create a duration object from the ISO 8601 string
       const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
 
