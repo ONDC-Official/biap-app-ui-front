@@ -118,6 +118,12 @@ const useStyles = makeStyles({
     color: "#196AAB",
     cursor: "pointer",
   },
+  loader: {
+    textAlign: 'left !important',
+    display: 'flex',
+    borderBottom: "1px solid #E0E0E0",
+    paddingBottom: '16px !important'
+  }
 });
 
 export default useStyles;

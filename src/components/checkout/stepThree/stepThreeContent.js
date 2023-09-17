@@ -180,6 +180,19 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                         const fulfillments = item[0].product.fulfillments;
                         console.log("ITEM=====>", item)
                         delete item[0].product.fulfillments;
+                        let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
+                        itemsData = itemsData.map((itemData) => {
+                            let findItemFromQuote = null;
+                            if(updatedCartItems.current){
+                                let findItemFromQuote = updatedCartItems.current[0].message.quote.items.find((data) => data.id === itemData.local_id);
+                                if(findItemFromQuote){
+                                    itemData.parent_item_id = findItemFromQuote.parent_item_id
+                                }
+                            }else{}
+                            return itemData;
+                        });
+                        console.log("itemsData=====>sssssssssss", itemsData)
+
                         return {
                             context: {
                                 transaction_id: transaction_id,
@@ -188,7 +201,7 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                                 domain: item[0].domain,
                             },
                             message: {
-                                items: item,
+                                items: itemsData,
                                 fulfillments: fulfillments,
                                 billing_info: {
                                     address: removeNullValues(billingAddress?.address),

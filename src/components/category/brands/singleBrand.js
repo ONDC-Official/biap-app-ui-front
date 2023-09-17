@@ -7,14 +7,22 @@ import Typography from "@mui/material/Typography";
 import no_image_found from "../../../assets/images/no_image_found.png";
 
 const SingleBrand = ({data, onMouseOver}) => {
-    const { id, descriptor } = data;
-    const { name: brand_name,images } = descriptor;
+    const { id, provider, domain, provider_descriptor } = data;
+    const { name: brand_name,images } = provider_descriptor;
 
     const classes = useStyles();
     const history = useHistory();
 
+    const redirectBasedOnDomain =  () => {
+        if(domain === "ONDC:RET11"){
+            history.push(`/application/brand/${provider}/${id}`)
+        }else{
+            history.push(`/application/brand/${provider}`)
+        }
+    };
+
     return (
-        <div className={classes.brandItemContainer} onMouseOver={onMouseOver}  onClick={() => history.push(`/application/brand/${id}`)}>
+        <div className={classes.brandItemContainer} onMouseOver={onMouseOver}  onClick={() => redirectBasedOnDomain()}>
             <Card className={classes.brandCard}>
                 <img className={classes.brandImage} src={images?.length > 0 ? images[0] : no_image_found} alt={`sub-cat-img-${data.value}`}/>
             </Card>

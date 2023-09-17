@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import useStyles from './style';
 import {useHistory, useLocation, useParams} from "react-router-dom";
 import Typography from "@mui/material/Typography";
@@ -11,6 +11,7 @@ import {ReactComponent as NextIcon} from '../../../assets/images/next.svg';
 import {getBrandCustomMenuRequest} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from '../../../assets/images/no_image_found.png'
+import {SearchContext} from "../../../context/searchContext";
 
 const SingleCategory = ({data, index}) => {
     const classes = useStyles();
@@ -48,6 +49,8 @@ const CategoriesComponent = ({brandDetails}) => {
     const {brandId} = useParams();
     const history = useHistory();
     const locationData = useLocation();
+    const { locationData: deliveryAddressLocation } = useContext(SearchContext);
+
     const useQuery = () => {
         const { search } = locationData;
         return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -79,7 +82,7 @@ const CategoriesComponent = ({brandDetails}) => {
         if(brandDetails){
             getCustomMenu(brandDetails.domain)
         }
-    }, [brandDetails]);
+    }, [brandDetails, deliveryAddressLocation]);
 
     useEffect(() => {
         if(customMenuId && subCatList.length > 0){

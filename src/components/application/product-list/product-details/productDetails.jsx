@@ -15,12 +15,15 @@ import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
+import moment from 'moment';
+import {SearchContext} from "../../../../context/searchContext";
 
 const ProductDetails = () => {
   const classes = useStyles();
   const history = useHistory();
   const params = useParams();
   const { fetchCartItems } = useContext(CartContext);
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
@@ -166,7 +169,7 @@ const ProductDetails = () => {
   useEffect(() => {
     let productId = params.id;
     getProductDetails(productId);
-  }, [params]);
+  }, [params, deliveryAddressLocation]);
 
   const renderVegNonVegTag = () => {
     const FnB = "ONDC:RET11";
@@ -268,11 +271,21 @@ const ProductDetails = () => {
   };
 
   const renderItemDetails = () => {
+    let returnWindowValue = 0;
+    if(productPayload.item_details?.["@ondc/org/return_window"]){
+      // Create a duration object from the ISO 8601 string
+      const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
+
+      // Get the number of hours from the duration object
+      const hours = duration.humanize();
+      returnWindowValue = `${hours}`;
+    }
+
     const data = {
       "Available on COD":
         productPayload.item_details?.["@ondc/org/available_on_cod"].toString() === "true" ? "Yes" : "No",
       Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString() === "true" ? "Yes" : "No",
-      "Return window value": productPayload.item_details?.["@ondc/org/return_window"],
+      "Return window value": returnWindowValue,
       Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString() === "true" ? "Yes" : "No",
       "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
       "Manufacturer name":

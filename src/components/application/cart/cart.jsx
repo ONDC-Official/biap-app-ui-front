@@ -20,6 +20,7 @@ import { CartContext } from "../../../context/cartContext";
 import EditCustomizations from "./EditCustomizations";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import {SearchContext} from "../../../context/searchContext";
 
 export default function Cart() {
   let user = {};
@@ -37,6 +38,7 @@ export default function Cart() {
   const dispatch = useContext(ToastContext);
   const { deliveryAddress } = useContext(AddressContext);
   const { fetchCartItems } = useContext(CartContext);
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { cancellablePromise } = useCancellablePromise();
   const transaction_id = getValueFromCookie("transaction_id");
@@ -59,6 +61,8 @@ export default function Cart() {
   const [productLoading, setProductLoading] = useState(false);
   const [currentCartItem, setCurrentCartItem] = useState(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [isProductAvailableQuantityIsZero, setIsProductAvailableQuantityIsZero] = useState(false);
+  const [isProductCategoryIsDifferent, setIsProductCategoryIsDifferent] = useState(false);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -105,6 +109,18 @@ export default function Cart() {
     }
   };
 
+  // function to dispatch error
+  function dispatchError(message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type: toast_types.error,
+        message,
+      },
+    });
+  }
+
   const updateCartItem = async (itemId, increment, uniqueId) => {
     const url = `/clientApis/v2/cart/${user.id}/${uniqueId}`;
     const items = cartItems.concat([]);
@@ -115,20 +131,40 @@ export default function Cart() {
 
       if (increment !== null) {
         if (increment) {
-          updatedCartItem.item.quantity.count += 1;
+          const productMaxQuantity = updatedCartItem?.item?.product?.quantity?.maximum;
+          if(productMaxQuantity){
+            if(updatedCartItem.item.quantity.count < productMaxQuantity.count){
+              updatedCartItem.item.quantity.count += 1;
+              updatedCartItem = updatedCartItem.item;
+              const res = await putCall(url, updatedCartItem);
+              console.log("after update:", res);
+              setLoading(false);
+              getCartItems();
+              fetchCartItems();
+            }else{
+              dispatchError(`Maximum allowed quantity is ${updatedCartItem.item.quantity.count}`)
+            }
+          }else{
+            updatedCartItem.item.quantity.count += 1;
+            updatedCartItem = updatedCartItem.item;
+            const res = await putCall(url, updatedCartItem);
+            console.log("after update:", res);
+            setLoading(false);
+            getCartItems();
+            fetchCartItems();
+          }
         } else {
           if (updatedCartItem.item.quantity.count > 1) {
             updatedCartItem.item.quantity.count -= 1;
+            updatedCartItem = updatedCartItem.item;
+            const res = await putCall(url, updatedCartItem);
+            console.log("after update:", res);
+            setLoading(false);
+            getCartItems();
+            fetchCartItems();
           }
         }
       }
-
-      updatedCartItem = updatedCartItem.item;
-      const res = await putCall(url, updatedCartItem);
-      console.log("after update:", res);
-      setLoading(false);
-      getCartItems();
-      fetchCartItems();
     }
   };
 
@@ -157,9 +193,28 @@ export default function Cart() {
     getCartItems();
   }, [openDrawer]);
 
+  const checkAvailableQuantity = () => {
+    let quantityIsZero = false;
+    cartItems.forEach((item) => {
+      const availableQuantity = item.item.product.quantity.available;
+      if(availableQuantity && availableQuantity.count === 0){
+        quantityIsZero = true;
+      }
+    });
+    setIsProductAvailableQuantityIsZero(quantityIsZero)
+  };
+
+  const checkDifferentCategory = () => {
+    const everyEnvHasSameValue = cartItems.every( ({item}) => item.domain === cartItems[0].item.domain); // use proper name
+    setIsProductCategoryIsDifferent(!everyEnvHasSameValue);
+  };
   useEffect(() => {
     checkDistinctProviders();
-  }, [cartItems.length]);
+    checkAvailableQuantity();
+    if(cartItems.length > 1){
+      checkDifferentCategory();
+    }
+  }, [cartItems.length, deliveryAddressLocation]);
 
   const emptyCartScreen = () => {
     return (
@@ -330,6 +385,7 @@ export default function Cart() {
 
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
+      console.log("cartItem=====>", cartItem)
       return (
         <Grid key={cartItem._id}>
           <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
@@ -447,6 +503,17 @@ export default function Cart() {
               </div>
             </Grid>
           )}
+          {
+              idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
+                  <Grid>
+                    <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
+                      <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
+                        You are ordering from different category. Please check your order again.
+                      </Typography>
+                    </div>
+                  </Grid>
+              )
+          }
           <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
         </Grid>
       );
@@ -471,7 +538,7 @@ export default function Cart() {
         <Button
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
-          disabled={haveDistinctProviders || checkoutLoading}
+          disabled={isProductAvailableQuantityIsZero || isProductCategoryIsDifferent || haveDistinctProviders || checkoutLoading}
           onClick={() => {
             console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {
