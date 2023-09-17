@@ -216,6 +216,9 @@ const CustomizationRenderer = (props) => {
     setGroupToCustomizationMap(mappings.groupToCustomizationMap);
   }, [customizationGroups, customizations]);
 
+  console.log("customizations,", customizations);
+  console.log("customizationGroups,", customizationGroups);
+
   useEffect(() => {
     const initializeCustomizationState = () => {
       const minSeq = findMinMaxSeq(customizationGroups).minSeq;
