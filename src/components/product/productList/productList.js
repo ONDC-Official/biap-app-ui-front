@@ -48,7 +48,7 @@ const ProductList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 1,
-    pageSize: 10,
+    pageSize: 18,
     searchData: [],
   });
   const dispatch = useContext(ToastContext);
