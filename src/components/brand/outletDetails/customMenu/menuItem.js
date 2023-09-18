@@ -56,6 +56,8 @@ const MenuItem = (props) => {
     }
   };
 
+  let customGroupTag = productPayload.item_details.tags.find((item) => item.code === "custom_group");
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5}>
@@ -107,6 +109,7 @@ const MenuItem = (props) => {
               getProductDetails(productId);
               setCustomizationModal(true);
             }}
+            disabled={customGroupTag == undefined || (customGroupTag.list && customGroupTag.list.length == 0)}
           >
             Customise
           </Button>
