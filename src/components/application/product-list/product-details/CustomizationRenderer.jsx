@@ -2,24 +2,17 @@ import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Divider,
-  FormControlLabel,
-  Grid,
-  Typography,
-} from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, FormControlLabel, Grid, Typography } from "@mui/material";
 import Radio from "../../../common/Radio";
 import Checkbox from "../../../common/Checkbox";
-import { createCustomizationAndGroupMapping } from "./utils";
+import { createCustomizationAndGroupMapping, getCustomizationGroupsForProduct } from "./utils";
 
 const CustomizationRenderer = (props) => {
-  const { productPayload, customization_state, setCustomizationState, selectedCustomizations = null } = props;
+  const { productPayload, customization_state, setCustomizationState, isEditFlow = false, setItemOutOfStock } = props;
+
+  console.log("props", props);
 
   const classes = useStyles();
-
   const [isInitialized, setIsInitialized] = useState(false);
   const [customizationGroups, setCustomizationGroups] = useState([]);
   const [customizations, setCustomizations] = useState([]);
@@ -27,107 +20,6 @@ const CustomizationRenderer = (props) => {
 
   const [customizationToGroupMap, setCustomizationToGroupMap] = useState({});
   const [groupToCustomizationMap, setGroupToCustomizationMap] = useState({});
-
-  console.log("customizationToGroupMap", customizationToGroupMap);
-  console.log("groupToCustomizationMap", groupToCustomizationMap);
-
-  const handleCustomizationSelect = (selectedOption, level) => {
-    if (!selectedOption.inStock) return;
-    const newState = { ...customization_state };
-
-    // Check if the parent's customization group has minQuantity === 0
-    const parentGroup = customizationGroups.find((group) => group.id === selectedOption.parent);
-    const parentAllowsUnselecting = parentGroup && parentGroup.minQuantity === 0;
-
-    if (parentGroup.seq === highestSeq) {
-      if (
-        newState[level].selected.length < parentGroup.maxQuantity &&
-        !newState[level].selected.includes(selectedOption)
-      ) {
-        newState[level].id = parentGroup.id;
-        newState[level].seq = parentGroup.seq;
-        newState[level].selected = [...newState[level].selected, selectedOption];
-      } else {
-        newState[level].selected = newState[level].selected.filter((item) => item.id !== selectedOption.id);
-        setCustomizationState(newState);
-        return;
-      }
-    }
-
-    // If the option is already selected and unselecting is allowed, deselect it
-    else if (
-      (parentAllowsUnselecting && newState[level].selected.includes(selectedOption)) ||
-      !newState[level].selected.includes(selectedOption)
-    ) {
-      if (newState[level].selected.includes(selectedOption)) {
-        newState[level].selected = [];
-        for (let i = level + 1; i <= Object.keys(newState).length; i++) {
-          delete newState[i];
-        }
-        setCustomizationState(newState);
-        return;
-      } else {
-        newState[level].id = parentGroup.id;
-        newState[level].seq = parentGroup.seq;
-        newState[level].selected = [selectedOption];
-      }
-    }
-
-    // Reset subsequent groups' selections
-    for (let i = level + 1; i <= Object.keys(newState).length; i++) {
-      delete newState[i];
-    }
-
-    let currentSelectedOption = selectedOption; // Store the current selectedOption
-    while (currentSelectedOption.child) {
-      const nextGroup = customizationGroups.find((group) => group.id === currentSelectedOption.child);
-      if (nextGroup) {
-        // Render options for non-mandatory group, but don't select any option
-        if (nextGroup.minQuantity === 0) {
-          newState[level + 1] = {
-            id: nextGroup.id,
-            seq: nextGroup.seq,
-            name: nextGroup.name,
-            options: customizations.filter((c) => c.parent === nextGroup.id),
-            selected: [],
-          };
-
-          for (let i = level + 2; i <= Object.keys(newState).length; i++) {
-            delete newState[i];
-          }
-
-          setCustomizationState(newState); // Set state after rendering options
-          return; // Exit loop after rendering options
-        }
-
-        const nextGroupOptions = customizations.filter((customization) => customization.parent === nextGroup.id);
-        const nextSelectedOption = nextGroupOptions.find((opt) => opt.isDefault && opt.inStock) || nextGroupOptions[0];
-
-        if (nextSelectedOption) {
-          level++;
-          newState[level] = {
-            id: nextGroup.id,
-            name: nextGroup.name,
-            options: nextGroupOptions,
-            selected: [nextSelectedOption],
-          };
-
-          // Reset selections for subsequent groups under the new selection
-          for (let i = level + 1; i <= Object.keys(newState).length; i++) {
-            delete newState[i];
-          }
-
-          currentSelectedOption = nextSelectedOption; // Update the current selectedOption
-        } else {
-          break;
-        }
-      } else {
-        break;
-      }
-    }
-
-    setCustomizationState(newState);
-  };
 
   const formatCustomizationGroups = (customisation_groups) => {
     const formattedCustomizationGroups = customisation_groups?.map((group) => {
@@ -205,7 +97,14 @@ const CustomizationRenderer = (props) => {
   useEffect(() => {
     if (productPayload) {
       const { customisation_groups, customisation_items } = productPayload;
-      setCustomizationGroups(formatCustomizationGroups(customisation_groups));
+      const customGroup = productPayload.item_details.tags.find((item) => item.code == "custom_group");
+      if (customGroup && customGroup.list.length > 0) {
+        const customizationGroupIds = customGroup?.list.map((item) => item.value);
+        const filteredGroups = getCustomizationGroupsForProduct(customisation_groups, customizationGroupIds);
+        setCustomizationGroups(formatCustomizationGroups(filteredGroups));
+      } else {
+        setCustomizationGroups([]);
+      }
       setCustomizations(formatCustomizations(customisation_items));
     }
   }, [productPayload]);
@@ -216,84 +115,86 @@ const CustomizationRenderer = (props) => {
     setGroupToCustomizationMap(mappings.groupToCustomizationMap);
   }, [customizationGroups, customizations]);
 
-  console.log("customizations,", customizations);
-  console.log("customizationGroups,", customizationGroups);
-
   useEffect(() => {
-    if (selectedCustomizations === null) {
-      const initializeCustomizationState = () => {
-        const minSeq = findMinMaxSeq(customizationGroups).minSeq;
-        const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
-        const customization_state = { firstGroup };
+    console.log("USE_EFFECT", customization_state);
 
-        const processGroup = (id) => {
-          const group = customizationGroups.find((item) => item.id === id);
-          const groupId = group.id;
-          const groupName = group.name;
-          const isMandatory = group.minQuantity > 0;
+    const initializeCustomizationState = () => {
+      const minSeq = findMinMaxSeq(customizationGroups).minSeq;
+      const firstGroup = customizationGroups.find((group) => group.seq === minSeq);
+      const customization_state = { firstGroup };
 
-          customization_state[groupId] = {
-            id: groupId,
-            name: groupName,
-            seq: group.seq,
-            options: [],
-            selected: [],
-            childs: [],
-            isMandatory,
-            type: group.maxQuantity > 1 ? "Checkbox" : "Radio",
-          };
+      const processGroup = (id) => {
+        const group = customizationGroups.find((item) => item.id === id);
+        const groupId = group.id;
+        const groupName = group.name;
+        const isMandatory = group.minQuantity > 0;
 
-          const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
-
-          customization_state[groupId].options = childCustomizations;
-          customization_state[groupId].selected = findSelectedCustomizationForGroup(
-            customization_state[groupId],
-            childCustomizations
-          );
-
-          let childGroups =
-            customization_state[groupId].selected[0]?.id != undefined
-              ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
-              : [];
-          customization_state[groupId].childs = childGroups;
-
-          if (childGroups) {
-            for (const childGroup of childGroups) {
-              processGroup(childGroup);
-            }
-          }
+        customization_state[groupId] = {
+          id: groupId,
+          name: groupName,
+          seq: group.seq,
+          options: [],
+          selected: [],
+          childs: [],
+          isMandatory,
+          type: group.maxQuantity > 1 ? "Checkbox" : "Radio",
         };
 
-        if (firstGroup) {
-          processGroup(firstGroup.id);
-          console.log("customization_state", customization_state);
-          setCustomizationState(customization_state);
+        const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
+
+        customization_state[groupId].options = childCustomizations;
+        customization_state[groupId].selected = findSelectedCustomizationForGroup(
+          customization_state[groupId],
+          childCustomizations
+        );
+
+        let childGroups =
+          customization_state[groupId].selected[0]?.id != undefined
+            ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
+            : [];
+        customization_state[groupId].childs = childGroups;
+
+        if (childGroups) {
+          for (const childGroup of childGroups) {
+            processGroup(childGroup);
+          }
         }
       };
 
+      if (firstGroup) {
+        processGroup(firstGroup.id);
+        setCustomizationState(customization_state);
+      }
+    };
+
+    if (!isEditFlow) {
       initializeCustomizationState();
     }
   }, [customizationGroups, customizations, customizationToGroupMap]);
 
   const findSelectedCustomizationForGroup = (group, childCustomizations) => {
     if (!group.isMandatory) return [];
+    let selected_groups = [];
     let defaultCustomization = childCustomizations.filter(
       (customization) => customization.isDefault && customization.inStock
     );
 
     if (defaultCustomization.length) {
-      return defaultCustomization;
+      selected_groups = defaultCustomization;
     } else {
-      return [childCustomizations.find((customization) => customization.inStock)];
+      const x = childCustomizations.find((customization) => customization.inStock);
+      selected_groups = x ? [x] : [];
     }
+
+    let is_item_out_of_stock = true;
+    if (selected_groups.length) is_item_out_of_stock = false;
+
+    setItemOutOfStock(is_item_out_of_stock);
+    return selected_groups;
   };
 
   const processGroup = (groupId, updatedCustomizationState1, selectedGroup, selectedOption) => {
     const currentGroup = customizationGroups.find((item) => item.id === groupId);
-    //  console.log("param**", groupId);
-    //  console.log("param**", updatedCustomizationState1);
-    //  console.log("param**", selectedGroup);
-    //  console.log("param**", selectedOption);
     if (!currentGroup) return;
 
     const groupName = currentGroup.name;
@@ -318,25 +219,27 @@ const CustomizationRenderer = (props) => {
 
     let childGroups = [];
     if (currentGroup.id === selectedGroup.id) {
+      console.log("**1");
       let new_selected_options = [];
       // if option is there then remove it here
       if (!isMandatory && currentGroupOldState.selected.find((optn) => optn.id == selectedOption.id)) {
-        console.log("**1");
         new_selected_options = [...currentGroupOldState["selected"]].filter((item) => item.id != selectedOption.id);
         updatedCustomizationState1[groupId].selected = new_selected_options;
       } else {
         console.log("**2");
-        // if option is not there then add it only if length is lenght is less than max Qty
+        // if option is not there then add it only if length is less than max Qty
         if (currentGroup.maxQuantity === 1) {
-          console.log("**3");
           childGroups = customizationToGroupMap[selectedOption.id];
           updatedCustomizationState1[groupId].selected = [selectedOption];
+          console.log("**3", childGroups, selectedOption);
         } else {
           console.log("**4");
           if (currentGroup.maxQuantity > 1 && currentGroupOldState.selected.length < currentGroup.maxQuantity) {
+            console.log("**5");
             new_selected_options = [...currentGroupOldState["selected"], selectedOption];
             updatedCustomizationState1[groupId].selected = new_selected_options;
           } else {
+            console.log("**6");
             updatedCustomizationState1[groupId].selected = currentGroupOldState.selected;
           }
         }
@@ -349,16 +252,15 @@ const CustomizationRenderer = (props) => {
         childCustomizations
       );
 
+      console.log("selecetd cus", selectedCustomization);
+
       updatedCustomizationState1[groupId].selected = selectedCustomization;
 
       if (selectedCustomization.length) {
         childGroups = customizationToGroupMap[selectedCustomization[0].id];
-        console.log("**5", selectedCustomization[0].id);
         updatedCustomizationState1[groupId].childs = childGroups;
       }
     }
-
-    //  updatedCustomizationState1[groupId].childs = childGroups;
 
     // Recursively process child groups
     for (const childGroup of childGroups) {
@@ -417,7 +319,17 @@ const CustomizationRenderer = (props) => {
         <AccordionDetails sx={{ padding: "20px 0" }}>
           <Grid sx={{ backgroundColor: "#F3F9FE", padding: "20px" }}>
             {group?.options?.map((option) => {
-              const selected = group?.selected?.some((selectedOption) => selectedOption?.id === option?.id);
+              const selected = group?.selected?.some((selectedOption) => selectedOption?.id === option?.id) ?? false;
+
+              //   let selected = false;
+              //   //   group.selected.map((item) => {
+              //   //     if (item.id == option.id) {
+              //   //       selected = true;
+              //   //     }
+              //   //   });
+
+              console.log(group.selected);
+
               return (
                 <>
                   <FormControlLabel
@@ -427,14 +339,7 @@ const CustomizationRenderer = (props) => {
                         handleClick(group, option);
                       }
                     }}
-                    control={
-                      //  group.type === "Checkbox" ? (
-                      //    <Checkbox checked={selected} disabled={!option.inStock} />
-                      //  ) : (
-                      //    <Radio checked={selected} disabled={!option.inStock} />
-                      //  )
-                      <Checkbox checked={selected} disabled={!option.inStock} />
-                    }
+                    control={<Checkbox checked={selected} disabled={!option.inStock} />}
                     label={
                       <>
                         <div
@@ -482,7 +387,6 @@ const CustomizationRenderer = (props) => {
 
   let elements = [];
   const renderGroups = (group) => {
-    console.log("renderGroup", group);
     if (!group) return;
 
     elements.push(renderGroup(group));

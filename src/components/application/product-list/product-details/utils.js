@@ -50,6 +50,16 @@ export const formatCustomizationGroups = (customisation_groups) => {
   return formattedCustomizationGroups;
 };
 
+export const getCustomizationGroupsForProduct = (allGroups, ids) => {
+  return allGroups.filter((g) => {
+    return ids.includes(g.local_id);
+  });
+};
+
+export const hasCustomizations = (productPayload) => {
+  return productPayload.item_details.tags.find((item) => item.code === "custom_group") ? true : false;
+};
+
 export const initializeCustomizationState_ = async (customizationGroups, customizations, customization_state) => {
   let firstGroup = null;
   for (const group of customizationGroups) {

@@ -36,6 +36,7 @@ const ProductDetails = () => {
   const [activeSize, setActiveSize] = useState("");
 
   const [customizationPrices, setCustomizationPrices] = useState(0);
+  const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
@@ -447,10 +448,12 @@ const ProductDetails = () => {
                   </Grid>
                 )}
 
+                {console.log(" <CustomizationRenderer", customization_state)}
                 <CustomizationRenderer
                   productPayload={productPayload}
                   customization_state={customization_state}
                   setCustomizationState={setCustomizationState}
+                  setItemOutOfStock={setItemOutOfStock}
                 />
 
                 <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
@@ -458,14 +461,14 @@ const ProductDetails = () => {
                     variant="contained"
                     sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
                     onClick={() => addToCart(false)}
-                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
+                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock}
                   >
                     Add to cart
                   </Button>
                   <Button
                     variant="outlined"
                     sx={{ flex: 1, textTransform: "none" }}
-                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1}
+                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock}
                     onClick={() => addToCart(true)}
                   >
                     Order now

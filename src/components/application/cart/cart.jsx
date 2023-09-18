@@ -135,9 +135,16 @@ export default function Cart() {
           if (productMaxQuantity) {
             if (updatedCartItem.item.quantity.count < productMaxQuantity.count) {
               updatedCartItem.item.quantity.count += 1;
+
+              let customisations = updatedCartItem.item.customisations;
+              customisations = customisations.map((c) => {
+                return { ...c, quantity: { ...c.quantity, count: c.quantity.count + 1 } };
+              });
+              updatedCartItem.item.customisations = customisations;
+
               updatedCartItem = updatedCartItem.item;
+
               const res = await putCall(url, updatedCartItem);
-              console.log("after update:", res);
               setLoading(false);
               getCartItems();
               fetchCartItems();
@@ -148,7 +155,6 @@ export default function Cart() {
             updatedCartItem.item.quantity.count += 1;
             updatedCartItem = updatedCartItem.item;
             const res = await putCall(url, updatedCartItem);
-            console.log("after update:", res);
             setLoading(false);
             getCartItems();
             fetchCartItems();
@@ -156,9 +162,15 @@ export default function Cart() {
         } else {
           if (updatedCartItem.item.quantity.count > 1) {
             updatedCartItem.item.quantity.count -= 1;
+
+            let customisations = updatedCartItem.item.customisations;
+            customisations = customisations.map((c) => {
+              return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
+            });
+            updatedCartItem.item.customisations = customisations;
+
             updatedCartItem = updatedCartItem.item;
             const res = await putCall(url, updatedCartItem);
-            console.log("after update:", res);
             setLoading(false);
             getCartItems();
             fetchCartItems();
@@ -385,7 +397,6 @@ export default function Cart() {
 
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
-      console.log("cartItem=====>", cartItem);
       return (
         <Grid key={cartItem._id}>
           <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
@@ -414,6 +425,7 @@ export default function Cart() {
                       alignItems="center"
                       onClick={() => {
                         setCustomizationState(cartItem.item.customisationState);
+                        console.log("cartItem.item.customisationState", cartItem.item.customisationState);
                         getProductDetails(cartItem.item.id);
                         setCurrentCartItem(cartItem);
                         setOpenDrawer(true);
@@ -563,7 +575,6 @@ export default function Cart() {
   const getProviderIds = (request_object) => {
     let providers = [];
     request_object.map((cartItem) => {
-      console.log("SET PROVIDER IDS cartItem=====>", cartItem);
       providers.push(cartItem.provider.local_id);
     });
     const ids = [...new Set(providers)];
