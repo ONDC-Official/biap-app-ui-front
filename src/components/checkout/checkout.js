@@ -1232,7 +1232,6 @@ const Checkout = () => {
     total_payable: 0,
   });
   const [initLoading, setInitLoading] = useState(false);
-
   const [activePaymentMethod, setActivePaymentMethod] = useState(
     payment_methods.COD
   );
@@ -1255,215 +1254,225 @@ const Checkout = () => {
   }, []);
 
   useEffect(() => {
-    if (updatedCartItems.length > 0) {
-      // fetch request object length and compare it with the response length
-      let c = cartItems.map((item) => {
-        return item.item;
-      });
-      const requestObject = constructQouteObject(c);
-      if (requestObject.length === updatedCartItems.length) {
-        // setToggleInit(true);
-      }
+    try {
+      if (updatedCartItems.length > 0) {
+        // fetch request object length and compare it with the response length
+        let c = cartItems.map((item) => {
+          return item.item;
+        });
+        const requestObject = constructQouteObject(c);
+        if (requestObject.length === updatedCartItems.length) {
+          // setToggleInit(true);
+        }
 
-      const cartList = JSON.parse(JSON.stringify(updatedCartItems));
-      // check if any one order contains error
-      let total_payable = 0;
-      const quotes = updatedCartItems?.map((item, index) => {
-        let { message, error } = item;
-        let provider_payable = 0;
-        const provider = {
-          products: [],
-          total_payable: 0,
-          name: "",
-          error: null,
-        };
-        // else generate quote of it
-        if (message) {
-          //          message = m2;
+        const cartList = JSON.parse(JSON.stringify(updatedCartItems));
+        // check if any one order contains error
+        let total_payable = 0;
+        const quotes = updatedCartItems?.map((item, index) => {
+          let { message, error } = item;
+          let provider_payable = 0;
+          const provider = {
+            products: [],
+            total_payable: 0,
+            name: "",
+            error: null,
+          };
+          // else generate quote of it
+          if (message) {
+            //          message = m2;
 
-          if (message?.quote?.quote?.price?.value) {
-            provider_payable += Number(message?.quote?.quote?.price?.value);
-          }
-          const breakup = message?.quote?.quote?.breakup;
-          const provided_by = message?.quote?.provider?.descriptor?.name;
-          provider.name = provided_by;
-          let uuid = 0;
-          const all_items = breakup?.map((break_up_item) => {
-            const cartIndex = cartList.findIndex(
-              (one) => one.id === break_up_item["@ondc/org/item_id"]
-            );
-            const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
-            let cartQuantity = cartItem ? cartItem?.quantity?.count : 0;
-            let quantity = break_up_item["@ondc/org/item_quantity"]
-              ? break_up_item["@ondc/org/item_quantity"]["count"]
-              : 0;
-            let textClass = "";
-            let quantityMessage = "";
-            if (quantity === 0) {
-              if (break_up_item["@ondc/org/title_type"] === "item") {
-                textClass = "text-error";
-                quantityMessage = "Out of stock";
+            if (message?.quote?.quote?.price?.value) {
+              provider_payable += Number(message?.quote?.quote?.price?.value);
+            }
+            const breakup = message?.quote?.quote?.breakup;
+            const provided_by = message?.quote?.provider?.descriptor?.name;
+            provider.name = provided_by;
+            let uuid = 0;
+            const all_items = breakup?.map((break_up_item) => {
+              const cartIndex = cartList.findIndex(
+                (one) => one.id === break_up_item["@ondc/org/item_id"]
+              );
+              const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
+              let cartQuantity = cartItem ? cartItem?.quantity?.count : 0;
+              let quantity = break_up_item["@ondc/org/item_quantity"]
+                ? break_up_item["@ondc/org/item_quantity"]["count"]
+                : 0;
+              let textClass = "";
+              let quantityMessage = "";
+              if (quantity === 0) {
+                if (break_up_item["@ondc/org/title_type"] === "item") {
+                  textClass = "text-error";
+                  quantityMessage = "Out of stock";
 
-                if (cartIndex > -1) {
-                  cartList.splice(cartIndex, 1);
+                  if (cartIndex > -1) {
+                    cartList.splice(cartIndex, 1);
+                  }
                 }
+              } else if (quantity !== cartQuantity) {
+                textClass =
+                  break_up_item["@ondc/org/title_type"] === "item"
+                    ? "text-amber"
+                    : "";
+                quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
+                if (cartItem) {
+                  cartItem.quantity.count = quantity;
+                }
+              } else {
+                quantityMessage = `Quantity: ${quantity}`;
               }
-            } else if (quantity !== cartQuantity) {
-              textClass =
-                break_up_item["@ondc/org/title_type"] === "item"
-                  ? "text-amber"
-                  : "";
-              quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
-              if (cartItem) {
-                cartItem.quantity.count = quantity;
+
+              if (error && error.code === "30009") {
+                cartList.splice(cartIndex, 1);
               }
-            } else {
-              quantityMessage = `Quantity: ${quantity}`;
-            }
-
-            if (error && error.code === "30009") {
-              cartList.splice(cartIndex, 1);
-            }
-            uuid = uuid + 1;
-            return {
-              id: break_up_item["@ondc/org/item_id"],
-              title: break_up_item?.title,
-              title_type: break_up_item["@ondc/org/title_type"],
-              isCustomization: isItemCustomization(break_up_item?.item?.tags),
-              isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
-              parent_item_id: break_up_item?.item?.parent_item_id,
-              price: Number(break_up_item.price?.value)?.toFixed(2),
-              cartQuantity,
-              quantity,
-              provided_by,
-              textClass,
-              quantityMessage,
-              uuid: uuid,
-            };
-          });
-
-          let items = {};
-          let delivery = {};
-          all_items.forEach((item) => {
-            // for type item
-            if (item.title_type === "item" && !item.isCustomization) {
-              let key = item.parent_item_id || item.id;
-              let price = {
-                title: item.quantity + " * Base Price",
-                value: item.price,
+              uuid = uuid + 1;
+              return {
+                id: break_up_item["@ondc/org/item_id"],
+                title: break_up_item?.title,
+                title_type: break_up_item["@ondc/org/title_type"],
+                isCustomization: isItemCustomization(break_up_item?.item?.tags),
+                isDelivery:
+                  break_up_item["@ondc/org/title_type"] === "delivery",
+                parent_item_id: break_up_item?.item?.parent_item_id,
+                price: Number(break_up_item.price?.value)?.toFixed(2),
+                cartQuantity,
+                quantity,
+                provided_by,
+                textClass,
+                quantityMessage,
+                uuid: uuid,
               };
-              items[key] = { title: item.title, price: price };
-            }
-            if (item.title_type === "tax" && !item.isCustomization) {
-              let key = item.parent_item_id || item.id;
-              items[key] = items[key] || {};
-              items[key]["tax"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount" && !item.isCustomization) {
-              let key = item.parent_item_id || item.id;
-              items[key] = items[key] || {};
-              items[key]["discount"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
+            });
 
-            //for customizations
-            if (item.title_type === "item" && item.isCustomization) {
-              let key = item.parent_item_id;
-              items[key]["customizations"] = items[key]["customizations"] || {};
-              items[key]["customizations"][item.id] = {
-                title: item.title,
-                price: {
+            let items = {};
+            let delivery = {};
+            all_items.forEach((item) => {
+              // for type item
+              if (item.title_type === "item" && !item.isCustomization) {
+                let key = item.parent_item_id || item.id;
+                let price = {
                   title: item.quantity + " * Base Price",
                   value: item.price,
-                },
-              };
-            }
-            if (item.title_type === "tax" && item.isCustomization) {
-              let key = item.parent_item_id;
-              items[key]["customizations"][item.id] =
-                items[key]["customizations"][item.id] || {};
-              items[key]["customizations"][item.id]["tax"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount" && item.isCustomization) {
-              let key = item.parent_item_id;
-              items[key]["customizations"][item.id] =
-                items[key]["customizations"][item.id] || {};
-              items[key]["customizations"][item.id]["discount"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            //for delivery
-            if (item.title_type === "delivery") {
-              delivery["delivery"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount_f") {
-              delivery["discount"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "tax_f") {
-              delivery["tax"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "packing") {
-              delivery["packing"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount") {
-              if (item.isCustomization) {
-                let id = item.parent_item_id;
-              } else {
-                let id = item.id;
-                items[id]["discount"] = {
+                };
+                items[key] = { title: item.title, price: price };
+              }
+              if (item.title_type === "tax" && !item.isCustomization) {
+                let key = item.parent_item_id || item.id;
+                items[key] = items[key] || {};
+                items[key]["tax"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-            }
-            if (item.title_type === "misc") {
-              delivery["misc"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-          });
-          provider.items = items;
-          provider.delivery = delivery;
-        }
+              if (item.title_type === "discount" && !item.isCustomization) {
+                let key = item.parent_item_id || item.id;
+                items[key] = items[key] || {};
+                items[key]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
 
-        if (error) {
-          provider.error = error.message;
-        }
+              //for customizations
+              if (item.title_type === "item" && item.isCustomization) {
+                let key = item.parent_item_id;
+                items[key]["customizations"] =
+                  items[key]["customizations"] || {};
+                items[key]["customizations"][item.id] = {
+                  title: item.title,
+                  price: {
+                    title: item.quantity + " * Base Price",
+                    value: item.price,
+                  },
+                };
+              }
+              if (item.title_type === "tax" && item.isCustomization) {
+                let key = item.parent_item_id;
+                items[key]["customizations"][item.id] =
+                  items[key]["customizations"][item.id] || {};
+                items[key]["customizations"][item.id]["tax"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "discount" && item.isCustomization) {
+                let key = item.parent_item_id;
+                items[key]["customizations"][item.id] =
+                  items[key]["customizations"][item.id] || {};
+                items[key]["customizations"][item.id]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              //for delivery
+              if (item.title_type === "delivery") {
+                delivery["delivery"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "discount_f") {
+                delivery["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "tax_f") {
+                delivery["tax"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "packing") {
+                delivery["packing"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "discount") {
+                if (item.isCustomization) {
+                  let id = item.parent_item_id;
+                } else {
+                  let id = item.id;
+                  items[id]["discount"] = {
+                    title: item.title,
+                    value: item.price,
+                  };
+                }
+              }
+              if (item.title_type === "misc") {
+                delivery["misc"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+            });
+            provider.items = items;
+            provider.delivery = delivery;
+          }
 
-        total_payable += provider_payable;
-        provider.total_payable = provider_payable;
-        return provider;
-      });
-      // setGetQuoteLoading(false);
-      // setUpdateCartLoading(false);
-      setProductsQuote({
-        providers: quotes,
-        total_payable: total_payable.toFixed(2),
-      });
+          if (error) {
+            provider.error = error.message;
+          }
+
+          total_payable += provider_payable;
+          provider.total_payable = provider_payable;
+          return provider;
+        });
+        // setGetQuoteLoading(false);
+        // setUpdateCartLoading(false);
+        setProductsQuote({
+          providers: quotes,
+          total_payable: total_payable.toFixed(2),
+        });
+      }
+    } catch (err) {
+      showQuoteError();
     }
   }, [updatedCartItems]);
+
+  const showQuoteError = () => {
+    dispatchError("There is issue with quote from seller side! Please check!");
+  };
 
   const isItemCustomization = (tags) => {
     let isCustomization = false;
@@ -1777,24 +1786,24 @@ const Checkout = () => {
     let total = 0;
     providers.forEach((provider) => {
       const data = provider.delivery;
-      if(data.delivery){
-        total = total+parseInt(data.delivery.value);
+      if (data.delivery) {
+        total = total + parseInt(data.delivery.value);
       }
-      if(data.discount){
-        total = total+parseInt(data.discount.value);
+      if (data.discount) {
+        total = total + parseInt(data.discount.value);
       }
-      if(data.tax){
-        total = total+parseInt(data.tax.value);
+      if (data.tax) {
+        total = total + parseInt(data.tax.value);
       }
-      if(data.packing){
-        total = total+parseInt(data.packing.value);
+      if (data.packing) {
+        total = total + parseInt(data.packing.value);
       }
-      if(data.misc){
-        total = total+parseInt(data.misc.value);
+      if (data.misc) {
+        total = total + parseInt(data.misc.value);
       }
     });
     return total;
-  }
+  };
 
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
@@ -1880,227 +1889,238 @@ const Checkout = () => {
 
   const getItemsTotal = (providers) => {
     let finalTotal = 0;
-    if(providers){
+    if (providers) {
       providers.forEach((provider) => {
-        const items = Object.values(provider.items).filter((quote) => quote?.title !== "");
+        const items = Object.values(provider.items).filter(
+          (quote) => quote?.title !== ""
+        );
         items.forEach((item) => {
           finalTotal = finalTotal + parseInt(item.price.value);
           Object.values(item.customizations).forEach((custItem) => {
             finalTotal = finalTotal + parseInt(custItem.price.value);
-          })
-        })
-      })
+          });
+        });
+      });
     }
     return finalTotal;
   };
 
   const renderItems = (provider, pindex) => {
     return (
-        <div key={`pindex-${pindex}`}>
-          {Object.values(provider.items)
-              .filter((quote) => quote?.title !== "")
-              .map((quote, qIndex) => (
-                  <div key={`quote-${qIndex}`}>
-                    <div
-                        className={classes.summaryQuoteItemContainer}
-                        key={`quote-${qIndex}-title`}
-                    >
-                      <Typography
-                          variant="body1"
-                          className={`${classes.summaryItemLabel} ${quote.textClass}`}
-                      >
-                        {quote?.title}
-                        <p className={`${styles.ordered_from} ${quote.textClass}`}>
-                          {quote.quantityMessage}
-                        </p>
-                      </Typography>
-                    </div>
-                    {renderItemDetails(quote)}
-                    {quote?.customizations && (
-                        <div key={`quote-${qIndex}-customizations`}>
-                          <div
-                              className={classes.summaryQuoteItemContainer}
-                              key={`quote-${qIndex}-customizations`}
-                          >
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemPriceLabel}
-                            >
-                              Customizations
-                            </Typography>
-                          </div>
-                          {Object.values(quote?.customizations).map(
-                              (customization, cIndex) => (
-                                  <div>
-                                    <div
-                                        className={classes.summaryQuoteItemContainer}
-                                        key={`quote-${qIndex}-customizations-${cIndex}`}
-                                    >
-                                      <Typography
-                                          variant="body1"
-                                          className={classes.summaryCustomizationLabel}
-                                      >
-                                        {customization.title}
-                                      </Typography>
-                                    </div>
-                                    {renderItemDetails(customization, cIndex, true)}
-                                  </div>
-                              )
-                          )}
-                        </div>
-                    )}
-                  </div>
-              ))}
-          {/*<div className={classes.summarySubtotalContainer}>*/}
-          {/*  <Typography variant="body2" className={classes.subTotalLabel}>*/}
-          {/*    Total*/}
-          {/*  </Typography>*/}
-          {/*  <Typography variant="body2" className={classes.subTotalValue}>*/}
-          {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
-          {/*  </Typography>*/}
-          {/*</div>*/}
-          {provider.error && (
-              <Typography
-                  variant="body1"
-                  color="error"
-                  className={classes.summaryItemLabel}
+      <div key={`pindex-${pindex}`}>
+        {Object.values(provider.items)
+          .filter((quote) => quote?.title !== "")
+          .map((quote, qIndex) => (
+            <div key={`quote-${qIndex}`}>
+              <div
+                className={classes.summaryQuoteItemContainer}
+                key={`quote-${qIndex}-title`}
               >
-                {provider.error}
-              </Typography>
-          )}
-        </div>
+                <Typography
+                  variant="body1"
+                  className={`${classes.summaryItemLabel} ${quote.textClass}`}
+                >
+                  {quote?.title}
+                  <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                    {quote.quantityMessage}
+                  </p>
+                </Typography>
+              </div>
+              {renderItemDetails(quote)}
+              {quote?.customizations && (
+                <div key={`quote-${qIndex}-customizations`}>
+                  <div
+                    className={classes.summaryQuoteItemContainer}
+                    key={`quote-${qIndex}-customizations`}
+                  >
+                    <Typography
+                      variant="body1"
+                      className={classes.summaryItemPriceLabel}
+                    >
+                      Customizations
+                    </Typography>
+                  </div>
+                  {Object.values(quote?.customizations).map(
+                    (customization, cIndex) => (
+                      <div>
+                        <div
+                          className={classes.summaryQuoteItemContainer}
+                          key={`quote-${qIndex}-customizations-${cIndex}`}
+                        >
+                          <Typography
+                            variant="body1"
+                            className={classes.summaryCustomizationLabel}
+                          >
+                            {customization.title}
+                          </Typography>
+                        </div>
+                        {renderItemDetails(customization, cIndex, true)}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        {/*<div className={classes.summarySubtotalContainer}>*/}
+        {/*  <Typography variant="body2" className={classes.subTotalLabel}>*/}
+        {/*    Total*/}
+        {/*  </Typography>*/}
+        {/*  <Typography variant="body2" className={classes.subTotalValue}>*/}
+        {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
+        {/*  </Typography>*/}
+        {/*</div>*/}
+        {provider.error && (
+          <Typography
+            variant="body1"
+            color="error"
+            className={classes.summaryItemLabel}
+          >
+            {provider.error}
+          </Typography>
+        )}
+      </div>
     );
   };
 
   if (cartItems === null || updatedCartItems === null) {
     return <Redirect to={"/application/cart"} />;
   }
+
+  const renderQuote = () => {
+    try {
+      return (
+        <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+          <Card className={classes.summaryCard}>
+            <Typography variant="h4">Summary</Typography>
+            <Box component={"div"} className={classes.divider} />
+            {productsQuote?.providers.map((provider, pindex) =>
+              renderItems(provider, pindex)
+            )}
+            <div className={classes.summarySubtotalContainer}>
+              <Typography variant="body2" className={classes.subTotalLabel}>
+                Total
+              </Typography>
+              <Typography variant="body2" className={classes.subTotalValue}>
+                {`₹${getItemsTotal(productsQuote?.providers)}`}
+              </Typography>
+            </div>
+            <Box component={"div"} className={classes.divider} />
+            {productsQuote?.providers.map((provider, pindex) => {
+              return (
+                <div key={`pindex-${pindex}`}>
+                  <div key={`d-pindex-${pindex}`}>
+                    {renderDeliveryCharges(provider.delivery)}
+                  </div>
+                </div>
+              );
+            })}
+            <div className={classes.summarySubtotalContainer}>
+              <Typography variant="body2" className={classes.subTotalLabel}>
+                Total
+              </Typography>
+              <Typography variant="body2" className={classes.subTotalValue}>
+                {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
+              </Typography>
+            </div>
+            <Box component={"div"} className={classes.orderTotalDivider} />
+            <div className={classes.summaryItemContainer}>
+              <Typography variant="body" className={classes.totalLabel}>
+                Order Total
+              </Typography>
+              <Typography variant="body" className={classes.totalValue}>
+                {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
+                {`₹${productsQuote?.total_payable}`}
+              </Typography>
+            </div>
+            <Button
+              className={classes.proceedToBuy}
+              fullWidth
+              variant="contained"
+              disabled={confirmOrderLoading || initLoading || activeStep !== 2}
+              onClick={() => {
+                const { productQuotes, successOrderIds } = JSON.parse(
+                  // getValueFromCookie("checkout_details") || "{}"
+                  localStorage.getItem("checkout_details") || "{}"
+                );
+                setConfirmOrderLoading(true);
+                let c = cartItems.map((item) => {
+                  return item.item;
+                });
+                if (activePaymentMethod === payment_methods.JUSPAY) {
+                  // setTogglePaymentGateway(true);
+                  // setLoadingSdkForPayment(true);
+                  // initiateSDK();
+                  const request_object = constructQouteObject(
+                    c.filter(({ provider }) =>
+                      successOrderIds.includes(provider.local_id.toString())
+                    )
+                  );
+                  confirmOrder(request_object[0], payment_methods.JUSPAY);
+                } else {
+                  const request_object = constructQouteObject(
+                    c.filter(({ provider }) =>
+                      successOrderIds.includes(provider.local_id.toString())
+                    )
+                  );
+                  confirmOrder(request_object[0], payment_methods.COD);
+                }
+              }}
+            >
+              {confirmOrderLoading ? <Loading /> : "Proceed to Buy"}
+            </Button>
+          </Card>
+        </Grid>
+      );
+    } catch (err) {
+      showQuoteError();
+    }
+  };
+
   return (
-      <>
-        <div className={classes.header}>
-          <Typography
-              component={Link}
-              underline="hover"
-              color="primary.main"
-              variant="body1"
-              className={classes.headerTypo}
-              to={`/application`}
-          >
-            BACK TO SHOP
-          </Typography>
-        </div>
-        <div className={classes.bodyContainer}>
-          <Grid container spacing={6}>
-            <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
-              <Stepper
-                  activeStep={activeStep}
-                  orientation="vertical"
-                  connector={false}
-              >
-                {steps.map((step, index) => (
-                    <Step key={step.label} className={classes.stepRoot}>
-                      <StepLabel className={classes.stepLabel}>
-                        {renderStepLabel(step, index)}
-                      </StepLabel>
-                      <StepContent
-                          className={
-                            activeStep === index
-                                ? classes.stepContent
-                                : classes.stepContentHidden
-                          }
-                      >
-                        {renderStepContent(step, index)}
-                      </StepContent>
-                    </Step>
-                ))}
-              </Stepper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-              <Card className={classes.summaryCard}>
-                <Typography variant="h4">Summary</Typography>
-                <Box component={"div"} className={classes.divider}/>
-                {productsQuote?.providers.map((provider, pindex) =>
-                    renderItems(provider, pindex)
-                )}
-                <div className={classes.summarySubtotalContainer}>
-                  <Typography variant="body2" className={classes.subTotalLabel}>
-                    Total
-                  </Typography>
-                  <Typography variant="body2" className={classes.subTotalValue}>
-                    {`₹${getItemsTotal(productsQuote?.providers)}`}
-                  </Typography>
-                </div>
-                <Box component={"div"} className={classes.divider}/>
-                {productsQuote?.providers.map((provider, pindex) => {
-                  return (
-                      <div key={`pindex-${pindex}`}>
-                        <div key={`d-pindex-${pindex}`}>
-                          {renderDeliveryCharges(provider.delivery)}
-                        </div>
-                      </div>
-                  )
-                })}
-                <div className={classes.summarySubtotalContainer}>
-                  <Typography variant="body2" className={classes.subTotalLabel}>
-                    Total
-                  </Typography>
-                  <Typography variant="body2" className={classes.subTotalValue}>
-                    {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
-                  </Typography>
-                </div>
-                <Box component={"div"} className={classes.orderTotalDivider}/>
-                <div className={classes.summaryItemContainer}>
-                  <Typography variant="body" className={classes.totalLabel}>
-                    Order Total
-                  </Typography>
-                  <Typography variant="body" className={classes.totalValue}>
-                    {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
-                    {`₹${productsQuote?.total_payable}`}
-                  </Typography>
-                </div>
-                <Button
-                    className={classes.proceedToBuy}
-                    fullWidth
-                    variant="contained"
-                    disabled={
-                        confirmOrderLoading || initLoading || activeStep !== 2
+    <>
+      <div className={classes.header}>
+        <Typography
+          component={Link}
+          underline="hover"
+          color="primary.main"
+          variant="body1"
+          className={classes.headerTypo}
+          to={`/application`}
+        >
+          BACK TO SHOP
+        </Typography>
+      </div>
+      <div className={classes.bodyContainer}>
+        <Grid container spacing={6}>
+          <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+            <Stepper
+              activeStep={activeStep}
+              orientation="vertical"
+              connector={false}
+            >
+              {steps.map((step, index) => (
+                <Step key={step.label} className={classes.stepRoot}>
+                  <StepLabel className={classes.stepLabel}>
+                    {renderStepLabel(step, index)}
+                  </StepLabel>
+                  <StepContent
+                    className={
+                      activeStep === index
+                        ? classes.stepContent
+                        : classes.stepContentHidden
                     }
-                    onClick={() => {
-                      const {productQuotes, successOrderIds} = JSON.parse(
-                          // getValueFromCookie("checkout_details") || "{}"
-                          localStorage.getItem("checkout_details") || "{}"
-                      );
-                      setConfirmOrderLoading(true);
-                      let c = cartItems.map((item) => {
-                        return item.item;
-                      });
-                      if (activePaymentMethod === payment_methods.JUSPAY) {
-                        // setTogglePaymentGateway(true);
-                        // setLoadingSdkForPayment(true);
-                        // initiateSDK();
-                        const request_object = constructQouteObject(
-                            c.filter(({provider}) =>
-                                successOrderIds.includes(provider.local_id.toString())
-                            )
-                        );
-                        confirmOrder(request_object[0], payment_methods.JUSPAY);
-                      } else {
-                        const request_object = constructQouteObject(
-                            c.filter(({provider}) =>
-                                successOrderIds.includes(provider.local_id.toString())
-                            )
-                        );
-                        confirmOrder(request_object[0], payment_methods.COD);
-                      }
-                    }}
-                >
-                  {confirmOrderLoading ? <Loading/> : "Proceed to Buy"}
-                </Button>
-              </Card>
-            </Grid>
+                  >
+                    {renderStepContent(step, index)}
+                  </StepContent>
+                </Step>
+              ))}
+            </Stepper>
           </Grid>
-        </div>
-      </>
+          {renderQuote()}
+        </Grid>
+      </div>
+    </>
   );
 };
 
