@@ -27,6 +27,7 @@ import { getCall, postCall } from "../../../../api/axios";
 import {
   formatCustomizationGroups,
   formatCustomizations,
+  hasCustomizations,
   initializeCustomizationState,
 } from "../../../application/product-list/product-details/utils";
 import { CartContext } from "../../../../context/cartContext";
@@ -178,10 +179,10 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
         ...productPayload.item_details,
       },
       customisations,
-      hasCustomisations: true,
+      hasCustomisations: hasCustomizations(productPayload) ? true : false,
     };
 
-    console.log("payload", payload);
+    console.log("payload**", payload);
 
     postCall(url, payload)
       .then(() => {

@@ -14,6 +14,7 @@ import { ReactComponent as CustomiseIcon } from "../../../../assets/images/custo
 import { ReactComponent as PlusIcon } from "../../../../assets/images/plus.svg";
 import no_image_found from "../../../../assets/images/no_image_found.png";
 import { useHistory } from "react-router-dom";
+import { hasCustomizations } from "../../../application/product-list/product-details/utils";
 
 const MenuItem = (props) => {
   const classes = useStyles();
@@ -100,19 +101,20 @@ const MenuItem = (props) => {
           >
             Add to cart
           </Button>
-          <Button
-            fullWidth
-            variant="text"
-            color="success"
-            endIcon={<CustomiseIcon />}
-            onClick={() => {
-              getProductDetails(productId);
-              setCustomizationModal(true);
-            }}
-            disabled={customGroupTag == undefined || (customGroupTag.list && customGroupTag.list.length == 0)}
-          >
-            Customise
-          </Button>
+          {hasCustomizations(productPayload) && (
+            <Button
+              fullWidth
+              variant="text"
+              color="success"
+              endIcon={<CustomiseIcon />}
+              onClick={() => {
+                getProductDetails(productId);
+                setCustomizationModal(true);
+              }}
+            >
+              Customise
+            </Button>
+          )}
         </div>
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
