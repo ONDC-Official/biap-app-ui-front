@@ -9,7 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import Badge from "@mui/material/Badge";
 
-import logo from "../../../assets/images/AppLogo.png";
+import logo from "../../../assets/images/AppLogo.svg";
 import { ReactComponent as LocationIcon } from "../../../assets/images/location.svg";
 import { ReactComponent as AddressDownIcon } from "../../../assets/images/chevron-down.svg";
 import { ReactComponent as ListIcon } from "../../../assets/images/list.svg";

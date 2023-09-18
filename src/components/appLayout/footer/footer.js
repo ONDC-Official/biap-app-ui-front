@@ -3,7 +3,7 @@ import useStyles from './style';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import logo from "../../../assets/images/AppLogo.png";
+import logo from "../../../assets/images/AppLogo.svg";
 import { ReactComponent as CallIcon} from "../../../assets/images/call.svg";
 import { ReactComponent as WhatsappIcon} from "../../../assets/images/whatsapp.svg";
 import appStoreImage from "../../../assets/images/appStore.png";
