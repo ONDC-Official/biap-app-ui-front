@@ -448,6 +448,7 @@ const ProductDetails = () => {
                   </Grid>
                 )}
 
+                {console.log(" <CustomizationRenderer", customization_state)}
                 <CustomizationRenderer
                   productPayload={productPayload}
                   customization_state={customization_state}

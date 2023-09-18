@@ -47,6 +47,7 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
   const { fetchCartItems } = useContext(CartContext);
 
   const [customizationPrices, setCustomizationPrices] = useState(0);
+  const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -263,7 +264,9 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
                 productPayload={productPayload}
                 customization_state={customization_state}
                 setCustomizationState={setCustomizationState}
+                setItemOutOfStock={setItemOutOfStock}
               />
+
               <Grid container sx={{ marginTop: 4 }}>
                 <Grid container alignItems="center" justifyContent="space-around" xs={3} className={classes.qty}>
                   <RemoveIcon
@@ -278,7 +281,12 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
                   </Typography>
                   <AddIcon fontSize="small" className={classes.qtyIcon} onClick={() => setItemQty(itemQty + 1)} />
                 </Grid>
-                <Button variant="contained" sx={{ flex: 1 }} onClick={() => addToCart(productPayload)}>
+                <Button
+                  disabled={itemOutOfStock}
+                  variant="contained"
+                  sx={{ flex: 1 }}
+                  onClick={() => addToCart(productPayload)}
+                >
                   Add Item Total- ₹{(productPayload?.item_details?.price.value + customizationPrices) * itemQty}{" "}
                 </Button>
               </Grid>

@@ -397,7 +397,6 @@ export default function Cart() {
 
   const renderProducts = () => {
     return cartItems?.map((cartItem, idx) => {
-      console.log("cartItem=====>", cartItem);
       return (
         <Grid key={cartItem._id}>
           <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
@@ -426,6 +425,7 @@ export default function Cart() {
                       alignItems="center"
                       onClick={() => {
                         setCustomizationState(cartItem.item.customisationState);
+                        console.log("cartItem.item.customisationState", cartItem.item.customisationState);
                         getProductDetails(cartItem.item.id);
                         setCurrentCartItem(cartItem);
                         setOpenDrawer(true);
@@ -575,7 +575,6 @@ export default function Cart() {
   const getProviderIds = (request_object) => {
     let providers = [];
     request_object.map((cartItem) => {
-      console.log("SET PROVIDER IDS cartItem=====>", cartItem);
       providers.push(cartItem.provider.local_id);
     });
     const ids = [...new Set(providers)];
