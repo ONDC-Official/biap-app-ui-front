@@ -1965,7 +1965,7 @@ const Checkout = () => {
             <div>
               <Typography
                 variant="body1"
-                className={`${classes.summaryItemLabel} text-error`}
+                className={`${classes.summaryItemLabel} ${classes.marginBottom10} text-error`}
               >
                 Out of stock
               </Typography>
@@ -1977,7 +1977,9 @@ const Checkout = () => {
                 <Typography
                   variant="body1"
                   className={classes.summaryItemQuantityLabel}
-                ></Typography>
+                >
+                  Items
+                </Typography>
                 <Typography
                   variant="body1"
                   className={classes.summaryItemQuantityValue}
@@ -2094,15 +2096,15 @@ const Checkout = () => {
         {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
         {/*  </Typography>*/}
         {/*</div>*/}
-        {provider.error && (
-          <Typography
-            variant="body1"
-            color="error"
-            className={classes.summaryItemLabel}
-          >
-            {provider.error}
-          </Typography>
-        )}
+        {/*{provider.error && (*/}
+        {/*  <Typography*/}
+        {/*    variant="body1"*/}
+        {/*    color="error"*/}
+        {/*    className={classes.summaryItemLabel}*/}
+        {/*  >*/}
+        {/*    {provider.error}*/}
+        {/*  </Typography>*/}
+        {/*)}*/}
       </div>
     );
   };
