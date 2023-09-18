@@ -76,6 +76,9 @@ const TopBrands = () => {
     useEffect(() => {
         getAllBrands();
     }, []);
+
+    const rowsPerPage = 8;
+    const totalPageCount =  Math.ceil(brands.length / rowsPerPage);
     return (
         <Grid container spacing={3} className={classes.topBrandsContainer}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -83,78 +86,60 @@ const TopBrands = () => {
                     All Providers
                 </Typography>
             </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
-                {
-                    isLoading
-                    ?<Loading />
-                    :(
-                        <>
-                            <Pagination
-                                count={brands.length}
-                                page={page}
-                                className={classes.categoriesContainer}
-                                boundaryCount={4}
-                                onChange={(event, page) => {
-                                    setPage(page);
-                                }}
-                                renderItem={(item) => {
-                                    if(item.type === "page"){
-                                        const brandIndex = item.page - 1;
-                                        const brand = brands[brandIndex];
-                                        return (
-                                            <BrandCard
-                                                data={brand}
-                                                index={brandIndex}
-                                                isActive={brandIndex === activeBrandIndex}
-                                                onMouseOver={() => {
-                                                    setPage(brandIndex+1);
-                                                    setActiveBrandIndex(brandIndex);
-                                                }}
-                                            />
-                                        )
-                                    }else if(item.type === "next"){
-                                        return (
-                                            <IconButton
-                                                color="inherit" className={classes.actionButton}
-                                                onClick={() => {
-                                                    setPage(item.page+1)
-                                                    setActiveBrandIndex(activeBrandIndex+1)
-                                                }}
-                                                disabled={brands.length === item.page}
-                                            >
-                                                <NextIcon />
-                                            </IconButton>
-                                        )
-                                    }else if(item.type === "previous"){
-                                        return (
-                                            <div className={classes.previousIconContainer}>
-                                                <div style={{margin: 'auto'}}>
-                                                    <IconButton
-                                                        color="inherit" className={classes.actionButton}
-                                                        onClick={() => {
-                                                            setPage(item.page-1)
-                                                            setActiveBrandIndex(activeBrandIndex-1)
-                                                        }}
-                                                        disabled={item.page === -1}
-                                                    >
-                                                        <PreviousIcon />
-                                                    </IconButton>
-                                                </div>
-                                            </div>
-                                        )
-                                    }else{
-                                        return (
-                                            <PaginationItem
-                                                {...item}
-                                            />
-                                        )
-                                    }
-                                }}
-                            />
-                        </>
-                    )
-                }
-            </Grid>
+            {
+                isLoading
+                ?(
+                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
+                        <Loading />
+                    </Grid>
+                ):(
+                    <>
+                        <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
+                            <div style={{margin: 'auto'}}>
+                                <IconButton
+                                    color="inherit" className={classes.actionButton}
+                                    onClick={() => {
+                                        setPage(page-1)
+                                        // setActiveSubCatIndex(activeSubCatIndex-1)
+                                    }}
+                                    disabled={page === 0}
+                                >
+                                    <PreviousIcon />
+                                </IconButton>
+                            </div>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={10} lg={10} xl={10} className={classes.brandsContainer}>
+                            {
+                                brands.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((brand, brandIndex) => (
+                                    <BrandCard
+                                        key={`btand-index-${brandIndex}`}
+                                        data={brand}
+                                        index={brandIndex}
+                                        // isActive={brandIndex === activeBrandIndex}
+                                        onMouseOver={() => {
+                                            setActiveBrandIndex(brandIndex);
+                                        }}
+                                    />
+                                ))
+                            }
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
+                            <div style={{margin: 'auto'}}>
+                                <IconButton
+                                    color="inherit" className={classes.actionButton}
+                                    onClick={() => {
+                                        setPage(page+1)
+                                        // setActiveSubCatIndex(activeSubCatIndex+1)
+                                    }}
+                                    disabled={page === (totalPageCount-1)}
+                                >
+                                    <NextIcon />
+                                </IconButton>
+                            </div>
+                        </Grid>
+                    </>
+                )
+            }
         </Grid>
     )
 

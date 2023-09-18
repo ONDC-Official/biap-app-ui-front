@@ -48,7 +48,7 @@ const ProductList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
     page: 1,
-    pageSize: 10,
+    pageSize: 18,
     searchData: [],
   });
   const dispatch = useContext(ToastContext);
@@ -66,13 +66,6 @@ const ProductList = () => {
   const subCategoryName = query.get("sc");
   const searchProductName = query.get("s");
 
-  useEffect(() => {
-    if (locationData) {
-      const searchName = query.get("s");
-      getAllProducts(searchName);
-    }
-  }, [locationData, deliveryAddressLocation]);
-
   const getAllProducts = async (searchName) => {
     setIsLoading(true);
     try {
@@ -85,7 +78,7 @@ const ProductList = () => {
       paginationData.searchData.pageNumber = paginationData.page;
       paginationData.searchData.limit = paginationData.pageSize;
       if (searchName) {
-        paginationData.searchData.productName = searchName || "";
+        paginationData.searchData.name = searchName || "";
       } else {
       }
       if (subCategoryName) {
@@ -171,8 +164,11 @@ const ProductList = () => {
   }, [subCategoryName]);
 
   useEffect(() => {
-    getAllProducts();
-  }, [paginationModel]);
+    if (locationData) {
+      const searchName = query.get("s");
+      getAllProducts(searchName);
+    }
+  }, [paginationModel, locationData, deliveryAddressLocation]);
 
   const handleChangeFilter = (filterIndex, value) => {
     const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));

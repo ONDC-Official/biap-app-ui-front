@@ -279,10 +279,12 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
         <Grid container spacing={3}>
             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                 <Card
-                    className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.COD?classes.activeCard:""}`}
+                    className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.COD?classes.activeCard:""} ${initializeOrderLoading?classes.nonClickable:""}`}
                     onClick={() => {
-                        setActivePaymentMethod(payment_methods.COD);
-                        handleInitializaOrder();
+                        if(!initializeOrderLoading && activePaymentMethod !== payment_methods.COD) {
+                            setActivePaymentMethod(payment_methods.COD);
+                            handleInitializaOrder();
+                        }
                     }}
                 >
                     {/*<img className={classes.paymentImage} src={cashOnDelivery} alt="Cash on delivery"/>*/}
@@ -299,10 +301,12 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
             </Grid>
             <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
                 <Card
-                    className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.JUSPAY?classes.activeCard:""}`}
+                    className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.JUSPAY?classes.activeCard:""} ${initializeOrderLoading?classes.nonClickable:""}`}
                     onClick={() => {
-                        setActivePaymentMethod(payment_methods.JUSPAY);
-                        handleInitializaOrder();
+                        if(!initializeOrderLoading && activePaymentMethod !== payment_methods.JUSPAY) {
+                            setActivePaymentMethod(payment_methods.JUSPAY);
+                            handleInitializaOrder();
+                        }
                     }}
                 >
                     {/*<img className={classes.paymentImage} src={prepaid} alt="Prepaid"/>*/}

@@ -35,6 +35,9 @@ const useStyles = makeStyles({
         position: 'absolute',
         top: '8px',
         right: '8px',
+    },
+    nonClickable: {
+        cursor: "not-allowed !important"
     }
 });
 

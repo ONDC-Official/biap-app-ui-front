@@ -127,6 +127,20 @@ const useStyles = makeStyles({
     fontSize: "12px !important",
     fontWeight: "600 !important",
   },
+  summaryItemQuantityLabel: {
+    flex: 1,
+    fontSize: "12px !important",
+    fontWeight: "600 !important",
+  },
+  summaryItemQuantityValue: {
+    width: "120px !important",
+    textAlign: "right",
+    fontSize: "12px !important",
+    fontWeight: "600 !important",
+  },
+  marginBottom10: {
+    marginBottom: '10px !important'
+  },
   summaryCustomizationPriceValue: {
     color: "#A2A6B0 !important",
     width: "100px !important",
