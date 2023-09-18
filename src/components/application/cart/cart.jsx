@@ -135,9 +135,16 @@ export default function Cart() {
           if (productMaxQuantity) {
             if (updatedCartItem.item.quantity.count < productMaxQuantity.count) {
               updatedCartItem.item.quantity.count += 1;
+
+              let customisations = updatedCartItem.item.customisations;
+              customisations = customisations.map((c) => {
+                return { ...c, quantity: { ...c.quantity, count: c.quantity.count + 1 } };
+              });
+              updatedCartItem.item.customisations = customisations;
+
               updatedCartItem = updatedCartItem.item;
+
               const res = await putCall(url, updatedCartItem);
-              console.log("after update:", res);
               setLoading(false);
               getCartItems();
               fetchCartItems();
@@ -148,7 +155,6 @@ export default function Cart() {
             updatedCartItem.item.quantity.count += 1;
             updatedCartItem = updatedCartItem.item;
             const res = await putCall(url, updatedCartItem);
-            console.log("after update:", res);
             setLoading(false);
             getCartItems();
             fetchCartItems();
@@ -156,9 +162,15 @@ export default function Cart() {
         } else {
           if (updatedCartItem.item.quantity.count > 1) {
             updatedCartItem.item.quantity.count -= 1;
+
+            let customisations = updatedCartItem.item.customisations;
+            customisations = customisations.map((c) => {
+              return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
+            });
+            updatedCartItem.item.customisations = customisations;
+
             updatedCartItem = updatedCartItem.item;
             const res = await putCall(url, updatedCartItem);
-            console.log("after update:", res);
             setLoading(false);
             getCartItems();
             fetchCartItems();

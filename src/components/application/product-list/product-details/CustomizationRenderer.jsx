@@ -8,7 +8,13 @@ import Checkbox from "../../../common/Checkbox";
 import { createCustomizationAndGroupMapping, getCustomizationGroupsForProduct } from "./utils";
 
 const CustomizationRenderer = (props) => {
-  const { productPayload, customization_state, setCustomizationState, selectedCustomizations = null } = props;
+  const {
+    productPayload,
+    customization_state,
+    setCustomizationState,
+    selectedCustomizations = null,
+    setItemOutOfStock,
+  } = props;
 
   const classes = useStyles();
   const [isInitialized, setIsInitialized] = useState(false);
@@ -18,6 +24,9 @@ const CustomizationRenderer = (props) => {
 
   const [customizationToGroupMap, setCustomizationToGroupMap] = useState({});
   const [groupToCustomizationMap, setGroupToCustomizationMap] = useState({});
+
+  console.log("customizations", customizations);
+  console.log("customizationsGroup", customizationGroups);
 
   const formatCustomizationGroups = (customisation_groups) => {
     const formattedCustomizationGroups = customisation_groups?.map((group) => {
@@ -170,15 +179,22 @@ const CustomizationRenderer = (props) => {
 
   const findSelectedCustomizationForGroup = (group, childCustomizations) => {
     if (!group.isMandatory) return [];
+    let selected_groups = [];
     let defaultCustomization = childCustomizations.filter(
       (customization) => customization.isDefault && customization.inStock
     );
 
     if (defaultCustomization.length) {
-      return defaultCustomization;
+      selected_groups = defaultCustomization;
     } else {
-      return [childCustomizations.find((customization) => customization.inStock)];
+      selected_groups = childCustomizations.find((customization) => customization.inStock) || [];
     }
+
+    let is_item_out_of_stock = true;
+    if (selected_groups.length) is_item_out_of_stock = false;
+
+    setItemOutOfStock(is_item_out_of_stock);
+    return selected_groups;
   };
 
   const processGroup = (groupId, updatedCustomizationState1, selectedGroup, selectedOption) => {
@@ -207,21 +223,27 @@ const CustomizationRenderer = (props) => {
 
     let childGroups = [];
     if (currentGroup.id === selectedGroup.id) {
+      console.log("**1");
       let new_selected_options = [];
       // if option is there then remove it here
       if (!isMandatory && currentGroupOldState.selected.find((optn) => optn.id == selectedOption.id)) {
         new_selected_options = [...currentGroupOldState["selected"]].filter((item) => item.id != selectedOption.id);
         updatedCustomizationState1[groupId].selected = new_selected_options;
       } else {
-        // if option is not there then add it only if length is lenght is less than max Qty
+        console.log("**2");
+        // if option is not there then add it only if length is less than max Qty
         if (currentGroup.maxQuantity === 1) {
           childGroups = customizationToGroupMap[selectedOption.id];
           updatedCustomizationState1[groupId].selected = [selectedOption];
+          console.log("**3", childGroups, selectedOption);
         } else {
+          console.log("**4");
           if (currentGroup.maxQuantity > 1 && currentGroupOldState.selected.length < currentGroup.maxQuantity) {
+            console.log("**5");
             new_selected_options = [...currentGroupOldState["selected"], selectedOption];
             updatedCustomizationState1[groupId].selected = new_selected_options;
           } else {
+            console.log("**6");
             updatedCustomizationState1[groupId].selected = currentGroupOldState.selected;
           }
         }
@@ -233,6 +255,8 @@ const CustomizationRenderer = (props) => {
         updatedCustomizationState1[groupId],
         childCustomizations
       );
+
+      console.log("selecetd cus", selectedCustomization);
 
       updatedCustomizationState1[groupId].selected = selectedCustomization;
 
