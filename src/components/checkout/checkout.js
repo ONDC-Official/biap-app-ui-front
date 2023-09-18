@@ -1229,6 +1229,7 @@ const Checkout = () => {
   const [updatedCartItems, setUpdatedCartItems] = useState([]);
   const [productsQuote, setProductsQuote] = useState({
     providers: [],
+    isError: false,
     total_payable: 0,
   });
   const [initLoading, setInitLoading] = useState(false);
@@ -1241,6 +1242,7 @@ const Checkout = () => {
   const eventTimeOutRef = useRef([]);
   const [eventData, setEventData] = useState([]);
   const dispatch = useContext(ToastContext);
+
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -1266,8 +1268,11 @@ const Checkout = () => {
       }
 
       const cartList = JSON.parse(JSON.stringify(updatedCartItems));
+      console.log("updatedCartItems=====>", cartList)
+      console.log("cartItems=====>", cartItems)
       // check if any one order contains error
       let total_payable = 0;
+      let isAnyError = false;
       const quotes = updatedCartItems?.map((item, index) => {
         let { message, error } = item;
         let provider_payable = 0;
@@ -1289,20 +1294,48 @@ const Checkout = () => {
           provider.name = provided_by;
           let uuid = 0;
           const all_items = breakup?.map((break_up_item) => {
+            console.log("break_up_item=====>", break_up_item);
             const cartIndex = cartList.findIndex(
               (one) => one.id === break_up_item["@ondc/org/item_id"]
             );
             const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
-            let cartQuantity = cartItem ? cartItem?.quantity?.count : 0;
+            let findItemFromCartItems = null;
+            let isCustimization = false;
+            console.log("********************break_up_item=====>", break_up_item)
+            const findTag = break_up_item?.item?.tags.find((tag) => tag.code === "type");
+            if(findTag){
+              const findCust = findTag.list.find((listItem) => listItem.value === "customization");
+              if(findCust){
+                isCustimization = true
+              }else{}
+              cartItems.forEach((ci) => {
+                if(isCustimization){
+                  const cc = ci?.item?.customisations || [];
+                  cc.forEach((i) => {
+                    if(i.local_id === break_up_item["@ondc/org/item_id"]){
+                      findItemFromCartItems = i;
+                    }
+                  })
+                }else{
+                  if(ci?.item?.local_id === break_up_item["@ondc/org/item_id"]){
+                    findItemFromCartItems = ci?.item;
+                  }
+                }
+              });
+            }
+
+            let cartQuantity = findItemFromCartItems?findItemFromCartItems?.quantity?.count:cartItem ? cartItem?.quantity?.count : 0;
             let quantity = break_up_item["@ondc/org/item_quantity"]
               ? break_up_item["@ondc/org/item_quantity"]["count"]
               : 0;
             let textClass = "";
             let quantityMessage = "";
+            let isError = false;
             if (quantity === 0) {
               if (break_up_item["@ondc/org/title_type"] === "item") {
                 textClass = "text-error";
                 quantityMessage = "Out of stock";
+                isError = true;
 
                 if (cartIndex > -1) {
                   cartList.splice(cartIndex, 1);
@@ -1314,6 +1347,7 @@ const Checkout = () => {
                   ? "text-amber"
                   : "";
               quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
+              isError = true;
               if (cartItem) {
                 cartItem.quantity.count = quantity;
               }
@@ -1339,12 +1373,19 @@ const Checkout = () => {
               textClass,
               quantityMessage,
               uuid: uuid,
+              isError
             };
           });
 
           let items = {};
           let delivery = {};
+          let outOfStock = [];
+          console.log("all_items=====>", all_items)
           all_items.forEach((item) => {
+            if(item.isError){
+              outOfStock.push(item);
+              isAnyError = true;
+            }
             // for type item
             if (item.title_type === "item" && !item.isCustomization) {
               let key = item.parent_item_id || item.id;
@@ -1381,6 +1422,10 @@ const Checkout = () => {
                   title: item.quantity + " * Base Price",
                   value: item.price,
                 },
+                quantityMessage: item.quantityMessage,
+                textClass: item.textClass,
+                quantity: item.quantity,
+                cartQuantity: item.cartQuantity,
               };
             }
             if (item.title_type === "tax" && item.isCustomization) {
@@ -1446,6 +1491,7 @@ const Checkout = () => {
           });
           provider.items = items;
           provider.delivery = delivery;
+          provider.outOfStock = outOfStock;
         }
 
         if (error) {
@@ -1460,8 +1506,10 @@ const Checkout = () => {
       // setUpdateCartLoading(false);
       setProductsQuote({
         providers: quotes,
+        isError: isAnyError,
         total_payable: total_payable.toFixed(2),
       });
+      console.log("==========================================>", quotes)
     }
   }, [updatedCartItems]);
 
@@ -1894,6 +1942,84 @@ const Checkout = () => {
     return finalTotal;
   };
 
+  const renderOutofStockItems = (provider, pindex) => {
+    return (
+        <div key={`outof-stockpindex-${pindex}`}>
+          {
+            provider.error
+            ?(
+              <>
+                <div>
+                  <Typography
+                      variant="body1"
+                      className={`${classes.summaryItemLabel} text-error`}
+                  >
+                    Out of stock
+                  </Typography>
+                </div>
+                <div>
+                  <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}>
+                    <Typography
+                        variant="body1"
+                        className={classes.summaryItemQuantityLabel}
+                    >
+
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
+                    >
+                      Cart Quantity
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
+                    >
+                      Available Quantity
+                    </Typography>
+                  </div>
+                </div>
+                {
+                  provider.outOfStock.map((outOfStockItems, i) => (
+                    <div key={`outof-stock-item-index-${i}`}>
+                      <div>
+                        <div
+                            className={classes.summaryQuoteItemContainer}
+                            key={`quote-${i}-price`}
+                        >
+                          <Typography
+                              variant="body1"
+                              className={classes.summaryItemQuantityLabel}
+                          >
+                            {outOfStockItems?.title}
+                          </Typography>
+                          <Typography
+                              variant="body1"
+                              className={classes.summaryItemQuantityValue}
+                          >
+                            {`${outOfStockItems?.cartQuantity}`}
+                          </Typography>
+                          <Typography
+                              variant="body1"
+                              className={classes.summaryItemQuantityValue}
+                          >
+                            {`${outOfStockItems?.quantity}`}
+                          </Typography>
+                        </div>
+
+                      </div>
+                    </div>
+                  ))
+                }
+                <Box component={"div"} className={classes.divider}/>
+              </>
+            ):(
+              <></>
+            )
+          }
+        </div>
+    )
+  }
   const renderItems = (provider, pindex) => {
     return (
         <div key={`pindex-${pindex}`}>
@@ -2020,6 +2146,10 @@ const Checkout = () => {
                 <Typography variant="h4">Summary</Typography>
                 <Box component={"div"} className={classes.divider}/>
                 {productsQuote?.providers.map((provider, pindex) =>
+                    renderOutofStockItems(provider, pindex)
+                )}
+
+                {productsQuote?.providers.map((provider, pindex) =>
                     renderItems(provider, pindex)
                 )}
                 <div className={classes.summarySubtotalContainer}>
@@ -2063,7 +2193,7 @@ const Checkout = () => {
                     fullWidth
                     variant="contained"
                     disabled={
-                        confirmOrderLoading || initLoading || activeStep !== 2
+                        productsQuote.isError || confirmOrderLoading || initLoading || activeStep !== 2
                     }
                     onClick={() => {
                       const {productQuotes, successOrderIds} = JSON.parse(
