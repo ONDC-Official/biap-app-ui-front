@@ -1243,7 +1243,6 @@ const Checkout = () => {
   const [eventData, setEventData] = useState([]);
   const dispatch = useContext(ToastContext);
 
-
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -1268,8 +1267,8 @@ const Checkout = () => {
       }
 
       const cartList = JSON.parse(JSON.stringify(updatedCartItems));
-      console.log("updatedCartItems=====>", cartList)
-      console.log("cartItems=====>", cartItems)
+      console.log("updatedCartItems=====>", cartList);
+      console.log("cartItems=====>", cartItems);
       // check if any one order contains error
       let total_payable = 0;
       let isAnyError = false;
@@ -1301,30 +1300,44 @@ const Checkout = () => {
             const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
             let findItemFromCartItems = null;
             let isCustimization = false;
-            console.log("********************break_up_item=====>", break_up_item)
-            const findTag = break_up_item?.item?.tags.find((tag) => tag.code === "type");
-            if(findTag){
-              const findCust = findTag.list.find((listItem) => listItem.value === "customization");
-              if(findCust){
-                isCustimization = true
-              }else{}
+            console.log(
+              "********************break_up_item=====>",
+              break_up_item
+            );
+            const findTag = break_up_item?.item?.tags.find(
+              (tag) => tag.code === "type"
+            );
+            if (findTag) {
+              const findCust = findTag.list.find(
+                (listItem) => listItem.value === "customization"
+              );
+              if (findCust) {
+                isCustimization = true;
+              } else {
+              }
               cartItems.forEach((ci) => {
-                if(isCustimization){
+                if (isCustimization) {
                   const cc = ci?.item?.customisations || [];
                   cc.forEach((i) => {
-                    if(i.local_id === break_up_item["@ondc/org/item_id"]){
+                    if (i.local_id === break_up_item["@ondc/org/item_id"]) {
                       findItemFromCartItems = i;
                     }
-                  })
-                }else{
-                  if(ci?.item?.local_id === break_up_item["@ondc/org/item_id"]){
+                  });
+                } else {
+                  if (
+                    ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
+                  ) {
                     findItemFromCartItems = ci?.item;
                   }
                 }
               });
             }
 
-            let cartQuantity = findItemFromCartItems?findItemFromCartItems?.quantity?.count:cartItem ? cartItem?.quantity?.count : 0;
+            let cartQuantity = findItemFromCartItems
+              ? findItemFromCartItems?.quantity?.count
+              : cartItem
+              ? cartItem?.quantity?.count
+              : 0;
             let quantity = break_up_item["@ondc/org/item_quantity"]
               ? break_up_item["@ondc/org/item_quantity"]["count"]
               : 0;
@@ -1373,16 +1386,16 @@ const Checkout = () => {
               textClass,
               quantityMessage,
               uuid: uuid,
-              isError
+              isError,
             };
           });
 
           let items = {};
           let delivery = {};
           let outOfStock = [];
-          console.log("all_items=====>", all_items)
+          console.log("all_items=====>", all_items);
           all_items.forEach((item) => {
-            if(item.isError){
+            if (item.isError) {
               outOfStock.push(item);
               isAnyError = true;
             }
@@ -1509,7 +1522,7 @@ const Checkout = () => {
         isError: isAnyError,
         total_payable: total_payable.toFixed(2),
       });
-      console.log("==========================================>", quotes)
+      console.log("==========================================>", quotes);
     }
   }, [updatedCartItems]);
 
@@ -1825,24 +1838,24 @@ const Checkout = () => {
     let total = 0;
     providers.forEach((provider) => {
       const data = provider.delivery;
-      if(data.delivery){
-        total = total+parseInt(data.delivery.value);
+      if (data.delivery) {
+        total = total + parseInt(data.delivery.value);
       }
-      if(data.discount){
-        total = total+parseInt(data.discount.value);
+      if (data.discount) {
+        total = total + parseInt(data.discount.value);
       }
-      if(data.tax){
-        total = total+parseInt(data.tax.value);
+      if (data.tax) {
+        total = total + parseInt(data.tax.value);
       }
-      if(data.packing){
-        total = total+parseInt(data.packing.value);
+      if (data.packing) {
+        total = total + parseInt(data.packing.value);
       }
-      if(data.misc){
-        total = total+parseInt(data.misc.value);
+      if (data.misc) {
+        total = total + parseInt(data.misc.value);
       }
     });
     return total;
-  }
+  };
 
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
@@ -1928,173 +1941,169 @@ const Checkout = () => {
 
   const getItemsTotal = (providers) => {
     let finalTotal = 0;
-    if(providers){
+    if (providers) {
       providers.forEach((provider) => {
-        const items = Object.values(provider.items).filter((quote) => quote?.title !== "");
+        const items = Object.values(provider.items).filter(
+          (quote) => quote?.title !== ""
+        );
         items.forEach((item) => {
           finalTotal = finalTotal + parseInt(item.price.value);
           Object.values(item.customizations).forEach((custItem) => {
             finalTotal = finalTotal + parseInt(custItem.price.value);
-          })
-        })
-      })
+          });
+        });
+      });
     }
     return finalTotal;
   };
 
   const renderOutofStockItems = (provider, pindex) => {
     return (
-        <div key={`outof-stockpindex-${pindex}`}>
-          {
-            provider.error
-            ?(
-              <>
+      <div key={`outof-stockpindex-${pindex}`}>
+        {provider.error ? (
+          <>
+            <div>
+              <Typography
+                variant="body1"
+                className={`${classes.summaryItemLabel} text-error`}
+              >
+                Out of stock
+              </Typography>
+            </div>
+            <div>
+              <div
+                className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+              >
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemQuantityLabel}
+                ></Typography>
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemQuantityValue}
+                >
+                  Cart Quantity
+                </Typography>
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemQuantityValue}
+                >
+                  Available Quantity
+                </Typography>
+              </div>
+            </div>
+            {provider.outOfStock.map((outOfStockItems, i) => (
+              <div key={`outof-stock-item-index-${i}`}>
                 <div>
-                  <Typography
-                      variant="body1"
-                      className={`${classes.summaryItemLabel} text-error`}
+                  <div
+                    className={classes.summaryQuoteItemContainer}
+                    key={`quote-${i}-price`}
                   >
-                    Out of stock
-                  </Typography>
-                </div>
-                <div>
-                  <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}>
                     <Typography
-                        variant="body1"
-                        className={classes.summaryItemQuantityLabel}
+                      variant="body1"
+                      className={classes.summaryItemQuantityLabel}
                     >
-
+                      {outOfStockItems?.title}
                     </Typography>
                     <Typography
-                        variant="body1"
-                        className={classes.summaryItemQuantityValue}
+                      variant="body1"
+                      className={classes.summaryItemQuantityValue}
                     >
-                      Cart Quantity
+                      {`${outOfStockItems?.cartQuantity}`}
                     </Typography>
                     <Typography
-                        variant="body1"
-                        className={classes.summaryItemQuantityValue}
+                      variant="body1"
+                      className={classes.summaryItemQuantityValue}
                     >
-                      Available Quantity
+                      {`${outOfStockItems?.quantity}`}
                     </Typography>
                   </div>
                 </div>
-                {
-                  provider.outOfStock.map((outOfStockItems, i) => (
-                    <div key={`outof-stock-item-index-${i}`}>
-                      <div>
-                        <div
-                            className={classes.summaryQuoteItemContainer}
-                            key={`quote-${i}-price`}
-                        >
-                          <Typography
-                              variant="body1"
-                              className={classes.summaryItemQuantityLabel}
-                          >
-                            {outOfStockItems?.title}
-                          </Typography>
-                          <Typography
-                              variant="body1"
-                              className={classes.summaryItemQuantityValue}
-                          >
-                            {`${outOfStockItems?.cartQuantity}`}
-                          </Typography>
-                          <Typography
-                              variant="body1"
-                              className={classes.summaryItemQuantityValue}
-                          >
-                            {`${outOfStockItems?.quantity}`}
-                          </Typography>
-                        </div>
-
-                      </div>
-                    </div>
-                  ))
-                }
-                <Box component={"div"} className={classes.divider}/>
-              </>
-            ):(
-              <></>
-            )
-          }
-        </div>
-    )
-  }
+              </div>
+            ))}
+            <Box component={"div"} className={classes.divider} />
+          </>
+        ) : (
+          <></>
+        )}
+      </div>
+    );
+  };
   const renderItems = (provider, pindex) => {
     return (
-        <div key={`pindex-${pindex}`}>
-          {Object.values(provider.items)
-              .filter((quote) => quote?.title !== "")
-              .map((quote, qIndex) => (
-                  <div key={`quote-${qIndex}`}>
-                    <div
-                        className={classes.summaryQuoteItemContainer}
-                        key={`quote-${qIndex}-title`}
-                    >
-                      <Typography
-                          variant="body1"
-                          className={`${classes.summaryItemLabel} ${quote.textClass}`}
-                      >
-                        {quote?.title}
-                        <p className={`${styles.ordered_from} ${quote.textClass}`}>
-                          {quote.quantityMessage}
-                        </p>
-                      </Typography>
-                    </div>
-                    {renderItemDetails(quote)}
-                    {quote?.customizations && (
-                        <div key={`quote-${qIndex}-customizations`}>
-                          <div
-                              className={classes.summaryQuoteItemContainer}
-                              key={`quote-${qIndex}-customizations`}
-                          >
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemPriceLabel}
-                            >
-                              Customizations
-                            </Typography>
-                          </div>
-                          {Object.values(quote?.customizations).map(
-                              (customization, cIndex) => (
-                                  <div>
-                                    <div
-                                        className={classes.summaryQuoteItemContainer}
-                                        key={`quote-${qIndex}-customizations-${cIndex}`}
-                                    >
-                                      <Typography
-                                          variant="body1"
-                                          className={classes.summaryCustomizationLabel}
-                                      >
-                                        {customization.title}
-                                      </Typography>
-                                    </div>
-                                    {renderItemDetails(customization, cIndex, true)}
-                                  </div>
-                              )
-                          )}
-                        </div>
-                    )}
-                  </div>
-              ))}
-          {/*<div className={classes.summarySubtotalContainer}>*/}
-          {/*  <Typography variant="body2" className={classes.subTotalLabel}>*/}
-          {/*    Total*/}
-          {/*  </Typography>*/}
-          {/*  <Typography variant="body2" className={classes.subTotalValue}>*/}
-          {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
-          {/*  </Typography>*/}
-          {/*</div>*/}
-          {provider.error && (
-              <Typography
-                  variant="body1"
-                  color="error"
-                  className={classes.summaryItemLabel}
+      <div key={`pindex-${pindex}`}>
+        {Object.values(provider.items)
+          .filter((quote) => quote?.title !== "")
+          .map((quote, qIndex) => (
+            <div key={`quote-${qIndex}`}>
+              <div
+                className={classes.summaryQuoteItemContainer}
+                key={`quote-${qIndex}-title`}
               >
-                {provider.error}
-              </Typography>
-          )}
-        </div>
+                <Typography
+                  variant="body1"
+                  className={`${classes.summaryItemLabel} ${quote.textClass}`}
+                >
+                  {quote?.title}
+                  <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                    {quote.quantityMessage}
+                  </p>
+                </Typography>
+              </div>
+              {renderItemDetails(quote)}
+              {quote?.customizations && (
+                <div key={`quote-${qIndex}-customizations`}>
+                  <div
+                    className={classes.summaryQuoteItemContainer}
+                    key={`quote-${qIndex}-customizations`}
+                  >
+                    <Typography
+                      variant="body1"
+                      className={classes.summaryItemPriceLabel}
+                    >
+                      Customizations
+                    </Typography>
+                  </div>
+                  {Object.values(quote?.customizations).map(
+                    (customization, cIndex) => (
+                      <div>
+                        <div
+                          className={classes.summaryQuoteItemContainer}
+                          key={`quote-${qIndex}-customizations-${cIndex}`}
+                        >
+                          <Typography
+                            variant="body1"
+                            className={classes.summaryCustomizationLabel}
+                          >
+                            {customization.title}
+                          </Typography>
+                        </div>
+                        {renderItemDetails(customization, cIndex, true)}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        {/*<div className={classes.summarySubtotalContainer}>*/}
+        {/*  <Typography variant="body2" className={classes.subTotalLabel}>*/}
+        {/*    Total*/}
+        {/*  </Typography>*/}
+        {/*  <Typography variant="body2" className={classes.subTotalValue}>*/}
+        {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
+        {/*  </Typography>*/}
+        {/*</div>*/}
+        {provider.error && (
+          <Typography
+            variant="body1"
+            color="error"
+            className={classes.summaryItemLabel}
+          >
+            {provider.error}
+          </Typography>
+        )}
+      </div>
     );
   };
 
@@ -2102,135 +2111,142 @@ const Checkout = () => {
     return <Redirect to={"/application/cart"} />;
   }
   return (
-      <>
-        <div className={classes.header}>
-          <Typography
-              component={Link}
-              underline="hover"
-              color="primary.main"
-              variant="body1"
-              className={classes.headerTypo}
-              to={`/application`}
-          >
-            BACK TO SHOP
-          </Typography>
-        </div>
-        <div className={classes.bodyContainer}>
-          <Grid container spacing={6}>
-            <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
-              <Stepper
-                  activeStep={activeStep}
-                  orientation="vertical"
-                  connector={false}
-              >
-                {steps.map((step, index) => (
-                    <Step key={step.label} className={classes.stepRoot}>
-                      <StepLabel className={classes.stepLabel}>
-                        {renderStepLabel(step, index)}
-                      </StepLabel>
-                      <StepContent
-                          className={
-                            activeStep === index
-                                ? classes.stepContent
-                                : classes.stepContentHidden
-                          }
-                      >
-                        {renderStepContent(step, index)}
-                      </StepContent>
-                    </Step>
-                ))}
-              </Stepper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-              <Card className={classes.summaryCard}>
-                <Typography variant="h4">Summary</Typography>
-                <Box component={"div"} className={classes.divider}/>
-                {productsQuote?.providers.map((provider, pindex) =>
-                    renderOutofStockItems(provider, pindex)
-                )}
-
-                {productsQuote?.providers.map((provider, pindex) =>
-                    renderItems(provider, pindex)
-                )}
-                <div className={classes.summarySubtotalContainer}>
-                  <Typography variant="body2" className={classes.subTotalLabel}>
-                    Total
-                  </Typography>
-                  <Typography variant="body2" className={classes.subTotalValue}>
-                    {`₹${getItemsTotal(productsQuote?.providers)}`}
-                  </Typography>
-                </div>
-                <Box component={"div"} className={classes.divider}/>
-                {productsQuote?.providers.map((provider, pindex) => {
-                  return (
-                      <div key={`pindex-${pindex}`}>
-                        <div key={`d-pindex-${pindex}`}>
-                          {renderDeliveryCharges(provider.delivery)}
-                        </div>
-                      </div>
-                  )
-                })}
-                <div className={classes.summarySubtotalContainer}>
-                  <Typography variant="body2" className={classes.subTotalLabel}>
-                    Total
-                  </Typography>
-                  <Typography variant="body2" className={classes.subTotalValue}>
-                    {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
-                  </Typography>
-                </div>
-                <Box component={"div"} className={classes.orderTotalDivider}/>
-                <div className={classes.summaryItemContainer}>
-                  <Typography variant="body" className={classes.totalLabel}>
-                    Order Total
-                  </Typography>
-                  <Typography variant="body" className={classes.totalValue}>
-                    {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
-                    {`₹${productsQuote?.total_payable}`}
-                  </Typography>
-                </div>
-                <Button
-                    className={classes.proceedToBuy}
-                    fullWidth
-                    variant="contained"
-                    disabled={
-                        productsQuote.isError || confirmOrderLoading || initLoading || activeStep !== 2
+    <>
+      <div className={classes.header}>
+        <Typography
+          component={Link}
+          underline="hover"
+          color="primary.main"
+          variant="body1"
+          className={classes.headerTypo}
+          to={`/application`}
+        >
+          BACK TO SHOP
+        </Typography>
+      </div>
+      <div className={classes.bodyContainer}>
+        <Grid container spacing={6}>
+          <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+            <Stepper
+              activeStep={activeStep}
+              orientation="vertical"
+              connector={false}
+            >
+              {steps.map((step, index) => (
+                <Step key={step.label} className={classes.stepRoot}>
+                  <StepLabel className={classes.stepLabel}>
+                    {renderStepLabel(step, index)}
+                  </StepLabel>
+                  <StepContent
+                    className={
+                      activeStep === index
+                        ? classes.stepContent
+                        : classes.stepContentHidden
                     }
-                    onClick={() => {
-                      const {productQuotes, successOrderIds} = JSON.parse(
-                          // getValueFromCookie("checkout_details") || "{}"
-                          localStorage.getItem("checkout_details") || "{}"
-                      );
-                      setConfirmOrderLoading(true);
-                      let c = cartItems.map((item) => {
-                        return item.item;
-                      });
-                      if (activePaymentMethod === payment_methods.JUSPAY) {
-                        // setTogglePaymentGateway(true);
-                        // setLoadingSdkForPayment(true);
-                        // initiateSDK();
-                        const request_object = constructQouteObject(
-                            c.filter(({provider}) =>
-                                successOrderIds.includes(provider.local_id.toString())
-                            )
-                        );
-                        confirmOrder(request_object[0], payment_methods.JUSPAY);
-                      } else {
-                        const request_object = constructQouteObject(
-                            c.filter(({provider}) =>
-                                successOrderIds.includes(provider.local_id.toString())
-                            )
-                        );
-                        confirmOrder(request_object[0], payment_methods.COD);
-                      }
-                    }}
-                >
-                  {confirmOrderLoading || initLoading ? <Loading/> : "Proceed to Buy"}
-                </Button>
-              </Card>
-            </Grid>
+                  >
+                    {renderStepContent(step, index)}
+                  </StepContent>
+                </Step>
+              ))}
+            </Stepper>
           </Grid>
-        </div>
-      </>
+          <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+            <Card className={classes.summaryCard}>
+              <Typography variant="h4">Summary</Typography>
+              <Box component={"div"} className={classes.divider} />
+              {productsQuote?.providers.map((provider, pindex) =>
+                renderOutofStockItems(provider, pindex)
+              )}
+
+              {productsQuote?.providers.map((provider, pindex) =>
+                renderItems(provider, pindex)
+              )}
+              <div className={classes.summarySubtotalContainer}>
+                <Typography variant="body2" className={classes.subTotalLabel}>
+                  Total
+                </Typography>
+                <Typography variant="body2" className={classes.subTotalValue}>
+                  {`₹${getItemsTotal(productsQuote?.providers)}`}
+                </Typography>
+              </div>
+              <Box component={"div"} className={classes.divider} />
+              {productsQuote?.providers.map((provider, pindex) => {
+                return (
+                  <div key={`pindex-${pindex}`}>
+                    <div key={`d-pindex-${pindex}`}>
+                      {renderDeliveryCharges(provider.delivery)}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className={classes.summarySubtotalContainer}>
+                <Typography variant="body2" className={classes.subTotalLabel}>
+                  Total
+                </Typography>
+                <Typography variant="body2" className={classes.subTotalValue}>
+                  {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
+                </Typography>
+              </div>
+              <Box component={"div"} className={classes.orderTotalDivider} />
+              <div className={classes.summaryItemContainer}>
+                <Typography variant="body" className={classes.totalLabel}>
+                  Order Total
+                </Typography>
+                <Typography variant="body" className={classes.totalValue}>
+                  {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
+                  {`₹${productsQuote?.total_payable}`}
+                </Typography>
+              </div>
+              <Button
+                className={classes.proceedToBuy}
+                fullWidth
+                variant="contained"
+                disabled={
+                  productsQuote.isError ||
+                  confirmOrderLoading ||
+                  initLoading ||
+                  activeStep !== 2
+                }
+                onClick={() => {
+                  const { productQuotes, successOrderIds } = JSON.parse(
+                    // getValueFromCookie("checkout_details") || "{}"
+                    localStorage.getItem("checkout_details") || "{}"
+                  );
+                  setConfirmOrderLoading(true);
+                  let c = cartItems.map((item) => {
+                    return item.item;
+                  });
+                  if (activePaymentMethod === payment_methods.JUSPAY) {
+                    // setTogglePaymentGateway(true);
+                    // setLoadingSdkForPayment(true);
+                    // initiateSDK();
+                    const request_object = constructQouteObject(
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
+                    );
+                    confirmOrder(request_object[0], payment_methods.JUSPAY);
+                  } else {
+                    const request_object = constructQouteObject(
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
+                    );
+                    confirmOrder(request_object[0], payment_methods.COD);
+                  }
+                }}
+              >
+                {confirmOrderLoading || initLoading ? (
+                  <Loading />
+                ) : (
+                  "Proceed to Buy"
+                )}
+              </Button>
+            </Card>
+          </Grid>
+        </Grid>
+      </div>
+    </>
   );
 };
 

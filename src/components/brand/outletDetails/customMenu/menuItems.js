@@ -27,6 +27,7 @@ import { getCall, postCall } from "../../../../api/axios";
 import {
   formatCustomizationGroups,
   formatCustomizations,
+  hasCustomizations,
   initializeCustomizationState,
 } from "../../../application/product-list/product-details/utils";
 import { CartContext } from "../../../../context/cartContext";
@@ -47,6 +48,7 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
   const { fetchCartItems } = useContext(CartContext);
 
   const [customizationPrices, setCustomizationPrices] = useState(0);
+  const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -177,10 +179,10 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
         ...productPayload.item_details,
       },
       customisations,
-      hasCustomisations: true,
+      hasCustomisations: hasCustomizations(productPayload) ? true : false,
     };
 
-    console.log("payload", payload);
+    console.log("payload**", payload);
 
     postCall(url, payload)
       .then(() => {
@@ -263,7 +265,9 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
                 productPayload={productPayload}
                 customization_state={customization_state}
                 setCustomizationState={setCustomizationState}
+                setItemOutOfStock={setItemOutOfStock}
               />
+
               <Grid container sx={{ marginTop: 4 }}>
                 <Grid container alignItems="center" justifyContent="space-around" xs={3} className={classes.qty}>
                   <RemoveIcon
@@ -278,7 +282,12 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
                   </Typography>
                   <AddIcon fontSize="small" className={classes.qtyIcon} onClick={() => setItemQty(itemQty + 1)} />
                 </Grid>
-                <Button variant="contained" sx={{ flex: 1 }} onClick={() => addToCart(productPayload)}>
+                <Button
+                  disabled={itemOutOfStock}
+                  variant="contained"
+                  sx={{ flex: 1 }}
+                  onClick={() => addToCart(productPayload)}
+                >
                   Add Item Total- ₹{(productPayload?.item_details?.price.value + customizationPrices) * itemQty}{" "}
                 </Button>
               </Grid>

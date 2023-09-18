@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import useStyles from "../product-list/product-details/style";
@@ -24,6 +24,7 @@ const EditCustomizations = (props) => {
   const { fetchCartItems } = useContext(CartContext);
   let user = {};
   const userCookie = getValueFromCookie("user");
+  const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
   if (userCookie) {
     try {
@@ -192,7 +193,8 @@ const EditCustomizations = (props) => {
             productPayload={productPayload}
             customization_state={customization_state}
             setCustomizationState={setCustomizationState}
-            selectedCustomizations={currentCartItem?.item?.customisations}
+            setItemOutOfStock={setItemOutOfStock}
+            isEditFlow={true}
           />
         </div>
       </Grid>
@@ -202,6 +204,7 @@ const EditCustomizations = (props) => {
           variant="outlined"
           sx={{ marginRight: 1.4 }}
           onClick={() => history.push(`/application/products/${productPayload.id}`)}
+          disabled={itemOutOfStock}
         >
           View Details
         </Button>
@@ -211,6 +214,7 @@ const EditCustomizations = (props) => {
           onClick={() => {
             updateCustomizations();
           }}
+          disabled={itemOutOfStock}
         >
           Save
         </Button>
