@@ -2094,7 +2094,7 @@ const Checkout = () => {
                       }
                     }}
                 >
-                  {confirmOrderLoading ? <Loading/> : "Proceed to Buy"}
+                  {confirmOrderLoading || initLoading ? <Loading/> : "Proceed to Buy"}
                 </Button>
               </Card>
             </Grid>
