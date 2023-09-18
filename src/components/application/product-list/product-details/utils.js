@@ -50,6 +50,12 @@ export const formatCustomizationGroups = (customisation_groups) => {
   return formattedCustomizationGroups;
 };
 
+export const getCustomizationGroupsForProduct = (allGroups, ids) => {
+  return allGroups.filter((g) => {
+    return ids.includes(g.local_id);
+  });
+};
+
 export const initializeCustomizationState_ = async (customizationGroups, customizations, customization_state) => {
   let firstGroup = null;
   for (const group of customizationGroups) {
