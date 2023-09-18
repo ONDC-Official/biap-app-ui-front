@@ -15,6 +15,10 @@ const useStyles = makeStyles({
             display: 'none'
         }
     },
+    paginationActionContainer:{
+        display: 'flex',
+        gap: '25px',
+    },
     brandCard: {
         cursor: 'pointer',
         height: '171px !important',

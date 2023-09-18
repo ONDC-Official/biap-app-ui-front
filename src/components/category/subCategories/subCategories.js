@@ -70,11 +70,14 @@ const SubCategories = () => {
 
     useEffect(() => {
         if(categoryName){
+            setPage(0)
             const options = PRODUCT_SUBCATEGORY[categoryName];
             setSubCatList(options || []);
         }
     }, [categoryName, deliveryAddressLocation]);
 
+    const rowsPerPage = 10;
+    const totalPageCount =  Math.ceil(subCatList.length / rowsPerPage);
     return (
         <Grid container spacing={3} className={classes.subCatContainerMain}>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -82,69 +85,47 @@ const SubCategories = () => {
                     Shop By Category
                 </Typography>
             </Grid>
-            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.subCatContainer}>
-                <Pagination
-                    count={subCatList.length}
-                    page={page}
-                    className={classes.categoriesContainer}
-                    boundaryCount={4}
-                    onChange={(event, page) => {
-                        setPage(page);
-                    }}
-                    renderItem={(item) => {
-                        console.log("item.type=====>", item.type)
-                        if(item.type === "page"){
-                            const subCatIndex = item.page - 1;
-                            const subCat = subCatList[subCatIndex];
-                            return (
-                                <SubCaregoryCard
-                                    data={subCat}
-                                    isActive={subCatIndex === activeSubCatIndex}
-                                    onMouseOver={() => {
-                                        setPage(subCatIndex+1);
-                                        setActiveSubCatIndex(subCatIndex);
-                                    }}
-                                />
-                            )
-                        }else if(item.type === "next"){
-                            return (
-                                <IconButton
-                                    color="inherit" className={classes.actionButton}
-                                    onClick={() => {
-                                        setPage(item.page+1)
-                                        setActiveSubCatIndex(activeSubCatIndex+1)
-                                    }}
-                                    disabled={subCatList.length === item.page}
-                                >
-                                    <NextIcon />
-                                </IconButton>
-                            )
-                        }else if(item.type === "previous"){
-                            return (
-                                <div className={classes.previousIconContainer}>
-                                    <div style={{margin: 'auto'}}>
-                                        <IconButton
-                                            color="inherit" className={classes.actionButton}
-                                            onClick={() => {
-                                                setPage(item.page-1)
-                                                setActiveSubCatIndex(activeSubCatIndex-1)
-                                            }}
-                                            disabled={item.page === -1}
-                                        >
-                                            <PreviousIcon />
-                                        </IconButton>
-                                    </div>
-                                </div>
-                            )
-                        }else{
-                            return (
-                                <PaginationItem
-                                    {...item}
-                                />
-                            )
-                        }
-                    }}
-                />
+            <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
+                <div style={{margin: 'auto'}}>
+                    <IconButton
+                        color="inherit" className={classes.actionButton}
+                        onClick={() => {
+                            setPage(page-1)
+                            // setActiveSubCatIndex(activeSubCatIndex-1)
+                        }}
+                        disabled={page === 0}
+                    >
+                        <PreviousIcon />
+                    </IconButton>
+                </div>
+            </Grid>
+            <Grid item xs={12} sm={12} md={10} lg={10} xl={10} className={classes.subCatContainer}>
+                {
+                    subCatList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((subCat, subCatIndex) => (
+                        <SubCaregoryCard
+                            key={`sub-cat-index-${subCatIndex}`}
+                            data={subCat}
+                            // isActive={subCatIndex === activeSubCatIndex}
+                            onMouseOver={() => {
+                                setActiveSubCatIndex(subCatIndex);
+                            }}
+                        />
+                    ))
+                }
+            </Grid>
+            <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
+                <div style={{margin: 'auto'}}>
+                    <IconButton
+                        color="inherit" className={classes.actionButton}
+                        onClick={() => {
+                            setPage(page+1)
+                            // setActiveSubCatIndex(activeSubCatIndex+1)
+                        }}
+                        disabled={page === (totalPageCount-1)}
+                    >
+                        <NextIcon />
+                    </IconButton>
+                </div>
             </Grid>
         </Grid>
     )

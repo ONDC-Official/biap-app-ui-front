@@ -10,17 +10,21 @@ const useStyles = makeStyles({
     subCatContainer: {
         display: 'flex',
         gap: '25px',
-        overflow: 'auto',
+        // overflow: 'auto',
         paddingBottom: '10px',
-        '&::-webkit-scrollbar': {
-            display: 'none'
-            // height: '8px',
-            // scrollbarColor: `${palette.primary.main} !important`
-        },
+        // '&::-webkit-scrollbar': {
+        //     // display: 'none',
+        //     height: '8px',
+        //     scrollbarColor: `${palette.primary.main} !important`
+        // },
         // '&::-webkit-scrollbar-thumb': {
         //     background: `${palette.primary.main} !important`
         // },
 
+    },
+    paginationActionContainer:{
+        display: 'flex',
+        gap: '25px',
     },
     subCatCard: {
         cursor: 'pointer',
