@@ -1256,275 +1256,285 @@ const Checkout = () => {
   }, []);
 
   useEffect(() => {
-    if (updatedCartItems.length > 0) {
-      // fetch request object length and compare it with the response length
-      let c = cartItems.map((item) => {
-        return item.item;
-      });
-      const requestObject = constructQouteObject(c);
-      if (requestObject.length === updatedCartItems.length) {
-        // setToggleInit(true);
-      }
+    try {
+      if (updatedCartItems.length > 0) {
+        // fetch request object length and compare it with the response length
+        let c = cartItems.map((item) => {
+          return item.item;
+        });
+        const requestObject = constructQouteObject(c);
+        if (requestObject.length === updatedCartItems.length) {
+          // setToggleInit(true);
+        }
 
-      const cartList = JSON.parse(JSON.stringify(updatedCartItems));
-      console.log("updatedCartItems=====>", cartList);
-      console.log("cartItems=====>", cartItems);
-      // check if any one order contains error
-      let total_payable = 0;
-      let isAnyError = false;
-      const quotes = updatedCartItems?.map((item, index) => {
-        let { message, error } = item;
-        let provider_payable = 0;
-        const provider = {
-          products: [],
-          total_payable: 0,
-          name: "",
-          error: null,
-        };
-        // else generate quote of it
-        if (message) {
-          //          message = m2;
+        const cartList = JSON.parse(JSON.stringify(updatedCartItems));
+        console.log("updatedCartItems=====>", cartList);
+        console.log("cartItems=====>", cartItems);
+        // check if any one order contains error
+        let total_payable = 0;
+        let isAnyError = false;
+        const quotes = updatedCartItems?.map((item, index) => {
+          let { message, error } = item;
+          let provider_payable = 0;
+          const provider = {
+            products: [],
+            total_payable: 0,
+            name: "",
+            error: null,
+          };
+          // else generate quote of it
+          if (message) {
+            //          message = m2;
 
-          if (message?.quote?.quote?.price?.value) {
-            provider_payable += Number(message?.quote?.quote?.price?.value);
-          }
-          const breakup = message?.quote?.quote?.breakup;
-          const provided_by = message?.quote?.provider?.descriptor?.name;
-          provider.name = provided_by;
-          let uuid = 0;
-          const all_items = breakup?.map((break_up_item) => {
-            console.log("break_up_item=====>", break_up_item);
-            const cartIndex = cartList.findIndex(
-              (one) => one.id === break_up_item["@ondc/org/item_id"]
-            );
-            const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
-            let findItemFromCartItems = null;
-            let isCustimization = false;
-            console.log(
-              "********************break_up_item=====>",
-              break_up_item
-            );
-            const findTag = break_up_item?.item?.tags.find(
-              (tag) => tag.code === "type"
-            );
-            if (findTag) {
-              const findCust = findTag.list.find(
-                (listItem) => listItem.value === "customization"
+            if (message?.quote?.quote?.price?.value) {
+              provider_payable += Number(message?.quote?.quote?.price?.value);
+            }
+            const breakup = message?.quote?.quote?.breakup;
+            const provided_by = message?.quote?.provider?.descriptor?.name;
+            provider.name = provided_by;
+            let uuid = 0;
+            const all_items = breakup?.map((break_up_item) => {
+              console.log("break_up_item=====>", break_up_item);
+              const cartIndex = cartList.findIndex(
+                (one) => one.id === break_up_item["@ondc/org/item_id"]
               );
-              if (findCust) {
-                isCustimization = true;
-              } else {
-              }
-              cartItems.forEach((ci) => {
-                if (isCustimization) {
-                  const cc = ci?.item?.customisations || [];
-                  cc.forEach((i) => {
-                    if (i.local_id === break_up_item["@ondc/org/item_id"]) {
-                      findItemFromCartItems = i;
-                    }
-                  });
+              const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
+              let findItemFromCartItems = null;
+              let isCustimization = false;
+              console.log(
+                "********************break_up_item=====>",
+                break_up_item
+              );
+              const findTag = break_up_item?.item?.tags.find(
+                (tag) => tag.code === "type"
+              );
+              if (findTag) {
+                const findCust = findTag.list.find(
+                  (listItem) => listItem.value === "customization"
+                );
+                if (findCust) {
+                  isCustimization = true;
                 } else {
-                  if (
-                    ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
-                  ) {
-                    findItemFromCartItems = ci?.item;
+                }
+                cartItems.forEach((ci) => {
+                  if (isCustimization) {
+                    const cc = ci?.item?.customisations || [];
+                    cc.forEach((i) => {
+                      if (i.local_id === break_up_item["@ondc/org/item_id"]) {
+                        findItemFromCartItems = i;
+                      }
+                    });
+                  } else {
+                    if (
+                      ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
+                    ) {
+                      findItemFromCartItems = ci?.item;
+                    }
+                  }
+                });
+              }
+
+              let cartQuantity = findItemFromCartItems
+                ? findItemFromCartItems?.quantity?.count
+                : cartItem
+                ? cartItem?.quantity?.count
+                : 0;
+              let quantity = break_up_item["@ondc/org/item_quantity"]
+                ? break_up_item["@ondc/org/item_quantity"]["count"]
+                : 0;
+              let textClass = "";
+              let quantityMessage = "";
+              let isError = false;
+              if (quantity === 0) {
+                if (break_up_item["@ondc/org/title_type"] === "item") {
+                  textClass = "text-error";
+                  quantityMessage = "Out of stock";
+                  isError = true;
+
+                  if (cartIndex > -1) {
+                    cartList.splice(cartIndex, 1);
                   }
                 }
-              });
-            }
-
-            let cartQuantity = findItemFromCartItems
-              ? findItemFromCartItems?.quantity?.count
-              : cartItem
-              ? cartItem?.quantity?.count
-              : 0;
-            let quantity = break_up_item["@ondc/org/item_quantity"]
-              ? break_up_item["@ondc/org/item_quantity"]["count"]
-              : 0;
-            let textClass = "";
-            let quantityMessage = "";
-            let isError = false;
-            if (quantity === 0) {
-              if (break_up_item["@ondc/org/title_type"] === "item") {
-                textClass = "text-error";
-                quantityMessage = "Out of stock";
+              } else if (quantity !== cartQuantity) {
+                textClass =
+                  break_up_item["@ondc/org/title_type"] === "item"
+                    ? "text-amber"
+                    : "";
+                quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
                 isError = true;
-
-                if (cartIndex > -1) {
-                  cartList.splice(cartIndex, 1);
+                if (cartItem) {
+                  cartItem.quantity.count = quantity;
                 }
+              } else {
+                quantityMessage = `Quantity: ${quantity}`;
               }
-            } else if (quantity !== cartQuantity) {
-              textClass =
-                break_up_item["@ondc/org/title_type"] === "item"
-                  ? "text-amber"
-                  : "";
-              quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
-              isError = true;
-              if (cartItem) {
-                cartItem.quantity.count = quantity;
+
+              if (error && error.code === "30009") {
+                cartList.splice(cartIndex, 1);
               }
-            } else {
-              quantityMessage = `Quantity: ${quantity}`;
-            }
-
-            if (error && error.code === "30009") {
-              cartList.splice(cartIndex, 1);
-            }
-            uuid = uuid + 1;
-            return {
-              id: break_up_item["@ondc/org/item_id"],
-              title: break_up_item?.title,
-              title_type: break_up_item["@ondc/org/title_type"],
-              isCustomization: isItemCustomization(break_up_item?.item?.tags),
-              isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
-              parent_item_id: break_up_item?.item?.parent_item_id,
-              price: Number(break_up_item.price?.value)?.toFixed(2),
-              cartQuantity,
-              quantity,
-              provided_by,
-              textClass,
-              quantityMessage,
-              uuid: uuid,
-              isError,
-            };
-          });
-
-          let items = {};
-          let delivery = {};
-          let outOfStock = [];
-          console.log("all_items=====>", all_items);
-          all_items.forEach((item) => {
-            if (item.isError) {
-              outOfStock.push(item);
-              isAnyError = true;
-            }
-            // for type item
-            if (item.title_type === "item" && !item.isCustomization) {
-              let key = item.parent_item_id || item.id;
-              let price = {
-                title: item.quantity + " * Base Price",
-                value: item.price,
+              uuid = uuid + 1;
+              return {
+                id: break_up_item["@ondc/org/item_id"],
+                title: break_up_item?.title,
+                title_type: break_up_item["@ondc/org/title_type"],
+                isCustomization: isItemCustomization(break_up_item?.item?.tags),
+                isDelivery:
+                  break_up_item["@ondc/org/title_type"] === "delivery",
+                parent_item_id: break_up_item?.item?.parent_item_id,
+                price: Number(break_up_item.price?.value)?.toFixed(2),
+                cartQuantity,
+                quantity,
+                provided_by,
+                textClass,
+                quantityMessage,
+                uuid: uuid,
+                isError,
               };
-              items[key] = { title: item.title, price: price };
-            }
-            if (item.title_type === "tax" && !item.isCustomization) {
-              let key = item.parent_item_id || item.id;
-              items[key] = items[key] || {};
-              items[key]["tax"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount" && !item.isCustomization) {
-              let key = item.parent_item_id || item.id;
-              items[key] = items[key] || {};
-              items[key]["discount"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
+            });
 
-            //for customizations
-            if (item.title_type === "item" && item.isCustomization) {
-              let key = item.parent_item_id;
-              items[key]["customizations"] = items[key]["customizations"] || {};
-              items[key]["customizations"][item.id] = {
-                title: item.title,
-                price: {
+            let items = {};
+            let delivery = {};
+            let outOfStock = [];
+            console.log("all_items=====>", all_items);
+            all_items.forEach((item) => {
+              if (item.isError) {
+                outOfStock.push(item);
+                isAnyError = true;
+              }
+              // for type item
+              if (item.title_type === "item" && !item.isCustomization) {
+                let key = item.parent_item_id || item.id;
+                let price = {
                   title: item.quantity + " * Base Price",
                   value: item.price,
-                },
-                quantityMessage: item.quantityMessage,
-                textClass: item.textClass,
-                quantity: item.quantity,
-                cartQuantity: item.cartQuantity,
-              };
-            }
-            if (item.title_type === "tax" && item.isCustomization) {
-              let key = item.parent_item_id;
-              items[key]["customizations"][item.id] =
-                items[key]["customizations"][item.id] || {};
-              items[key]["customizations"][item.id]["tax"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount" && item.isCustomization) {
-              let key = item.parent_item_id;
-              items[key]["customizations"][item.id] =
-                items[key]["customizations"][item.id] || {};
-              items[key]["customizations"][item.id]["discount"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            //for delivery
-            if (item.title_type === "delivery") {
-              delivery["delivery"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount_f") {
-              delivery["discount"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "tax_f") {
-              delivery["tax"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "packing") {
-              delivery["packing"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-            if (item.title_type === "discount") {
-              if (item.isCustomization) {
-                let id = item.parent_item_id;
-              } else {
-                let id = item.id;
-                items[id]["discount"] = {
+                };
+                items[key] = { title: item.title, price: price };
+              }
+              if (item.title_type === "tax" && !item.isCustomization) {
+                let key = item.parent_item_id || item.id;
+                items[key] = items[key] || {};
+                items[key]["tax"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-            }
-            if (item.title_type === "misc") {
-              delivery["misc"] = {
-                title: item.title,
-                value: item.price,
-              };
-            }
-          });
-          provider.items = items;
-          provider.delivery = delivery;
-          provider.outOfStock = outOfStock;
-        }
+              if (item.title_type === "discount" && !item.isCustomization) {
+                let key = item.parent_item_id || item.id;
+                items[key] = items[key] || {};
+                items[key]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
 
-        if (error) {
-          provider.error = error.message;
-        }
+              //for customizations
+              if (item.title_type === "item" && item.isCustomization) {
+                let key = item.parent_item_id;
+                items[key]["customizations"] =
+                  items[key]["customizations"] || {};
+                items[key]["customizations"][item.id] = {
+                  title: item.title,
+                  price: {
+                    title: item.quantity + " * Base Price",
+                    value: item.price,
+                  },
+                  quantityMessage: item.quantityMessage,
+                  textClass: item.textClass,
+                  quantity: item.quantity,
+                  cartQuantity: item.cartQuantity,
+                };
+              }
+              if (item.title_type === "tax" && item.isCustomization) {
+                let key = item.parent_item_id;
+                items[key]["customizations"][item.id] =
+                  items[key]["customizations"][item.id] || {};
+                items[key]["customizations"][item.id]["tax"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "discount" && item.isCustomization) {
+                let key = item.parent_item_id;
+                items[key]["customizations"][item.id] =
+                  items[key]["customizations"][item.id] || {};
+                items[key]["customizations"][item.id]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              //for delivery
+              if (item.title_type === "delivery") {
+                delivery["delivery"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "discount_f") {
+                delivery["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "tax_f") {
+                delivery["tax"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "packing") {
+                delivery["packing"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+              if (item.title_type === "discount") {
+                if (item.isCustomization) {
+                  let id = item.parent_item_id;
+                } else {
+                  let id = item.id;
+                  items[id]["discount"] = {
+                    title: item.title,
+                    value: item.price,
+                  };
+                }
+              }
+              if (item.title_type === "misc") {
+                delivery["misc"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+            });
+            provider.items = items;
+            provider.delivery = delivery;
+            provider.outOfStock = outOfStock;
+          }
 
-        total_payable += provider_payable;
-        provider.total_payable = provider_payable;
-        return provider;
-      });
-      // setGetQuoteLoading(false);
-      // setUpdateCartLoading(false);
-      setProductsQuote({
-        providers: quotes,
-        isError: isAnyError,
-        total_payable: total_payable.toFixed(2),
-      });
-      console.log("==========================================>", quotes);
+          if (error) {
+            provider.error = error.message;
+          }
+
+          total_payable += provider_payable;
+          provider.total_payable = provider_payable;
+          return provider;
+        });
+        // setGetQuoteLoading(false);
+        // setUpdateCartLoading(false);
+        setProductsQuote({
+          providers: quotes,
+          isError: isAnyError,
+          total_payable: total_payable.toFixed(2),
+        });
+        console.log("==========================================>", quotes);
+      }
+    } catch (err) {
+      showQuoteError();
     }
   }, [updatedCartItems]);
+
+  const showQuoteError = () => {
+    dispatchError("There is issue with quote from seller side! Please check!");
+  };
 
   const isItemCustomization = (tags) => {
     let isCustomization = false;
@@ -2109,6 +2119,109 @@ const Checkout = () => {
     );
   };
 
+  const renderQuote = () => {
+    try {
+      return (
+        <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+          <Card className={classes.summaryCard}>
+            <Typography variant="h4">Summary</Typography>
+            <Box component={"div"} className={classes.divider} />
+            {productsQuote?.providers.map((provider, pindex) =>
+              renderOutofStockItems(provider, pindex)
+            )}
+
+            {productsQuote?.providers.map((provider, pindex) =>
+              renderItems(provider, pindex)
+            )}
+            <div className={classes.summarySubtotalContainer}>
+              <Typography variant="body2" className={classes.subTotalLabel}>
+                Total
+              </Typography>
+              <Typography variant="body2" className={classes.subTotalValue}>
+                {`₹${getItemsTotal(productsQuote?.providers)}`}
+              </Typography>
+            </div>
+            <Box component={"div"} className={classes.divider} />
+            {productsQuote?.providers.map((provider, pindex) => {
+              return (
+                <div key={`pindex-${pindex}`}>
+                  <div key={`d-pindex-${pindex}`}>
+                    {renderDeliveryCharges(provider.delivery)}
+                  </div>
+                </div>
+              );
+            })}
+            <div className={classes.summarySubtotalContainer}>
+              <Typography variant="body2" className={classes.subTotalLabel}>
+                Total
+              </Typography>
+              <Typography variant="body2" className={classes.subTotalValue}>
+                {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
+              </Typography>
+            </div>
+            <Box component={"div"} className={classes.orderTotalDivider} />
+            <div className={classes.summaryItemContainer}>
+              <Typography variant="body" className={classes.totalLabel}>
+                Order Total
+              </Typography>
+              <Typography variant="body" className={classes.totalValue}>
+                {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
+                {`₹${productsQuote?.total_payable}`}
+              </Typography>
+            </div>
+            <Button
+              className={classes.proceedToBuy}
+              fullWidth
+              variant="contained"
+              disabled={
+                productsQuote.isError ||
+                confirmOrderLoading ||
+                initLoading ||
+                activeStep !== 2
+              }
+              onClick={() => {
+                const { productQuotes, successOrderIds } = JSON.parse(
+                  // getValueFromCookie("checkout_details") || "{}"
+                  localStorage.getItem("checkout_details") || "{}"
+                );
+                setConfirmOrderLoading(true);
+                let c = cartItems.map((item) => {
+                  return item.item;
+                });
+                if (activePaymentMethod === payment_methods.JUSPAY) {
+                  // setTogglePaymentGateway(true);
+                  // setLoadingSdkForPayment(true);
+                  // initiateSDK();
+                  const request_object = constructQouteObject(
+                    c.filter(({ provider }) =>
+                      successOrderIds.includes(provider.local_id.toString())
+                    )
+                  );
+                  confirmOrder(request_object[0], payment_methods.JUSPAY);
+                } else {
+                  const request_object = constructQouteObject(
+                    c.filter(({ provider }) =>
+                      successOrderIds.includes(provider.local_id.toString())
+                    )
+                  );
+                  confirmOrder(request_object[0], payment_methods.COD);
+                }
+              }}
+            >
+              {confirmOrderLoading || initLoading ? (
+                <Loading />
+              ) : (
+                "Proceed to Buy"
+              )}
+            </Button>
+          </Card>
+        </Grid>
+      );
+    } catch (error) {
+      showQuoteError();
+    }
+  };
+
   if (cartItems === null || updatedCartItems === null) {
     return <Redirect to={"/application/cart"} />;
   }
@@ -2152,100 +2265,7 @@ const Checkout = () => {
               ))}
             </Stepper>
           </Grid>
-          <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Card className={classes.summaryCard}>
-              <Typography variant="h4">Summary</Typography>
-              <Box component={"div"} className={classes.divider} />
-              {productsQuote?.providers.map((provider, pindex) =>
-                renderOutofStockItems(provider, pindex)
-              )}
-
-              {productsQuote?.providers.map((provider, pindex) =>
-                renderItems(provider, pindex)
-              )}
-              <div className={classes.summarySubtotalContainer}>
-                <Typography variant="body2" className={classes.subTotalLabel}>
-                  Total
-                </Typography>
-                <Typography variant="body2" className={classes.subTotalValue}>
-                  {`₹${getItemsTotal(productsQuote?.providers)}`}
-                </Typography>
-              </div>
-              <Box component={"div"} className={classes.divider} />
-              {productsQuote?.providers.map((provider, pindex) => {
-                return (
-                  <div key={`pindex-${pindex}`}>
-                    <div key={`d-pindex-${pindex}`}>
-                      {renderDeliveryCharges(provider.delivery)}
-                    </div>
-                  </div>
-                );
-              })}
-              <div className={classes.summarySubtotalContainer}>
-                <Typography variant="body2" className={classes.subTotalLabel}>
-                  Total
-                </Typography>
-                <Typography variant="body2" className={classes.subTotalValue}>
-                  {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
-                </Typography>
-              </div>
-              <Box component={"div"} className={classes.orderTotalDivider} />
-              <div className={classes.summaryItemContainer}>
-                <Typography variant="body" className={classes.totalLabel}>
-                  Order Total
-                </Typography>
-                <Typography variant="body" className={classes.totalValue}>
-                  {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
-                  {`₹${productsQuote?.total_payable}`}
-                </Typography>
-              </div>
-              <Button
-                className={classes.proceedToBuy}
-                fullWidth
-                variant="contained"
-                disabled={
-                  productsQuote.isError ||
-                  confirmOrderLoading ||
-                  initLoading ||
-                  activeStep !== 2
-                }
-                onClick={() => {
-                  const { productQuotes, successOrderIds } = JSON.parse(
-                    // getValueFromCookie("checkout_details") || "{}"
-                    localStorage.getItem("checkout_details") || "{}"
-                  );
-                  setConfirmOrderLoading(true);
-                  let c = cartItems.map((item) => {
-                    return item.item;
-                  });
-                  if (activePaymentMethod === payment_methods.JUSPAY) {
-                    // setTogglePaymentGateway(true);
-                    // setLoadingSdkForPayment(true);
-                    // initiateSDK();
-                    const request_object = constructQouteObject(
-                      c.filter(({ provider }) =>
-                        successOrderIds.includes(provider.local_id.toString())
-                      )
-                    );
-                    confirmOrder(request_object[0], payment_methods.JUSPAY);
-                  } else {
-                    const request_object = constructQouteObject(
-                      c.filter(({ provider }) =>
-                        successOrderIds.includes(provider.local_id.toString())
-                      )
-                    );
-                    confirmOrder(request_object[0], payment_methods.COD);
-                  }
-                }}
-              >
-                {confirmOrderLoading || initLoading ? (
-                  <Loading />
-                ) : (
-                  "Proceed to Buy"
-                )}
-              </Button>
-            </Card>
-          </Grid>
+          {renderQuote()}
         </Grid>
       </div>
     </>
