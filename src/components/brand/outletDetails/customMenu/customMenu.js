@@ -67,13 +67,6 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
         <>
           {customMenuRef.current.length > 0 ? (
             <>
-              {customMenuRef.current.map((menu, ind) => (
-                <MenuItems
-                  key={`custom-menu-ind-${ind}`}
-                  customMenu={menu}
-                  updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
-                />
-              ))}
               <div className={classes.menuButtonContainer}>
                 <Fab
                   variant="extended"
@@ -94,6 +87,14 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                   <MenuModal customMenu={customMenuRef.current} />
                 </ModalComponent>
               </div>
+
+              {customMenuRef.current.map((menu, ind) => (
+                <MenuItems
+                  key={`custom-menu-ind-${ind}`}
+                  customMenu={menu}
+                  updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
+                />
+              ))}
             </>
           ) : (
             <Typography variant="body1">Menu not available</Typography>
