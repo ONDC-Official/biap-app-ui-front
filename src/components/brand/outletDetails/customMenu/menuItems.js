@@ -51,6 +51,7 @@ const MenuItems = (props) => {
 
   const [customizationPrices, setCustomizationPrices] = useState(0);
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -87,14 +88,12 @@ const MenuItems = (props) => {
 
   const getProductDetails = async (productId) => {
     try {
-      setProductLoading(true);
+      setProductLoading(productId);
       const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
       setProductPayload(data.response);
       return data.response;
     } catch (error) {
       console.error("Error fetching product details:", error);
-    } finally {
-      setProductLoading(false);
     }
   };
 
@@ -126,9 +125,10 @@ const MenuItems = (props) => {
   const getCustomizations = async (productPayload, customization_state) => {
     const { customisation_items } = productPayload;
     const customizations = [];
-    const firstGroupId = customization_state["firstGroup"].id;
 
-    console.log("selectedCustomizationIds", customization_state);
+    const firstGroupId = customization_state["firstGroup"]?.id;
+    if (!firstGroupId) return;
+
     getCustomization_(firstGroupId, customization_state);
 
     for (const cId of selectedCustomizationIds) {
@@ -148,16 +148,26 @@ const MenuItems = (props) => {
 
   const addToCart = async (productPayload, isDefault = false) => {
     console.log("productPayload", productPayload);
-    setProductLoading(true);
+    setProductLoading(productPayload.id);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
-    const groups = await formatCustomizationGroups(productPayload.customisation_groups);
-    const cus = await formatCustomizations(productPayload.customisation_items);
-    const newState = await initializeCustomizationState(groups, cus, customization_state);
-    const customizationState = isDefault ? newState : customization_state;
-    const customisations = await getCustomizations(productPayload, customizationState);
+    const hasCustomisations = hasCustomizations(productPayload) ? true : false;
 
-    calculateSubtotal(customizationState["firstGroup"].id, customizationState);
+    let groups = [];
+    let cus = [];
+    let newState = {};
+    let customizationState = {};
+    let customisations = null;
+
+    if (hasCustomisations) {
+      groups = await formatCustomizationGroups(productPayload.customisation_groups);
+      cus = await formatCustomizations(productPayload.customisation_items);
+      newState = await initializeCustomizationState(groups, cus, customization_state);
+      customizationState = isDefault ? newState : customization_state;
+      customisations = await getCustomizations(productPayload, customizationState);
+    }
+
+    calculateSubtotal(customizationState["firstGroup"]?.id, customizationState);
     const subtotal = productPayload?.item_details?.price?.value + customizationPrices;
 
     const payload = {
@@ -182,10 +192,8 @@ const MenuItems = (props) => {
         ...productPayload.item_details,
       },
       customisations,
-      hasCustomisations: hasCustomizations(productPayload) ? true : false,
+      hasCustomisations,
     };
-
-    console.log("payload**", payload);
 
     postCall(url, payload)
       .then(() => {
@@ -196,7 +204,7 @@ const MenuItems = (props) => {
       })
       .catch((error) => {
         console.log(error);
-        setProductLoading(false);
+        setProductLoading(null);
       });
   };
 
