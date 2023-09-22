@@ -37,12 +37,13 @@ const useStyles = makeStyles({
     height: "152px !important",
     width: "100% !important",
     position: "relative !important",
-    float: "right",
   },
   cardAction: {
     marginTop: "-27px",
-    // width: '152px !important',
-    float: "right",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
   },
   addToCartIcon: {
     borderRadius: "60px !important",
@@ -119,11 +120,11 @@ const useStyles = makeStyles({
     cursor: "pointer",
   },
   loader: {
-    textAlign: 'left !important',
-    display: 'flex',
+    textAlign: "left !important",
+    display: "flex",
     borderBottom: "1px solid #E0E0E0",
-    paddingBottom: '16px !important'
-  }
+    paddingBottom: "16px !important",
+  },
 });
 
 export default useStyles;

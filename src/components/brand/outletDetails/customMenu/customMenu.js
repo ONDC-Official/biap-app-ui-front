@@ -21,23 +21,50 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
   const customMenuRef = useRef([]);
   const [isLoading, setIsLoading] = useState(false);
   const [menuModal, setMenuModal] = useState(false);
+  const [firstMenuItemId, setFirstMenuItemId] = useState("");
+  const [firstMenuItemDetails, setFirstMenuItemDetails] = useState(null);
+  const [blockingCallLoading, setBlockingCallLoading] = useState(false);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
   const getBrandCustomMenu = async (domain) => {
-    setIsLoading(true);
+    setBlockingCallLoading(true);
     try {
       const data = await cancellablePromise(getBrandCustomMenuRequest(domain, brandId));
       let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
+      setFirstMenuItemId(resData[0].id);
       resData = resData.map((singleCustomMenu) => {
         singleCustomMenu.items = [];
         return singleCustomMenu;
       });
       customMenuRef.current = resData;
+      const firstMenuData = await getCustomMenuItems(resData[0].id);
     } catch (err) {
-    } finally {
-      setIsLoading(false);
+      setBlockingCallLoading(false);
+    }
+  };
+
+  const getCustomMenuItems = async (menuId) => {
+    try {
+      const data = await cancellablePromise(getCustomMenuItemsRequest(menuId));
+      let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
+
+      resData = resData.map((item) => {
+        const findVegNonVegTag = item.item_details.tags.find((tag) => tag.code === "veg_nonveg");
+        if (findVegNonVegTag) {
+          item.item_details.isVeg =
+            findVegNonVegTag.list[0].value === "yes" || findVegNonVegTag.list[0].value === "Yes";
+        } else {
+        }
+        return item;
+      });
+      updateItemsOfCustomMenuRef(menuId, resData);
+      setFirstMenuItemDetails(resData);
+      setBlockingCallLoading(false);
+      console.log(menuId, resData);
+    } catch (err) {
+      return err;
     }
   };
 
@@ -59,7 +86,7 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
 
   return (
     <div>
-      {isLoading ? (
+      {blockingCallLoading ? (
         <div className={classes.progressBarContainer}>
           <Loading />
         </div>
@@ -67,13 +94,6 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
         <>
           {customMenuRef.current.length > 0 ? (
             <>
-              {customMenuRef.current.map((menu, ind) => (
-                <MenuItems
-                  key={`custom-menu-ind-${ind}`}
-                  customMenu={menu}
-                  updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
-                />
-              ))}
               <div className={classes.menuButtonContainer}>
                 <Fab
                   variant="extended"
@@ -94,6 +114,25 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
                   <MenuModal customMenu={customMenuRef.current} />
                 </ModalComponent>
               </div>
+
+              <MenuItems
+                firstMenuItemId={firstMenuItemId}
+                key={`custom-menu-ind`}
+                customMenu={customMenuRef.current[0]}
+                updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
+                setBlockingCallLoading={setBlockingCallLoading}
+                firstMenuItemDetails={firstMenuItemDetails}
+              />
+
+              {customMenuRef.current.slice(1, customMenuRef.current.length).map((menu, ind) => (
+                <MenuItems
+                  firstMenuItemId={firstMenuItemId}
+                  key={`custom-menu-ind-${ind}`}
+                  customMenu={menu}
+                  updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
+                  setBlockingCallLoading={setBlockingCallLoading}
+                />
+              ))}
             </>
           ) : (
             <Typography variant="body1">Menu not available</Typography>

@@ -31,7 +31,9 @@ import {
   initializeCustomizationState,
 } from "../../../application/product-list/product-details/utils";
 import { CartContext } from "../../../../context/cartContext";
-const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
+
+const MenuItems = (props) => {
+  const { customMenu, updateItemsOfCustomMenuRef, firstMenuItemId, firstMenuItemDetails = null } = props;
   const classes = useStyles();
   const history = useHistory();
   const { brandId, outletId } = useParams();
@@ -64,6 +66,7 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
     try {
       const data = await cancellablePromise(getCustomMenuItemsRequest(menuId));
       let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
+
       resData = resData.map((item) => {
         const findVegNonVegTag = item.item_details.tags.find((tag) => tag.code === "veg_nonveg");
         if (findVegNonVegTag) {
@@ -204,8 +207,98 @@ const MenuItems = ({ customMenu, updateItemsOfCustomMenuRef }) => {
     }
   }, [customization_state]);
 
+  if (firstMenuItemDetails) {
+    return (
+      <Accordion defaultExpanded={true}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon className={classes.expandIcon} />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography variant="h5">{`${customMenu?.descriptor?.name} (${menuItems?.length || 0})`}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <>
+            {firstMenuItemDetails.length > 0 ? (
+              <Grid container spacing={3}>
+                {firstMenuItemDetails.map((item, itemInd) => (
+                  <Grid item xs={12} sm={12} md={12} lg={12} xl={12} key={`menu-item-ind-${itemInd}`}>
+                    <MenuItem
+                      productPayload={item}
+                      setProductPayload={setProductPayload}
+                      product={item?.item_details}
+                      productId={item.id}
+                      price={item?.item_details?.price}
+                      bpp_provider_descriptor={item?.provider_details?.descriptor}
+                      bpp_id={item?.bpp_details?.bpp_id}
+                      location_id={item?.location_details ? item.location_details?.id : ""}
+                      bpp_provider_id={item?.provider_details?.id}
+                      handleAddToCart={addToCart}
+                      setCustomizationModal={setCustomizationModal}
+                      getProductDetails={getProductDetails}
+                      productLoading={productLoading}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Typography variant="body1">There is not items available in this menu</Typography>
+            )}
+          </>
+
+          <ModalComponent
+            open={customizationModal}
+            onClose={() => {
+              setCustomizationModal(false);
+              setCustomizationState({});
+              fetchCartItems();
+            }}
+            title="Customize"
+          >
+            {productLoading ? (
+              <Loading />
+            ) : (
+              <>
+                <CustomizationRenderer
+                  productPayload={productPayload}
+                  customization_state={customization_state}
+                  setCustomizationState={setCustomizationState}
+                  setItemOutOfStock={setItemOutOfStock}
+                />
+
+                <Grid container sx={{ marginTop: 4 }}>
+                  <Grid container alignItems="center" justifyContent="space-around" xs={3} className={classes.qty}>
+                    <RemoveIcon
+                      fontSize="small"
+                      className={classes.qtyIcon}
+                      onClick={() => {
+                        if (itemQty > 1) setItemQty(itemQty - 1);
+                      }}
+                    />
+                    <Typography variant="body1" color="#196AAB">
+                      {itemQty}
+                    </Typography>
+                    <AddIcon fontSize="small" className={classes.qtyIcon} onClick={() => setItemQty(itemQty + 1)} />
+                  </Grid>
+                  <Button
+                    disabled={itemOutOfStock}
+                    variant="contained"
+                    sx={{ flex: 1 }}
+                    onClick={() => addToCart(productPayload)}
+                  >
+                    Add Item Total- ₹{(productPayload?.item_details?.price.value + customizationPrices) * itemQty}{" "}
+                  </Button>
+                </Grid>
+              </>
+            )}
+          </ModalComponent>
+        </AccordionDetails>
+      </Accordion>
+    );
+  }
+
   return (
-    <Accordion defaultExpanded={true}>
+    <Accordion defaultExpanded={false}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon className={classes.expandIcon} />}
         aria-controls="panel1a-content"
