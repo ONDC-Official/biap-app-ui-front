@@ -94,6 +94,8 @@ const MenuItems = (props) => {
       return data.response;
     } catch (error) {
       console.error("Error fetching product details:", error);
+    } finally {
+      setProductLoading(false);
     }
   };
 

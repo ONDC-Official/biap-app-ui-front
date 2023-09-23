@@ -134,9 +134,8 @@ const ProductDetails = () => {
     const url = `/clientApis/v2/cart/${user.id}`;
     let subtotal = productPayload?.item_details?.price?.value;
 
-    const customisations = getCustomizations() === undefined ? null : getCustomizations();
+    const customisations = getCustomizations() ?? null;
 
-    console.log("customisations:::", customisations);
     if (customisations) {
       calculateSubtotal(customization_state["firstGroup"]?.id, customization_state);
       subtotal += customizationPrices;
