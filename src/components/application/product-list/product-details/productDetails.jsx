@@ -86,9 +86,10 @@ const ProductDetails = () => {
 
     if (!customisation_items.length) return null;
     const customizations = [];
-    const levels = Object.keys(customization_state);
-    const firstGroupId = customization_state["firstGroup"].id;
 
+    const firstGroupId = customization_state["firstGroup"]?.id;
+
+    if (!firstGroupId) return;
     getCustomization_(firstGroupId);
 
     for (const cId of selectedCustomizationIds) {
@@ -133,9 +134,10 @@ const ProductDetails = () => {
     const url = `/clientApis/v2/cart/${user.id}`;
     let subtotal = productPayload?.item_details?.price?.value;
 
-    const customisations = getCustomizations();
+    const customisations = getCustomizations() ?? null;
+
     if (customisations) {
-      calculateSubtotal(customization_state["firstGroup"].id, customization_state);
+      calculateSubtotal(customization_state["firstGroup"]?.id, customization_state);
       subtotal += customizationPrices;
     }
 
@@ -448,7 +450,6 @@ const ProductDetails = () => {
                   </Grid>
                 )}
 
-                {console.log(" <CustomizationRenderer", customization_state)}
                 <CustomizationRenderer
                   productPayload={productPayload}
                   customization_state={customization_state}

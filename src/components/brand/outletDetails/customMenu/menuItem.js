@@ -15,6 +15,7 @@ import { ReactComponent as PlusIcon } from "../../../../assets/images/plus.svg";
 import no_image_found from "../../../../assets/images/no_image_found.png";
 import { useHistory } from "react-router-dom";
 import { hasCustomizations } from "../../../application/product-list/product-details/utils";
+import Loading from "../../../shared/loading/loading";
 
 const MenuItem = (props) => {
   const classes = useStyles();
@@ -90,7 +91,7 @@ const MenuItem = (props) => {
             fullWidth
             variant="outlined"
             color="primary"
-            endIcon={<PlusIcon />}
+            endIcon={productLoading === productId ? null : <PlusIcon />}
             className={classes.addToCartIcon}
             onClick={() => {
               getProductDetails(productId).then((data) => {
@@ -99,8 +100,9 @@ const MenuItem = (props) => {
             }}
             disabled={productLoading}
           >
-            Add to cart
+            {productLoading === productId ? <Loading height="8px" width="8px" /> : "Add to cart"}
           </Button>
+
           {hasCustomizations(productPayload) && (
             <Button
               fullWidth

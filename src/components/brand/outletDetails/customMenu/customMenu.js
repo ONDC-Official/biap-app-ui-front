@@ -62,7 +62,6 @@ const CustomMenu = ({ brandDetails, outletDetails }) => {
       updateItemsOfCustomMenuRef(menuId, resData);
       setFirstMenuItemDetails(resData);
       setBlockingCallLoading(false);
-      console.log(menuId, resData);
     } catch (err) {
       return err;
     }
