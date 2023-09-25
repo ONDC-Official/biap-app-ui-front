@@ -13,6 +13,7 @@ import moment from "moment";
 import styles from "../../../styles/cart/cartView.module.scss";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import ReturnOrderModal from "./returnOrderModal";
 
 const OrderSummary = ({ orderDetails }) => {
   const classes = useStyles();
@@ -21,17 +22,14 @@ const OrderSummary = ({ orderDetails }) => {
   const [deliveryQuotes, setDeliveryQuotes] = useState(null);
   const dispatch = useContext(ToastContext);
 
-  console.log("<=====================orderDetails========>", orderDetails);
+  const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
 
   const isItemCustomization = (tags) => {
     let isCustomization = false;
     tags?.forEach((tag) => {
       if (tag.code === "type") {
         tag.list.forEach((listOption) => {
-          if (
-            listOption.code === "type" &&
-            listOption.value == "customization"
-          ) {
+          if (listOption.code === "type" && listOption.value == "customization") {
             isCustomization = true;
             return true;
           }
@@ -47,12 +45,9 @@ const OrderSummary = ({ orderDetails }) => {
         const provided_by = orderDetails?.provider?.descriptor?.name;
         let uuid = 0;
         const breakup = orderDetails.quote.breakup;
-        console.log("breakup=====>", breakup);
         const all_items = breakup?.map((break_up_item) => {
           const items = orderDetails.items;
-          const itemIndex = items.findIndex(
-            (one) => one.id === break_up_item["@ondc/org/item_id"]
-          );
+          const itemIndex = items.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
           const item = itemIndex > -1 ? items[itemIndex] : null;
           let itemQuantity = item ? item?.quantity?.count : 0;
           let quantity = break_up_item["@ondc/org/item_quantity"]
@@ -70,10 +65,7 @@ const OrderSummary = ({ orderDetails }) => {
               }
             }
           } else if (quantity !== itemQuantity) {
-            textClass =
-              break_up_item["@ondc/org/title_type"] === "item"
-                ? "text-amber"
-                : "";
+            textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
             quantityMessage = `Quantity: ${quantity}/${itemQuantity}`;
             if (item) {
               item.quantity.count = quantity;
@@ -141,8 +133,7 @@ const OrderSummary = ({ orderDetails }) => {
           }
           if (item.title_type === "tax" && item.isCustomization) {
             let key = item.parent_item_id;
-            items[key]["customizations"][item.id] =
-              items[key]["customizations"][item.id] || {};
+            items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
             items[key]["customizations"][item.id]["tax"] = {
               title: item.title,
               value: item.price,
@@ -150,8 +141,7 @@ const OrderSummary = ({ orderDetails }) => {
           }
           if (item.title_type === "discount" && item.isCustomization) {
             let key = item.parent_item_id;
-            items[key]["customizations"][item.id] =
-              items[key]["customizations"][item.id] || {};
+            items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
             items[key]["customizations"][item.id]["discount"] = {
               title: item.title,
               value: item.price,
@@ -224,10 +214,7 @@ const OrderSummary = ({ orderDetails }) => {
     dispatchError("There is issue with quote from seller side! Please check!");
   };
 
-  console.log("1111111111111111111111=====>", itemQuotes);
-  console.log("2222222222222222222222=====>", deliveryQuotes);
   const getSubTotal = (quote) => {
-    console.log("quote=====>", quote);
     let subtotal = 0;
     quote.forEach((item) => {
       subtotal += parseInt(item?.price?.value);
@@ -238,17 +225,11 @@ const OrderSummary = ({ orderDetails }) => {
   const getItemsWithCustomizations = () => {
     const breakup = orderDetails?.quote?.breakup;
     let returnBreakup = [];
-    const filterItems = breakup.filter(
-      (item) => item["@ondc/org/title_type"] === "item"
-    );
-    const filterCustomizations = breakup.filter(
-      (item) => item["@ondc/org/title_type"] === "customization"
-    );
+    const filterItems = breakup.filter((item) => item["@ondc/org/title_type"] === "item");
+    const filterCustomizations = breakup.filter((item) => item["@ondc/org/title_type"] === "customization");
     filterItems.forEach((item) => {
       const itemId = item["@ondc/org/item_id"];
-      const filterCustomizationItems = filterCustomizations.filter(
-        (cust) => cust.item.parent_item_id === itemId
-      );
+      const filterCustomizationItems = filterCustomizations.filter((cust) => cust.item.parent_item_id === itemId);
       returnBreakup.push(item);
       if (filterCustomizationItems.length > 0) {
         filterCustomizationItems.forEach((custItem) => {
@@ -266,52 +247,33 @@ const OrderSummary = ({ orderDetails }) => {
           .filter((quote) => quote?.title !== "")
           .map((quote, qIndex) => (
             <div key={`quote-${qIndex}`}>
-              <div
-                className={classes.summaryQuoteItemContainer}
-                key={`quote-${qIndex}-title`}
-              >
-                <Typography
-                  variant="body1"
-                  className={`${classes.summaryItemLabel} ${quote.textClass}`}
-                >
+              <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-title`}>
+                <Typography variant="body1" className={`${classes.summaryItemLabel} ${quote.textClass}`}>
                   {quote?.title}
-                  <p className={`${styles.ordered_from} ${quote.textClass}`}>
-                    {quote.quantityMessage}
-                  </p>
+                  <p className={`${styles.ordered_from} ${quote.textClass}`}>{quote.quantityMessage}</p>
                 </Typography>
               </div>
               {renderItemDetails(quote)}
               {quote?.customizations && (
                 <div key={`quote-${qIndex}-customizations`}>
-                  <div
-                    className={classes.summaryQuoteItemContainer}
-                    key={`quote-${qIndex}-customizations`}
-                  >
-                    <Typography
-                      variant="body1"
-                      className={classes.summaryItemPriceLabel}
-                    >
+                  <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-customizations`}>
+                    <Typography variant="body1" className={classes.summaryItemPriceLabel}>
                       Customizations
                     </Typography>
                   </div>
-                  {Object.values(quote?.customizations).map(
-                    (customization, cIndex) => (
-                      <div>
-                        <div
-                          className={classes.summaryQuoteItemContainer}
-                          key={`quote-${qIndex}-customizations-${cIndex}`}
-                        >
-                          <Typography
-                            variant="body1"
-                            className={classes.summaryCustomizationLabel}
-                          >
-                            {customization.title}
-                          </Typography>
-                        </div>
-                        {renderItemDetails(customization, cIndex, true)}
+                  {Object.values(quote?.customizations).map((customization, cIndex) => (
+                    <div>
+                      <div
+                        className={classes.summaryQuoteItemContainer}
+                        key={`quote-${qIndex}-customizations-${cIndex}`}
+                      >
+                        <Typography variant="body1" className={classes.summaryCustomizationLabel}>
+                          {customization.title}
+                        </Typography>
                       </div>
-                    )
-                  )}
+                      {renderItemDetails(customization, cIndex, true)}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -323,77 +285,45 @@ const OrderSummary = ({ orderDetails }) => {
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
       <div>
-        <div
-          className={classes.summaryQuoteItemContainer}
-          key={`quote-${qIndex}-price`}
-        >
+        <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-price`}>
           <Typography
             variant="body1"
-            className={
-              isCustomization
-                ? classes.summaryCustomizationPriceLabel
-                : classes.summaryItemPriceLabel
-            }
+            className={isCustomization ? classes.summaryCustomizationPriceLabel : classes.summaryItemPriceLabel}
           >
             {quote?.price?.title}
           </Typography>
           <Typography
             variant="body1"
-            className={
-              isCustomization
-                ? classes.summaryCustomizationPriceValue
-                : classes.summaryItemPriceValue
-            }
+            className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
           >
             {`₹${quote?.price?.value}`}
           </Typography>
         </div>
         {quote?.tax && (
-          <div
-            className={classes.summaryQuoteItemContainer}
-            key={`quote-${qIndex}-tax`}
-          >
+          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-tax`}>
             <Typography
               variant="body1"
-              className={
-                isCustomization
-                  ? classes.summaryCustomizationTaxLabel
-                  : classes.summaryItemTaxLabel
-              }
+              className={isCustomization ? classes.summaryCustomizationTaxLabel : classes.summaryItemTaxLabel}
             >
               {quote?.tax.title}
             </Typography>
             <Typography
               variant="body1"
-              className={
-                isCustomization
-                  ? classes.summaryCustomizationPriceValue
-                  : classes.summaryItemPriceValue
-              }
+              className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
             >
               {`₹${quote?.tax.value}`}
             </Typography>
           </div>
         )}
         {quote?.discount && (
-          <div
-            className={classes.summaryQuoteItemContainer}
-            key={`quote-${qIndex}-discount`}
-          >
+          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-discount`}>
             <Typography
               variant="body1"
-              className={
-                isCustomization
-                  ? classes.summaryCustomizationDiscountLabel
-                  : classes.summaryItemDiscountLabel
-              }
+              className={isCustomization ? classes.summaryCustomizationDiscountLabel : classes.summaryItemDiscountLabel}
             >
               {quote?.discount.title}
             </Typography>
-            <Typography
-              variant="body1"
-              className={classes.summaryItemPriceValue}
-            >
+            <Typography variant="body1" className={classes.summaryItemPriceValue}>
               {`₹${quote?.discount.value}`}
             </Typography>
           </div>
@@ -405,9 +335,7 @@ const OrderSummary = ({ orderDetails }) => {
   const getItemsTotal = () => {
     let finalTotal = 0;
     if (itemQuotes) {
-      const items = Object.values(itemQuotes).filter(
-        (quote) => quote?.title !== ""
-      );
+      const items = Object.values(itemQuotes).filter((quote) => quote?.title !== "");
       items.forEach((item) => {
         finalTotal = finalTotal + parseInt(item.price.value);
         Object.values(item.customizations).forEach((custItem) => {
@@ -420,10 +348,7 @@ const OrderSummary = ({ orderDetails }) => {
 
   const renderDeliveryLine = (quote, key) => {
     return (
-      <div
-        className={classes.summaryDeliveryItemContainer}
-        key={`d-quote-${key}-price`}
-      >
+      <div className={classes.summaryDeliveryItemContainer} key={`d-quote-${key}-price`}>
         <Typography variant="body1" className={classes.summaryDeliveryLabel}>
           {quote?.title}
         </Typography>
@@ -520,13 +445,10 @@ const OrderSummary = ({ orderDetails }) => {
         <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
       </Typography>
       <Typography variant="body1" className={classes.orderOnTypo}>
-        {`Ordered On: ${moment(orderDetails?.createdAt).format(
-          "DD/MM/yy"
-        )} at ${moment(orderDetails?.createdAt).format("hh:mma")}`}{" "}
-        | Payment:{" "}
-        {orderDetails?.payment?.type === "ON-FULFILLMENT"
-          ? "Cash on delivery"
-          : "Prepaid"}
+        {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format(
+          "hh:mma"
+        )}`}{" "}
+        | Payment: {orderDetails?.payment?.type === "ON-FULFILLMENT" ? "Cash on delivery" : "Prepaid"}
       </Typography>
       <Box component={"div"} className={classes.orderSummaryDivider} />
 
@@ -535,7 +457,6 @@ const OrderSummary = ({ orderDetails }) => {
       <Box component={"div"} className={classes.orderSummaryDivider} />
 
       {renderQuote()}
-
       <div className={classes.summaryItemActionContainer}>
         <Button fullWidth variant="outlined" className={classes.helpButton}>
           Get Help
@@ -545,10 +466,40 @@ const OrderSummary = ({ orderDetails }) => {
           variant="contained"
           color="error"
           className={classes.cancelOrderButton}
+          onClick={() => setToggleReturnOrderModal(true)}
         >
-          Cancel Order
+          Return Order
         </Button>
       </div>
+      {console.log(orderDetails)}
+      {toggleReturnOrderModal && (
+        <ReturnOrderModal
+          onClose={() => setToggleReturnOrderModal(false)}
+          onSuccess={() => setToggleReturnOrderModal(false)}
+          quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+          partailsReturnProductList={orderDetails.items?.map(({ id }, index) => {
+            let findQuote = orderDetails.quote?.breakup.find(
+              (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
+            );
+            if (findQuote) {
+            } else {
+              findQuote = orderDetails.quote?.breakup[index];
+            }
+            return {
+              id,
+              name: findQuote?.title ?? "NA",
+              cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+              return_status: orderDetails.items?.[index]?.return_status ?? "",
+              fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+              ...orderDetails.items?.[index]?.product,
+            };
+          })}
+          order_status={orderDetails.state}
+          bpp_id={orderDetails.bpp_id}
+          transaction_id={orderDetails.transactionId}
+          order_id={orderDetails.id}
+        />
+      )}
     </Card>
   );
 };
