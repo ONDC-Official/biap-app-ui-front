@@ -173,11 +173,13 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                 postCall(
                     "/clientApis/v2/initialize_order",
                     items.map((item) => {
+                        console.log("initialize_order item=====>", item)
                         const fulfillments = item[0].product.fulfillments;
                         delete item[0].product.fulfillments;
+                        item[0].fulfillment_id = item[0].product.fulfillment_id;
+                        delete item[0].product.fulfillment_id;
                         let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
                         itemsData = itemsData.map((itemData) => {
-                            let findItemFromQuote = null;
                             if(updatedCartItems.current){
                                 let findItemFromQuote = updatedCartItems.current[0].message.quote.items.find((data) => data.id === itemData.local_id);
                                 if(findItemFromQuote){
