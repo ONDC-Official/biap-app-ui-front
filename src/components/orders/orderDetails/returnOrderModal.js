@@ -1,8 +1,5 @@
 import React, { useContext, useRef, useState, useEffect } from "react";
 import CrossIcon from "../../shared/svg/cross-icon";
-import { ONDC_COLORS } from "../../shared/colors";
-// import Button from "../../shared/button/button";
-import { buttonTypes } from "../../shared/button/utils";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
 import productCartStyles from "../../../styles/products/productCard.module.scss";
 import productStyles from "../../../styles/orders/orders.module.scss";
@@ -15,11 +12,10 @@ import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { postCall, getCall } from "../../../api/axios";
 import Checkbox from "../../shared/checkbox/checkbox";
 import Dropdown from "../../shared/dropdown/dropdown";
-import DropdownSvg from "../../shared/svg/dropdonw";
 import Subtract from "../../shared/svg/subtract";
 import Add from "../../shared/svg/add";
 import { RETURN_REASONS } from "../../../constants/cancelation-reasons";
-import { Button, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function ReturnOrderModal({
@@ -305,33 +301,39 @@ export default function ReturnOrderModal({
               <div className="px-1 py-2">
                 {partailsReturnProductList?.map((product, idx) => {
                   return (
-                    <div className="d-flex mb-2">
+                    <div className="d-flex mb-4">
                       <div style={{ width: 100, height: 80 }}>
                         <img src={product?.descriptor?.symbol} alt="" style={{ width: "100%", height: "100%" }} />
                       </div>
                       <div className="d-flex px-2" style={{ flex: 1, justifyContent: "space-between" }}>
                         <div className="d-flex" style={{ flex: 1, flexDirection: "column" }}>
-                          <p
+                          <Typography
                             className={productStyles.product_name}
                             title={product?.name}
                             style={{ fontSize: "16px", textAlign: "left" }}
                           >
                             {product?.name}
-                          </p>
-                          <div className="pt-1">
+                          </Typography>
+                          <div className="my-1">
                             <Typography variant="subtitle1" color="#686868">
                               QTY: {quantity[idx]?.count ?? "0"} X ₹ {Number(product?.price?.value)?.toFixed(2)}
                             </Typography>
+                            {Object.keys(product.customizations).map((key, idx) => {
+                              const isLastItem = idx === Object.keys(product.customizations).length - 1;
+                              return (
+                                <Grid container>
+                                  <Typography variant="subtitle1" color="#686868">
+                                    {product.customizations[key].title}
+                                    (₹{product.customizations[key].price.value}) {isLastItem ? "" : "+"}
+                                  </Typography>
+                                </Grid>
+                              );
+                            })}
                           </div>
                         </div>
                         <div style={{ width: 100 }}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Typography
-                              sx={{ minWidth: 70, textAlign: "center" }}
-                              variant="subtitle1"
-                              className={productStyles.quantity_count}
-                              color="#686868"
-                            >
+                            <Typography className={productStyles.quantity_count}>
                               ₹{Number(product?.price?.value)?.toFixed(2)}
                             </Typography>
                             <Checkbox
@@ -405,91 +407,6 @@ export default function ReturnOrderModal({
                         </div>
                       </div>
                     </div>
-                    //   <div key={product?.id} className="d-flex align-items-center">
-                    //     <div style={{ width: isProductSelected(product?.id) ? "70%" : "90%" }}>
-                    //       <Checkbox
-                    //         id={product?.id}
-                    //         checked={isProductSelected(product?.id)}
-                    //         disabled={loading}
-                    //         boxBasis="8%"
-                    //         nameBasis="92%"
-                    //         onClick={() => {
-                    //           setInlineError((error) => ({
-                    //             ...error,
-                    //             selected_id_error: "",
-                    //           }));
-                    //           if (isProductSelected(product?.id)) {
-                    //             removeProductToCancel(product);
-                    //             return;
-                    //           }
-                    //           addProductToCancel(product, orderQty[idx]?.count);
-                    //         }}
-                    //       >
-                    //         <p
-                    //           className={productStyles.product_name}
-                    //           title={product?.name}
-                    //           style={{ fontSize: "16px", textAlign: "left" }}
-                    //         >
-                    //           {product?.name}
-                    //         </p>
-                    //         <div className="pt-1">
-                    //           <p className={productStyles.quantity_count}>QTY: {quantity[idx]?.count ?? "0"}</p>
-                    //         </div>
-                    //       </Checkbox>
-                    //     </div>
-                    //     {isProductSelected(product?.id) && (
-                    //       <div style={{ width: "20%" }}>
-                    //         <div className={productCartStyles.quantity_count_wrapper}>
-                    //           <div
-                    //             className={`${
-                    //               orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                    //             } d-flex align-items-center justify-content-center`}
-                    //             onClick={() => {
-                    //               //   setQuantityCount(quantityCount - 1);
-                    //               //   onReduceQuantity(id);
-                    //               //   if (quantityCount - 1 === 0) {
-                    //               //     setToggleAddToCart(false);
-                    //               //   }
-                    //               if (orderQty[idx]?.count > 1) {
-                    //                 onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
-                    //               }
-                    //             }}
-                    //           >
-                    //             {/* {orderQty[idx]?.count > 1 && ( */}
-                    //             <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
-                    //             {/* )} */}
-                    //           </div>
-                    //           <div className="d-flex align-items-center justify-content-center">
-                    //             <p className={productCartStyles.quantity_count}>
-                    //               {orderQty[idx]?.count ?? "0"}
-                    //               {/* {quantityCount} */}
-                    //             </p>
-                    //           </div>
-                    //           <div
-                    //             className={`${
-                    //               orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""
-                    //             } d-flex align-items-center justify-content-center`}
-                    //             onClick={() => {
-                    //               //   setQuantityCount((quantityCount) => quantityCount + 1);
-                    //               //   onAddQuantity(id);
-                    //               if (orderQty[idx]?.count < quantity[idx]?.count) {
-                    //                 onUpdateQty(orderQty[idx]?.count + 1, idx, product?.id);
-                    //               }
-                    //             }}
-                    //           >
-                    //             {/* {orderQty[idx]?.count < quantity[idx]?.count && ( */}
-                    //             <Add width="13" height="13" classes={productCartStyles.add_svg_color} />
-                    //             {/* )} */}
-                    //           </div>
-                    //         </div>
-                    //       </div>
-                    //     )}
-                    //     <div className="ms-auto">
-                    //       <p className={productStyles.product_price} style={{ whiteSpace: "nowrap" }}>
-                    //         ₹ {Number(product?.price?.value)?.toFixed(2)}
-                    //       </p>
-                    //     </div>
-                    //   </div>
                   );
                 })}
               </div>

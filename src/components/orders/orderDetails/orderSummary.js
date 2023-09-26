@@ -471,29 +471,43 @@ const OrderSummary = ({ orderDetails }) => {
           Return Order
         </Button>
       </div>
-      {console.log(orderDetails)}
       {toggleReturnOrderModal && (
         <ReturnOrderModal
           onClose={() => setToggleReturnOrderModal(false)}
           onSuccess={() => setToggleReturnOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsReturnProductList={orderDetails.items?.map(({ id }, index) => {
-            let findQuote = orderDetails.quote?.breakup.find(
-              (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
-            );
-            if (findQuote) {
-            } else {
-              findQuote = orderDetails.quote?.breakup[index];
-            }
-            return {
-              id,
-              name: findQuote?.title ?? "NA",
-              cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
-              return_status: orderDetails.items?.[index]?.return_status ?? "",
-              fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
-              ...orderDetails.items?.[index]?.product,
-            };
-          })}
+          partailsReturnProductList={orderDetails.items
+            ?.map(({ id }, index) => {
+              let findQuote = orderDetails.quote?.breakup.find(
+                (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
+              );
+
+              if (findQuote) {
+                const tag = findQuote.item.tags.find((tag) => tag.code === "type");
+                const tagList = tag?.list;
+                const type = tagList?.find((item) => item.code === "type");
+
+                if (type?.value === "item") {
+                  const parentId = findQuote.item.parent_item_id;
+                  const customizations = itemQuotes[parentId].customizations;
+
+                  return {
+                    id,
+                    name: findQuote?.title ?? "NA",
+                    cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+                    return_status: orderDetails.items?.[index]?.return_status ?? "",
+                    fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+                    customizations: customizations ?? null,
+                    ...orderDetails.items?.[index]?.product,
+                  };
+                }
+              } else {
+                findQuote = orderDetails.quote?.breakup[index];
+              }
+
+              return null;
+            })
+            .filter((item) => item !== null)}
           order_status={orderDetails.state}
           bpp_id={orderDetails.bpp_id}
           transaction_id={orderDetails.transactionId}
