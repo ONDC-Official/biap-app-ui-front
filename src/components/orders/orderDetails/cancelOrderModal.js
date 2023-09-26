@@ -35,6 +35,7 @@ export default function CancelOrderModal({
   onSuccess,
   quantity,
 }) {
+  console.log("partailsCancelProductList", partailsCancelProductList);
   // CONSTANTS
   const CANCEL_ORDER_TYPES = {
     allOrder: "ALL_ORDERS",
@@ -233,10 +234,12 @@ export default function CancelOrderModal({
         image: "",
       },
     }));
+
+    console.log("cancel order payload:", payload);
     try {
       const data = await cancellablePromise(
         postCall(
-          "clientApis/v1/update",
+          "clientApis/v2/update",
           requestObject?.map((item, index) => {
             return {
               context: {
@@ -450,7 +453,7 @@ export default function CancelOrderModal({
             {areProductsToBeCancled() && selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
               <div className="px-1 py-2">
                 {partailsCancelProductList?.map((product, idx) => {
-                  console.log("cancel product", product);
+                  console.log("cancel-product:", product);
                   return (
                     <div className="d-flex mb-4">
                       <div style={{ width: 100, height: 80 }}>

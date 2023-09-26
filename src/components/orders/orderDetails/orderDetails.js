@@ -44,7 +44,6 @@ const OrderDetails = () => {
     setIsLoading(true);
     try {
       const data = await cancellablePromise(getOrderDetailsRequest(orderId));
-      console.log("getOrderDetails=====>", data);
       setOrderDetails(data[0]);
     } catch (err) {
       dispatch({

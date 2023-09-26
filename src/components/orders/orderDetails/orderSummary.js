@@ -25,6 +25,8 @@ const OrderSummary = ({ orderDetails }) => {
 
   const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
+  const [productsList, setProductsList] = useState([]);
+  const [allNonCancellable, setAllNonCancellable] = useState(false);
 
   const isItemCustomization = (tags) => {
     let isCustomization = false;
@@ -199,6 +201,60 @@ const OrderSummary = ({ orderDetails }) => {
       showQuoteError();
     }
   }, [orderDetails]);
+
+  useEffect(() => {
+    if (orderDetails && itemQuotes) {
+      const productsList = generateProductsList(orderDetails, itemQuotes);
+      setProductsList(productsList);
+    }
+  }, [orderDetails, itemQuotes]);
+
+  useEffect(() => {
+    if (!!productsList.length) {
+      setAllNonCancellable(areAllItemsNonCancellable(productsList));
+    }
+  }, [productsList]);
+
+  const areAllItemsNonCancellable = (products) => {
+    for (const productIndex in products) {
+      if (productsList[productIndex]["@ondc/org/cancellable"] == false) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  function generateProductsList(orderDetails, itemQuotes) {
+    return orderDetails?.items
+      ?.map(({ id }, index) => {
+        let findQuote = orderDetails.quote?.breakup.find(
+          (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
+        );
+        if (findQuote) {
+          const tag = findQuote.item.tags.find((tag) => tag.code === "type");
+          const tagList = tag?.list;
+          const type = tagList?.find((item) => item.code === "type");
+          if (type?.value === "item") {
+            const parentId = findQuote.item.parent_item_id;
+            const customizations = itemQuotes[parentId].customizations;
+            return {
+              id,
+              name: findQuote?.title ?? "NA",
+              cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+              return_status: orderDetails.items?.[index]?.return_status ?? "",
+              fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+              customizations: customizations ?? null,
+              ...orderDetails.items?.[index]?.product,
+            };
+          }
+        } else {
+          findQuote = orderDetails.quote?.breakup[index];
+        }
+        return null;
+      })
+      .filter((item) => item !== null);
+  }
 
   // function to dispatch error
   function dispatchError(message) {
@@ -463,7 +519,19 @@ const OrderSummary = ({ orderDetails }) => {
         <Button fullWidth variant="outlined" className={classes.helpButton}>
           Get Help
         </Button>
-        {false ? (
+        {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            className={classes.cancelOrderButton}
+            onClick={() => setToggleCancelOrderModal(true)}
+            disabled={allNonCancellable}
+          >
+            Cancel Order
+          </Button>
+        )}
+        {orderDetails?.state === "Completed" && (
           <Button
             fullWidth
             variant="contained"
@@ -473,100 +541,30 @@ const OrderSummary = ({ orderDetails }) => {
           >
             Return Order
           </Button>
-        ) : (
-          <Button
-            fullWidth
-            variant="contained"
-            color="error"
-            className={classes.cancelOrderButton}
-            onClick={() => setToggleCancelOrderModal(true)}
-          >
-            Cancel Order
-          </Button>
         )}
       </div>
+
       {toggleReturnOrderModal && (
         <ReturnOrderModal
           onClose={() => setToggleReturnOrderModal(false)}
           onSuccess={() => setToggleReturnOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsReturnProductList={orderDetails.items
-            ?.map(({ id }, index) => {
-              let findQuote = orderDetails.quote?.breakup.find(
-                (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
-              );
-
-              if (findQuote) {
-                const tag = findQuote.item.tags.find((tag) => tag.code === "type");
-                const tagList = tag?.list;
-                const type = tagList?.find((item) => item.code === "type");
-
-                if (type?.value === "item") {
-                  const parentId = findQuote.item.parent_item_id;
-                  const customizations = itemQuotes[parentId].customizations;
-
-                  return {
-                    id,
-                    name: findQuote?.title ?? "NA",
-                    cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
-                    return_status: orderDetails.items?.[index]?.return_status ?? "",
-                    fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
-                    customizations: customizations ?? null,
-                    ...orderDetails.items?.[index]?.product,
-                  };
-                }
-              } else {
-                findQuote = orderDetails.quote?.breakup[index];
-              }
-
-              return null;
-            })
-            .filter((item) => item !== null)}
+          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes)}
           order_status={orderDetails.state}
-          bpp_id={orderDetails.bpp_id}
+          bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
           order_id={orderDetails.id}
         />
       )}
+
       {toggleCancelOrderModal && (
         <CancelOrderModal
           onClose={() => setToggleCancelOrderModal(false)}
           onSuccess={() => setToggleCancelOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsCancelProductList={orderDetails.items
-            ?.map(({ id }, index) => {
-              let findQuote = orderDetails.quote?.breakup.find(
-                (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
-              );
-
-              if (findQuote) {
-                const tag = findQuote.item.tags.find((tag) => tag.code === "type");
-                const tagList = tag?.list;
-                const type = tagList?.find((item) => item.code === "type");
-
-                if (type?.value === "item") {
-                  const parentId = findQuote.item.parent_item_id;
-                  const customizations = itemQuotes[parentId].customizations;
-
-                  return {
-                    id,
-                    name: findQuote?.title ?? "NA",
-                    cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
-                    return_status: orderDetails.items?.[index]?.return_status ?? "",
-                    fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
-                    customizations: customizations ?? null,
-                    ...orderDetails.items?.[index]?.product,
-                  };
-                }
-              } else {
-                findQuote = orderDetails.quote?.breakup[index];
-              }
-
-              return null;
-            })
-            .filter((item) => item !== null)}
+          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes)}
           order_status={orderDetails.state}
-          bpp_id={orderDetails.bpp_id}
+          bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
           order_id={orderDetails.id}
         />

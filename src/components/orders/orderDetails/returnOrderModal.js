@@ -137,7 +137,7 @@ export default function ReturnOrderModal({
     try {
       const data = await cancellablePromise(
         postCall(
-          "clientApis/v1/update",
+          "clientApis/v2/update",
           requestObject?.map((item, index) => {
             return {
               context: {
