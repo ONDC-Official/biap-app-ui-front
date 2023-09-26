@@ -19,7 +19,7 @@ const CustomerDetails = ({orderDetails}) => {
     const fetchAddress = (address) => {
         const {locality, building, city, state, country, areaCode} = address;
         let addressString = "";
-        addressString = `${locality}, ${building}, ${city}, ${state}, ${country} - ${areaCode}`;
+        addressString = `${locality?`${locality}`:""} ${building?`,${building}`:""} ${city?`,${city}`:""} ${state?`,${state}`:""} ${country?`,${country}`:""} - ${areaCode}`;
         return addressString;
     };
 
