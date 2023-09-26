@@ -1,7 +1,11 @@
 import React, { useContext, useRef, useState, useEffect } from "react";
 import CrossIcon from "../../shared/svg/cross-icon";
+import { ONDC_COLORS } from "../../shared/colors";
+import Button from "../../shared/button/button";
+import { buttonTypes } from "../../shared/button/utils";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
 import productCartStyles from "../../../styles/products/productCard.module.scss";
+import cancelRadioStyles from "../../../styles/cart/cartView.module.scss";
 import productStyles from "../../../styles/orders/orders.module.scss";
 import ErrorMessage from "../../shared/error-message/errorMessage";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
@@ -10,37 +14,47 @@ import { ToastContext } from "../../../context/toastContext";
 import useCancellablePromise from "../../../api/cancelRequest";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { postCall, getCall } from "../../../api/axios";
+import AddressRadioButton from "../../../components/application/initialize-order/address-details/address-radio-button/addressRadioButton";
 import Checkbox from "../../shared/checkbox/checkbox";
 import Dropdown from "../../shared/dropdown/dropdown";
+import DropdownSvg from "../../shared/svg/dropdonw";
 import Subtract from "../../shared/svg/subtract";
 import Add from "../../shared/svg/add";
-import { RETURN_REASONS } from "../../../constants/cancelation-reasons";
-import { Button, Grid, Typography } from "@mui/material";
+import { CANCELATION_REASONS } from "../../../constants/cancelation-reasons";
+import { Grid, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Expand } from "@mui/icons-material";
 
-export default function ReturnOrderModal({
+export default function CancelOrderModal({
   bpp_id,
   transaction_id,
   order_id,
   order_status,
-  partailsReturnProductList = [],
+  partailsCancelProductList = [],
   onClose,
   onSuccess,
   quantity,
 }) {
-  console.log("partailsReturnProductList:", partailsReturnProductList);
+  // CONSTANTS
+  const CANCEL_ORDER_TYPES = {
+    allOrder: "ALL_ORDERS",
+    partialOrders: "PARTIAL_ORDERS",
+  };
+
   // STATES
   const [inlineError, setInlineError] = useState({
     selected_id_error: "",
     reason_error: "",
   });
   const [loading, setLoading] = useState(false);
+  const [selectedCancelType, setSelectedCancelType] = useState();
   const [selectedCancelReasonId, setSelectedCancelReasonId] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
   const [orderQty, setOrderQty] = useState([]);
   const [reasons, setReasons] = useState([]);
 
   // REFS
+  const cancelEventSourceResponseRef = useRef(null);
   const cancelPartialEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
 
@@ -51,9 +65,9 @@ export default function ReturnOrderModal({
   const { cancellablePromise } = useCancellablePromise();
 
   // use this function to check if the list exist or not for partial products
-  // to be returned
-  function areProductsToBeReturned() {
-    return partailsReturnProductList?.length > 0;
+  // to be cancled
+  function areProductsToBeCancled() {
+    return partailsCancelProductList?.length > 0;
   }
 
   // use this function to dispatch error
@@ -66,6 +80,91 @@ export default function ReturnOrderModal({
         message,
       },
     });
+  }
+
+  // CANCEL APIS
+  // use this function to fetch cancel product through events
+  function fetchCancelOrderDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_cancel", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getCancelOrderDetails(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (cancelEventSourceResponseRef.current.length <= 0) {
+        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
+        setLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
+  // use this api to cancel an order
+  async function handleFetchCancelOrderDetails() {
+    const allCheckPassed = [checkReason()].every(Boolean);
+    if (!allCheckPassed) return;
+
+    cancelEventSourceResponseRef.current = [];
+    setLoading(true);
+    try {
+      const { context } = await cancellablePromise(
+        postCall("/clientApis/v1/cancel_order", {
+          context: {
+            bpp_id,
+            transaction_id,
+          },
+          message: {
+            order_id,
+            cancellation_reason_id: "1",
+          },
+        })
+      );
+      fetchCancelOrderDataThroughEvents(context.message_id);
+    } catch (err) {
+      setLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  }
+
+  // on cancel Api
+  async function getCancelOrderDetails(message_id) {
+    try {
+      const data = await cancellablePromise(getCall(`/clientApis/v1/on_cancel_order?messageId=${message_id}`));
+      cancelEventSourceResponseRef.current = [...cancelEventSourceResponseRef.current, data];
+      setLoading(false);
+      if (data?.message) {
+        onSuccess();
+      } else {
+        dispatchToast("Something went wrong!, product status cannot be updated", toast_types.error);
+      }
+    } catch (err) {
+      setLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    }
   }
 
   // PARTIAL CANCEL APIS
@@ -127,7 +226,7 @@ export default function ReturnOrderModal({
         count: item.quantity.count,
       },
       tags: {
-        update_type: "return",
+        update_type: "cancel",
         reason_code: selectedCancelReasonId?.key,
         ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
         ttl_reverseqc: "P3D",
@@ -203,7 +302,7 @@ export default function ReturnOrderModal({
     if (selectedIds.length <= 0) {
       setInlineError((error) => ({
         ...error,
-        selected_id_error: "Please select a product to return",
+        selected_id_error: "Please select a product to cancel",
       }));
       return false;
     }
@@ -261,17 +360,38 @@ export default function ReturnOrderModal({
     };
   }, []);
 
+  // use this effect to promatically navigate between the radio button
   useEffect(() => {
-    if (selectedIds.length > 0) {
-      const findNonReturnableItem = selectedIds.find((p) => !p?.["@ondc/org/returnable"]);
-      if (findNonReturnableItem) {
-        const data = RETURN_REASONS.filter((r) => r.isApplicableForNonReturnable);
-        setReasons(data);
-      } else {
-        setReasons(RETURN_REASONS);
-      }
+    if (areProductsToBeCancled() && partailsCancelProductList.length !== 1) {
+      setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
+      return;
     }
-  }, [selectedIds]);
+    setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
+    // eslint-disable-next-line
+  }, []);
+
+  // useEffect(() => {
+  //   if(selectedIds.length > 0){
+  //     const findCancellableItem = selectedIds.find((p) => p?.["@ondc/org/cancellable"]);
+  //     if(findCancellableItem){
+  //       const data = CANCELATION_REASONS.filter((r) => r.isApplicableForCancellation);
+  //       setReasons(data);
+  //     }else{
+  //       setReasons(CANCELATION_REASONS);
+  //     }
+  //   };
+  // }, [selectedIds]);
+
+  useEffect(() => {
+    if (selectedCancelType === CANCEL_ORDER_TYPES.allOrder) {
+      const data = CANCELATION_REASONS.filter((r) => !r.isApplicableForCancellation);
+      setReasons(data);
+    } else if (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders) {
+      setReasons(CANCELATION_REASONS);
+    } else {
+      setReasons([]);
+    }
+  }, [selectedCancelType]);
 
   useEffect(() => {
     if (quantity) {
@@ -290,16 +410,47 @@ export default function ReturnOrderModal({
     <div className={styles.overlay}>
       <div className={styles.popup_card} style={{ width: "700px" }}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
-          <Typography variant="h4">Return Order</Typography>
+          <p className={styles.card_header_title}>Cancel Order</p>
           <div className="ms-auto">
-            <CrossIcon width="20" height="20" color={"#151515"} style={{ cursor: "pointer" }} onClick={onClose} />
+            <CrossIcon
+              width="20"
+              height="20"
+              color={ONDC_COLORS.SECONDARYCOLOR}
+              style={{ cursor: "pointer" }}
+              onClick={onClose}
+            />
           </div>
         </div>
         <div className={styles.card_body}>
-          <div style={{ maxHeight: "280px", overflow: "auto" }}>
-            {areProductsToBeReturned() && (
+          <div className="py-2 d-flex align-items-center">
+            <AddressRadioButton
+              disabled={loading}
+              checked={selectedCancelType === CANCEL_ORDER_TYPES.allOrder}
+              onClick={() => {
+                setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
+              }}
+            >
+              <div className="px-3">
+                <p className={cancelRadioStyles.address_name_and_phone}>Cancel Complete Orders</p>
+              </div>
+            </AddressRadioButton>
+            <AddressRadioButton
+              disabled={loading || !areProductsToBeCancled() || partailsCancelProductList.length === 1}
+              checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
+              onClick={() => {
+                setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
+              }}
+            >
+              <div className="px-3">
+                <p className={cancelRadioStyles.address_name_and_phone}>Cancel Selected</p>
+              </div>
+            </AddressRadioButton>
+          </div>
+          <div style={{ maxHeight: "250px", overflow: "auto" }}>
+            {areProductsToBeCancled() && selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
               <div className="px-1 py-2">
-                {partailsReturnProductList?.map((product, idx) => {
+                {partailsCancelProductList?.map((product, idx) => {
+                  console.log("cancel product", product);
                   return (
                     <div className="d-flex mb-4">
                       <div style={{ width: 100, height: 80 }}>
@@ -413,17 +564,18 @@ export default function ReturnOrderModal({
             )}
           </div>
           {inlineError.selected_id_error && <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>}
-          {selectedIds && selectedIds.length > 0 && (
+
+          {selectedCancelType === CANCEL_ORDER_TYPES.allOrder && (
             <div className="px-2">
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                Select reason*
-              </Typography>
+              <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
               <Dropdown
                 header={
                   <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
                     <div className="px-2">
                       <p className={styles.cancel_dropdown_text}>
-                        {selectedCancelReasonId?.value ? selectedCancelReasonId?.value : "Select reason for return"}
+                        {selectedCancelReasonId?.value
+                          ? selectedCancelReasonId?.value
+                          : "Select reason for cancellation"}
                       </p>
                     </div>
                     <div className="px-2 ms-auto">
@@ -432,7 +584,44 @@ export default function ReturnOrderModal({
                   </div>
                 }
                 body_classes="dropdown-menu-right"
-                style={{ width: "100%", maxHeight: "250px", overflow: "auto", margin: "260px 0" }}
+                style={{ width: "100%", maxHeight: "250px", overflow: "auto", margin: "180px 0" }}
+                click={(reasonValue) => {
+                  const REASONS = reasons;
+                  const type = REASONS.find(({ value }) => value.toLowerCase() === reasonValue.toLowerCase());
+                  setSelectedCancelReasonId(type);
+                  setInlineError((error) => ({
+                    ...error,
+                    reason_error: "",
+                  }));
+                }}
+                options={reasons.map(({ value }) => ({
+                  value,
+                }))}
+                show_icons={false}
+              />
+              {inlineError.reason_error && <ErrorMessage>{inlineError.reason_error}</ErrorMessage>}
+            </div>
+          )}
+          {selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && selectedIds && selectedIds.length > 0 && (
+            <div className="px-2">
+              <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
+              <Dropdown
+                header={
+                  <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
+                    <div className="px-2">
+                      <p className={styles.cancel_dropdown_text}>
+                        {selectedCancelReasonId?.value
+                          ? selectedCancelReasonId?.value
+                          : "Select reason for cancellation"}
+                      </p>
+                    </div>
+                    <div className="px-2 ms-auto">
+                      <ExpandMoreIcon sx={{ color: "#979797" }} />
+                    </div>
+                  </div>
+                }
+                body_classes="dropdown-menu-right"
+                style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
                 click={(reasonValue) => {
                   const REASONS = reasons;
                   const type = REASONS.find(({ value }) => value.toLowerCase() === reasonValue.toLowerCase());
@@ -451,31 +640,33 @@ export default function ReturnOrderModal({
             </div>
           )}
         </div>
-        <div className={`${styles.card_footer} d-flex align-items-center`}>
+        <div className={`${styles.card_footer} d-flex align-items-center justify-content-center`}>
           <div className="px-3">
             <Button
-              sx={{ paddingLeft: 4, paddingRight: 4 }}
               disabled={loading}
-              variant="outlined"
+              button_type={buttonTypes.secondary}
+              button_hover_type={buttonTypes.secondary_hover}
+              button_text="Cancel"
               onClick={() => {
                 onClose();
               }}
-            >
-              Cancel
-            </Button>
+            />
           </div>
-          <div>
+          <div className="px-3">
             <Button
-              sx={{ paddingLeft: 4, paddingRight: 4 }}
               isloading={loading ? 1 : 0}
               disabled={loading}
-              variant="contained"
+              button_type={buttonTypes.primary}
+              button_hover_type={buttonTypes.primary_hover}
+              button_text="Confirm"
               onClick={() => {
-                handlePartialOrderCancel();
+                if (selectedCancelType === CANCEL_ORDER_TYPES.allOrder) {
+                  handleFetchCancelOrderDetails();
+                } else {
+                  handlePartialOrderCancel();
+                }
               }}
-            >
-              Confirm
-            </Button>
+            />
           </div>
         </div>
       </div>

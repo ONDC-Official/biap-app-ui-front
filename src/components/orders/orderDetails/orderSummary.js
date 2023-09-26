@@ -14,6 +14,7 @@ import styles from "../../../styles/cart/cartView.module.scss";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import ReturnOrderModal from "./returnOrderModal";
+import CancelOrderModal from "./cancelOrderModal";
 
 const OrderSummary = ({ orderDetails }) => {
   const classes = useStyles();
@@ -23,6 +24,7 @@ const OrderSummary = ({ orderDetails }) => {
   const dispatch = useContext(ToastContext);
 
   const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
+  const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
 
   const isItemCustomization = (tags) => {
     let isCustomization = false;
@@ -461,15 +463,27 @@ const OrderSummary = ({ orderDetails }) => {
         <Button fullWidth variant="outlined" className={classes.helpButton}>
           Get Help
         </Button>
-        <Button
-          fullWidth
-          variant="contained"
-          color="error"
-          className={classes.cancelOrderButton}
-          onClick={() => setToggleReturnOrderModal(true)}
-        >
-          Return Order
-        </Button>
+        {false ? (
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            className={classes.cancelOrderButton}
+            onClick={() => setToggleReturnOrderModal(true)}
+          >
+            Return Order
+          </Button>
+        ) : (
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            className={classes.cancelOrderButton}
+            onClick={() => setToggleCancelOrderModal(true)}
+          >
+            Cancel Order
+          </Button>
+        )}
       </div>
       {toggleReturnOrderModal && (
         <ReturnOrderModal
@@ -477,6 +491,49 @@ const OrderSummary = ({ orderDetails }) => {
           onSuccess={() => setToggleReturnOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
           partailsReturnProductList={orderDetails.items
+            ?.map(({ id }, index) => {
+              let findQuote = orderDetails.quote?.breakup.find(
+                (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
+              );
+
+              if (findQuote) {
+                const tag = findQuote.item.tags.find((tag) => tag.code === "type");
+                const tagList = tag?.list;
+                const type = tagList?.find((item) => item.code === "type");
+
+                if (type?.value === "item") {
+                  const parentId = findQuote.item.parent_item_id;
+                  const customizations = itemQuotes[parentId].customizations;
+
+                  return {
+                    id,
+                    name: findQuote?.title ?? "NA",
+                    cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+                    return_status: orderDetails.items?.[index]?.return_status ?? "",
+                    fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+                    customizations: customizations ?? null,
+                    ...orderDetails.items?.[index]?.product,
+                  };
+                }
+              } else {
+                findQuote = orderDetails.quote?.breakup[index];
+              }
+
+              return null;
+            })
+            .filter((item) => item !== null)}
+          order_status={orderDetails.state}
+          bpp_id={orderDetails.bpp_id}
+          transaction_id={orderDetails.transactionId}
+          order_id={orderDetails.id}
+        />
+      )}
+      {toggleCancelOrderModal && (
+        <CancelOrderModal
+          onClose={() => setToggleCancelOrderModal(false)}
+          onSuccess={() => setToggleCancelOrderModal(false)}
+          quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+          partailsCancelProductList={orderDetails.items
             ?.map(({ id }, index) => {
               let findQuote = orderDetails.quote?.breakup.find(
                 (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
