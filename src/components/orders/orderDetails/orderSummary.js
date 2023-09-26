@@ -20,6 +20,7 @@ const OrderSummary = ({ orderDetails }) => {
   const [itemQuotes, setItemQuotes] = useState(null);
   const [deliveryQuotes, setDeliveryQuotes] = useState(null);
   const dispatch = useContext(ToastContext);
+  const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
 
   console.log("<=====================orderDetails========>", orderDetails);
 
@@ -101,6 +102,7 @@ const OrderSummary = ({ orderDetails }) => {
         let items = {};
         let delivery = {};
         all_items.forEach((item) => {
+          setQuoteItemInProcessing(item.id);
           // for type item
           if (item.title_type === "item" && !item.isCustomization) {
             let key = item.parent_item_id || item.id;
@@ -108,7 +110,9 @@ const OrderSummary = ({ orderDetails }) => {
               title: item.quantity + " * Base Price",
               value: item.price,
             };
-            items[key] = { title: item.title, price: price };
+            let prev_item_data = items[key];
+            let addition_item_data = { title: item.title, price: price };
+            items[key] = { ...prev_item_data, ...addition_item_data };
           }
           if (item.title_type === "tax" && !item.isCustomization) {
             let key = item.parent_item_id || item.id;
@@ -131,16 +135,26 @@ const OrderSummary = ({ orderDetails }) => {
           if (item.title_type === "item" && item.isCustomization) {
             let key = item.parent_item_id;
             items[key]["customizations"] = items[key]["customizations"] || {};
-            items[key]["customizations"][item.id] = {
+            let existing_data = items[key]["customizations"][item.id] || {};
+            let customisation_details = {
               title: item.title,
               price: {
                 title: item.quantity + " * Base Price",
                 value: item.price,
               },
+              quantityMessage: item.quantityMessage,
+              textClass: item.textClass,
+              quantity: item.quantity,
+              cartQuantity: item.cartQuantity,
+            };
+            items[key]["customizations"][item.id] = {
+              ...existing_data,
+              ...customisation_details,
             };
           }
           if (item.title_type === "tax" && item.isCustomization) {
             let key = item.parent_item_id;
+            items[key]["customizations"] = items[key]["customizations"] || {};
             items[key]["customizations"][item.id] =
               items[key]["customizations"][item.id] || {};
             items[key]["customizations"][item.id]["tax"] = {
@@ -150,6 +164,7 @@ const OrderSummary = ({ orderDetails }) => {
           }
           if (item.title_type === "discount" && item.isCustomization) {
             let key = item.parent_item_id;
+            items[key]["customizations"] = items[key]["customizations"] || {};
             items[key]["customizations"][item.id] =
               items[key]["customizations"][item.id] || {};
             items[key]["customizations"][item.id]["discount"] = {
@@ -200,10 +215,12 @@ const OrderSummary = ({ orderDetails }) => {
             };
           }
         });
+        setQuoteItemInProcessing(null);
         setItemQuotes(items);
         setDeliveryQuotes(delivery);
       }
     } catch (error) {
+      console.log(error);
       showQuoteError();
     }
   }, [orderDetails]);
@@ -221,7 +238,14 @@ const OrderSummary = ({ orderDetails }) => {
   }
 
   const showQuoteError = () => {
-    dispatchError("There is issue with quote from seller side! Please check!");
+    let msg = "";
+    if (quoteItemInProcessing) {
+      msg = `Looks like Quote mapping for item: ${quoteItemInProcessing} is invalid! Please check!`;
+    } else {
+      msg =
+        "There can be issue with quote or buyer side! Please confirm first if quote is valid!";
+    }
+    dispatchError(msg);
   };
 
   console.log("1111111111111111111111=====>", itemQuotes);
@@ -410,9 +434,11 @@ const OrderSummary = ({ orderDetails }) => {
       );
       items.forEach((item) => {
         finalTotal = finalTotal + parseInt(item.price.value);
-        Object.values(item.customizations).forEach((custItem) => {
-          finalTotal = finalTotal + parseInt(custItem.price.value);
-        });
+        if (item.customizations) {
+          Object.values(item.customizations).forEach((custItem) => {
+            finalTotal = finalTotal + parseInt(custItem.price.value);
+          });
+        }
       });
     }
     return finalTotal;
@@ -509,6 +535,7 @@ const OrderSummary = ({ orderDetails }) => {
         </div>
       );
     } catch (error) {
+      console.log(error);
       showQuoteError();
     }
   };

@@ -1468,6 +1468,8 @@ const Checkout = () => {
               }
               if (item.title_type === "discount" && item.isCustomization) {
                 let key = item.parent_item_id;
+                items[key]["customizations"] =
+                  items[key]["customizations"] || {};
                 items[key]["customizations"][item.id] =
                   items[key]["customizations"][item.id] || {};
                 items[key]["customizations"][item.id]["discount"] = {
