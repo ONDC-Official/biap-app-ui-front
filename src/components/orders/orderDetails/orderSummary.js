@@ -243,7 +243,7 @@ const OrderSummary = ({ orderDetails }) => {
       msg = `Looks like Quote mapping for item: ${quoteItemInProcessing} is invalid! Please check!`;
     } else {
       msg =
-        "There can be issue with quote or buyer side! Please confirm first if quote is valid!";
+        "Seems like issue with quote processing! Please confirm first if quote is valid!";
     }
     dispatchError(msg);
   };
