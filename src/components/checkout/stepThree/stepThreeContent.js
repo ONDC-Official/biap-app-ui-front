@@ -60,7 +60,6 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
         }
         if (updatedCartItemsData) {
             updatedCartItems.current = updatedCartItemsData;
-            console.log("updatedCartItemsData uuuuuuuuuuuuuuu=====>", updatedCartItemsData)
         }
         if(cartItemsData && updatedCartItemsData){
 
@@ -68,9 +67,8 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
     }, [cartItemsData, updatedCartItemsData]);
 
     useEffect(() => {
-        console.log("<==============================================cartItems=====>", cartItems)
         if(cartItems && cartItems.length > 0){
-            handleInitializaOrder();
+            // handleInitializaOrder();
         }
     }, [cartItems]);
     const handleSuccess = () => {
@@ -96,7 +94,6 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
         try {
             localStorage.setItem("selectedItems", JSON.stringify(updatedCartItems));
             const data = await cancellablePromise(getCall(`/clientApis/v2/on_initialize_order?messageIds=${message_id}`));
-            console.log("data[0]=====>", data[0]);
             responseRef.current = [...responseRef.current, data[0]];
             setEventData((eventData) => [...eventData, data[0]]);
 
@@ -168,7 +165,6 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
 
     const initializeOrder = async (itemsList) => {
         const items = JSON.parse(JSON.stringify(Object.assign([], itemsList)));
-        console.log("items=====>", items)
         responseRef.current = [];
         setInitializeOrderLoading(true);
         try {
@@ -178,7 +174,6 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                     "/clientApis/v2/initialize_order",
                     items.map((item) => {
                         const fulfillments = item[0].product.fulfillments;
-                        console.log("ITEM=====>", item)
                         delete item[0].product.fulfillments;
                         let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
                         itemsData = itemsData.map((itemData) => {
@@ -191,7 +186,6 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                             }else{}
                             return itemData;
                         });
-                        console.log("itemsData=====>sssssssssss", itemsData)
 
                         return {
                             context: {
@@ -266,12 +260,9 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
         let c = cartItems.map((item) => {
             return item.item;
         });
-        console.log("c=====>", c)
-        console.log("A=====>", responseReceivedIds)
         const request_object = constructQouteObject(
             c.filter(({provider}) => responseReceivedIds.includes(provider.local_id.toString()))
         );
-        console.log("request_object=====>", request_object)
         initializeOrder(request_object);
     }
 
