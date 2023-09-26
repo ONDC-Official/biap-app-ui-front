@@ -20,6 +20,7 @@ import {getCall, postCall} from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
 import {getValueFromCookie} from "../../../utils/cookies";
 import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
+import Chip from "@mui/material/Chip";
 
 const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const classes = useStyles();
@@ -663,6 +664,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       <Typography variant="h5" className={classes.orderNumberTypo}>
         {`Order Number: `}
         <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
+        <Chip
+            className={classes.statusChip}
+            color={orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"?"primary":orderDetails?.state === "Delivered"?"success":orderDetails?.state === "Cancelled"?"error":"primary"}
+            label={orderDetails?.state}
+        />
       </Typography>
       <Typography variant="body1" className={classes.orderOnTypo}>
         {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format(
