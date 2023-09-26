@@ -94,7 +94,12 @@ const OrderDetails = () => {
             <CustomerDetails orderDetails={orderDetails} />
           </Grid>
           <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
-            <OrderSummary orderDetails={orderDetails} />
+            <OrderSummary
+              orderDetails={orderDetails}
+              onUpdateOrder={(data) => {
+                setOrderDetails(data);
+              }}
+            />
           </Grid>
         </>
       )}

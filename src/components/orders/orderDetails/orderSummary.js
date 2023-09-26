@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, {useEffect, useState, useContext, useRef} from "react";
 import useStyles from "./style";
 
 import Card from "@mui/material/Card";
@@ -15,8 +15,13 @@ import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import ReturnOrderModal from "./returnOrderModal";
 import CancelOrderModal from "./cancelOrderModal";
+import useCancellablePromise from "../../../api/cancelRequest";
+import {getCall, postCall} from "../../../api/axios";
+import Loading from "../../shared/loading/loading";
+import {getValueFromCookie} from "../../../utils/cookies";
+import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
 
-const OrderSummary = ({ orderDetails }) => {
+const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const classes = useStyles();
 
   const [itemQuotes, setItemQuotes] = useState(null);
@@ -28,6 +33,24 @@ const OrderSummary = ({ orderDetails }) => {
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
   const [productsList, setProductsList] = useState([]);
   const [allNonCancellable, setAllNonCancellable] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const statusEventSourceResponseRef = useRef(null);
+  const eventTimeOutRef = useRef([]);
+
+  // HOOKS
+  const { cancellablePromise } = useCancellablePromise();
+
+  // use this function to dispatch error
+  function dispatchToast(message, type) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type,
+        message,
+      },
+    });
+  }
 
   const isItemCustomization = (tags) => {
     let isCustomization = false;
@@ -522,6 +545,119 @@ const OrderSummary = ({ orderDetails }) => {
     }
   };
 
+  // on status
+  async function getUpdatedStatus(message_id) {
+    try {
+      const data = await cancellablePromise(
+          getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`)
+      );
+      statusEventSourceResponseRef.current = [
+        ...statusEventSourceResponseRef.current,
+        data[0],
+      ];
+      const { message, error = {} } = data[0];
+      if (error?.message) {
+        dispatchToast("Cannot get status for this product", toast_types.error);
+        setStatusLoading(false);
+        return;
+      }
+      if (message?.order) {
+        onUpdateOrder(message?.order);
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.success,
+            message: "Order status updated successfully!",
+          },
+        });
+      }
+      setStatusLoading(false);
+    } catch (err) {
+      setStatusLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    }
+  };
+
+  // STATUS APIS
+  // use this function to fetch support info through events
+  function fetchStatusDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+        `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+        header
+    );
+    es.addEventListener("on_status", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getUpdatedStatus(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (statusEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+            "Cannot proceed with you request now! Please try again",
+            toast_types.error
+        );
+        setStatusLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
+  // use this api to get updated status of the order
+  async function handleFetchUpdatedStatus() {
+    statusEventSourceResponseRef.current = [];
+    setStatusLoading(true);
+    const transaction_id = orderDetails?.transactionId;
+    const bpp_id = orderDetails?.bppId;
+    const order_id = orderDetails?.id;
+    console.log("order_id=====>", orderDetails?.id)
+    try {
+      const data = await cancellablePromise(
+          postCall("/clientApis/v2/order_status", [
+            {
+              context: {
+                transaction_id,
+                bpp_id,
+              },
+              message: {
+                order_id,
+              },
+            },
+          ])
+      );
+      //Error handling workflow eg, NACK
+      if (data[0].error && data[0].message.ack.status === "NACK") {
+        setStatusLoading(false);
+        dispatchToast(data[0].error.message, toast_types.error);
+      } else {
+        fetchStatusDataThroughEvents(data[0]?.context?.message_id);
+      }
+    } catch (err) {
+      setStatusLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  };
+
   return (
     <Card className={classes.orderSummaryCard}>
       <Typography variant="h5" className={classes.orderNumberTypo}>
@@ -542,8 +678,13 @@ const OrderSummary = ({ orderDetails }) => {
 
       {renderQuote()}
       <div className={classes.summaryItemActionContainer}>
-        <Button fullWidth variant="outlined" className={classes.helpButton}>
-          Get Help
+        <Button
+          fullWidth
+          variant="outlined"
+          className={classes.helpButton}
+          onClick={() => handleFetchUpdatedStatus()}
+        >
+          {statusLoading?<Loading />:"Get Status"}
         </Button>
         {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
           <Button
@@ -552,7 +693,7 @@ const OrderSummary = ({ orderDetails }) => {
             color="error"
             className={classes.cancelOrderButton}
             onClick={() => setToggleCancelOrderModal(true)}
-            disabled={allNonCancellable}
+            disabled={allNonCancellable || statusLoading}
           >
             Cancel Order
           </Button>
@@ -564,6 +705,7 @@ const OrderSummary = ({ orderDetails }) => {
             color="error"
             className={classes.cancelOrderButton}
             onClick={() => setToggleReturnOrderModal(true)}
+            disabled={statusLoading}
           >
             Return Order
           </Button>
