@@ -122,8 +122,8 @@ const StepTwoContent = ({
             data[0].message.quote.items.forEach((item) => {
                 const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.id === item.id);
                 if (findItemIndexFromCart > -1) {
-                    updatedCartItems.current[findItemIndexFromCart].fulfillment_id = item.fulfillment_id;
-                    updatedCartItems.current[findItemIndexFromCart].fulfillments = data[0].message.quote.fulfillments;
+                    updatedCartItems.current[findItemIndexFromCart].item.product.fulfillment_id = item.fulfillment_id;
+                    updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments = data[0].message.quote.fulfillments;
                 }
             });
 

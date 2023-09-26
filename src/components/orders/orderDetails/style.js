@@ -11,6 +11,9 @@ const useStyles = makeStyles({
         marginTop: '20px',
         marginBottom: '20px',
     },
+    statusChip:{
+        float: 'right'
+    },
 
     orderSummaryCard: {
         padding: '26px 16px !Important',

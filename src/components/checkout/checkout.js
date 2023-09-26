@@ -1235,9 +1235,7 @@ const Checkout = () => {
   });
   const [initLoading, setInitLoading] = useState(false);
 
-  const [activePaymentMethod, setActivePaymentMethod] = useState(
-    payment_methods.COD
-  );
+  const [activePaymentMethod, setActivePaymentMethod] = useState("");
   const [confirmOrderLoading, setConfirmOrderLoading] = useState(false);
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
@@ -2207,31 +2205,35 @@ const Checkout = () => {
                 activeStep !== 2
               }
               onClick={() => {
-                const { productQuotes, successOrderIds } = JSON.parse(
-                  // getValueFromCookie("checkout_details") || "{}"
-                  localStorage.getItem("checkout_details") || "{}"
-                );
-                setConfirmOrderLoading(true);
-                let c = cartItems.map((item) => {
-                  return item.item;
-                });
-                if (activePaymentMethod === payment_methods.JUSPAY) {
-                  // setTogglePaymentGateway(true);
-                  // setLoadingSdkForPayment(true);
-                  // initiateSDK();
-                  const request_object = constructQouteObject(
-                    c.filter(({ provider }) =>
-                      successOrderIds.includes(provider.local_id.toString())
-                    )
+                if(activePaymentMethod) {
+                  const { productQuotes, successOrderIds } = JSON.parse(
+                      // getValueFromCookie("checkout_details") || "{}"
+                      localStorage.getItem("checkout_details") || "{}"
                   );
-                  confirmOrder(request_object[0], payment_methods.JUSPAY);
-                } else {
-                  const request_object = constructQouteObject(
-                    c.filter(({ provider }) =>
-                      successOrderIds.includes(provider.local_id.toString())
-                    )
-                  );
-                  confirmOrder(request_object[0], payment_methods.COD);
+                  setConfirmOrderLoading(true);
+                  let c = cartItems.map((item) => {
+                    return item.item;
+                  });
+                  if (activePaymentMethod === payment_methods.JUSPAY) {
+                    // setTogglePaymentGateway(true);
+                    // setLoadingSdkForPayment(true);
+                    // initiateSDK();
+                    const request_object = constructQouteObject(
+                        c.filter(({ provider }) =>
+                            successOrderIds.includes(provider.local_id.toString())
+                        )
+                    );
+                    confirmOrder(request_object[0], payment_methods.JUSPAY);
+                  } else {
+                    const request_object = constructQouteObject(
+                        c.filter(({ provider }) =>
+                            successOrderIds.includes(provider.local_id.toString())
+                        )
+                    );
+                    confirmOrder(request_object[0], payment_methods.COD);
+                  }
+                }else {
+                  dispatchError("Please select payment.");
                 }
               }}
             >
