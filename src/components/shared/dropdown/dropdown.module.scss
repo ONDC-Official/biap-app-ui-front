@@ -1,7 +1,7 @@
 @import "../../../assets/scss/variables.scss";
 
 .dropdown_link {
-  font-size: $font-16;
+  font-size: $font-14;
   line-height: 1.5;
   letter-spacing: normal;
   text-align: left;
@@ -22,7 +22,7 @@
 }
 
 .dropdown_link_wrapper {
-  padding: 15px 10px;
+  padding: 8px 4px;
   display: flex;
   align-items: center;
   background: transparent;
@@ -30,7 +30,7 @@
   cursor: pointer;
 }
 
-.dropdown_link_wrapper>div {
+.dropdown_link_wrapper > div {
   padding: 0 10px;
 }
 

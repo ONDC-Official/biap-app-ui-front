@@ -126,10 +126,12 @@
 }
 
 .quantity_count {
-  font-size: $font-12;
-  color: #a1a1a1;
-  text-align: left;
+  font-size: $font-14;
+  color: #222222;
   margin: 0;
+  min-width: 100px;
+  text-align: center;
+  font-weight: 700;
 }
 
 .secondary_action,
@@ -169,7 +171,7 @@
 }
 
 .cancel_return_button {
-  width: 130px !important
+  width: 130px !important;
 }
 
 .primary_action:hover {
@@ -184,7 +186,7 @@ button:disabled {
 
 .label_chip {
   padding: 4px 8px;
-  background-color: #EFEFEF;
+  background-color: #efefef;
   border: 0.5px solid #ddd;
   border-radius: 36px;
 }
