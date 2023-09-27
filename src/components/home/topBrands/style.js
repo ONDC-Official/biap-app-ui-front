@@ -30,7 +30,8 @@ const useStyles = makeStyles({
         boxShadow: "none !important",
     },
     brandImage: {
-        margin: 'auto'
+        margin: 'auto !important',
+        width: '100%'
     },
     dotsContainer: {
       textAlign: 'center'
