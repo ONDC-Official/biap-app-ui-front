@@ -1672,12 +1672,12 @@ const Checkout = () => {
         removeCookie("transaction_id");
         removeCookie("parent_order_id");
         removeCookie("search_context");
-        removeCookie("delivery_address");
+        // removeCookie("delivery_address");
         removeCookie("billing_address");
         // removeCookie("checkout_details");
         localStorage.removeItem("checkout_details");
         removeCookie("parent_and_transaction_id_map");
-        removeCookie("LatLongInfo");
+        // removeCookie("LatLongInfo");
         setCartItems([]);
         history.replace("/application/orders");
       }
