@@ -17,25 +17,25 @@ import { postCall, getCall } from "../../../api/axios";
 import AddressRadioButton from "../../../components/application/initialize-order/address-details/address-radio-button/addressRadioButton";
 import Checkbox from "../../shared/checkbox/checkbox";
 import Dropdown from "../../shared/dropdown/dropdown";
-import DropdownSvg from "../../shared/svg/dropdonw";
 import Subtract from "../../shared/svg/subtract";
 import Add from "../../shared/svg/add";
 import { CANCELATION_REASONS } from "../../../constants/cancelation-reasons";
 import { Grid, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Expand } from "@mui/icons-material";
 
-export default function CancelOrderModal({
-  bpp_id,
-  transaction_id,
-  order_id,
-  order_status,
-  partailsCancelProductList = [],
-  onClose,
-  onSuccess,
-  quantity,
-}) {
-  console.log("partailsCancelProductList", partailsCancelProductList);
+export default function CancelOrderModal(props) {
+  const {
+    bpp_id,
+    transaction_id,
+    order_id,
+    order_status,
+    partailsCancelProductList = [],
+    onClose,
+    onSuccess,
+    quantity,
+    domain,
+  } = props;
+
   // CONSTANTS
   const CANCEL_ORDER_TYPES = {
     allOrder: "ALL_ORDERS",
@@ -129,8 +129,9 @@ export default function CancelOrderModal({
     setLoading(true);
     try {
       const { context } = await cancellablePromise(
-        postCall("/clientApis/v1/cancel_order", {
+        postCall("/clientApis/v2/cancel_order", {
           context: {
+            domain,
             bpp_id,
             transaction_id,
           },
@@ -243,6 +244,7 @@ export default function CancelOrderModal({
           requestObject?.map((item, index) => {
             return {
               context: {
+                domain,
                 bpp_id,
                 transaction_id,
               },
@@ -453,7 +455,6 @@ export default function CancelOrderModal({
             {areProductsToBeCancled() && selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
               <div className="px-1 py-2">
                 {partailsCancelProductList?.map((product, idx) => {
-                  console.log("cancel-product:", product);
                   return (
                     <div className="d-flex mb-4">
                       <div style={{ width: 100, height: 80 }}>
