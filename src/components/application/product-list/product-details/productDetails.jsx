@@ -368,9 +368,18 @@ const ProductDetails = () => {
                 <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
                   {productDetails?.descriptor?.name}
                 </Typography>
-                <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}>
-                  ₹ {productDetails?.price?.value}
-                </Typography>
+                <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+                  <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
+                    ₹{productDetails?.price?.value}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    color="black"
+                    sx={{ fontFamily: "inter", fontWeight: 400, marginLeft: 2, textDecoration: "line-through" }}
+                  >
+                    ₹{productDetails?.price?.maximum_value}
+                  </Typography>
+                </Grid>
                 <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
                 <VariationsRenderer
                   productPayload={productPayload}
