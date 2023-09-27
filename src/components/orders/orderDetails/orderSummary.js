@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext, useRef} from "react";
+import React, { useEffect, useState, useContext, useRef } from "react";
 import useStyles from "./style";
 
 import Card from "@mui/material/Card";
@@ -16,10 +16,10 @@ import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import ReturnOrderModal from "./returnOrderModal";
 import CancelOrderModal from "./cancelOrderModal";
 import useCancellablePromise from "../../../api/cancelRequest";
-import {getCall, postCall} from "../../../api/axios";
+import { getCall, postCall } from "../../../api/axios";
 import Loading from "../../shared/loading/loading";
-import {getValueFromCookie} from "../../../utils/cookies";
-import {SSE_TIMEOUT} from "../../../constants/sse-waiting-time";
+import { getValueFromCookie } from "../../../utils/cookies";
+import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import Chip from "@mui/material/Chip";
 
 const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
@@ -120,8 +120,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             fulfillment_status: item?.fulfillment_status,
             cancellation_status: item?.cancellation_status,
             return_status: item?.return_status,
-            isCancellable: item?.product?.['@ondc/org/cancellable'],
-            isReturnable: item?.product?.['@ondc/org/returnable']
+            isCancellable: item?.product?.["@ondc/org/cancellable"],
+            isReturnable: item?.product?.["@ondc/org/returnable"],
           };
         });
         let items = {};
@@ -140,12 +140,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             addition_item_data.isCancellable = item.isCancellable;
             addition_item_data.isReturnable = item.isReturnable;
             addition_item_data.fulfillment_status = item?.fulfillment_status;
-            if(item?.return_status){
+            if (item?.return_status) {
               addition_item_data.return_status = item?.return_status;
-            }else{}
-            if(item?.cancellation_status){
+            } else {
+            }
+            if (item?.cancellation_status) {
               addition_item_data.cancellation_status = item?.cancellation_status;
-            }else{}
+            } else {
+            }
             items[key] = { ...prev_item_data, ...addition_item_data };
           }
           if (item.title_type === "tax" && !item.isCustomization) {
@@ -271,13 +273,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   }, [productsList]);
 
   const areAllItemsNonCancellable = (products) => {
-    for (const productIndex in products) {
-      if (productsList[productIndex]["@ondc/org/cancellable"] == false) {
-        return false;
-      }
-    }
-
-    return true;
+    return !products.some((obj) => obj["@ondc/org/cancellable"]);
   };
 
   function generateProductsList(orderDetails, itemQuotes) {
@@ -369,53 +365,48 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-title`}>
                 <Typography variant="body1" className={`${classes.summaryItemLabel} ${quote.textClass}`}>
                   {quote?.title}
-                  {
-                    quote?.fulfillment_status && (
-                      <Chip
-                          size="small"
-                          // variant="outlined"
-                          className={classes.statusChip}
-                          label={quote?.fulfillment_status}
-                      />
-                    )
-                  }
+                  {quote?.fulfillment_status && (
+                    <Chip
+                      size="small"
+                      // variant="outlined"
+                      className={classes.statusChip}
+                      label={quote?.fulfillment_status}
+                    />
+                  )}
                   <p className={`${styles.ordered_from} ${quote.textClass}`}>{quote.quantityMessage}</p>
                 </Typography>
               </div>
               <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom12}`}>
-                {
-                  quote.cancellation_status
-                  ?(
+                {quote.cancellation_status ? (
+                  <Chip
+                    size="small"
+                    // variant="outlined"
+                    className={classes.statusChip}
+                    label={quote?.cancellation_status}
+                  />
+                ) : quote.return_status ? (
+                  <Chip
+                    size="small"
+                    // variant="outlined"
+                    className={classes.statusChip}
+                    label={quote?.return_status}
+                  />
+                ) : (
+                  <>
                     <Chip
                       size="small"
                       // variant="outlined"
                       className={classes.statusChip}
-                      label={quote?.cancellation_status}
+                      label={quote?.isReturnable ? "returnable" : "non returnable"}
                     />
-                  ):quote.return_status?(
                     <Chip
                       size="small"
                       // variant="outlined"
                       className={classes.statusChip}
-                      label={quote?.return_status}
+                      label={quote?.isCancellable ? "cancelable" : "non cancelable"}
                     />
-                  ):(
-                    <>
-                      <Chip
-                          size="small"
-                          // variant="outlined"
-                          className={classes.statusChip}
-                          label={quote?.isReturnable?"returnable":"non returnable"}
-                      />
-                      <Chip
-                          size="small"
-                          // variant="outlined"
-                          className={classes.statusChip}
-                          label={quote?.isCancellable?"cancelable":"non cancelable"}
-                      />
-                    </>
-                  )
-                }
+                  </>
+                )}
               </div>
               {renderItemDetails(quote)}
               {quote?.customizations && (
@@ -608,13 +599,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   // on status
   async function getUpdatedStatus(message_id) {
     try {
-      const data = await cancellablePromise(
-          getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`)
-      );
-      statusEventSourceResponseRef.current = [
-        ...statusEventSourceResponseRef.current,
-        data[0],
-      ];
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`));
+      statusEventSourceResponseRef.current = [...statusEventSourceResponseRef.current, data[0]];
       const { message, error = {} } = data[0];
       if (error?.message) {
         dispatchToast("Cannot get status for this product", toast_types.error);
@@ -641,7 +627,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         clearTimeout(timer);
       });
     }
-  };
+  }
 
   // STATUS APIS
   // use this function to fetch support info through events
@@ -655,8 +641,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       },
     };
     let es = new window.EventSourcePolyfill(
-        `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
-        header
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
     );
     es.addEventListener("on_status", (e) => {
       const { messageId } = JSON.parse(e?.data);
@@ -666,10 +652,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     const timer = setTimeout(() => {
       es.close();
       if (statusEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-            "Cannot proceed with you request now! Please try again",
-            toast_types.error
-        );
+        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
         setStatusLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -692,17 +675,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     const order_id = orderDetails?.id;
     try {
       const data = await cancellablePromise(
-          postCall("/clientApis/v2/order_status", [
-            {
-              context: {
-                transaction_id,
-                bpp_id,
-              },
-              message: {
-                order_id,
-              },
+        postCall("/clientApis/v2/order_status", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
             },
-          ])
+            message: {
+              order_id,
+            },
+          },
+        ])
       );
       //Error handling workflow eg, NACK
       if (data[0].error && data[0].message.ack.status === "NACK") {
@@ -715,7 +698,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       setStatusLoading(false);
       dispatchToast(err?.message, toast_types.error);
     }
-  };
+  }
 
   return (
     <Card className={classes.orderSummaryCard}>
@@ -723,9 +706,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         {`Order Number: `}
         <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
         <Chip
-            className={classes.statusChip}
-            color={orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"?"primary":orderDetails?.state === "Delivered"?"success":orderDetails?.state === "Cancelled"?"error":"primary"}
-            label={orderDetails?.state}
+          className={classes.statusChip}
+          color={
+            orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"
+              ? "primary"
+              : orderDetails?.state === "Delivered"
+              ? "success"
+              : orderDetails?.state === "Cancelled"
+              ? "error"
+              : "primary"
+          }
+          label={orderDetails?.state}
         />
       </Typography>
       <Typography variant="body1" className={classes.orderOnTypo}>
@@ -742,13 +733,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
 
       {renderQuote()}
       <div className={classes.summaryItemActionContainer}>
-        <Button
-          fullWidth
-          variant="outlined"
-          className={classes.helpButton}
-          onClick={() => handleFetchUpdatedStatus()}
-        >
-          {statusLoading?<Loading />:"Get Status"}
+        <Button fullWidth variant="outlined" className={classes.helpButton} onClick={() => handleFetchUpdatedStatus()}>
+          {statusLoading ? <Loading /> : "Get Status"}
         </Button>
         {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
           <Button
@@ -786,6 +772,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
           order_id={orderDetails.id}
+          domain={orderDetails.domain}
         />
       )}
 
@@ -794,11 +781,26 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           onClose={() => setToggleCancelOrderModal(false)}
           onSuccess={() => setToggleCancelOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes)}
+          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
+            if (orderDetails.domain === "ONDC:RET11") {
+              return (
+                orderDetails.state === "Created" &&
+                item["@ondc/org/cancellable"] == true &&
+                item.fulfillment_status == "Pending"
+              );
+            } else {
+              return (
+                orderDetails.state === "Accepted" &&
+                item["@ondc/org/cancellable"] == true &&
+                item.fulfillment_status !== "Pending"
+              );
+            }
+          })}
           order_status={orderDetails.state}
           bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
           order_id={orderDetails.id}
+          domain={orderDetails.domain}
         />
       )}
     </Card>
