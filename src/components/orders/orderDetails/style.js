@@ -12,7 +12,12 @@ const useStyles = makeStyles({
         marginBottom: '20px',
     },
     statusChip:{
-        float: 'right'
+        float: 'right',
+        marginRight: '5px !important',
+    },
+
+    marginBottom12:{
+        marginBottom: '12px !important'
     },
 
     orderSummaryCard: {
