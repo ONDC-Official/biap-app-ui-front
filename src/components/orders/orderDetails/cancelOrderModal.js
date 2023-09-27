@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useState, useEffect } from "react";
 import CrossIcon from "../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../shared/colors";
-import Button from "../../shared/button/button";
+// import Button from "../../shared/button/button";
 import { buttonTypes } from "../../shared/button/utils";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
 import productCartStyles from "../../../styles/products/productCard.module.scss";
@@ -20,7 +20,7 @@ import Dropdown from "../../shared/dropdown/dropdown";
 import Subtract from "../../shared/svg/subtract";
 import Add from "../../shared/svg/add";
 import { CANCELATION_REASONS } from "../../../constants/cancelation-reasons";
-import { Grid, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function CancelOrderModal(props) {
@@ -644,25 +644,25 @@ export default function CancelOrderModal(props) {
             </div>
           )}
         </div>
-        <div className={`${styles.card_footer} d-flex align-items-center justify-content-center`}>
+        <div className={`${styles.card_footer} d-flex align-items-center`}>
           <div className="px-3">
             <Button
+              sx={{ paddingLeft: 4, paddingRight: 4 }}
               disabled={loading}
-              button_type={buttonTypes.secondary}
-              button_hover_type={buttonTypes.secondary_hover}
-              button_text="Cancel"
+              variant="outlined"
               onClick={() => {
                 onClose();
               }}
-            />
+            >
+              Cancel
+            </Button>
           </div>
-          <div className="px-3">
+          <div>
             <Button
+              sx={{ paddingLeft: 4, paddingRight: 4 }}
               isloading={loading ? 1 : 0}
               disabled={loading}
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Confirm"
+              variant="contained"
               onClick={() => {
                 if (selectedCancelType === CANCEL_ORDER_TYPES.allOrder) {
                   handleFetchCancelOrderDetails();
@@ -670,7 +670,9 @@ export default function CancelOrderModal(props) {
                   handlePartialOrderCancel();
                 }
               }}
-            />
+            >
+              Confirm
+            </Button>
           </div>
         </div>
       </div>
