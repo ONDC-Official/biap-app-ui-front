@@ -117,6 +117,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             textClass,
             quantityMessage,
             uuid: uuid,
+            fulfillment_status: item?.fulfillment_status,
+            cancellation_status: item?.cancellation_status,
+            return_status: item?.return_status,
+            isCancellable: item?.product?.['@ondc/org/cancellable'],
+            isReturnable: item?.product?.['@ondc/org/returnable']
           };
         });
         let items = {};
@@ -132,6 +137,15 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             };
             let prev_item_data = items[key];
             let addition_item_data = { title: item.title, price: price };
+            addition_item_data.isCancellable = item.isCancellable;
+            addition_item_data.isReturnable = item.isReturnable;
+            addition_item_data.fulfillment_status = item?.fulfillment_status;
+            if(item?.return_status){
+              addition_item_data.return_status = item?.return_status;
+            }else{}
+            if(item?.cancellation_status){
+              addition_item_data.cancellation_status = item?.cancellation_status;
+            }else{}
             items[key] = { ...prev_item_data, ...addition_item_data };
           }
           if (item.title_type === "tax" && !item.isCustomization) {
@@ -355,8 +369,53 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-title`}>
                 <Typography variant="body1" className={`${classes.summaryItemLabel} ${quote.textClass}`}>
                   {quote?.title}
+                  {
+                    quote?.fulfillment_status && (
+                      <Chip
+                          size="small"
+                          // variant="outlined"
+                          className={classes.statusChip}
+                          label={quote?.fulfillment_status}
+                      />
+                    )
+                  }
                   <p className={`${styles.ordered_from} ${quote.textClass}`}>{quote.quantityMessage}</p>
                 </Typography>
+              </div>
+              <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom12}`}>
+                {
+                  quote.cancellation_status
+                  ?(
+                    <Chip
+                      size="small"
+                      // variant="outlined"
+                      className={classes.statusChip}
+                      label={quote?.cancellation_status}
+                    />
+                  ):quote.return_status?(
+                    <Chip
+                      size="small"
+                      // variant="outlined"
+                      className={classes.statusChip}
+                      label={quote?.return_status}
+                    />
+                  ):(
+                    <>
+                      <Chip
+                          size="small"
+                          // variant="outlined"
+                          className={classes.statusChip}
+                          label={quote?.isReturnable?"returnable":"non returnable"}
+                      />
+                      <Chip
+                          size="small"
+                          // variant="outlined"
+                          className={classes.statusChip}
+                          label={quote?.isCancellable?"cancelable":"non cancelable"}
+                      />
+                    </>
+                  )
+                }
               </div>
               {renderItemDetails(quote)}
               {quote?.customizations && (
@@ -631,7 +690,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     const transaction_id = orderDetails?.transactionId;
     const bpp_id = orderDetails?.bppId;
     const order_id = orderDetails?.id;
-    console.log("order_id=====>", orderDetails?.id)
     try {
       const data = await cancellablePromise(
           postCall("/clientApis/v2/order_status", [
