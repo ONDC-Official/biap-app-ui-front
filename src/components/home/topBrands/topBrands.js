@@ -57,7 +57,6 @@ const TopBrands = () => {
             const data = await cancellablePromise(
                 getAllBrandsRequest()
             );
-            console.log("getAllBrandsRequest=====>", data)
             setBrands(data.data);
         } catch (err) {
             dispatch({

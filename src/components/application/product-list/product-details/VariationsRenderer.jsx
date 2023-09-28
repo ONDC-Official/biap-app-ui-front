@@ -274,8 +274,6 @@ const VariationsRenderer = (props) => {
         result[groupId] = groupData;
       });
 
-      // console.log(result);
-
       setVariationState(result);
     }
   }, [variationGroups, initialVariationState, variations]);

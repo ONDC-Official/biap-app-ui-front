@@ -94,7 +94,6 @@ const CategoriesComponent = () => {
                         history.replace({ pathname: locationData.pathname, search: params.toString() });
                     }}
                     renderItem={(item) => {
-                        console.log("item.type=====>", item.type)
                         if(item.type === "page"){
                             const subCatIndex = item.page - 1;
                             const subCat = subCatList[subCatIndex];

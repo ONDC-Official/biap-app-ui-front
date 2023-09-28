@@ -37,1189 +37,6 @@ import { toast_actions, toast_types } from "../shared/toast/utils/toast";
 import Loading from "../shared/loading/loading";
 import { CartContext } from "../../context/cartContext";
 
-const m = {
-  quote: {
-    provider: {
-      id: "P1",
-      locations: [
-        {
-          id: "L1",
-        },
-      ],
-    },
-    items: [
-      {
-        fulfillment_id: "F1",
-        id: "I1",
-      },
-    ],
-    fulfillments: [
-      {
-        id: "F1",
-        type: "Delivery",
-        "@ondc/org/provider_name": "LSP or Provider Name",
-        tracking: false,
-        "@ondc/org/category": "Immediate Delivery",
-        "@ondc/org/TAT": "PT60M",
-        state: {
-          descriptor: {
-            code: "Serviceable",
-          },
-        },
-      },
-    ],
-    quote: {
-      price: {
-        currency: "INR",
-        value: "245",
-      },
-      breakup: [
-        {
-          "@ondc/org/item_id": "I1",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Atta",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "170.00",
-          },
-          item: {
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "170.00",
-            },
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Delivery charges",
-          "@ondc/org/title_type": "delivery",
-          price: {
-            currency: "INR",
-            value: "50.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Discount",
-          "@ondc/org/title_type": "discount_f",
-          price: {
-            currency: "INR",
-            value: "-50.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Tax",
-          "@ondc/org/title_type": "tax_f",
-          price: {
-            currency: "INR",
-            value: "9.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Packing charges",
-          "@ondc/org/title_type": "packing",
-          price: {
-            currency: "INR",
-            value: "25.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "I1",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "0.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "I1",
-          title: "Discount",
-          "@ondc/org/title_type": "discount",
-          price: {
-            currency: "INR",
-            value: "-10.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Convenience Fee",
-          "@ondc/org/title_type": "misc",
-          price: {
-            currency: "INR",
-            value: "10.00",
-          },
-        },
-      ],
-      ttl: "P1D",
-    },
-  },
-};
-
-const m2 = {
-  quote: {
-    provider: {
-      id: "P1",
-      locations: [
-        {
-          id: "L1",
-        },
-      ],
-    },
-    items: [
-      {
-        id: "I1",
-        fulfillment_id: "F1",
-        parent_item_id: "DI1",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "item",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C1",
-        fulfillment_id: "F1",
-        parent_item_id: "DI1",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG1",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C7",
-        fulfillment_id: "F1",
-        parent_item_id: "DI1",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG2",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C14",
-        fulfillment_id: "F1",
-        parent_item_id: "DI1",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG3",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C16",
-        fulfillment_id: "F1",
-        parent_item_id: "DI1",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG3",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "I1",
-        fulfillment_id: "F1",
-        parent_item_id: "DI2",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "item",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C2",
-        fulfillment_id: "F1",
-        parent_item_id: "DI2",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG1",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C7",
-        fulfillment_id: "F1",
-        parent_item_id: "DI2",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG2",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C14",
-        fulfillment_id: "F1",
-        parent_item_id: "DI2",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG3",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "C15",
-        fulfillment_id: "F1",
-        parent_item_id: "DI2",
-        tags: [
-          {
-            code: "type",
-            list: [
-              {
-                code: "type",
-                value: "customization",
-              },
-            ],
-          },
-          {
-            code: "parent",
-            list: [
-              {
-                code: "id",
-                value: "CG3",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    fulfillments: [
-      {
-        id: "F1",
-        "@ondc/org/provider_name": "LSP or Provider Name",
-        tracking: false,
-        "@ondc/org/category": "Immediate Delivery",
-        "@ondc/org/TAT": "PT60M",
-        state: {
-          descriptor: {
-            code: "Serviceable",
-          },
-        },
-      },
-    ],
-    quote: {
-      price: {
-        currency: "INR",
-        value: "1946.65",
-      },
-      breakup: [
-        {
-          "@ondc/org/item_id": "I1",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Farm House Pizza",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "269.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "269.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "item",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C1",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "New Hand Tossed",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "0.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "0.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG1",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C7",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Large",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "450.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "450.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG2",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C14",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Grilled Mushrooms",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "80.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "80.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C16",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Pepper Barbeque Chicken",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "95.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "95.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "I1",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Farm House Pizza",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "269.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "269.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "item",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C2",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "100% Wheat Thin Crust",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "0.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "0.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG1",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C7",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Large",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "450.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "450.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG2",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C14",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Grilled Mushrooms",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "80.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "80.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C15",
-          "@ondc/org/item_quantity": {
-            count: 1,
-          },
-          title: "Fresh Tomato",
-          "@ondc/org/title_type": "item",
-          price: {
-            currency: "INR",
-            value: "80.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            quantity: {
-              available: {
-                count: "99",
-              },
-              maximum: {
-                count: "99",
-              },
-            },
-            price: {
-              currency: "INR",
-              value: "80.00",
-            },
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "I1",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "13.45",
-          },
-          item: {
-            parent_item_id: "DI1",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "item",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C1",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "0.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG1",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C7",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "22.50",
-          },
-          item: {
-            parent_item_id: "DI1",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG2",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C14",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "4.00",
-          },
-          item: {
-            parent_item_id: "DI1",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C16",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "4.75",
-          },
-          item: {
-            parent_item_id: "DI1",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG1",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "I1",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "13.45",
-          },
-          item: {
-            parent_item_id: "DI2",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "item",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C2",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "22.50",
-          },
-          item: {
-            parent_item_id: "DI2",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG1",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C7",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "22.50",
-          },
-          item: {
-            parent_item_id: "DI2",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG2",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C14",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "4.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "C15",
-          title: "Tax",
-          "@ondc/org/title_type": "tax",
-          price: {
-            currency: "INR",
-            value: "4.00",
-          },
-          item: {
-            parent_item_id: "DI2",
-            tags: [
-              {
-                code: "type",
-                list: [
-                  {
-                    code: "type",
-                    value: "customization",
-                  },
-                ],
-              },
-              {
-                code: "parent",
-                list: [
-                  {
-                    code: "id",
-                    value: "CG3",
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Delivery charges",
-          "@ondc/org/title_type": "delivery",
-          price: {
-            currency: "INR",
-            value: "50.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Packing charges",
-          "@ondc/org/title_type": "packing",
-          price: {
-            currency: "INR",
-            value: "25.00",
-          },
-        },
-        {
-          "@ondc/org/item_id": "F1",
-          title: "Convenience Fee",
-          "@ondc/org/title_type": "misc",
-          price: {
-            currency: "INR",
-            value: "10.00",
-          },
-        },
-      ],
-      ttl: "PT1H",
-    },
-  },
-};
-
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
@@ -1269,8 +86,6 @@ const Checkout = () => {
         }
 
         const cartList = JSON.parse(JSON.stringify(updatedCartItems));
-        console.log("updatedCartItems=====>", cartList);
-        console.log("cartItems=====>", cartItems);
         // check if any one order contains error
         let total_payable = 0;
         let isAnyError = false;
@@ -1295,17 +110,12 @@ const Checkout = () => {
             provider.name = provided_by;
             let uuid = 0;
             const all_items = breakup?.map((break_up_item) => {
-              console.log("break_up_item=====>", break_up_item);
               const cartIndex = cartList.findIndex(
                 (one) => one.id === break_up_item["@ondc/org/item_id"]
               );
               const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
               let findItemFromCartItems = null;
               let isCustimization = false;
-              console.log(
-                "********************break_up_item=====>",
-                break_up_item
-              );
               if(break_up_item?.item?.tags){
                 const findTag = break_up_item?.item?.tags.find(
                     (tag) => tag.code === "type"
@@ -1336,7 +146,6 @@ const Checkout = () => {
                   }
                 }
               });
-              console.log("findItemFromCartItems=====>", findItemFromCartItems)
               let cartQuantity = findItemFromCartItems
                 ? findItemFromCartItems?.quantity?.count
                 : cartItem
@@ -1374,7 +183,10 @@ const Checkout = () => {
 
               if (error && error.code === "30009") {
                 cartList.splice(cartIndex, 1);
-              }
+              }else{}
+              if (error && error.code === "40002") {
+
+              }else{}
               uuid = uuid + 1;
               return {
                 id: break_up_item["@ondc/org/item_id"],
@@ -1392,14 +204,16 @@ const Checkout = () => {
                 quantityMessage,
                 uuid: uuid,
                 isError,
+                errorCode: error?.code || ""
               };
             });
 
             let items = {};
             let delivery = {};
             let outOfStock = [];
-            console.log("all_items=====>", all_items);
+            let errorCode = "";
             all_items.forEach((item) => {
+              errorCode = item.errorCode
               setQuoteItemInProcessing(item.id);
               if (item.isError) {
                 outOfStock.push(item);
@@ -1524,6 +338,10 @@ const Checkout = () => {
             provider.items = items;
             provider.delivery = delivery;
             provider.outOfStock = outOfStock;
+            provider.errorCode = errorCode || "";
+            if(errorCode !== ""){
+              isAnyError = true;
+            }
           }
 
           if (error) {
@@ -1541,7 +359,6 @@ const Checkout = () => {
           isError: isAnyError,
           total_payable: total_payable.toFixed(2),
         });
-        console.log("==========================================>", quotes);
       }
     } catch (err) {
       console.log(err);
@@ -1602,6 +419,7 @@ const Checkout = () => {
       case 0:
         return (
           <StepOneContent
+            isError={productsQuote.isError}
             handleNext={() => {
               setActiveStep(1);
             }}
@@ -1610,6 +428,7 @@ const Checkout = () => {
       case 1:
         return (
           <StepTwoContent
+              isError={productsQuote.isError}
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
@@ -1631,6 +450,7 @@ const Checkout = () => {
       case 2:
         return (
           <StepThreeContent
+              isError={productsQuote.isError}
             responseReceivedIds={updatedCartItems.map((item) => {
               const { message } = item;
               return message?.quote?.provider?.id.toString();
@@ -1783,7 +603,6 @@ const Checkout = () => {
     );
     try {
       const search_context = JSON.parse(getValueFromCookie("search_context"));
-      console.log("items=====>", items)
       const item = items[0];
       const queryParams = [
         {
@@ -1898,6 +717,21 @@ const Checkout = () => {
         {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data.packing && renderDeliveryLine(data.packing, "packing")}
         {data.misc && renderDeliveryLine(data.misc, "misc")}
+        {
+          data && (data.delivery || data.discount || data.tax || data.packing || data.misc) && (
+            <>
+              <div className={classes.summarySubtotalContainer}>
+                <Typography variant="body2" className={classes.subTotalLabel}>
+                  Total
+                </Typography>
+                <Typography variant="body2" className={classes.subTotalValue}>
+                  {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
+                </Typography>
+              </div>
+              <Box component={"div"} className={classes.orderTotalDivider} />
+            </>
+          )
+        }
       </div>
     );
   };
@@ -1907,19 +741,19 @@ const Checkout = () => {
     providers.forEach((provider) => {
       const data = provider.delivery;
       if (data.delivery) {
-        total = total + parseInt(data.delivery.value);
+        total = total + parseFloat(data.delivery.value);
       }
       if (data.discount) {
-        total = total + parseInt(data.discount.value);
+        total = total + parseFloat(data.discount.value);
       }
       if (data.tax) {
-        total = total + parseInt(data.tax.value);
+        total = total + parseFloat(data.tax.value);
       }
       if (data.packing) {
-        total = total + parseInt(data.packing.value);
+        total = total + parseFloat(data.packing.value);
       }
       if (data.misc) {
-        total = total + parseInt(data.misc.value);
+        total = total + parseFloat(data.misc.value);
       }
     });
     return total;
@@ -2015,10 +849,16 @@ const Checkout = () => {
           (quote) => quote?.title !== ""
         );
         items.forEach((item) => {
-          finalTotal = finalTotal + parseInt(item.price.value);
-          if (item.customizations) {
+          finalTotal = finalTotal + parseFloat(item.price.value);
+          if(item?.tax){
+            finalTotal = finalTotal + parseFloat(item.tax.value);
+          }
+          if (item?.customizations) {
             Object.values(item.customizations)?.forEach((custItem) => {
-              finalTotal = finalTotal + parseInt(custItem.price.value);
+              finalTotal = finalTotal + parseFloat(custItem.price.value);
+              if(custItem?.tax){
+                finalTotal = finalTotal + parseFloat(custItem.tax.value);
+              }
             });
           }
         });
@@ -2028,78 +868,83 @@ const Checkout = () => {
   };
 
   const renderOutofStockItems = (provider, pindex) => {
-    return (
-      <div key={`outof-stockpindex-${pindex}`}>
-        {provider.error ? (
-          <>
-            <div>
-              <Typography
-                variant="body1"
-                className={`${classes.summaryItemLabel} ${classes.marginBottom10} text-error`}
-              >
-                Out of stock
-              </Typography>
-            </div>
-            <div>
-              <div
-                className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
-              >
-                <Typography
-                  variant="body1"
-                  className={classes.summaryItemQuantityLabel}
-                >
-                  Items
-                </Typography>
-                <Typography
-                  variant="body1"
-                  className={classes.summaryItemQuantityValue}
-                >
-                  Cart Quantity
-                </Typography>
-                <Typography
-                  variant="body1"
-                  className={classes.summaryItemQuantityValue}
-                >
-                  Available Quantity
-                </Typography>
-              </div>
-            </div>
-            {provider.outOfStock.map((outOfStockItems, i) => (
-              <div key={`outof-stock-item-index-${i}`}>
-                <div>
-                  <div
-                    className={classes.summaryQuoteItemContainer}
-                    key={`quote-${i}-price`}
-                  >
+    if(productsQuote.isError && provider.errorCode === "40002" && provider.error){
+      return (
+          <div key={`outof-stockpindex-${pindex}`}>
+            {provider.error && provider.errorCode === "40002" ? (
+                <>
+                  <div>
                     <Typography
-                      variant="body1"
-                      className={classes.summaryItemQuantityLabel}
+                        variant="body1"
+                        className={`${classes.summaryItemLabel} ${classes.marginBottom10} ${classes.marginTop20} text-error`}
                     >
-                      {outOfStockItems?.title}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      className={classes.summaryItemQuantityValue}
-                    >
-                      {`${outOfStockItems?.cartQuantity}`}
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      className={classes.summaryItemQuantityValue}
-                    >
-                      {`${outOfStockItems?.quantity}`}
+                      Out of stock
                     </Typography>
                   </div>
-                </div>
-              </div>
-            ))}
-            <Box component={"div"} className={classes.divider} />
-          </>
-        ) : (
-          <></>
-        )}
-      </div>
-    );
+                  <div>
+                    <div
+                        className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+                    >
+                      <Typography
+                          variant="body1"
+                          className={classes.summaryItemQuantityLabel}
+                      >
+                        Items
+                      </Typography>
+                      <Typography
+                          variant="body1"
+                          className={classes.summaryItemQuantityValue}
+                      >
+                        Cart Quantity
+                      </Typography>
+                      <Typography
+                          variant="body1"
+                          className={classes.summaryItemQuantityValue}
+                      >
+                        Available Quantity
+                      </Typography>
+                    </div>
+                  </div>
+                  {provider.outOfStock.map((outOfStockItems, i) => (
+                      <div key={`outof-stock-item-index-${i}`}>
+                        <div>
+                          <div
+                              className={classes.summaryQuoteItemContainer}
+                              key={`quote-${i}-price`}
+                          >
+                            <Typography
+                                variant="body1"
+                                className={classes.summaryItemQuantityLabel}
+                            >
+                              {outOfStockItems?.title}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                className={classes.summaryItemQuantityValue}
+                            >
+                              {`${outOfStockItems?.cartQuantity}`}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                className={classes.summaryItemQuantityValue}
+                            >
+                              {`${outOfStockItems?.quantity}`}
+                            </Typography>
+                          </div>
+                        </div>
+                      </div>
+                  ))}
+                  <Box component={"div"} className={classes.divider} />
+                </>
+            ) : (
+                <></>
+            )}
+          </div>
+      );
+    }else{
+      return <></>
+    }
+
   };
   const renderItems = (provider, pindex) => {
     return (
@@ -2166,20 +1011,19 @@ const Checkout = () => {
         {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
         {/*  </Typography>*/}
         {/*</div>*/}
-        {/*{provider.error && (*/}
-        {/*  <Typography*/}
-        {/*    variant="body1"*/}
-        {/*    color="error"*/}
-        {/*    className={classes.summaryItemLabel}*/}
-        {/*  >*/}
-        {/*    {provider.error}*/}
-        {/*  </Typography>*/}
-        {/*)}*/}
+        {productsQuote.isError && provider.errorCode !== "" && provider.errorCode !== "40002" && provider.error && (
+          <Typography
+            variant="body1"
+            color="error"
+            className={classes.summaryItemLabel}
+          >
+            {provider.error}
+          </Typography>
+        )}
       </div>
     );
   };
 
-  console.log("productsQuote=====>", productsQuote)
   const renderQuote = () => {
     try {
       return (
@@ -2212,16 +1056,7 @@ const Checkout = () => {
                 </div>
               );
             })}
-            <div className={classes.summarySubtotalContainer}>
-              <Typography variant="body2" className={classes.subTotalLabel}>
-                Total
-              </Typography>
-              <Typography variant="body2" className={classes.subTotalValue}>
-                {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
-              </Typography>
-            </div>
-            <Box component={"div"} className={classes.orderTotalDivider} />
-            <div className={classes.summaryItemContainer}>
+            <div className={`${classes.summaryItemContainer} ${classes.marginTop20}`}>
               <Typography variant="body" className={classes.totalLabel}>
                 Order Total
               </Typography>

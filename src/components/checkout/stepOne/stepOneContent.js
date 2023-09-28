@@ -26,10 +26,9 @@ function stringToColor(string) {
     return color;
 };
 
-const StepOneContent = ({handleNext}) => {
+const StepOneContent = ({handleNext, isError}) => {
     const classes = useStyles();
     const user  = getUser();
-    console.log("user=====>", user)
     const stringAvatar = (name) => {
         return {
             sx: {
@@ -63,6 +62,7 @@ const StepOneContent = ({handleNext}) => {
                             <Button
                                 variant="contained"
                                 onClick={handleNext}
+                                disabled={isError}
                             >
                                 Continue
                             </Button>
@@ -70,7 +70,7 @@ const StepOneContent = ({handleNext}) => {
                     </Grid>
                 ):(
                     <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                        <SignUp />
+                        <SignUp isError={{isError}} />
                     </Grid>
                 )
             }

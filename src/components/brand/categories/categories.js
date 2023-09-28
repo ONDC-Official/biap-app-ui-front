@@ -70,7 +70,6 @@ const CategoriesComponent = ({brandDetails}) => {
             const data = await cancellablePromise(
                 getBrandCustomMenuRequest(domain, brandId)
             );
-            console.log("getCustomMenu=====>", data);
             setSubCatList(data.data)
         } catch (err) {
         } finally {
@@ -114,7 +113,6 @@ const CategoriesComponent = ({brandDetails}) => {
                         }}
                         boundaryCount={2}
                         renderItem={(item) => {
-                            console.log("item=====>", item)
                             if(item.type === "page"){
                                 const subCatIndex = item.page - 1;
                                 const subCat = subCatList[subCatIndex];

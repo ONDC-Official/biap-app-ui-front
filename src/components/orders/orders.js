@@ -61,7 +61,6 @@ const Orders = () => {
     }, [locationData]);
 
     const renderTabContent = (tabVal) => {
-        console.log("tabVal=====>", tabVal)
         switch(tabVal) {
             case "ongoing":
                 return (

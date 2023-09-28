@@ -347,7 +347,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const getSubTotal = (quote) => {
     let subtotal = 0;
     quote.forEach((item) => {
-      subtotal += parseInt(item?.price?.value);
+      subtotal += parseFloat(item?.price?.value);
     });
     return subtotal;
   };
@@ -507,10 +507,16 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     if (itemQuotes) {
       const items = Object.values(itemQuotes).filter((quote) => quote?.title !== "");
       items.forEach((item) => {
-        finalTotal = finalTotal + parseInt(item.price.value);
+        finalTotal = finalTotal + parseFloat(item.price.value);
+        if(item?.tax){
+          finalTotal = finalTotal + parseFloat(item.tax.value);
+        }
         if (item.customizations) {
           Object.values(item.customizations).forEach((custItem) => {
-            finalTotal = finalTotal + parseInt(custItem.price.value);
+            finalTotal = finalTotal + parseFloat(custItem.price.value);
+            if(custItem?.tax){
+              finalTotal = finalTotal + parseFloat(custItem.tax.value);
+            }
           });
         }
       });
@@ -547,19 +553,19 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     let total = 0;
     const data = deliveryQuotes;
     if (data.delivery) {
-      total = total + parseInt(data.delivery.value);
+      total = total + parseFloat(data.delivery.value);
     }
     if (data.discount) {
-      total = total + parseInt(data.discount.value);
+      total = total + parseFloat(data.discount.value);
     }
     if (data.tax) {
-      total = total + parseInt(data.tax.value);
+      total = total + parseFloat(data.tax.value);
     }
     if (data.packing) {
-      total = total + parseInt(data.packing.value);
+      total = total + parseFloat(data.packing.value);
     }
     if (data.misc) {
-      total = total + parseInt(data.misc.value);
+      total = total + parseFloat(data.misc.value);
     }
     return total;
   };

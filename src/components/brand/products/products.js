@@ -76,7 +76,6 @@ const Products = ({ brandDetails }) => {
       } else {
       }
       const data = await cancellablePromise(getAllProductRequest(paginationData.searchData));
-      console.log("getAllProducts=====>", data);
       setProducts(data.data);
       setTotalProductCount(data.count);
     } catch (err) {
@@ -96,7 +95,6 @@ const Products = ({ brandDetails }) => {
   const getFilterValues = async (attributeCode) => {
     try {
       const data = await cancellablePromise(getAllFilterValuesRequest(attributeCode, "", brandId));
-      console.log("getFilterValues=====>", data);
       let filterValues = data.data;
       filterValues = filterValues.map((value) => {
         const createObj = {
@@ -116,7 +114,6 @@ const Products = ({ brandDetails }) => {
     setIsLoading(true);
     try {
       const data = await cancellablePromise(getAllFiltersRequest("", brandId));
-      console.log("getAllFilters=====>", data);
       let filtersData = data.data;
       filtersData = filtersData.filter((item) => item.code !== "size_chart");
       filtersData = Object.values(filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {}));
