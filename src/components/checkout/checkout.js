@@ -1306,35 +1306,37 @@ const Checkout = () => {
                 "********************break_up_item=====>",
                 break_up_item
               );
-              const findTag = break_up_item?.item?.tags.find(
-                (tag) => tag.code === "type"
-              );
-              if (findTag) {
-                const findCust = findTag.list.find(
-                  (listItem) => listItem.value === "customization"
+              if(break_up_item?.item?.tags){
+                const findTag = break_up_item?.item?.tags.find(
+                    (tag) => tag.code === "type"
                 );
-                if (findCust) {
-                  isCustimization = true;
-                } else {
-                }
-                cartItems.forEach((ci) => {
-                  if (isCustimization) {
-                    const cc = ci?.item?.customisations || [];
-                    cc.forEach((i) => {
-                      if (i.local_id === break_up_item["@ondc/org/item_id"]) {
-                        findItemFromCartItems = i;
-                      }
-                    });
+                if (findTag) {
+                  const findCust = findTag.list.find(
+                      (listItem) => listItem.value === "customization"
+                  );
+                  if (findCust) {
+                    isCustimization = true;
                   } else {
-                    if (
-                      ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
-                    ) {
-                      findItemFromCartItems = ci?.item;
-                    }
                   }
-                });
-              }
-
+                }
+              }else{}
+              cartItems.forEach((ci) => {
+                if (isCustimization) {
+                  const cc = ci?.item?.customisations || [];
+                  cc.forEach((i) => {
+                    if (i.local_id === break_up_item["@ondc/org/item_id"]) {
+                      findItemFromCartItems = i;
+                    }
+                  });
+                } else {
+                  if (
+                      ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
+                  ) {
+                    findItemFromCartItems = ci?.item;
+                  }
+                }
+              });
+              console.log("findItemFromCartItems=====>", findItemFromCartItems)
               let cartQuantity = findItemFromCartItems
                 ? findItemFromCartItems?.quantity?.count
                 : cartItem
@@ -1781,25 +1783,26 @@ const Checkout = () => {
     );
     try {
       const search_context = JSON.parse(getValueFromCookie("search_context"));
-      const queryParams = items.map((item, index) => {
-        return {
-          // pass the map of parent order id and transaction id
+      console.log("items=====>", items)
+      const item = items[0];
+      const queryParams = [
+        {
           context: {
             domain: item.domain,
             city: search_context.location.name,
             state: search_context.location.state,
             parent_order_id: parentOrderIDMap.get(item?.provider?.id)
-              .parent_order_id,
+                .parent_order_id,
             transaction_id: parentOrderIDMap.get(item?.provider?.id)
-              .transaction_id,
+                .transaction_id,
           },
           message: {
             payment: {
               paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
               type:
-                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+                  method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
               transaction_id: parentOrderIDMap.get(item?.provider?.id)
-                .transaction_id,
+                  .transaction_id,
               paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
             },
             quote: {
@@ -1810,9 +1813,41 @@ const Checkout = () => {
               },
             },
             providers: getItemProviderId(item),
-          },
-        };
-      });
+          }
+        }
+      ];
+      // const queryParams = items.map((item, index) => {
+      //   return {
+      //     // pass the map of parent order id and transaction id
+      //     context: {
+      //       domain: item.domain,
+      //       city: search_context.location.name,
+      //       state: search_context.location.state,
+      //       parent_order_id: parentOrderIDMap.get(item?.provider?.id)
+      //         .parent_order_id,
+      //       transaction_id: parentOrderIDMap.get(item?.provider?.id)
+      //         .transaction_id,
+      //     },
+      //     message: {
+      //       payment: {
+      //         paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
+      //         type:
+      //           method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+      //         transaction_id: parentOrderIDMap.get(item?.provider?.id)
+      //           .transaction_id,
+      //         paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
+      //       },
+      //       quote: {
+      //         ...productQuotesForCheckout[0],
+      //         price: {
+      //           currency: productQuotesForCheckout[0].price.currency,
+      //           value: String(productQuotesForCheckout[0].price.value),
+      //         },
+      //       },
+      //       providers: getItemProviderId(item),
+      //     },
+      //   };
+      // });
 
       const data = await cancellablePromise(
         postCall("clientApis/v2/confirm_order", queryParams)
@@ -2144,6 +2179,7 @@ const Checkout = () => {
     );
   };
 
+  console.log("productsQuote=====>", productsQuote)
   const renderQuote = () => {
     try {
       return (
@@ -2199,6 +2235,7 @@ const Checkout = () => {
               fullWidth
               variant="contained"
               disabled={
+                activePaymentMethod === "" ||
                 productsQuote.isError ||
                 confirmOrderLoading ||
                 initLoading ||
