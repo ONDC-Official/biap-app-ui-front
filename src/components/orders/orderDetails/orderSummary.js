@@ -283,19 +283,34 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
         );
         if (findQuote) {
-          const tag = findQuote.item.tags.find((tag) => tag.code === "type");
-          const tagList = tag?.list;
-          const type = tagList?.find((item) => item.code === "type");
-          if (type?.value === "item") {
-            const parentId = findQuote.item.parent_item_id;
-            const customizations = itemQuotes[parentId].customizations;
+          if(findQuote?.item?.tags){
+            const tag = findQuote.item.tags.find((tag) => tag.code === "type");
+            const tagList = tag?.list;
+            const type = tagList?.find((item) => item.code === "type");
+            if (type?.value === "item") {
+              const parentId = findQuote?.item?.parent_item_id;
+              let customizations = null;
+              if(parentId){
+                customizations = itemQuotes[parentId].customizations;
+              }else{}
+              return {
+                id,
+                name: findQuote?.title ?? "NA",
+                cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+                return_status: orderDetails.items?.[index]?.return_status ?? "",
+                fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+                customizations: customizations ?? null,
+                ...orderDetails.items?.[index]?.product,
+              };
+            }
+          }else{
             return {
               id,
               name: findQuote?.title ?? "NA",
               cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
               return_status: orderDetails.items?.[index]?.return_status ?? "",
               fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
-              customizations: customizations ?? null,
+              customizations: null,
               ...orderDetails.items?.[index]?.product,
             };
           }
