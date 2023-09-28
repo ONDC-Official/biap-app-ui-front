@@ -43,7 +43,6 @@ const CancelledOrders = () => {
             const data = await cancellablePromise(
                 getAllOrdersRequest(paginationData)
             );
-            console.log("getAllOrders=====>", data);
             setOrderList(data.orders);
             setTotalOrdersCount(data.totalCount);
         } catch (err) {

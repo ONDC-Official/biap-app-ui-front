@@ -179,7 +179,6 @@ export const findSelectedCustomizationForGroup = (group, childCustomizations) =>
 };
 
 export const initializeCustomizationState = async (customizationGroups, customizations, customization_state) => {
-  //   console.log("initializeCustomizationState", customizationGroups, customizations, customization_state);
   const mappings = createCustomizationAndGroupMapping(customizations);
   const customizationToGroupMap = mappings.customizationToGroupMap;
   const minSeq = findMinMaxSeq(customizationGroups).minSeq;
@@ -204,7 +203,6 @@ export const initializeCustomizationState = async (customizationGroups, customiz
     };
 
     const childCustomizations = customizations.filter((customization) => customization.parent === groupId);
-    //  console.log("childCustomizations", childCustomizations);
 
     customization_state[groupId].options = childCustomizations;
     customization_state[groupId].selected = findSelectedCustomizationForGroup(
@@ -212,13 +210,6 @@ export const initializeCustomizationState = async (customizationGroups, customiz
       childCustomizations
     );
 
-    //  console.log("Selected", customization_state);
-    //  console.log(" customization_state[groupId].selected[0]", customization_state[groupId].selected[0]);
-    //  console.log(" customizationToGroupMap", customizationToGroupMap);
-    //  console.log(
-    //    "customizationToGroupMap[customization_state[groupId].selected[0]?.id]",
-    //    customizationToGroupMap[customization_state[groupId].selected[0]?.id]
-    //  );
     let childGroups =
       customization_state[groupId].selected[0]?.id != undefined
         ? customizationToGroupMap[customization_state[groupId].selected[0]?.id]
@@ -234,7 +225,6 @@ export const initializeCustomizationState = async (customizationGroups, customiz
 
   if (firstGroup) {
     processGroup(firstGroup.id);
-    //  console.log("customization_state", customization_state);
     return customization_state;
   }
 };

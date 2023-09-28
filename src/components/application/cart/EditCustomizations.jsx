@@ -94,7 +94,6 @@ const EditCustomizations = (props) => {
       updatedCartItem = updatedCartItem.item;
       updatedCartItem.customisationState = customization_state;
 
-      console.log(updatedCartItem);
       const res = await putCall(url, updatedCartItem);
       setOpenDrawer(false);
       fetchCartItems();

@@ -192,7 +192,6 @@ export default function Cart() {
       setProductLoading(true);
       const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
       setProductPayload(data.response);
-      console.log("getProduct:", data.response);
       return data.response;
     } catch (error) {
       console.error("Error fetching product details:", error);
@@ -425,7 +424,6 @@ export default function Cart() {
                       alignItems="center"
                       onClick={() => {
                         setCustomizationState(cartItem.item.customisationState);
-                        console.log("cartItem.item.customisationState", cartItem.item.customisationState);
                         getProductDetails(cartItem.item.id);
                         setCurrentCartItem(cartItem);
                         setOpenDrawer(true);
@@ -553,14 +551,12 @@ export default function Cart() {
             isProductAvailableQuantityIsZero || isProductCategoryIsDifferent || haveDistinctProviders || checkoutLoading
           }
           onClick={() => {
-            console.log("Checkout=====>", cartItems);
             if (cartItems.length > 0) {
               let c = cartItems.map((item) => {
                 return item.item;
               });
 
               const request_object = constructQouteObject(c);
-              console.log("request_object", request_object);
               getQuote(request_object[0]);
               getProviderIds(request_object[0]);
             }
@@ -621,7 +617,6 @@ export default function Cart() {
             ],
           },
         };
-        console.log("select payload:", selectPayload);
         const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
         //Error handling workflow eg, NACK
         const isNACK = data.find((item) => item.error && item?.message?.ack?.status === "NACK");
@@ -654,7 +649,6 @@ export default function Cart() {
             message: err?.response?.data?.error?.message,
           },
         });
-        console.log(err?.response?.data?.error);
         setGetQuoteLoading(false);
         history.replace("/application/products");
         setCheckoutLoading(false);
@@ -757,9 +751,6 @@ export default function Cart() {
           updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments =
             data[0].message.quote.fulfillments;
         }
-
-        console.log("cart", cartItems);
-        console.log("updated cart", updatedCartItems.current);
       });
 
       localStorage.setItem("cartItems", JSON.stringify(updatedCartItems.current));

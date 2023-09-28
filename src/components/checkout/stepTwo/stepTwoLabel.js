@@ -11,8 +11,6 @@ const StepTwoLabel = ({activeStep, onUpdateActiveStep}) => {
     const classes = useStyles();
     const { deliveryAddress, billingAddress } = useContext(AddressContext);
 
-    console.log("deliveryAddress=====>", deliveryAddress);
-    console.log("billingAddress=====>", billingAddress);
     return (
         <div>
             <Typography variant="h4" className={classes.labelTypo}>

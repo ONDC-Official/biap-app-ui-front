@@ -166,7 +166,6 @@ const ProductDetails = () => {
       hasCustomisations: customisations ? true : false,
     };
 
-    console.log(payload);
     const res = await postCall(url, payload);
     fetchCartItems();
     if (navigate) {

@@ -173,7 +173,6 @@ const StepThreeContent = ({activePaymentMethod, setActivePaymentMethod,
                 postCall(
                     "/clientApis/v2/initialize_order",
                     items.map((item) => {
-                        console.log("initialize_order item=====>", item)
                         const fulfillments = item[0].product.fulfillments;
                         delete item[0].product.fulfillments;
                         item[0].fulfillment_id = item[0].product.fulfillment_id;

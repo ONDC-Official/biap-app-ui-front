@@ -141,6 +141,12 @@ const useStyles = makeStyles({
   marginBottom10: {
     marginBottom: '10px !important'
   },
+  marginTop10: {
+    marginTop: '10px !important'
+  },
+  marginTop20: {
+    marginTop: '20px !important'
+  },
   summaryCustomizationPriceValue: {
     color: "#A2A6B0 !important",
     width: "100px !important",
@@ -188,11 +194,17 @@ const useStyles = makeStyles({
     textAlign: "right",
     fontWeight: "600 !important",
   },
-  divider: {
+  outOfStockDivider: {
     height: "1px",
     backgroundColor: "#CACDD8 !important",
     marginTop: "20px",
     marginBottom: "20px",
+  },
+  divider: {
+    height: "1px",
+    backgroundColor: "#CACDD8 !important",
+    marginTop: "20px",
+    // marginBottom: "20px",
   },
   orderTotalDivider: {
     height: "1px",

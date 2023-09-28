@@ -236,7 +236,6 @@ export default function CancelOrderModal(props) {
       },
     }));
 
-    console.log("cancel order payload:", payload);
     try {
       const data = await cancellablePromise(
         postCall(

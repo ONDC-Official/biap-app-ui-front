@@ -149,7 +149,6 @@ const MenuItems = (props) => {
   };
 
   const addToCart = async (productPayload, isDefault = false) => {
-    console.log("productPayload", productPayload);
     setProductLoading(productPayload.id);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;

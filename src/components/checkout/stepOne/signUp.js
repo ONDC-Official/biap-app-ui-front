@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '../../common/Checkbox';
 
-const SignUp = () => {
+const SignUp = ({isError}) => {
     const classes = useStyles();
 
     const [user, setUser] = useState({
@@ -201,7 +201,7 @@ const SignUp = () => {
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                <Button variant="contained" className={classes.signupButton}>
+                <Button disabled={isError} variant="contained" className={classes.signupButton}>
                     Signup
                 </Button>
             </Grid>
