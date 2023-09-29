@@ -672,8 +672,11 @@ const Checkout = () => {
         postCall("clientApis/v2/confirm_order", queryParams)
       );
       //Error handling workflow eg, NACK
+      // const isNACK = data.find(
+      //   (item) => item.error && item.message.ack.status === "NACK"
+      // );
       const isNACK = data.find(
-        (item) => item.error && item.message.ack.status === "NACK"
+          (item) => item.error && item.code !== ""
       );
       if (isNACK) {
         dispatchError(isNACK.error.message);
