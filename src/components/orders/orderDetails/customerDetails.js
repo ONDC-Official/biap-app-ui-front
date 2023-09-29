@@ -89,7 +89,7 @@ const CustomerDetails = ({orderDetails}) => {
                     variant="outlined"
                     startIcon={<CallIcon />}
                 >
-                    Call Burger King
+                    {`Call ${orderDetails?.provider?.descriptor?.name}`}
                 </Button>
             </Grid>
         </Grid>

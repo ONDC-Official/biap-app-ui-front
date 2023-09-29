@@ -746,11 +746,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         )}`}{" "}
         | Payment: {orderDetails?.payment?.type === "ON-FULFILLMENT" ? "Cash on delivery" : "Prepaid"}
       </Typography>
-      <Box component={"div"} className={classes.orderSummaryDivider} />
+      <Box component={"div"} className={`${classes.orderSummaryDivider} ${classes.marginBottom0}`} />
 
-      <OrderTimeline />
+      {/*<OrderTimeline />*/}
 
-      <Box component={"div"} className={classes.orderSummaryDivider} />
+      {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
 
       {renderQuote()}
       <div className={classes.summaryItemActionContainer}>

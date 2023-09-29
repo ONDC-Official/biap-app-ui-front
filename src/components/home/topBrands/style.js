@@ -31,7 +31,7 @@ const useStyles = makeStyles({
     },
     brandImage: {
         margin: 'auto !important',
-        width: '100%'
+        maxWidth: '100%'
     },
     dotsContainer: {
       textAlign: 'center'

@@ -86,8 +86,8 @@ const useStyles = makeStyles({
     boxShadow: "none !important",
     background: "#F5F5F5 !important",
     display: "flex",
-    height: "250px",
-    minHeight: "250px !important",
+    height: "280px",
+    minHeight: "280px !important",
     // width: '314px !important',
     borderRadius: "12px 0px 0px 12px !important",
   },
@@ -111,6 +111,12 @@ const useStyles = makeStyles({
   descriptionTypoList: {
     marginTop: "16px !important",
     color: "#505050 !important",
+
+    display: '-webkit-box',
+    '-webkit-line-clamp': 2,
+    '-webkit-box-orient': 'vertical',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   footerActions: {
     position: "absolute",

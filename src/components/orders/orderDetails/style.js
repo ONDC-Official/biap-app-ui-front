@@ -20,6 +20,10 @@ const useStyles = makeStyles({
         marginBottom: '12px !important'
     },
 
+    marginBottom0:{
+        marginBottom: '0px !important'
+    },
+
     orderSummaryCard: {
         padding: '26px 16px !Important',
         borderRadius: '16px !important',
