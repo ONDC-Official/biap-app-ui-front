@@ -17,7 +17,7 @@ const useStyles = makeStyles({
     },
     brandImage: {
         margin: 'auto !important',
-        width: '100%'
+        maxWidth: '100%'
     },
     brandNameTypo: {
         fontWeight: '600 !important',

@@ -45,8 +45,18 @@ const TopBrands = () => {
     const [brands, setBrands] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [page, setPage] = useState(0);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
     const dispatch = useContext(ToastContext);
+
+    function handleResize() {
+        const width = window.innerWidth
+        setScreenWidth(width);
+
+    }
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+    }, []);
 
     // HOOKS
     const { cancellablePromise } = useCancellablePromise();
@@ -76,7 +86,7 @@ const TopBrands = () => {
         getAllBrands();
     }, []);
 
-    const rowsPerPage = 8;
+    const rowsPerPage = parseInt(screenWidth/120)-5;
     const totalPageCount =  Math.ceil(brands.length / rowsPerPage);
     return (
         <Grid container spacing={3} className={classes.topBrandsContainer}>
@@ -93,8 +103,8 @@ const TopBrands = () => {
                     </Grid>
                 ):(
                     <>
-                        <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
-                            <div style={{margin: 'auto'}}>
+                        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
+                            <div style={{marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconButton
                                     color="inherit" className={classes.actionButton}
                                     onClick={() => {
@@ -106,8 +116,6 @@ const TopBrands = () => {
                                     <PreviousIcon />
                                 </IconButton>
                             </div>
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={10} lg={10} xl={10} className={classes.brandsContainer}>
                             {
                                 brands.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((brand, brandIndex) => (
                                     <BrandCard
@@ -121,9 +129,7 @@ const TopBrands = () => {
                                     />
                                 ))
                             }
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
-                            <div style={{margin: 'auto'}}>
+                            <div style={{marginRight: 'auto', marginTop: 'auto', marginBottom: 'auto'}}>
                                 <IconButton
                                     color="inherit" className={classes.actionButton}
                                     onClick={() => {

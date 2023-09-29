@@ -60,6 +60,16 @@ const SubCategories = () => {
     const locationData = useLocation();
     const [page, setPage] = useState(0);
     const { locationData: deliveryAddressLocation } = useContext(SearchContext);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+    function handleResize() {
+        const width = window.innerWidth
+        setScreenWidth(width);
+
+    }
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+    }, []);
 
     const useQuery = () => {
         const { search } = locationData;
@@ -76,7 +86,7 @@ const SubCategories = () => {
         }
     }, [categoryName, deliveryAddressLocation]);
 
-    const rowsPerPage = 10;
+    const rowsPerPage = parseInt(screenWidth/120)-5;
     const totalPageCount =  Math.ceil(subCatList.length / rowsPerPage);
     return (
         <Grid container spacing={3} className={classes.subCatContainerMain}>
@@ -85,8 +95,8 @@ const SubCategories = () => {
                     Shop By Category
                 </Typography>
             </Grid>
-            <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
-                <div style={{margin: 'auto'}}>
+            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.subCatContainer}>
+                <div style={{marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto'}}>
                     <IconButton
                         color="inherit" className={classes.actionButton}
                         onClick={() => {
@@ -98,8 +108,6 @@ const SubCategories = () => {
                         <PreviousIcon />
                     </IconButton>
                 </div>
-            </Grid>
-            <Grid item xs={12} sm={12} md={10} lg={10} xl={10} className={classes.subCatContainer}>
                 {
                     subCatList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((subCat, subCatIndex) => (
                         <SubCaregoryCard
@@ -112,9 +120,7 @@ const SubCategories = () => {
                         />
                     ))
                 }
-            </Grid>
-            <Grid item xs={12} sm={12} md={1} lg={1} xl={1} className={classes.paginationActionContainer}>
-                <div style={{margin: 'auto'}}>
+                <div style={{marginRight: 'auto', marginTop: 'auto', marginBottom: 'auto'}}>
                     <IconButton
                         color="inherit" className={classes.actionButton}
                         onClick={() => {

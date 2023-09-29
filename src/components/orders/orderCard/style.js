@@ -12,12 +12,14 @@ const useStyles = makeStyles({
         display: 'flex',
         minHeight: '250px !important',
         // width: '314px !important',
+        width: '300px !important',
+        height: '300px !important',
         borderRadius: '12px 0px 0px 12px !important'
     },
     orderImage: {
         margin: 'auto !important',
-        maxHeight: '95%',
-        maxWidth: '95%',
+        maxHeight: '100%',
+        maxWidth: '100%',
     },
     orderDetailsTypo: {
         padding: '37px 16px 26px 16px',
