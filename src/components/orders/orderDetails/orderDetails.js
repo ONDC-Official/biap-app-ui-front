@@ -97,7 +97,8 @@ const OrderDetails = () => {
             <OrderSummary
               orderDetails={orderDetails}
               onUpdateOrder={(data) => {
-                setOrderDetails(data);
+                // setOrderDetails(data);
+                getOrderDetails();
               }}
             />
           </Grid>
