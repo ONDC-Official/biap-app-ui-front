@@ -102,7 +102,7 @@ export const getAllOutletsFromCategoryAndLocationRequest = (params) => {
       radius: 100,
     };
     try {
-       const data = await getCall(`/clientApis/v2/locations?provider=${brandId}`);
+       const data = await getCall(`/clientApis/v2/locations`);
       //const data = await getCall(`/protocol/locations`, reqParams);
       return resolve(data);
     } catch (err) {

@@ -86,7 +86,7 @@ const TopBrands = () => {
         getAllBrands();
     }, []);
 
-    const rowsPerPage = parseInt(screenWidth/120)-5;
+    const rowsPerPage = parseInt(screenWidth/120)-7;
     const totalPageCount =  Math.ceil(brands.length / rowsPerPage);
     return (
         <Grid container spacing={3} className={classes.topBrandsContainer}>
