@@ -25,12 +25,17 @@ import CustomizationRenderer from "../../../application/product-list/product-det
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { getCall, postCall } from "../../../../api/axios";
 import {
+  areCustomisationsSame,
   formatCustomizationGroups,
   formatCustomizations,
   hasCustomizations,
   initializeCustomizationState,
 } from "../../../application/product-list/product-details/utils";
 import { CartContext } from "../../../../context/cartContext";
+import { ToastContext } from "../../../../context/toastContext";
+import { getCartItems } from "../../../application/cart/utils/getCartItems";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
+import { updateCartItem } from "../../../application/cart/utils/updateCartItem";
 
 const MenuItems = (props) => {
   const { customMenu, updateItemsOfCustomMenuRef, firstMenuItemId, firstMenuItemDetails = null } = props;
@@ -48,6 +53,7 @@ const MenuItems = (props) => {
   const [productLoading, setProductLoading] = useState(false);
   const [itemQty, setItemQty] = useState(1);
   const { fetchCartItems } = useContext(CartContext);
+  const dispatch = useContext(ToastContext);
 
   const [customizationPrices, setCustomizationPrices] = useState(0);
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
@@ -196,17 +202,107 @@ const MenuItems = (props) => {
       hasCustomisations,
     };
 
-    postCall(url, payload)
-      .then(() => {
-        fetchCartItems();
-        setCustomizationState({});
-        setCustomizationModal(false);
-        setProductLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setProductLoading(null);
+    const cartItems = await getCartItems();
+
+    let cartItem = [];
+    cartItem = cartItems.filter((ci) => {
+      return ci.item.id === payload.id;
+    });
+
+    if (cartItem.length > 0 && customisations && customisations.length > 0) {
+      cartItem = cartItems.filter((ci) => {
+        console.log(ci.item);
+        return ci.item.customisations.length === customisations.length;
       });
+    }
+
+    if (cartItem.length === 0) {
+      const res = await postCall(url, payload);
+      fetchCartItems();
+      setCustomizationState({});
+      setCustomizationModal(false);
+      setProductLoading(false);
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.success,
+          message: "Item added to cart successfully.",
+        },
+      });
+    } else {
+      const currentCount = parseInt(cartItem[0].item.quantity.count);
+      const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
+
+      if (currentCount < maxCount) {
+        if (!customisations) {
+          updateCartItem(cartItems, true, cartItem[0]._id);
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.success,
+              message: "Item quantity updated in your cart.",
+            },
+          });
+          setCustomizationState({});
+          setCustomizationModal(false);
+          setProductLoading(false);
+        } else {
+          console.log(3.2);
+          const currentIds = customisations.map((item) => item.id);
+          let matchingCustomisation = null;
+
+          for (let i = 0; i < cartItem.length; i++) {
+            let existingIds = cartItem[i].item.customisations.map((item) => item.id);
+            const areSame = areCustomisationsSame(existingIds, currentIds);
+            if (areSame) {
+              matchingCustomisation = cartItem[i];
+            }
+          }
+
+          if (matchingCustomisation) {
+            console.log(4);
+            updateCartItem(cartItems, true, matchingCustomisation._id);
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Item quantity updated in your cart.",
+              },
+            });
+            setCustomizationState({});
+            setCustomizationModal(false);
+            setProductLoading(false);
+          } else {
+            console.log(5);
+            const res = await postCall(url, payload);
+            setCustomizationState({});
+            setCustomizationModal(false);
+            setProductLoading(false);
+            fetchCartItems();
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Item added to cart successfully.",
+              },
+            });
+          }
+        }
+      } else {
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: `The maximum available quantity for item is already in your cart.`,
+          },
+        });
+      }
+    }
   };
 
   useEffect(() => {

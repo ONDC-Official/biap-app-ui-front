@@ -33,6 +33,7 @@ export default function Cart() {
       console.log("Error parsing user cookie:", error);
     }
   }
+
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useContext(ToastContext);
@@ -219,6 +220,7 @@ export default function Cart() {
     const everyEnvHasSameValue = cartItems.every(({ item }) => item.domain === cartItems[0].item.domain); // use proper name
     setIsProductCategoryIsDifferent(!everyEnvHasSameValue);
   };
+
   useEffect(() => {
     checkDistinctProviders();
     checkAvailableQuantity();

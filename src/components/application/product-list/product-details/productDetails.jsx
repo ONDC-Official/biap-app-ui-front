@@ -17,11 +17,16 @@ import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
 import moment from "moment";
 import { SearchContext } from "../../../../context/searchContext";
+import { getCartItems } from "../../cart/utils/getCartItems";
+import { updateCartItem } from "../../cart/utils/updateCartItem";
+import { ToastContext } from "../../../../context/toastContext";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 
 const ProductDetails = () => {
+  const params = useParams();
   const classes = useStyles();
   const history = useHistory();
-  const params = useParams();
+  const dispatch = useContext(ToastContext);
   const { fetchCartItems } = useContext(CartContext);
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
   const { cancellablePromise } = useCancellablePromise();
@@ -129,6 +134,23 @@ const ProductDetails = () => {
     return { minSeq, maxSeq };
   }
 
+  function areCustomisationsSame(existingIds, currentIds) {
+    if (existingIds.length !== currentIds.length) {
+      return false;
+    }
+
+    existingIds.sort();
+    currentIds.sort();
+
+    for (let i = 0; i < existingIds.length; i++) {
+      if (existingIds[i] !== currentIds[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
@@ -166,10 +188,98 @@ const ProductDetails = () => {
       hasCustomisations: customisations ? true : false,
     };
 
-    const res = await postCall(url, payload);
-    fetchCartItems();
-    if (navigate) {
-      history.push("/application/cart");
+    const cartItems = await getCartItems();
+
+    let cartItem = [];
+    cartItem = cartItems.filter((ci) => {
+      return ci.item.id === payload.id;
+    });
+
+    if (cartItem.length > 0 && customisations && customisations.length > 0) {
+      cartItem = cartItems.filter((ci) => {
+        console.log(ci.item);
+        return ci.item.customisations.length === customisations.length;
+      });
+    }
+
+    if (cartItem.length === 0) {
+      const res = await postCall(url, payload);
+      fetchCartItems();
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.success,
+          message: "Item added to cart successfully.",
+        },
+      });
+
+      if (navigate) {
+        history.push("/application/cart");
+      }
+    } else {
+      const currentCount = parseInt(cartItem[0].item.quantity.count);
+      const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
+
+      if (currentCount < maxCount) {
+        if (!customisations) {
+          updateCartItem(cartItems, true, cartItem[0]._id);
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.success,
+              message: "Item quantity updated in your cart.",
+            },
+          });
+        } else {
+          console.log(3.2);
+          const currentIds = customisations.map((item) => item.id);
+          let matchingCustomisation = null;
+
+          for (let i = 0; i < cartItem.length; i++) {
+            let existingIds = cartItem[i].item.customisations.map((item) => item.id);
+            const areSame = areCustomisationsSame(existingIds, currentIds);
+            if (areSame) {
+              matchingCustomisation = cartItem[i];
+            }
+          }
+
+          if (matchingCustomisation) {
+            console.log(4);
+            updateCartItem(cartItems, true, matchingCustomisation._id);
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Item quantity updated in your cart.",
+              },
+            });
+          } else {
+            console.log(5);
+            const res = await postCall(url, payload);
+            fetchCartItems();
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Item added to cart successfully.",
+              },
+            });
+          }
+        }
+      } else {
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: `The maximum available quantity for item is already in your cart.`,
+          },
+        });
+      }
     }
   };
 
