@@ -221,6 +221,8 @@ const ProductDetails = () => {
       const currentCount = parseInt(cartItem[0].item.quantity.count);
       const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
 
+      console.log(currentCount, maxCount);
+
       if (currentCount < maxCount) {
         if (!customisations) {
           updateCartItem(cartItems, true, cartItem[0]._id);
