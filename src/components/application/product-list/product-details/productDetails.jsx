@@ -54,7 +54,7 @@ const ProductDetails = () => {
 
       setProductPayload(data.response);
       setProductDetails(item_details);
-      setActiveImage(item_details?.descriptor?.images[0]);
+      setActiveImage(item_details?.descriptor?.symbol);
     } catch (error) {
       console.error("Error fetching product details:", error);
     }
@@ -457,7 +457,7 @@ const ProductDetails = () => {
                 <img className={classes.productImg} src={activeImage} />
               </div>
               <div className={classes.moreImagesContainer}>
-                {productDetails?.descriptor?.images.map((item, idx) => {
+                {productDetails?.descriptor?.images?.map((item, idx) => {
                   return (
                     <div
                       style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
