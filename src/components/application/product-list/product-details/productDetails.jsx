@@ -17,6 +17,8 @@ import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
 import moment from "moment";
 import { SearchContext } from "../../../../context/searchContext";
+import { getCartItems } from "../../cart/utils/getCartItems";
+import { updateCartItem } from "../../cart/utils/updateCartItem";
 
 const ProductDetails = () => {
   const classes = useStyles();
@@ -129,6 +131,23 @@ const ProductDetails = () => {
     return { minSeq, maxSeq };
   }
 
+  function areCustomisationsSame(existingIds, currentIds) {
+    if (existingIds.length !== currentIds.length) {
+      return false;
+    }
+
+    existingIds.sort();
+    currentIds.sort();
+
+    for (let i = 0; i < existingIds.length; i++) {
+      if (existingIds[i] !== currentIds[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   const addToCart = async (navigate = false) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
@@ -166,10 +185,36 @@ const ProductDetails = () => {
       hasCustomisations: customisations ? true : false,
     };
 
-    const res = await postCall(url, payload);
-    fetchCartItems();
-    if (navigate) {
-      history.push("/application/cart");
+    const cartItems = await getCartItems();
+    const cartItem = cartItems.filter(
+      (ci) => ci.item.id === payload.id && ci.item.customisations.length === customisations.length
+    );
+
+    if (cartItem.length === 0) {
+      const res = await postCall(url, payload);
+      fetchCartItems();
+      if (navigate) {
+        history.push("/application/cart");
+      }
+    } else {
+      if (!customisations) {
+        updateCartItem(cartItems, true, cartItem._id);
+      } else {
+        const currentIds = customisations.map((item) => item.id);
+        let matchingCustomisation = null;
+
+        for (let i = 0; i < cartItem.length; i++) {
+          let existingIds = cartItem[i].item.customisations.map((item) => item.id);
+          const areSame = areCustomisationsSame(existingIds, currentIds);
+          if (areSame) {
+            matchingCustomisation = cartItem[i];
+          }
+        }
+
+        if (matchingCustomisation) {
+          updateCartItem(cartItems, true, matchingCustomisation._id);
+        }
+      }
     }
   };
 
