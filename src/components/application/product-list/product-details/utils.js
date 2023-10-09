@@ -228,3 +228,20 @@ export const initializeCustomizationState = async (customizationGroups, customiz
     return customization_state;
   }
 };
+
+export function areCustomisationsSame(existingIds, currentIds) {
+  if (existingIds.length !== currentIds.length) {
+    return false;
+  }
+
+  existingIds.sort();
+  currentIds.sort();
+
+  for (let i = 0; i < existingIds.length; i++) {
+    if (existingIds[i] !== currentIds[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
