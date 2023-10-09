@@ -105,9 +105,7 @@ const OutletDetails = () => {
             <Card className={classes.outletDetailsCard}>
               <img
                 className={classes.outletImage}
-                src={
-                  brandDetails?.descriptor?.images?.length > 0 ? brandDetails?.descriptor?.images[0] : no_image_found
-                }
+                src={brandDetails?.descriptor?.symbol ? brandDetails?.descriptor?.symbol : no_image_found}
                 alt={`outlet-img-${outletDetails?.id}`}
               />
             </Card>

@@ -493,7 +493,7 @@ const ProductDetails = () => {
                     color="black"
                     sx={{ fontFamily: "inter", fontWeight: 400, marginLeft: 2, textDecoration: "line-through" }}
                   >
-                    ₹{productDetails?.price?.maximum_value}
+                    ₹{parseInt(productDetails?.price?.maximum_value).toFixed(0)}
                   </Typography>
                 </Grid>
                 <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />

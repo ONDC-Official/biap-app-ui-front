@@ -28,7 +28,7 @@ import {
   initializeCustomizationState,
 } from "../../application/product-list/product-details/utils";
 import { CartContext } from "../../../context/cartContext";
-import {SearchContext} from "../../../context/searchContext";
+import { SearchContext } from "../../../context/searchContext";
 import Loading from "../../shared/loading/loading";
 
 const ProductList = () => {

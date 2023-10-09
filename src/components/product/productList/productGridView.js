@@ -32,16 +32,12 @@ const ProductGridView = (props) => {
   } = props;
   const { id, descriptor, provider_details } = product;
   const { name: provider_name } = bpp_provider_descriptor;
-  const { name: product_name, images } = descriptor;
+  const { name: product_name, images, symbol } = descriptor;
 
   return (
     <div className={classes.productItemContainer} onClick={() => history.push(`/application/products/${productId}`)}>
       <Card className={classes.productCard}>
-        <img
-          className={classes.productImage}
-          src={images?.length > 0 ? images[0] : no_image_found}
-          alt={`sub-cat-img-${bpp_id}`}
-        />
+        <img className={classes.productImage} src={symbol ? symbol : no_image_found} alt={`sub-cat-img-${bpp_id}`} />
         <Tooltip title="Add to cart">
           <IconButton
             onClick={(e) => {

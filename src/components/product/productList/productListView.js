@@ -28,17 +28,13 @@ const ProductListView = (props) => {
   } = props;
   const { id, descriptor, provider_details } = product;
   const { name: provider_name } = bpp_provider_descriptor;
-  const { name: product_name, images, short_desc: product_description } = descriptor;
+  const { name: product_name, images, short_desc: product_description, symbol } = descriptor;
 
   return (
     <Grid container spacing={0} className={classes.productItemContainerList}>
       <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
         <Card className={classes.productCardList}>
-          <img
-            className={classes.productImage}
-            src={images?.length > 0 ? images[0] : no_image_found}
-            alt={`sub-cat-img-${bpp_id}`}
-          />
+          <img className={classes.productImage} src={symbol ? symbol : no_image_found} alt={`sub-cat-img-${bpp_id}`} />
         </Card>
       </Grid>
       <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5} className={classes.productDetailsTypo}>
