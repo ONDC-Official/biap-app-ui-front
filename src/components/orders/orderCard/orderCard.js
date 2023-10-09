@@ -56,22 +56,24 @@ const OrderCard = ({data, orderDetails}) => {
             </>
         );
     };
+
+    const fetchAddress = (address) => {
+        const {locality, building, city, state, country, areaCode} = address;
+        let addressString = "";
+        addressString = `${locality?`${locality}`:""} ${building?`,${building}`:""} ${city?`,${city}`:""} ${state?`,${state}`:""} ${country?`,${country}`:""} ${areaCode?`- ${areaCode}`:""}`;
+        return addressString;
+    };
+
     return (
         <Grid container spacing={0} className={classes.orderItemContainer}>
             <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
                 <Card className={classes.orderCard}>
-                    <img className={classes.orderImage} src={descriptor?.images?.length > 0 ? descriptor?.images[0] : no_image_found} alt={`sub-cat-img-${data?.id}`}/>
+                    <img className={classes.orderImage} src={descriptor?.images?.length > 0 ? descriptor?.images[0] : no_image_found} alt={`sub-cat-img-${orderDetails?.id}`}/>
                 </Card>
             </Grid>
             <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5} className={classes.orderDetailsTypo}>
                 <Typography component="div" variant="h5" className={classes.productNameTypoList}>
                     {descriptor?.name}
-                    {/*<Typography component="span" variant="body1" className={classes.deliveryTimeTypo}>*/}
-                    {/*    {`Delivery ${data?.domain === "ONDC:RET11"?"time":""}:`}*/}
-                    {/*    <Typography component="span" variant="body1" color="primary" className={classes.deliveryTimeTypoValue}>*/}
-                    {/*        {` ${data?.deliveryTime} ${data?.domain === "ONDC:RET11"?"mins":""}`}*/}
-                    {/*    </Typography>*/}
-                    {/*</Typography>*/}
                     <Chip
                         className={classes.statusChip}
                         color={state === "Confirmed" || state === "Created"?"primary":state === "Delivered"?"success":state === "Cancelled"?"error":"primary"}
@@ -79,7 +81,8 @@ const OrderCard = ({data, orderDetails}) => {
                     />
                 </Typography>
                 <Typography variant="body1" className={classes.addressTypo}>
-                    {data?.address}
+                    {orderDetails?.address}
+                    {orderDetails?.fulfillments[0]?.end?.location?.address?fetchAddress(orderDetails?.fulfillments[0]?.end?.location?.address):""}
                 </Typography>
                 <Typography variant="body1" className={classes.itemNameTypo}>
                     {renderItemsName(quote.breakup, items)}
@@ -94,7 +97,7 @@ const OrderCard = ({data, orderDetails}) => {
                     {`Ordered On: ${moment(createdAt).format("DD MMMM YYYY")} at ${moment(createdAt).format("hh:mma")}`}
 
                     {
-                        data.status === "Confirmed" && (
+                        orderDetails?.state === "Confirmed" && (
                             <Button
                                 className={classes.trackOrderButton}
                                 variant="contained"
@@ -105,7 +108,7 @@ const OrderCard = ({data, orderDetails}) => {
                     }
 
                     {
-                        data.status === "Delivered" && (
+                        orderDetails?.state === "Delivered" && (
                             <Button
                                 className={classes.downloadInvoiceButton}
                                 variant="outlined"
