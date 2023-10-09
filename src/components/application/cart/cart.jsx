@@ -235,9 +235,7 @@ export default function Cart() {
   useEffect(() => {
     checkDistinctProviders();
     checkAvailableQuantity();
-    if (cartItems.length > 1) {
-      checkDifferentCategory();
-    }
+    checkDifferentCategory();
   }, [cartItems.length, deliveryAddressLocation]);
 
   const emptyCartScreen = () => {
@@ -473,7 +471,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.2}>
               <div className={classes.qtyContainer}>
-                <Typography variant="body1" sx={{ marginRight: "6px", fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ marginRight: "12px", fontWeight: 600 }}>
                   {cartItem?.item?.quantity?.count}
                 </Typography>
                 <KeyboardArrowUpIcon

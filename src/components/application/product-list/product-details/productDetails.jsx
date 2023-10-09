@@ -195,9 +195,14 @@ const ProductDetails = () => {
       return ci.item.id === payload.id;
     });
 
-    if (cartItem.length > 0 && customisations && customisations.length > 0) {
-      cartItem = cartItems.filter((ci) => {
-        console.log(ci.item);
+    if (customisations) {
+      cartItem = cartItem.filter((ci) => {
+        return ci.item.customisations != null;
+      });
+    }
+
+    if (cartItem.length > 0 && customisations) {
+      cartItem = cartItem.filter((ci) => {
         return ci.item.customisations.length === customisations.length;
       });
     }
