@@ -28,7 +28,6 @@ export default function ReturnOrderModal({
   onSuccess,
   quantity,
 }) {
-  console.log("Return Modal: ", partailsReturnProductList);
   // STATES
   const [inlineError, setInlineError] = useState({
     selected_id_error: "",

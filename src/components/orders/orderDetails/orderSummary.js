@@ -784,7 +784,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         )}
       </div>
 
-      {console.log("check", generateProductsList(orderDetails, itemQuotes))}
       {toggleReturnOrderModal && (
         <ReturnOrderModal
           onClose={() => setToggleReturnOrderModal(false)}
