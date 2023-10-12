@@ -784,12 +784,13 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         )}
       </div>
 
+      {console.log("check", generateProductsList(orderDetails, itemQuotes))}
       {toggleReturnOrderModal && (
         <ReturnOrderModal
           onClose={() => setToggleReturnOrderModal(false)}
           onSuccess={() => setToggleReturnOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes)}
+          partailsReturnProductList={generateProductsList(orderDetails, itemQuotes)}
           order_status={orderDetails.state}
           bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
