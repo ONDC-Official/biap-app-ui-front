@@ -283,16 +283,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
         );
         if (findQuote) {
-          if(findQuote?.item?.tags){
+          if (findQuote?.item?.tags) {
             const tag = findQuote.item.tags.find((tag) => tag.code === "type");
             const tagList = tag?.list;
             const type = tagList?.find((item) => item.code === "type");
             if (type?.value === "item") {
               const parentId = findQuote?.item?.parent_item_id;
               let customizations = null;
-              if(parentId){
+              if (parentId) {
                 customizations = itemQuotes[parentId].customizations;
-              }else{}
+              } else {
+              }
               return {
                 id,
                 name: findQuote?.title ?? "NA",
@@ -303,7 +304,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
                 ...orderDetails.items?.[index]?.product,
               };
             }
-          }else{
+          } else {
             return {
               id,
               name: findQuote?.title ?? "NA",
@@ -466,7 +467,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             variant="body1"
             className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
           >
-            {`₹${quote?.price?.value}`}
+            {`₹${parseInt(quote?.price?.value).toFixed(2)}`}
           </Typography>
         </div>
         {quote?.tax && (
@@ -481,7 +482,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               variant="body1"
               className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
             >
-              {`₹${quote?.tax.value}`}
+              {`₹${parseInt(quote?.tax.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
@@ -494,7 +495,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               {quote?.discount.title}
             </Typography>
             <Typography variant="body1" className={classes.summaryItemPriceValue}>
-              {`₹${quote?.discount.value}`}
+              {`₹${parseInt(quote?.discount.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
@@ -508,20 +509,20 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       const items = Object.values(itemQuotes).filter((quote) => quote?.title !== "");
       items.forEach((item) => {
         finalTotal = finalTotal + parseFloat(item.price.value);
-        if(item?.tax){
+        if (item?.tax) {
           finalTotal = finalTotal + parseFloat(item.tax.value);
         }
         if (item.customizations) {
           Object.values(item.customizations).forEach((custItem) => {
             finalTotal = finalTotal + parseFloat(custItem.price.value);
-            if(custItem?.tax){
+            if (custItem?.tax) {
               finalTotal = finalTotal + parseFloat(custItem.tax.value);
             }
           });
         }
       });
     }
-    return finalTotal;
+    return parseInt(finalTotal).toFixed(2);
   };
 
   const renderDeliveryLine = (quote, key) => {
@@ -531,7 +532,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           {quote?.title}
         </Typography>
         <Typography variant="body1" className={classes.summaryItemPriceValue}>
-          {`₹${quote?.value}`}
+          {`₹${parseInt(quote?.value).toFixed(2)}`}
         </Typography>
       </div>
     );
@@ -567,7 +568,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     if (data.misc) {
       total = total + parseFloat(data.misc.value);
     }
-    return total;
+    return parseInt(total).toFixed(2);
   };
 
   const renderQuote = () => {
@@ -606,7 +607,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${orderDetails?.quote?.price?.value || 0}`}
+              {`₹${parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0}`}
             </Typography>
           </div>
         </div>

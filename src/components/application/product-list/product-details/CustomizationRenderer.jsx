@@ -121,6 +121,7 @@ const CustomizationRenderer = (props) => {
 
       const processGroup = (id) => {
         const group = customizationGroups.find((item) => item.id === id);
+        if (!group) return;
         const groupId = group.id;
         const groupName = group.name;
         const isMandatory = group.minQuantity > 0;
