@@ -138,10 +138,16 @@ export default function Cart() {
               updatedCartItem.item.quantity.count += 1;
 
               let customisations = updatedCartItem.item.customisations;
-              customisations = customisations.map((c) => {
-                return { ...c, quantity: { ...c.quantity, count: c.quantity.count + 1 } };
-              });
-              updatedCartItem.item.customisations = customisations;
+
+              if (customisations) {
+                customisations = customisations.map((c) => {
+                  return { ...c, quantity: { ...c.quantity, count: c.quantity.count + 1 } };
+                });
+
+                updatedCartItem.item.customisations = customisations;
+              } else {
+                updatedCartItem.item.customisations = null;
+              }
 
               updatedCartItem = updatedCartItem.item;
 
@@ -165,10 +171,15 @@ export default function Cart() {
             updatedCartItem.item.quantity.count -= 1;
 
             let customisations = updatedCartItem.item.customisations;
-            customisations = customisations.map((c) => {
-              return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
-            });
-            updatedCartItem.item.customisations = customisations;
+
+            if (customisations) {
+              customisations = customisations.map((c) => {
+                return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
+              });
+              updatedCartItem.item.customisations = customisations;
+            } else {
+              updatedCartItem.item.customisations = null;
+            }
 
             updatedCartItem = updatedCartItem.item;
             const res = await putCall(url, updatedCartItem);
@@ -208,8 +219,8 @@ export default function Cart() {
   const checkAvailableQuantity = () => {
     let quantityIsZero = false;
     cartItems.forEach((item) => {
-      const availableQuantity = item.item.product.quantity.available;
-      if (availableQuantity && availableQuantity.count === 0) {
+      const availableQuantity = item?.item?.product?.quantity?.available;
+      if (availableQuantity && availableQuantity?.count === 0) {
         quantityIsZero = true;
       }
     });
@@ -224,9 +235,7 @@ export default function Cart() {
   useEffect(() => {
     checkDistinctProviders();
     checkAvailableQuantity();
-    if (cartItems.length > 1) {
-      checkDifferentCategory();
-    }
+    checkDifferentCategory();
   }, [cartItems.length, deliveryAddressLocation]);
 
   const emptyCartScreen = () => {
@@ -408,7 +417,7 @@ export default function Cart() {
                     <img
                       className={classes.moreImage}
                       alt="product-image"
-                      src={cartItem?.item?.product?.descriptor?.images[0]}
+                      src={cartItem?.item?.product?.descriptor?.symbol}
                       onClick={() => history.push(`/application/products/${cartItem.item.id}`)}
                     />
                     {renderVegNonVegTag(cartItem)}
@@ -462,7 +471,7 @@ export default function Cart() {
             </Grid>
             <Grid item xs={1.2}>
               <div className={classes.qtyContainer}>
-                <Typography variant="body1" sx={{ marginRight: "6px", fontWeight: 600 }}>
+                <Typography variant="body1" sx={{ marginRight: "12px", fontWeight: 600 }}>
                   {cartItem?.item?.quantity?.count}
                 </Typography>
                 <KeyboardArrowUpIcon

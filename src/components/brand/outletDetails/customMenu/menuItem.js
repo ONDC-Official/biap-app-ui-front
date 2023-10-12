@@ -38,7 +38,7 @@ const MenuItem = (props) => {
   } = props;
   const { descriptor, isVeg } = product;
 
-  const { name: product_name, images, short_desc: product_description } = descriptor;
+  const { name: product_name, images, short_desc: product_description, symbol } = descriptor;
   const history = useHistory();
 
   const renderVegNonvegIcon = (isVeg) => {
@@ -79,7 +79,7 @@ const MenuItem = (props) => {
         <Card className={classes.itemCard}>
           <img
             className={classes.itemImage}
-            src={images?.length > 0 ? images[0] : no_image_found}
+            src={symbol ? symbol : no_image_found}
             alt={`item-ind-${productId}`}
             style={{ cursor: "pointer" }}
             onClick={() => history.push(`/application/products/${productId}`)}
