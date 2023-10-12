@@ -300,7 +300,7 @@ export default function ReturnOrderModal({
               <div className="px-1 py-2">
                 {partailsReturnProductList?.map((product, idx) => {
                   return (
-                    <div className="d-flex mb-4">
+                    <div key={idx} className="d-flex mb-4">
                       <div style={{ width: 100, height: 80 }}>
                         <img src={product?.descriptor?.symbol} alt="" style={{ width: "100%", height: "100%" }} />
                       </div>
@@ -315,15 +315,16 @@ export default function ReturnOrderModal({
                           </Typography>
                           <div className="my-1">
                             <Typography variant="subtitle1" color="#686868">
-                              QTY: {quantity[idx]?.count ?? "0"} X ₹ {Number(product?.price?.value)?.toFixed(2)}
+                              QTY: {quantity?.[idx]?.count ?? "0"} X ₹{" "}
+                              {Number(product?.price?.value)?.toFixed(2) || "Price Not Available"}
                             </Typography>
-                            {Object.keys(product.customizations).map((key, idx) => {
-                              const isLastItem = idx === Object.keys(product.customizations).length - 1;
+                            {Object.keys(product?.customizations || {}).map((key, idx) => {
+                              const isLastItem = idx === Object.keys(product.customizations || {}).length - 1;
                               return (
-                                <Grid container>
+                                <Grid container key={key}>
                                   <Typography variant="subtitle1" color="#686868">
-                                    {product.customizations[key].title}
-                                    (₹{product.customizations[key].price.value}) {isLastItem ? "" : "+"}
+                                    {product.customizations[key].title || "Customization Title"} (₹
+                                    {product.customizations[key].price?.value || "0"}) {isLastItem ? "" : "+"}
                                   </Typography>
                                 </Grid>
                               );

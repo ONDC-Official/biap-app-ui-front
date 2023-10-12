@@ -470,15 +470,16 @@ export default function CancelOrderModal(props) {
                           </Typography>
                           <div className="my-1">
                             <Typography variant="subtitle1" color="#686868">
-                              QTY: {quantity[idx]?.count ?? "0"} X ₹ {Number(product?.price?.value)?.toFixed(2)}
+                              QTY: {quantity?.[idx]?.count ?? "0"} X ₹{" "}
+                              {Number(product?.price?.value)?.toFixed(2) || "Price Not Available"}
                             </Typography>
-                            {Object.keys(product.customizations).map((key, idx) => {
-                              const isLastItem = idx === Object.keys(product.customizations).length - 1;
+                            {Object.keys(product?.customizations || {}).map((key, idx) => {
+                              const isLastItem = idx === Object.keys(product.customizations || {}).length - 1;
                               return (
-                                <Grid container>
+                                <Grid container key={key}>
                                   <Typography variant="subtitle1" color="#686868">
-                                    {product.customizations[key].title}
-                                    (₹{product.customizations[key].price.value}) {isLastItem ? "" : "+"}
+                                    {product.customizations[key].title || "Customization Title"} (₹
+                                    {product.customizations[key].price.value || "0"}) {isLastItem ? "" : "+"}
                                   </Typography>
                                 </Grid>
                               );

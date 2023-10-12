@@ -789,7 +789,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           onClose={() => setToggleReturnOrderModal(false)}
           onSuccess={() => setToggleReturnOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes)}
+          partailsReturnProductList={generateProductsList(orderDetails, itemQuotes)}
           order_status={orderDetails.state}
           bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
@@ -812,7 +812,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               );
             } else {
               return (
-                orderDetails.state === "Accepted" &&
+                (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
                 item["@ondc/org/cancellable"] == true &&
                 item.fulfillment_status !== "Pending"
               );
