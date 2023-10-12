@@ -812,7 +812,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               );
             } else {
               return (
-                orderDetails.state === "Accepted" &&
+                (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
                 item["@ondc/org/cancellable"] == true &&
                 item.fulfillment_status !== "Pending"
               );
