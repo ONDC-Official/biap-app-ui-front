@@ -805,16 +805,18 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
           partailsCancelProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
             if (orderDetails.domain === "ONDC:RET11") {
+              console.log("a");
               return (
                 orderDetails.state === "Created" &&
                 item["@ondc/org/cancellable"] == true &&
                 item.fulfillment_status == "Pending"
               );
             } else {
+              console.log("B:", item.fulfillment_status);
               return (
                 (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
                 item["@ondc/org/cancellable"] == true &&
-                item.fulfillment_status !== "Pending"
+                item.fulfillment_status == "Pending"
               );
             }
           })}
