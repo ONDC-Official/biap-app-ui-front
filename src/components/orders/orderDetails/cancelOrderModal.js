@@ -151,7 +151,7 @@ export default function CancelOrderModal(props) {
   // on cancel Api
   async function getCancelOrderDetails(message_id) {
     try {
-      const data = await cancellablePromise(getCall(`/clientApis/v1/on_cancel_order?messageId=${message_id}`));
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_cancel_order?messageId=${message_id}`));
       cancelEventSourceResponseRef.current = [...cancelEventSourceResponseRef.current, data];
       setLoading(false);
       if (data?.message) {

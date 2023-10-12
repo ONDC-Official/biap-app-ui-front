@@ -4,7 +4,7 @@ import { ONDC_COLORS } from "../../../shared/colors";
 import Button from "../../../shared/button/button";
 import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
-import productCartStyles from '../../../../styles/products/productCard.module.scss';
+import productCartStyles from "../../../../styles/products/productCard.module.scss";
 import cancelRadioStyles from "../../../../styles/cart/cartView.module.scss";
 import productStyles from "../../../../styles/orders/orders.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
@@ -102,10 +102,7 @@ export default function CancelOrderModal({
     const timer = setTimeout(() => {
       es.close();
       if (cancelEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
         setLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -149,13 +146,8 @@ export default function CancelOrderModal({
   // on cancel Api
   async function getCancelOrderDetails(message_id) {
     try {
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v1/on_cancel_order?messageId=${message_id}`)
-      );
-      cancelEventSourceResponseRef.current = [
-        ...cancelEventSourceResponseRef.current,
-        data,
-      ];
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_cancel_order?messageId=${message_id}`));
+      cancelEventSourceResponseRef.current = [...cancelEventSourceResponseRef.current, data];
       setLoading(false);
       if (data?.message) {
         onSuccess();
@@ -168,10 +160,7 @@ export default function CancelOrderModal({
           },
         });
       } else {
-        dispatchToast(
-          "Something went wrong!, product status cannot be updated",
-          toast_types.error
-        );
+        dispatchToast("Something went wrong!, product status cannot be updated", toast_types.error);
       }
     } catch (err) {
       setLoading(false);
@@ -206,10 +195,7 @@ export default function CancelOrderModal({
     const timer = setTimeout(() => {
       es.close();
       if (cancelPartialEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
         setLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -225,9 +211,7 @@ export default function CancelOrderModal({
 
   // use this api to partial update orders
   async function handlePartialOrderCancel() {
-    const allCheckPassed = [checkReason(), checkIsOrderSelected()].every(
-      Boolean
-    );
+    const allCheckPassed = [checkReason(), checkIsOrderSelected()].every(Boolean);
     if (!allCheckPassed) return;
 
     cancelPartialEventSourceResponseRef.current = [];
@@ -249,9 +233,7 @@ export default function CancelOrderModal({
       tags: {
         update_type: "cancel",
         reason_code: selectedCancelReasonId?.key,
-        ttl_approval: item?.["@ondc/org/return_window"]
-          ? item?.["@ondc/org/return_window"]
-          : "",
+        ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
         ttl_reverseqc: "P3D",
         image: "",
       },
@@ -302,13 +284,8 @@ export default function CancelOrderModal({
   // on Update api
   async function getPartialCancelOrderDetails(message_id) {
     try {
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_update?messageId=${message_id}`)
-      );
-      cancelPartialEventSourceResponseRef.current = [
-        ...cancelPartialEventSourceResponseRef.current,
-        data,
-      ];
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_update?messageId=${message_id}`));
+      cancelPartialEventSourceResponseRef.current = [...cancelPartialEventSourceResponseRef.current, data];
       setLoading(false);
       if (data?.message) {
         onSuccess();
@@ -321,10 +298,7 @@ export default function CancelOrderModal({
           },
         });
       } else {
-        dispatchToast(
-          "Something went wrong!, product status cannot be updated",
-          toast_types.error
-        );
+        dispatchToast("Something went wrong!, product status cannot be updated", toast_types.error);
       }
     } catch (err) {
       setLoading(false);
@@ -362,9 +336,7 @@ export default function CancelOrderModal({
 
   // use this function to check if the provider is already selected
   function isProductSelected(id) {
-    return (
-      selectedIds.filter(({ id: provider_id }) => provider_id === id).length > 0
-    );
+    return selectedIds.filter(({ id: provider_id }) => provider_id === id).length > 0;
   }
 
   // use this function to add attribute in filter list
@@ -385,9 +357,10 @@ export default function CancelOrderModal({
     data = data.map((item) => {
       if (item.id === pId) {
         item.quantity.count = qty;
-      } else { }
+      } else {
+      }
       return item;
-    })
+    });
     setSelectedIds(data);
   }
 
@@ -443,7 +416,7 @@ export default function CancelOrderModal({
     let qtyData = Object.assign([], orderQty);
     qtyData[idx].count = qty;
     setOrderQty(qtyData);
-    updateQtyForSelectedProduct(pId, qty)
+    updateQtyForSelectedProduct(pId, qty);
   };
 
   return (
@@ -471,247 +444,198 @@ export default function CancelOrderModal({
               }}
             >
               <div className="px-3">
-                <p className={cancelRadioStyles.address_name_and_phone}>
-                  Cancel Complete Orders
-                </p>
+                <p className={cancelRadioStyles.address_name_and_phone}>Cancel Complete Orders</p>
               </div>
             </AddressRadioButton>
             <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled() || (partailsCancelProductList.length === 1 && quantity[0].count === 1)}
+              disabled={
+                loading ||
+                !areProductsToBeCancled() ||
+                (partailsCancelProductList.length === 1 && quantity[0].count === 1)
+              }
               checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
               }}
             >
               <div className="px-3">
-                <p className={cancelRadioStyles.address_name_and_phone}>
-                  Cancel Selected
-                </p>
+                <p className={cancelRadioStyles.address_name_and_phone}>Cancel Selected</p>
               </div>
             </AddressRadioButton>
           </div>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
-            {areProductsToBeCancled() &&
-              (selectedCancelType === CANCEL_ORDER_TYPES.partialOrders) && (
-                <div className="px-1 py-2">
-                  {partailsCancelProductList?.map((product, idx) => {
-                    return (
-                      <div
-                        key={product?.id}
-                        className="d-flex align-items-center"
-                      >
-                        <div style={{ width: isProductSelected(product?.id) ? "70%" : "90%" }}>
-                          <Checkbox
-                            id={product?.id}
-                            checked={isProductSelected(product?.id)}
-                            disabled={loading}
-                            boxBasis="8%"
-                            nameBasis="92%"
-                            onClick={() => {
-                              setInlineError((error) => ({
-                                ...error,
-                                selected_id_error: "",
-                              }));
-                              if (isProductSelected(product?.id)) {
-                                removeProductToCancel(product);
-                                return;
-                              }
-                              addProductToCancel(product, orderQty[idx]?.count);
-                            }}
+            {areProductsToBeCancled() && selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
+              <div className="px-1 py-2">
+                {partailsCancelProductList?.map((product, idx) => {
+                  return (
+                    <div key={product?.id} className="d-flex align-items-center">
+                      <div style={{ width: isProductSelected(product?.id) ? "70%" : "90%" }}>
+                        <Checkbox
+                          id={product?.id}
+                          checked={isProductSelected(product?.id)}
+                          disabled={loading}
+                          boxBasis="8%"
+                          nameBasis="92%"
+                          onClick={() => {
+                            setInlineError((error) => ({
+                              ...error,
+                              selected_id_error: "",
+                            }));
+                            if (isProductSelected(product?.id)) {
+                              removeProductToCancel(product);
+                              return;
+                            }
+                            addProductToCancel(product, orderQty[idx]?.count);
+                          }}
+                        >
+                          <p
+                            className={productStyles.product_name}
+                            title={product?.name}
+                            style={{ fontSize: "16px", textAlign: "left" }}
                           >
-                            <p
-                              className={productStyles.product_name}
-                              title={product?.name}
-                              style={{ fontSize: "16px", textAlign: "left" }}
+                            {product?.name}
+                          </p>
+                          <div className="pt-1">
+                            <p className={productStyles.quantity_count}>QTY: {quantity[idx]?.count ?? "0"}</p>
+                          </div>
+                        </Checkbox>
+                      </div>
+                      {isProductSelected(product?.id) && (
+                        <div style={{ width: "20%" }}>
+                          <div className={productCartStyles.quantity_count_wrapper}>
+                            <div
+                              className={`${
+                                orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                              } d-flex align-items-center justify-content-center`}
+                              onClick={() => {
+                                //   setQuantityCount(quantityCount - 1);
+                                //   onReduceQuantity(id);
+                                //   if (quantityCount - 1 === 0) {
+                                //     setToggleAddToCart(false);
+                                //   }
+                                if (orderQty[idx]?.count > 1) {
+                                  onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
+                                }
+                              }}
                             >
-                              {product?.name}
-                            </p>
-                            <div className="pt-1">
-                              <p className={productStyles.quantity_count}>
-                                QTY: {quantity[idx]?.count ?? "0"}
+                              {orderQty[idx]?.count > 1 && (
+                                <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
+                              )}
+                            </div>
+                            <div className="d-flex align-items-center justify-content-center">
+                              <p className={productCartStyles.quantity_count}>
+                                {orderQty[idx]?.count ?? "0"}
+                                {/* {quantityCount} */}
                               </p>
                             </div>
-                          </Checkbox>
-                        </div>
-                        {
-                          isProductSelected(product?.id) && (
-                            <div style={{ width: "20%" }}>
-                              <div className={productCartStyles.quantity_count_wrapper}>
-                                <div
-                                  className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
-                                  onClick={() => {
-                                    //   setQuantityCount(quantityCount - 1);
-                                    //   onReduceQuantity(id);
-                                    //   if (quantityCount - 1 === 0) {
-                                    //     setToggleAddToCart(false);
-                                    //   }
-                                    if (orderQty[idx]?.count > 1) {
-                                      onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
-                                    }
-                                  }}
-                                >
-                                  {
-                                    orderQty[idx]?.count > 1 && (
-                                      <Subtract width="13" classes={productCartStyles.subtract_svg_color} />
-                                    )
-                                  }
-                                </div>
-                                <div className="d-flex align-items-center justify-content-center">
-                                  <p className={productCartStyles.quantity_count}>
-                                    {orderQty[idx]?.count ?? "0"}
-                                    {/* {quantityCount} */}
-                                  </p>
-                                </div>
-                                <div
-                                  className={`${orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""} d-flex align-items-center justify-content-center`}
-                                  onClick={() => {
-                                    //   setQuantityCount((quantityCount) => quantityCount + 1);
-                                    //   onAddQuantity(id);
-                                    if (orderQty[idx]?.count < quantity[idx]?.count) {
-                                      onUpdateQty(orderQty[idx]?.count + 1, idx, product?.id);
-                                    }
-                                  }}
-                                >
-                                  {
-                                    orderQty[idx]?.count < quantity[idx]?.count && (
-                                      <Add
-                                        width="13"
-                                        height="13"
-                                        classes={productCartStyles.add_svg_color}
-                                      />
-                                    )
-                                  }
-                                </div>
-                              </div>
+                            <div
+                              className={`${
+                                orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""
+                              } d-flex align-items-center justify-content-center`}
+                              onClick={() => {
+                                //   setQuantityCount((quantityCount) => quantityCount + 1);
+                                //   onAddQuantity(id);
+                                if (orderQty[idx]?.count < quantity[idx]?.count) {
+                                  onUpdateQty(orderQty[idx]?.count + 1, idx, product?.id);
+                                }
+                              }}
+                            >
+                              {orderQty[idx]?.count < quantity[idx]?.count && (
+                                <Add width="13" height="13" classes={productCartStyles.add_svg_color} />
+                              )}
                             </div>
-                          )
-                        }
-                        <div className="ms-auto">
-                          <p
-                            className={productStyles.product_price}
-                            style={{ whiteSpace: "nowrap" }}
-                          >
-                            ₹ {Number(product?.price?.value)?.toFixed(2)}
-                          </p>
+                          </div>
                         </div>
+                      )}
+                      <div className="ms-auto">
+                        <p className={productStyles.product_price} style={{ whiteSpace: "nowrap" }}>
+                          ₹ {Number(product?.price?.value)?.toFixed(2)}
+                        </p>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          {inlineError.selected_id_error && (
-            <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>
-          )}
+          {inlineError.selected_id_error && <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>}
 
-          {
-            selectedCancelType === CANCEL_ORDER_TYPES.allOrder && (
-              <div className="px-2">
-                <p className={styles.cancel_dropdown_label_text}>
-                  Select your Reason
-                </p>
-                <Dropdown
-                  header={
-                    <div
-                      className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
-                    >
-                      <div className="px-2">
-                        <p className={styles.cancel_dropdown_text}>
-                          {selectedCancelReasonId?.value
-                            ? selectedCancelReasonId?.value
-                            : "Select reason for cancellation"}
-                        </p>
-                      </div>
-                      <div className="px-2 ms-auto">
-                        <DropdownSvg
-                          width="15"
-                          height="10"
-                          color={ONDC_COLORS.ACCENTCOLOR}
-                        />
-                      </div>
+          {selectedCancelType === CANCEL_ORDER_TYPES.allOrder && (
+            <div className="px-2">
+              <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
+              <Dropdown
+                header={
+                  <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
+                    <div className="px-2">
+                      <p className={styles.cancel_dropdown_text}>
+                        {selectedCancelReasonId?.value
+                          ? selectedCancelReasonId?.value
+                          : "Select reason for cancellation"}
+                      </p>
                     </div>
-                  }
-                  body_classes="dropdown-menu-right"
-                  style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
-                  click={(reasonValue) => {
-                    const REASONS = reasons;
-                    const type = REASONS.find(
-                      ({ value }) =>
-                        value.toLowerCase() === reasonValue.toLowerCase()
-                    );
-                    setSelectedCancelReasonId(type);
-                    setInlineError((error) => ({
-                      ...error,
-                      reason_error: "",
-                    }));
-                  }}
-                  options={reasons.map(({ value }) => ({
-                    value,
-                  }))}
-                  show_icons={false}
-                />
-                {inlineError.reason_error && (
-                  <ErrorMessage>{inlineError.reason_error}</ErrorMessage>
-                )}
-              </div>
-            )
-          }
-          {
-            selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && selectedIds && selectedIds.length > 0 && (
-              <div className="px-2">
-                <p className={styles.cancel_dropdown_label_text}>
-                  Select your Reason
-                </p>
-                <Dropdown
-                  header={
-                    <div
-                      className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
-                    >
-                      <div className="px-2">
-                        <p className={styles.cancel_dropdown_text}>
-                          {selectedCancelReasonId?.value
-                            ? selectedCancelReasonId?.value
-                            : "Select reason for cancellation"}
-                        </p>
-                      </div>
-                      <div className="px-2 ms-auto">
-                        <DropdownSvg
-                          width="15"
-                          height="10"
-                          color={ONDC_COLORS.ACCENTCOLOR}
-                        />
-                      </div>
+                    <div className="px-2 ms-auto">
+                      <DropdownSvg width="15" height="10" color={ONDC_COLORS.ACCENTCOLOR} />
                     </div>
-                  }
-                  body_classes="dropdown-menu-right"
-                  style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
-                  click={(reasonValue) => {
-                    const REASONS = reasons;
-                    const type = REASONS.find(
-                      ({ value }) =>
-                        value.toLowerCase() === reasonValue.toLowerCase()
-                    );
-                    setSelectedCancelReasonId(type);
-                    setInlineError((error) => ({
-                      ...error,
-                      reason_error: "",
-                    }));
-                  }}
-                  options={reasons.map(({ value }) => ({
-                    value,
-                  }))}
-                  show_icons={false}
-                />
-                {inlineError.reason_error && (
-                  <ErrorMessage>{inlineError.reason_error}</ErrorMessage>
-                )}
-              </div>
-            )
-          }
+                  </div>
+                }
+                body_classes="dropdown-menu-right"
+                style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
+                click={(reasonValue) => {
+                  const REASONS = reasons;
+                  const type = REASONS.find(({ value }) => value.toLowerCase() === reasonValue.toLowerCase());
+                  setSelectedCancelReasonId(type);
+                  setInlineError((error) => ({
+                    ...error,
+                    reason_error: "",
+                  }));
+                }}
+                options={reasons.map(({ value }) => ({
+                  value,
+                }))}
+                show_icons={false}
+              />
+              {inlineError.reason_error && <ErrorMessage>{inlineError.reason_error}</ErrorMessage>}
+            </div>
+          )}
+          {selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && selectedIds && selectedIds.length > 0 && (
+            <div className="px-2">
+              <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
+              <Dropdown
+                header={
+                  <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
+                    <div className="px-2">
+                      <p className={styles.cancel_dropdown_text}>
+                        {selectedCancelReasonId?.value
+                          ? selectedCancelReasonId?.value
+                          : "Select reason for cancellation"}
+                      </p>
+                    </div>
+                    <div className="px-2 ms-auto">
+                      <DropdownSvg width="15" height="10" color={ONDC_COLORS.ACCENTCOLOR} />
+                    </div>
+                  </div>
+                }
+                body_classes="dropdown-menu-right"
+                style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
+                click={(reasonValue) => {
+                  const REASONS = reasons;
+                  const type = REASONS.find(({ value }) => value.toLowerCase() === reasonValue.toLowerCase());
+                  setSelectedCancelReasonId(type);
+                  setInlineError((error) => ({
+                    ...error,
+                    reason_error: "",
+                  }));
+                }}
+                options={reasons.map(({ value }) => ({
+                  value,
+                }))}
+                show_icons={false}
+              />
+              {inlineError.reason_error && <ErrorMessage>{inlineError.reason_error}</ErrorMessage>}
+            </div>
+          )}
         </div>
-        <div
-          className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
-        >
+        <div className={`${styles.card_footer} d-flex align-items-center justify-content-center`}>
           <div className="px-3">
             <Button
               disabled={loading}
