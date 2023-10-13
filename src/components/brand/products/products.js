@@ -167,12 +167,25 @@ const Products = ({ brandDetails, brandId }) => {
     setPaginationModel(data);
   };
 
+  //   const getProductDetails = async (productId) => {
+  //     try {
+  //       setProductLoading(true);
+  //       const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+  //       setProductPayload(data.response);
+  //       return data.response;
+  //     } catch (error) {
+  //       console.error("Error fetching product details:", error);
+  //     } finally {
+  //       setProductLoading(false);
+  //     }
+  //   };
+
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(true);
-      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
-      setProductPayload(data.response);
-      return data.response;
+      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      setProductPayload(data);
+      return data;
     } catch (error) {
       console.error("Error fetching product details:", error);
     } finally {

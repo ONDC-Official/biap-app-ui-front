@@ -46,12 +46,25 @@ const ProductDetails = ({ productId }) => {
     setActiveImage(imageUrl);
   };
 
+  //   const getProductDetails = async (productId) => {
+  //     try {
+  // const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+  //       const { item_details } = data.response;
+
+  //       setProductPayload(data.response);
+  //       setProductDetails(item_details);
+  //       setActiveImage(item_details?.descriptor?.symbol);
+  //     } catch (error) {
+  //       console.error("Error fetching product details:", error);
+  //     }
+  //   };
+
   const getProductDetails = async (productId) => {
     try {
-      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
-      const { item_details } = data.response;
+      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const { item_details } = data;
 
-      setProductPayload(data.response);
+      setProductPayload(data);
       setProductDetails(item_details);
       setActiveImage(item_details?.descriptor?.symbol);
     } catch (error) {
