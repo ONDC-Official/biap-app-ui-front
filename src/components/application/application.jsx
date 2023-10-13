@@ -22,6 +22,7 @@ import OrderDetails from "../orders/orderDetails/orderDetails";
 
 import AppLayout from "../appLayout";
 import Products from "../products/products";
+import BrandRoutes from "../brand/BrandRoutes";
 
 export default function Application() {
   return (
@@ -46,7 +47,7 @@ export default function Application() {
                 <Cart />
               </AppLayout>
             </PrivateRoute>
-            <PrivateRoute exact path={"/application/brand/:brandId"}>
+            {/* <PrivateRoute exact path={"/application/brand/:brandId"}>
               <AppLayout>
                 <Brand />
               </AppLayout>
@@ -56,10 +57,14 @@ export default function Application() {
                 <OutletDetails />
               </AppLayout>
             </PrivateRoute>
+             */}
+            <PrivateRoute path={"/application/brand"}>
+              <AppLayout>
+                <BrandRoutes />
+              </AppLayout>
+            </PrivateRoute>
             <PrivateRoute exact path={"/application/checkout"}>
-              <AppLayout
-                isCheckout={true}
-              >
+              <AppLayout isCheckout={true}>
                 <Checkout />
               </AppLayout>
             </PrivateRoute>

@@ -33,7 +33,7 @@ const BrandCard = ({ data, index, onMouseOver }) => {
         <Card
           className={classes.brandCard}
           onMouseOver={onMouseOver}
-          onClick={() => history.push(`/application/brand/${id}`)}
+          onClick={() => history.push(`/application/brand?brandId=${id}`)}
         >
           <img className={classes.brandImage} src={symbol ? symbol : no_image_found} alt={`brand-${index}`} />
         </Card>

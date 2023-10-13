@@ -16,9 +16,8 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import { getValueFromCookie } from "../../../utils/cookies";
 import { SearchContext } from "../../../context/searchContext";
 
-const Outlets = ({ brandDetails }) => {
+const Outlets = ({ brandDetails, brandId }) => {
   const classes = useStyles();
-  const { brandId } = useParams();
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { descriptor } = brandDetails;
@@ -79,7 +78,11 @@ const Outlets = ({ brandDetails }) => {
                 <>
                   {outlets.map((outlet, ind) => (
                     <Grid key={`outlet-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
-                      <SingleOutlet outletDetails={outlet} brandImageUrl={symbol ? symbol : no_image_found} />
+                      <SingleOutlet
+                        brandId={brandId}
+                        outletDetails={outlet}
+                        brandImageUrl={symbol ? symbol : no_image_found}
+                      />
                     </Grid>
                   ))}
                 </>
