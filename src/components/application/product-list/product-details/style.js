@@ -35,6 +35,7 @@ const useStyles = makeStyles({
   },
   productImg: {
     height: 500,
+    maxHeight: 400,
     marign: "auto",
   },
   moreImagesContainer: {

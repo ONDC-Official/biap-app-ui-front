@@ -22,6 +22,8 @@ import OrderDetails from "../orders/orderDetails/orderDetails";
 
 import AppLayout from "../appLayout";
 import Products from "../products/products";
+import BrandRoutes from "../brand/BrandRoutes";
+import ProductRoutes from "./product-list/ProductRoutes";
 
 export default function Application() {
   return (
@@ -32,6 +34,11 @@ export default function Application() {
             <Route path={"/application"} exact component={() => <Redirect to={"/application/products"} />} />
             <PrivateRoute exact path={"/application/products"}>
               <AppLayout>
+                <ProductRoutes />
+              </AppLayout>
+            </PrivateRoute>
+            {/* <PrivateRoute exact path={"/application/products"}>
+              <AppLayout>
                 <Products />
               </AppLayout>
             </PrivateRoute>
@@ -40,26 +47,20 @@ export default function Application() {
               <AppLayout>
                 <ProductDetails />
               </AppLayout>
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute path={"/application/cart"}>
               <AppLayout>
                 <Cart />
               </AppLayout>
             </PrivateRoute>
-            <PrivateRoute exact path={"/application/brand/:brandId"}>
+
+            <PrivateRoute path={"/application/brand"}>
               <AppLayout>
-                <Brand />
-              </AppLayout>
-            </PrivateRoute>
-            <PrivateRoute exact path={"/application/brand/:brandId/:outletId"}>
-              <AppLayout>
-                <OutletDetails />
+                <BrandRoutes />
               </AppLayout>
             </PrivateRoute>
             <PrivateRoute exact path={"/application/checkout"}>
-              <AppLayout
-                isCheckout={true}
-              >
+              <AppLayout isCheckout={true}>
                 <Checkout />
               </AppLayout>
             </PrivateRoute>

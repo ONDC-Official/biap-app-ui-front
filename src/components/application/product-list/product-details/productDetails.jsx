@@ -10,7 +10,7 @@ import { getCall, postCall } from "../../../../api/axios";
 import CustomizationRenderer from "./CustomizationRenderer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
@@ -22,8 +22,7 @@ import { updateCartItem } from "../../cart/utils/updateCartItem";
 import { ToastContext } from "../../../../context/toastContext";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 
-const ProductDetails = () => {
-  const params = useParams();
+const ProductDetails = ({ productId }) => {
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useContext(ToastContext);
@@ -47,12 +46,25 @@ const ProductDetails = () => {
     setActiveImage(imageUrl);
   };
 
+  //   const getProductDetails = async (productId) => {
+  //     try {
+  // const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+  //       const { item_details } = data.response;
+
+  //       setProductPayload(data.response);
+  //       setProductDetails(item_details);
+  //       setActiveImage(item_details?.descriptor?.symbol);
+  //     } catch (error) {
+  //       console.error("Error fetching product details:", error);
+  //     }
+  //   };
+
   const getProductDetails = async (productId) => {
     try {
-      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
-      const { item_details } = data.response;
+      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const { item_details } = data;
 
-      setProductPayload(data.response);
+      setProductPayload(data);
       setProductDetails(item_details);
       setActiveImage(item_details?.descriptor?.symbol);
     } catch (error) {
@@ -292,9 +304,8 @@ const ProductDetails = () => {
 
   // fetch product details
   useEffect(() => {
-    let productId = params.id;
     getProductDetails(productId);
-  }, [params, deliveryAddressLocation]);
+  }, [deliveryAddressLocation]);
 
   const renderVegNonVegTag = () => {
     const FnB = "ONDC:RET11";
@@ -450,8 +461,8 @@ const ProductDetails = () => {
                 Home
               </MuiLink>
               {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>
-            {productPayload?.item_details?.category_id}
-          </MuiLink> */}
+                {productPayload?.item_details?.category_id}
+              </MuiLink> */}
               <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
             </Breadcrumbs>
           </div>

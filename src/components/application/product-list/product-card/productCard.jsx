@@ -16,17 +16,18 @@ export default function ProductCard(props) {
     bpp_provider_id,
     bpp_provider_descriptor,
     show_quantity_button = true,
-    onUpdateCart = () => { },
+    onUpdateCart = () => {},
   } = props;
   const { id, descriptor, provider_details } = product;
-  const { cartItems, onAddProduct, onAddQuantity, onRemoveProduct, onReduceQuantity } =
-    useContext(CartContext);
+  const { cartItems, onAddProduct, onAddQuantity, onRemoveProduct, onReduceQuantity } = useContext(CartContext);
   const { name: provider_name } = bpp_provider_descriptor;
   const { name: product_name, images } = descriptor;
   const [quantityCount, setQuantityCount] = useState(0);
   const [toggleAddToCart, setToggleAddToCart] = useState();
   useEffect(() => {
-    const isProductPresent = cartItems.find(({ product }) => product.id === id && provider_details.id === product.provider_details.id);
+    const isProductPresent = cartItems.find(
+      ({ product }) => product.id === id && provider_details.id === product.provider_details.id
+    );
     if (isProductPresent) {
       setToggleAddToCart(true);
       setQuantityCount(isProductPresent.quantity.count);
@@ -36,9 +37,7 @@ export default function ProductCard(props) {
     }
   }, [cartItems, id]);
   return (
-    <div
-      className={`${styles.product_card_background} d-flex align-items-start`}
-    >
+    <div className={`${styles.product_card_background} d-flex align-items-start`}>
       <div className={styles.product_img_container}>
         <img
           src={images?.length > 0 ? images[0] : no_image_found}
@@ -56,7 +55,7 @@ export default function ProductCard(props) {
         <div className={styles.product_name_and_description_wrapper}>
           <Link
             to={{
-              pathname: `/application/products/${id}`,
+              pathname: `/application/products?productId=${id}`,
               state: {
                 product,
                 price,
@@ -86,107 +85,98 @@ export default function ProductCard(props) {
                 : Number(price?.value).toFixed(2)}
             </p>
           </div>
-          {show_quantity_button
-            ? (
-              <div className="ms-auto">
-                {toggleAddToCart && quantityCount > 0 ? (
-                  <div className={styles.quantity_count_wrapper}>
-                    <div
-                      className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
-                      onClick={() => {
-                        setQuantityCount(quantityCount - 1);
-                        onReduceQuantity(id);
-                        if (quantityCount - 1 === 0) {
-                          setToggleAddToCart(false);
-                        }
-                        onUpdateCart();
-                      }}
-                    >
-                      <Subtract width="13" classes={styles.subtract_svg_color} />
-                    </div>
-                    <div className="d-flex align-items-center justify-content-center">
-                      <p className={styles.quantity_count}>{quantityCount}</p>
-                    </div>
-                    <div
-                      className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
-                      onClick={() => {
-                        setQuantityCount((quantityCount) => quantityCount + 1);
-                        onAddQuantity(id);
-                        onUpdateCart();
-                      }}
-                    >
-                      <Add
-                        width="13"
-                        height="13"
-                        classes={styles.add_svg_color}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    className={styles.add_to_cart_button}
+          {show_quantity_button ? (
+            <div className="ms-auto">
+              {toggleAddToCart && quantityCount > 0 ? (
+                <div className={styles.quantity_count_wrapper}>
+                  <div
+                    className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
                     onClick={() => {
-                      setToggleAddToCart(true);
-                      setQuantityCount((quantityCount) => quantityCount + 1);
-                      onAddProduct({
-                        id,
-                        quantity: { count: quantityCount + 1 },
-                        bpp_id,
-                        provider: {
-                          id: bpp_provider_id,
-                          locations: [location_id],
-                        },
-                        product,
-                      });
+                      setQuantityCount(quantityCount - 1);
+                      onReduceQuantity(id);
+                      if (quantityCount - 1 === 0) {
+                        setToggleAddToCart(false);
+                      }
                       onUpdateCart();
                     }}
                   >
-                    Add
-                  </button>
-                )}
-              </div>
-            )
-            : (
-              <div className="ms-auto">
-                {
-                  quantityCount > 0 && (
-                    <div className={styles.quantity_count_wrapper}>
-                      <div
-                        className={`d-flex align-items-center justify-content-center`}
-                      // onClick={() => {
-                      //   setQuantityCount(quantityCount - 1);
-                      //   onReduceQuantity(id);
-                      //   if (quantityCount - 1 === 0) {
-                      //     setToggleAddToCart(false);
-                      //   }
-                      //   onUpdateCart();
-                      // }}
-                      >
-                        {/* <Subtract width="13" classes={styles.subtract_svg_color} /> */}
-                      </div>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <p className={styles.quantity_count}>{quantityCount}</p>
-                      </div>
-                      <div
-                        className={`d-flex align-items-center justify-content-center`}
-                      // onClick={() => {
-                      //   setQuantityCount((quantityCount) => quantityCount + 1);
-                      //   onAddQuantity(id);
-                      //   onUpdateCart();
-                      // }}
-                      >
-                        {/* <Add
+                    <Subtract width="13" classes={styles.subtract_svg_color} />
+                  </div>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <p className={styles.quantity_count}>{quantityCount}</p>
+                  </div>
+                  <div
+                    className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
+                    onClick={() => {
+                      setQuantityCount((quantityCount) => quantityCount + 1);
+                      onAddQuantity(id);
+                      onUpdateCart();
+                    }}
+                  >
+                    <Add width="13" height="13" classes={styles.add_svg_color} />
+                  </div>
+                </div>
+              ) : (
+                <button
+                  className={styles.add_to_cart_button}
+                  onClick={() => {
+                    setToggleAddToCart(true);
+                    setQuantityCount((quantityCount) => quantityCount + 1);
+                    onAddProduct({
+                      id,
+                      quantity: { count: quantityCount + 1 },
+                      bpp_id,
+                      provider: {
+                        id: bpp_provider_id,
+                        locations: [location_id],
+                      },
+                      product,
+                    });
+                    onUpdateCart();
+                  }}
+                >
+                  Add
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="ms-auto">
+              {quantityCount > 0 && (
+                <div className={styles.quantity_count_wrapper}>
+                  <div
+                    className={`d-flex align-items-center justify-content-center`}
+                    // onClick={() => {
+                    //   setQuantityCount(quantityCount - 1);
+                    //   onReduceQuantity(id);
+                    //   if (quantityCount - 1 === 0) {
+                    //     setToggleAddToCart(false);
+                    //   }
+                    //   onUpdateCart();
+                    // }}
+                  >
+                    {/* <Subtract width="13" classes={styles.subtract_svg_color} /> */}
+                  </div>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <p className={styles.quantity_count}>{quantityCount}</p>
+                  </div>
+                  <div
+                    className={`d-flex align-items-center justify-content-center`}
+                    // onClick={() => {
+                    //   setQuantityCount((quantityCount) => quantityCount + 1);
+                    //   onAddQuantity(id);
+                    //   onUpdateCart();
+                    // }}
+                  >
+                    {/* <Add
                         width="13"
                         height="13"
                         classes={styles.add_svg_color}
                       /> */}
-                      </div>
-                    </div>
-                  )
-                }
-              </div>
-            )
-          }
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

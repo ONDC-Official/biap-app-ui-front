@@ -7,16 +7,18 @@ import Box from "@mui/material/Box";
 
 import { useHistory, useParams } from "react-router-dom";
 
-const SingleOutlet = ({ outletDetails, brandImageUrl }) => {
+const SingleOutlet = ({ outletDetails, brandImageUrl, brandId }) => {
   const classes = useStyles();
-  const { brandId } = useParams();
   const history = useHistory();
 
   const { id, address, circle } = outletDetails;
   const { radius } = circle;
 
   return (
-    <div className={classes.outletItemContainer} onClick={() => history.push(`/application/brand/${brandId}/${id}`)}>
+    <div
+      className={classes.outletItemContainer}
+      onClick={() => history.push(`/application/brand?brandId=${brandId}&outletId=${id}`)}
+    >
       <Card className={classes.outletCard}>
         <img className={classes.outletImage} src={brandImageUrl} alt={`outlet-img-${outletDetails.id}`} />
       </Card>

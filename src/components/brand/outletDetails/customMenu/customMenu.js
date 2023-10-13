@@ -15,9 +15,8 @@ import { ReactComponent as MenuIcon } from "../../../../assets/images/menu.svg";
 import MenuItems from "./menuItems";
 import Loading from "../../../shared/loading/loading";
 
-const CustomMenu = ({ brandDetails, outletDetails }) => {
+const CustomMenu = ({ brandDetails, outletDetails, brandId }) => {
   const classes = useStyles();
-  const { brandId } = useParams();
   const customMenuRef = useRef([]);
   const [isLoading, setIsLoading] = useState(false);
   const [menuModal, setMenuModal] = useState(false);

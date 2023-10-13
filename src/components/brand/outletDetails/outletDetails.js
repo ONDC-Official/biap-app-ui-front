@@ -22,9 +22,9 @@ import { getBrandDetailsRequest, getOutletDetailsRequest } from "../../../api/br
 import useCancellablePromise from "../../../api/cancelRequest";
 import { SearchContext } from "../../../context/searchContext";
 
-const OutletDetails = () => {
+const OutletDetails = (props) => {
+  const { brandId, outletId } = props;
   const classes = useStyles();
-  const { brandId, outletId } = useParams();
   const history = useHistory();
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
@@ -174,7 +174,7 @@ const OutletDetails = () => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
             <Box component={"div"} className={classes.divider} />
-            <CustomMenu brandDetails={brandDetails} outletDetails={outletDetails} />
+            <CustomMenu brandId={brandId} brandDetails={brandDetails} outletDetails={outletDetails} />
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
         </Grid>

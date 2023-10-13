@@ -23,15 +23,14 @@ import { getCall, postCall } from "../../../api/axios";
 import { CartContext } from "../../../context/cartContext";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
-import {SearchContext} from "../../../context/searchContext";
+import { SearchContext } from "../../../context/searchContext";
 import Loading from "../../shared/loading/loading";
-const Products = ({ brandDetails }) => {
+const Products = ({ brandDetails, brandId }) => {
   const classes = useStyles();
   const history = useHistory();
   const { fetchCartItems } = useContext(CartContext);
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
-  const { brandId } = useParams();
   const { descriptor } = brandDetails;
   const { name: brandName, images } = descriptor;
   const locationData = useLocation();
@@ -168,12 +167,25 @@ const Products = ({ brandDetails }) => {
     setPaginationModel(data);
   };
 
+  //   const getProductDetails = async (productId) => {
+  //     try {
+  //       setProductLoading(true);
+  //       const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+  //       setProductPayload(data.response);
+  //       return data.response;
+  //     } catch (error) {
+  //       console.error("Error fetching product details:", error);
+  //     } finally {
+  //       setProductLoading(false);
+  //     }
+  //   };
+
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(true);
-      const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
-      setProductPayload(data.response);
-      return data.response;
+      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      setProductPayload(data);
+      return data;
     } catch (error) {
       console.error("Error fetching product details:", error);
     } finally {
