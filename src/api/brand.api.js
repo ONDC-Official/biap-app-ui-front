@@ -110,11 +110,23 @@ export const getAllOutletsFromCategoryAndLocationRequest = (params) => {
  * function to get outlet details
  * @returns
  */
+// export const getOutletDetailsRequest = (locationId) => {
+//   return new Promise(async (resolve, reject) => {
+//     try {
+//       // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
+//       const data = await getCall(`/clientApis/v2/locations/${locationId}`);
+//       return resolve(data);
+//     } catch (err) {
+//       return reject(err);
+//     }
+//   });
+// };
 export const getOutletDetailsRequest = (locationId) => {
   return new Promise(async (resolve, reject) => {
     try {
       // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
-      const data = await getCall(`/clientApis/v2/locations/${locationId}`);
+      // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
+      const data = await getCall(`/protocol/location-details?id=${locationId}`);
       return resolve(data);
     } catch (err) {
       return reject(err);
