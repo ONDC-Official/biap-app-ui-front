@@ -82,7 +82,7 @@ const MenuItem = (props) => {
             src={symbol ? symbol : no_image_found}
             alt={`item-ind-${productId}`}
             style={{ cursor: "pointer" }}
-            onClick={() => history.push(`/application/products/${productId}`)}
+            onClick={() => history.push(`/application/products?productId=${productId}`)}
           />
           {renderVegNonvegIcon(isVeg)}
         </Card>

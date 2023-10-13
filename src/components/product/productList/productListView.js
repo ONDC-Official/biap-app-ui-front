@@ -39,7 +39,7 @@ const ProductListView = (props) => {
       </Grid>
       <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5} className={classes.productDetailsTypo}>
         <Typography component="div" variant="h5" className={classes.productNameTypoList}>
-          {product_name}
+          {product_name} ...
         </Typography>
         <Typography variant="body1" className={classes.providerTypoList}>
           {provider_name}
@@ -53,7 +53,7 @@ const ProductListView = (props) => {
           {product_description}
         </Typography>
         <div className={classes.footerActions}>
-          <MuiLink component={Link} to={`/application/products/${productId}`}>
+          <MuiLink component={Link} to={`/application/products?product=${productId}`}>
             View details
           </MuiLink>
 

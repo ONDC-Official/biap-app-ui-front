@@ -418,7 +418,7 @@ export default function Cart() {
                       className={classes.moreImage}
                       alt="product-image"
                       src={cartItem?.item?.product?.descriptor?.symbol}
-                      onClick={() => history.push(`/application/products/${cartItem.item.id}`)}
+                      onClick={() => history.push(`/application/products?productId=${cartItem.item.id}`)}
                     />
                     {renderVegNonVegTag(cartItem)}
                   </div>

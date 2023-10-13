@@ -157,7 +157,7 @@ const VariationsRenderer = (props) => {
     if (groupData.id === Object.keys(variationState).length) {
       const matchingVariation = findMatchingVariation();
       if (matchingVariation) {
-        history.push(`/application/products/${matchingVariation.id}`);
+        history.push(`/application/products?productId=${matchingVariation.id}`);
       }
     }
 
@@ -212,7 +212,7 @@ const VariationsRenderer = (props) => {
       if (parseInt(value) === parseInt(toFind)) return item;
     });
 
-    history.push(`/application/products/${product?.id}`);
+    history.push(`/application/products?productId=${product?.id}`);
   };
 
   useEffect(() => {

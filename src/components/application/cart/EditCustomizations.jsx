@@ -202,7 +202,7 @@ const EditCustomizations = (props) => {
           fullWidth
           variant="outlined"
           sx={{ marginRight: 1.4 }}
-          onClick={() => history.push(`/application/products/${productPayload.id}`)}
+          onClick={() => history.push(`/application/products?productId=${productPayload.id}`)}
           disabled={itemOutOfStock}
         >
           View Details
