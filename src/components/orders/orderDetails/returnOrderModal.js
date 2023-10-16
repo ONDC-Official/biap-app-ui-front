@@ -28,6 +28,7 @@ export default function ReturnOrderModal({
   onSuccess,
   quantity,
   bpp_uri,
+  handleFetchUpdatedStatus,
 }) {
   // STATES
   const [inlineError, setInlineError] = useState({
