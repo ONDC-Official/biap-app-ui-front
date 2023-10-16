@@ -796,6 +796,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           order_id={orderDetails.id}
           domain={orderDetails.domain}
           bpp_uri={orderDetails.bpp_uri}
+          handleFetchUpdatedStatus={handleFetchUpdatedStatus}
         />
       )}
 
@@ -825,6 +826,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           order_id={orderDetails.id}
           domain={orderDetails.domain}
           bpp_uri={orderDetails.bpp_uri}
+          handleFetchUpdatedStatus={handleFetchUpdatedStatus}
         />
       )}
     </Card>

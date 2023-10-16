@@ -86,6 +86,7 @@ export default function ReturnOrderModal({
     es.addEventListener("on_update", (e) => {
       const { messageId } = JSON.parse(e?.data);
       getPartialCancelOrderDetails(messageId);
+      handleFetchUpdatedStatus();
     });
 
     const timer = setTimeout(() => {

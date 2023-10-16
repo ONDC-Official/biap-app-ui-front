@@ -35,6 +35,7 @@ export default function CancelOrderModal(props) {
     quantity,
     domain,
     bpp_uri,
+    handleFetchUpdatedStatus,
   } = props;
 
   // CONSTANTS
@@ -102,6 +103,7 @@ export default function CancelOrderModal(props) {
     es.addEventListener("on_cancel", (e) => {
       const { messageId } = JSON.parse(e?.data);
       getCancelOrderDetails(messageId);
+      handleFetchUpdatedStatus();
     });
 
     const timer = setTimeout(() => {
@@ -139,7 +141,7 @@ export default function CancelOrderModal(props) {
           },
           message: {
             order_id,
-            cancellation_reason_id: "1",
+            cancellation_reason_id: selectedCancelReasonId?.key,
           },
         })
       );
