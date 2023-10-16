@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
   padding: 0;
@@ -41,11 +45,11 @@ code {
   color: #FFBF00 !important;
 }
 
-body{
+body {
   background: #fff !important;
 }
 
-.MuiSnackbar-root{
+.MuiSnackbar-root {
   top: 90px !important;
   right: 25px !important;
 }
