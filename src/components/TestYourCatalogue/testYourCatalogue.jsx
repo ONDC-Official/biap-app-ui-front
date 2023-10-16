@@ -8,7 +8,6 @@ const TestYourCatalogue = () => {
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  console.log("response=====>", response);
   return (
     <div className='test-your-catalogue'>
       <Layout>

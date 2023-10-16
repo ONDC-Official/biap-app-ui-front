@@ -4,16 +4,7 @@ module.exports = {
     relative: false,
     files: [
       "./src/**/*.{js,jsx,ts,tsx}",
-      // "./src/components/TestYourCatalogue/*.{js,jsx,ts,tsx}",
-      // "./src/components/**/*.{js,jsx,ts,tsx}",
-      // "./src/components/TestYourCatalogue/components/**/*.{js,jsx,ts,tsx}",
-      // "./src/components/TestYourCatalogue/components/**/**/*.{js,jsx,ts,tsx}",
-    ],
-    // extract: {
-    //   wtf: (content) => {
-    //     return content.match(/[^<>"'`\s]*/)
-    //   }
-    // }
+    ]
   },
   corePlugins: {
     preflight: false,
@@ -32,7 +23,6 @@ module.exports = {
       },
     },
   },
-  // prefix: 'tw-',
   plugins: [],
 }
 
