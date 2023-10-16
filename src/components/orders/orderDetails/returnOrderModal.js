@@ -27,6 +27,7 @@ export default function ReturnOrderModal({
   onClose,
   onSuccess,
   quantity,
+  bpp_uri,
 }) {
   // STATES
   const [inlineError, setInlineError] = useState({
@@ -141,6 +142,7 @@ export default function ReturnOrderModal({
             return {
               context: {
                 bpp_id,
+                bpp_uri,
                 transaction_id,
               },
               message: {

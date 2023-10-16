@@ -34,6 +34,7 @@ export default function CancelOrderModal(props) {
     onSuccess,
     quantity,
     domain,
+    bpp_uri,
   } = props;
 
   // CONSTANTS
@@ -133,6 +134,7 @@ export default function CancelOrderModal(props) {
           context: {
             domain,
             bpp_id,
+            bpp_uri,
             transaction_id,
           },
           message: {
@@ -245,6 +247,7 @@ export default function CancelOrderModal(props) {
               context: {
                 domain,
                 bpp_id,
+                bpp_uri,
                 transaction_id,
               },
               message: {

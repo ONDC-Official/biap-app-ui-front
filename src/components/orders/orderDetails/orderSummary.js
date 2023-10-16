@@ -795,6 +795,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           transaction_id={orderDetails.transactionId}
           order_id={orderDetails.id}
           domain={orderDetails.domain}
+          bpp_uri={orderDetails.bpp_uri}
         />
       )}
 
@@ -805,14 +806,12 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
           partailsCancelProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
             if (orderDetails.domain === "ONDC:RET11") {
-              console.log("a");
               return (
                 orderDetails.state === "Created" &&
                 item["@ondc/org/cancellable"] == true &&
                 item.fulfillment_status == "Pending"
               );
             } else {
-              console.log("B:", item.fulfillment_status);
               return (
                 (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
                 item["@ondc/org/cancellable"] == true &&
@@ -825,6 +824,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           transaction_id={orderDetails.transactionId}
           order_id={orderDetails.id}
           domain={orderDetails.domain}
+          bpp_uri={orderDetails.bpp_uri}
         />
       )}
     </Card>
