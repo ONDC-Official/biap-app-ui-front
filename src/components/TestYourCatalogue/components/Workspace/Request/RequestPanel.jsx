@@ -5,6 +5,8 @@ import { convertKeyValueToObject } from '../../../../../utils/helpers';
 import UrlEditor from '../../Panes/RequestUrl/UrlEditor';
 import RequestTabGroup from '../../Tab-Groups/RequestTabGroup';
 
+axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
+
 const keyPairInitState = [
   {
     id: uuidv4(),
@@ -15,9 +17,9 @@ const keyPairInitState = [
 
 export default function Request({ setResponse, setLoading, loading }) {
   const [url, setUrl] = useState(
-    'https://jsonplaceholder.typicode.com/todos/1'
+    'protocol/test/v1/on_search'
   );
-  const [reqMethod, setReqMethod] = useState('GET');
+  const [reqMethod, setReqMethod] = useState('POST');
   const [queryParams, setQueryParams] = useState(keyPairInitState);
   const [headers, setHeaders] = useState(keyPairInitState);
   const [body, setBody] = useState('{\n\t\n}');
@@ -50,8 +52,8 @@ export default function Request({ setResponse, setLoading, loading }) {
 
       setResponse(response);
     } catch (e) {
-      console.log(e);
-      setResponse(e);
+      console.log(e.response);
+      setResponse(e.response);
     }
 
     setLoading(false);
