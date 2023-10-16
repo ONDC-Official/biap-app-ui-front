@@ -5,6 +5,8 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
+
+import TestYourCatalogue from "./components/TestYourCatalogue/testYourCatalogue";
 import Application from "./components/application/application";
 import Login from "./components/auth/login/login";
 import SignUp from "./components/auth/sign-up/signUp";
@@ -28,6 +30,7 @@ export default function OndcRoutes() {
         <Route path={"/login"} component={Login} />
         <Route path={"/sign-up"} component={SignUp} />
         <Route path={"/application"} component={Application} />
+        <Route path={"/testYourCatalogue"} component={TestYourCatalogue} />
         <Route path="/page-not-found" component={PageNotFound} />
         <Route path="" component={() => <Redirect to="/page-not-found" />} />
       </Switch>
