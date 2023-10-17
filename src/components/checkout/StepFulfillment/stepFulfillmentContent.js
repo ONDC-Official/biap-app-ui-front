@@ -58,7 +58,7 @@ const StepFulfillmentContent = ({
               <div className={classes.fulfillment}>
                 <FormControlLabel
                   value={fulfillment.id}
-                  control={<Radio />}
+                  control={<Radio style={{ paddingRight: "20px" }} />}
                   label={fulfillment["@ondc/org/category"]}
                 />
               </div>
