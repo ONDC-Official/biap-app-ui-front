@@ -16,12 +16,12 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
 
-import StepOneLabel from "./stepOne/stepOneLabel";
-import StepOneContent from "./stepOne/stepOneContent";
-import StepTwoLabel from "./stepTwo/stepTwoLabel";
-import StepTwoContent from "./stepTwo/stepTwoContent";
-import StepThreeLabel from "./stepThree/stepThreeLabel";
-import StepThreeContent from "./stepThree/stepThreeContent";
+import StepCustomerLabel from "./stepCustomer/stepCustomerLabel";
+import StepCustomerContent from "./stepCustomer/stepCustomerContent";
+import StepAddressLabel from "./stepAddress/stepAddressLabel";
+import StepAddressContent from "./stepAddress/stepAddressContent";
+import StepPaymentLabel from "./stepPayment/stepPaymentLabel";
+import StepPaymentContent from "./stepPayment/stepPaymentContent";
 
 import { Link, Redirect, useHistory } from "react-router-dom";
 import Box from "@mui/material/Box";
@@ -116,20 +116,21 @@ const Checkout = () => {
               const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
               let findItemFromCartItems = null;
               let isCustimization = false;
-              if(break_up_item?.item?.tags){
+              if (break_up_item?.item?.tags) {
                 const findTag = break_up_item?.item?.tags.find(
-                    (tag) => tag.code === "type"
+                  (tag) => tag.code === "type"
                 );
                 if (findTag) {
                   const findCust = findTag.list.find(
-                      (listItem) => listItem.value === "customization"
+                    (listItem) => listItem.value === "customization"
                   );
                   if (findCust) {
                     isCustimization = true;
                   } else {
                   }
                 }
-              }else{}
+              } else {
+              }
               cartItems.forEach((ci) => {
                 if (isCustimization) {
                   const cc = ci?.item?.customisations || [];
@@ -140,7 +141,7 @@ const Checkout = () => {
                   });
                 } else {
                   if (
-                      ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
+                    ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
                   ) {
                     findItemFromCartItems = ci?.item;
                   }
@@ -183,10 +184,11 @@ const Checkout = () => {
 
               if (error && error.code === "30009") {
                 cartList.splice(cartIndex, 1);
-              }else{}
+              } else {
+              }
               if (error && error.code === "40002") {
-
-              }else{}
+              } else {
+              }
               uuid = uuid + 1;
               return {
                 id: break_up_item["@ondc/org/item_id"],
@@ -204,7 +206,7 @@ const Checkout = () => {
                 quantityMessage,
                 uuid: uuid,
                 isError,
-                errorCode: error?.code || ""
+                errorCode: error?.code || "",
               };
             });
 
@@ -213,7 +215,7 @@ const Checkout = () => {
             let outOfStock = [];
             let errorCode = "";
             all_items.forEach((item) => {
-              errorCode = item.errorCode
+              errorCode = item.errorCode;
               setQuoteItemInProcessing(item.id);
               if (item.isError) {
                 outOfStock.push(item);
@@ -339,7 +341,7 @@ const Checkout = () => {
             provider.delivery = delivery;
             provider.outOfStock = outOfStock;
             provider.errorCode = errorCode || "";
-            if(errorCode !== ""){
+            if (errorCode !== "") {
               isAnyError = true;
             }
           }
@@ -398,10 +400,10 @@ const Checkout = () => {
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
-        return <StepOneLabel activeStep={activeStep} />;
+        return <StepCustomerLabel activeStep={activeStep} />;
       case 1:
         return (
-          <StepTwoLabel
+          <StepAddressLabel
             activeStep={activeStep}
             onUpdateActiveStep={() => {
               setActiveStep(1);
@@ -409,7 +411,7 @@ const Checkout = () => {
           />
         );
       case 2:
-        return <StepThreeLabel />;
+        return <StepPaymentLabel />;
       default:
         return <>stepLabel</>;
     }
@@ -418,7 +420,7 @@ const Checkout = () => {
     switch (stepIndex) {
       case 0:
         return (
-          <StepOneContent
+          <StepCustomerContent
             isError={productsQuote.isError}
             handleNext={() => {
               setActiveStep(1);
@@ -427,8 +429,8 @@ const Checkout = () => {
         );
       case 1:
         return (
-          <StepTwoContent
-              isError={productsQuote.isError}
+          <StepAddressContent
+            isError={productsQuote.isError}
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
@@ -449,8 +451,8 @@ const Checkout = () => {
         );
       case 2:
         return (
-          <StepThreeContent
-              isError={productsQuote.isError}
+          <StepPaymentContent
+            isError={productsQuote.isError}
             responseReceivedIds={updatedCartItems.map((item) => {
               const { message } = item;
               return message?.quote?.provider?.id.toString();
@@ -611,17 +613,17 @@ const Checkout = () => {
             city: search_context.location.name,
             state: search_context.location.state,
             parent_order_id: parentOrderIDMap.get(item?.provider?.id)
-                .parent_order_id,
+              .parent_order_id,
             transaction_id: parentOrderIDMap.get(item?.provider?.id)
-                .transaction_id,
+              .transaction_id,
           },
           message: {
             payment: {
               paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
               type:
-                  method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
               transaction_id: parentOrderIDMap.get(item?.provider?.id)
-                  .transaction_id,
+                .transaction_id,
               paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
             },
             quote: {
@@ -632,8 +634,8 @@ const Checkout = () => {
               },
             },
             providers: getItemProviderId(item),
-          }
-        }
+          },
+        },
       ];
       // const queryParams = items.map((item, index) => {
       //   return {
@@ -675,9 +677,7 @@ const Checkout = () => {
       // const isNACK = data.find(
       //   (item) => item.error && item.message.ack.status === "NACK"
       // );
-      const isNACK = data.find(
-          (item) => item.error && item.code !== ""
-      );
+      const isNACK = data.find((item) => item.error && item.code !== "");
       if (isNACK) {
         dispatchError(isNACK.error.message);
         setConfirmOrderLoading(false);
@@ -720,8 +720,12 @@ const Checkout = () => {
         {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data.packing && renderDeliveryLine(data.packing, "packing")}
         {data.misc && renderDeliveryLine(data.misc, "misc")}
-        {
-          data && (data.delivery || data.discount || data.tax || data.packing || data.misc) && (
+        {data &&
+          (data.delivery ||
+            data.discount ||
+            data.tax ||
+            data.packing ||
+            data.misc) && (
             <>
               <div className={classes.summarySubtotalContainer}>
                 <Typography variant="body2" className={classes.subTotalLabel}>
@@ -733,8 +737,7 @@ const Checkout = () => {
               </div>
               <Box component={"div"} className={classes.orderTotalDivider} />
             </>
-          )
-        }
+          )}
       </div>
     );
   };
@@ -853,13 +856,13 @@ const Checkout = () => {
         );
         items.forEach((item) => {
           finalTotal = finalTotal + parseFloat(item.price.value);
-          if(item?.tax){
+          if (item?.tax) {
             finalTotal = finalTotal + parseFloat(item.tax.value);
           }
           if (item?.customizations) {
             Object.values(item.customizations)?.forEach((custItem) => {
               finalTotal = finalTotal + parseFloat(custItem.price.value);
-              if(custItem?.tax){
+              if (custItem?.tax) {
                 finalTotal = finalTotal + parseFloat(custItem.tax.value);
               }
             });
@@ -871,83 +874,86 @@ const Checkout = () => {
   };
 
   const renderOutofStockItems = (provider, pindex) => {
-    if(productsQuote.isError && provider.errorCode === "40002" && provider.error){
+    if (
+      productsQuote.isError &&
+      provider.errorCode === "40002" &&
+      provider.error
+    ) {
       return (
-          <div key={`outof-stockpindex-${pindex}`}>
-            {provider.error && provider.errorCode === "40002" ? (
-                <>
-                  <div>
-                    <Typography
-                        variant="body1"
-                        className={`${classes.summaryItemLabel} ${classes.marginBottom10} ${classes.marginTop20} text-error`}
-                    >
-                      Out of stock
-                    </Typography>
-                  </div>
+        <div key={`outof-stockpindex-${pindex}`}>
+          {provider.error && provider.errorCode === "40002" ? (
+            <>
+              <div>
+                <Typography
+                  variant="body1"
+                  className={`${classes.summaryItemLabel} ${classes.marginBottom10} ${classes.marginTop20} text-error`}
+                >
+                  Out of stock
+                </Typography>
+              </div>
+              <div>
+                <div
+                  className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+                >
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityLabel}
+                  >
+                    Items
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityValue}
+                  >
+                    Cart Quantity
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityValue}
+                  >
+                    Available Quantity
+                  </Typography>
+                </div>
+              </div>
+              {provider.outOfStock.map((outOfStockItems, i) => (
+                <div key={`outof-stock-item-index-${i}`}>
                   <div>
                     <div
-                        className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+                      className={classes.summaryQuoteItemContainer}
+                      key={`quote-${i}-price`}
                     >
                       <Typography
-                          variant="body1"
-                          className={classes.summaryItemQuantityLabel}
+                        variant="body1"
+                        className={classes.summaryItemQuantityLabel}
                       >
-                        Items
+                        {outOfStockItems?.title}
                       </Typography>
                       <Typography
-                          variant="body1"
-                          className={classes.summaryItemQuantityValue}
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
                       >
-                        Cart Quantity
+                        {`${outOfStockItems?.cartQuantity}`}
                       </Typography>
                       <Typography
-                          variant="body1"
-                          className={classes.summaryItemQuantityValue}
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
                       >
-                        Available Quantity
+                        {`${outOfStockItems?.quantity}`}
                       </Typography>
                     </div>
                   </div>
-                  {provider.outOfStock.map((outOfStockItems, i) => (
-                      <div key={`outof-stock-item-index-${i}`}>
-                        <div>
-                          <div
-                              className={classes.summaryQuoteItemContainer}
-                              key={`quote-${i}-price`}
-                          >
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemQuantityLabel}
-                            >
-                              {outOfStockItems?.title}
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemQuantityValue}
-                            >
-                              {`${outOfStockItems?.cartQuantity}`}
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemQuantityValue}
-                            >
-                              {`${outOfStockItems?.quantity}`}
-                            </Typography>
-                          </div>
-                        </div>
-                      </div>
-                  ))}
-                  <Box component={"div"} className={classes.divider} />
-                </>
-            ) : (
-                <></>
-            )}
-          </div>
+                </div>
+              ))}
+              <Box component={"div"} className={classes.divider} />
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
       );
-    }else{
-      return <></>
+    } else {
+      return <></>;
     }
-
   };
   const renderItems = (provider, pindex) => {
     return (
@@ -1014,15 +1020,18 @@ const Checkout = () => {
         {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
         {/*  </Typography>*/}
         {/*</div>*/}
-        {productsQuote.isError && provider.errorCode !== "" && provider.errorCode !== "40002" && provider.error && (
-          <Typography
-            variant="body1"
-            color="error"
-            className={classes.summaryItemLabel}
-          >
-            {provider.error}
-          </Typography>
-        )}
+        {productsQuote.isError &&
+          provider.errorCode !== "" &&
+          provider.errorCode !== "40002" &&
+          provider.error && (
+            <Typography
+              variant="body1"
+              color="error"
+              className={classes.summaryItemLabel}
+            >
+              {provider.error}
+            </Typography>
+          )}
       </div>
     );
   };
@@ -1059,7 +1068,9 @@ const Checkout = () => {
                 </div>
               );
             })}
-            <div className={`${classes.summaryItemContainer} ${classes.marginTop20}`}>
+            <div
+              className={`${classes.summaryItemContainer} ${classes.marginTop20}`}
+            >
               <Typography variant="body" className={classes.totalLabel}>
                 Order Total
               </Typography>
@@ -1080,10 +1091,10 @@ const Checkout = () => {
                 activeStep !== 2
               }
               onClick={() => {
-                if(activePaymentMethod) {
+                if (activePaymentMethod) {
                   const { productQuotes, successOrderIds } = JSON.parse(
-                      // getValueFromCookie("checkout_details") || "{}"
-                      localStorage.getItem("checkout_details") || "{}"
+                    // getValueFromCookie("checkout_details") || "{}"
+                    localStorage.getItem("checkout_details") || "{}"
                   );
                   setConfirmOrderLoading(true);
                   let c = cartItems.map((item) => {
@@ -1094,20 +1105,20 @@ const Checkout = () => {
                     // setLoadingSdkForPayment(true);
                     // initiateSDK();
                     const request_object = constructQouteObject(
-                        c.filter(({ provider }) =>
-                            successOrderIds.includes(provider.local_id.toString())
-                        )
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
                     );
                     confirmOrder(request_object[0], payment_methods.JUSPAY);
                   } else {
                     const request_object = constructQouteObject(
-                        c.filter(({ provider }) =>
-                            successOrderIds.includes(provider.local_id.toString())
-                        )
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
                     );
                     confirmOrder(request_object[0], payment_methods.COD);
                   }
-                }else {
+                } else {
                   dispatchError("Please select payment.");
                 }
               }}
