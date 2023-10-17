@@ -492,7 +492,7 @@ const Checkout = () => {
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
-              setActiveStep(2);
+              setActiveStep(3);
             }}
             updateInitLoading={(value) => setInitLoading(value)}
             responseReceivedIds={updatedCartItems.map((item) => {
@@ -514,6 +514,7 @@ const Checkout = () => {
               setActivePaymentMethod(value);
             }}
             cartItemsData={cartItems}
+            selectedFulfillmemtId={selectedFulfillment}
             updatedCartItemsData={updatedCartItems}
             updateInitLoading={(value) => setInitLoading(value)}
             setUpdateCartItemsDataOnInitialize={(data) => {
@@ -1140,7 +1141,7 @@ const Checkout = () => {
                 productsQuote.isError ||
                 confirmOrderLoading ||
                 initLoading ||
-                activeStep !== 2
+                activeStep !== 3
               }
               onClick={() => {
                 if (activePaymentMethod) {

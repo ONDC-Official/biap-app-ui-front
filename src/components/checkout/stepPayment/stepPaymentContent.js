@@ -29,6 +29,7 @@ const StepPaymentContent = ({
   setUpdateCartItemsData,
   setUpdateCartItemsDataOnInitialize,
   responseReceivedIds,
+  selectedFulfillmemtId,
 }) => {
   const classes = useStyles();
 
@@ -77,6 +78,7 @@ const StepPaymentContent = ({
       // handleInitializaOrder();
     }
   }, [cartItems]);
+
   const handleSuccess = () => {
     setInitializeOrderLoading(false);
     updateInitLoading(false);
@@ -191,7 +193,7 @@ const StepPaymentContent = ({
             const fulfillments = item[0].product.fulfillments;
             let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
             itemsData = itemsData.map((itemData) => {
-              itemData.fulfillment_id = itemData.product.fulfillment_id;
+              itemData.fulfillment_id = selectedFulfillmemtId;
               delete itemData.product.fulfillment_id;
               if (updatedCartItems.current) {
                 let findItemFromQuote =
@@ -216,7 +218,9 @@ const StepPaymentContent = ({
               },
               message: {
                 items: itemsData,
-                fulfillments: fulfillments,
+                fulfillments: fulfillments.filter(
+                  (fulfillment) => fulfillment.id === selectedFulfillmemtId
+                ),
                 billing_info: {
                   address: removeNullValues(billingAddress?.address),
                   phone: billingAddress?.phone,
