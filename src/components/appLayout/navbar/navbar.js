@@ -56,7 +56,7 @@ const NavBar = ({ isCheckout = false }) => {
   const { setSearchData, setLocationData } = useContext(SearchContext);
   const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
 
-  useEffect(() => {}, [locationData]);
+  useEffect(() => { }, [locationData]);
 
   // STATES
   const [inlineError, setInlineError] = useState({
@@ -379,10 +379,10 @@ const NavBar = ({ isCheckout = false }) => {
                     disabled
                     // className={classes.searchIcon}
                     aria-label="search"
-                    // onClick={() => {
-                    //     setSearchData(() => search);
-                    //     history.push(`/products?s=${search.value}`);
-                    // }}
+                  // onClick={() => {
+                  //     setSearchData(() => search);
+                  //     history.push(`/products?s=${search.value}`);
+                  // }}
                   >
                     <SearchIcon />
                   </IconButton>
@@ -503,7 +503,7 @@ const NavBar = ({ isCheckout = false }) => {
                   horizontal: "right",
                 }}
               >
-                <MenuItem onClick={() => {}}>My Profile</MenuItem>
+                <MenuItem onClick={() => { }}>My Profile</MenuItem>
                 <MenuItem
                   onClick={() => {
                     history.push(`/application/orders`);
@@ -512,7 +512,14 @@ const NavBar = ({ isCheckout = false }) => {
                   Order History
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={() => {}}>Support</MenuItem>
+                <MenuItem onClick={() => { }}>Support</MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    history.push(`/testYourCatalogue`);
+                  }}
+                >
+                  Test your catalogue
+                </MenuItem>
                 <MenuItem
                   onClick={() => {
                     deleteAllCookies();
@@ -575,7 +582,7 @@ const NavBar = ({ isCheckout = false }) => {
           <ModalComponent
             open={toggleAddressModal.toggle}
             onClose={() => {
-              if(addressList.length > 0){
+              if (addressList.length > 0) {
                 setToggleAddressModal({
                   actionType: "",
                   toggle: false,
