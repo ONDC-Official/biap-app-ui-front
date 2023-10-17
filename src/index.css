@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
   padding: 0;
@@ -7,8 +11,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: 'Inter';
 }
 
 /* width */
@@ -40,4 +43,13 @@ code {
 
 .text-amber {
   color: #FFBF00 !important;
+}
+
+body {
+  background: #fff !important;
+}
+
+.MuiSnackbar-root {
+  top: 90px !important;
+  right: 25px !important;
 }

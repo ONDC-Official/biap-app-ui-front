@@ -1,6 +1,16 @@
 import React, { createContext, useReducer } from "react";
-import Toast from "../components/shared/toast/toast";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
 import { toast_actions } from "../components/shared/toast/utils/toast";
+import Slide from "@mui/material/Slide";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+function SlideTransition(props) {
+  return <Slide {...props} direction="up" />;
+}
 
 export const ToastContext = createContext([]);
 
@@ -36,21 +46,34 @@ export default function ToastProvider({ ...props }) {
             left: "15px",
             width: "100%",
             maxWidth: "400px",
-            wordBreak: 'normal'
+            wordBreak: "normal",
           }}
         >
-          <div
-            style={{ height: "90vh", overflowY: "auto", overflowX: "hidden" }}
-          >
+          <div style={{ height: "90vh", overflowY: "auto", overflowX: "hidden" }}>
             {state.map((toast) => {
               return (
                 <div className="p-2" key={toast.id}>
-                  <Toast
-                    id={toast.id}
-                    type={toast.type}
-                    message={toast.message}
-                    onRemove={() => handleRemoveToast(toast.id, 500)}
-                  />
+                  {/*<Toast*/}
+                  {/*  id={toast.id}*/}
+                  {/*  type={toast.type}*/}
+                  {/*  message={toast.message}*/}
+                  {/*  onRemove={() => handleRemoveToast(toast.id, 500)}*/}
+                  {/*/>*/}
+                  <Snackbar
+                    open={true}
+                    autoHideDuration={5000}
+                    onClose={() => handleRemoveToast(toast.id, 200)}
+                    anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                    TransitionComponent={SlideTransition}
+                  >
+                    <Alert
+                      onClose={() => handleRemoveToast(toast.id, 200)}
+                      severity={toast.type}
+                      sx={{ width: "100%" }}
+                    >
+                      {toast.message}
+                    </Alert>
+                  </Snackbar>
                 </div>
               );
             })}

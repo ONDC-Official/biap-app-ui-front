@@ -1,318 +1,642 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import styles from '../../../../styles/products/productDetails.module.scss';
-import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom/cjs/react-router-dom.min';
-import no_image_found from '../../../../assets/images/no_image_found.png';
-import back_icon from '../../../../assets/images/back.svg';
-import Navbar from '../../../shared/navbar/navbar';
-import OrderSummary from '../../cart/order-summary/orderSummary';
-import { useContext } from 'react';
-import { CartContext } from '../../../../context/cartContext';
-import Subtract from '../../../shared/svg/subtract';
-import Add from '../../../shared/svg/add';
+import React, { useContext, useEffect, useState } from "react";
+import useStyles from "./style";
+import CloseIcon from "@mui/icons-material/Close";
+import DoneIcon from "@mui/icons-material/Done";
+import MuiLink from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import VariationsRenderer from "./VariationsRenderer";
+import { getCall, postCall } from "../../../../api/axios";
+import CustomizationRenderer from "./CustomizationRenderer";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { getValueFromCookie } from "../../../../utils/cookies";
+import { Link, useHistory } from "react-router-dom";
+import useCancellablePromise from "../../../../api/cancelRequest";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
+import Loading from "../../../shared/loading/loading";
+import { CartContext } from "../../../../context/cartContext";
+import moment from "moment";
+import { SearchContext } from "../../../../context/searchContext";
+import { getCartItems } from "../../cart/utils/getCartItems";
+import { updateCartItem } from "../../cart/utils/updateCartItem";
+import { ToastContext } from "../../../../context/toastContext";
+import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 
-export default function ProductDetails() {
-  const location = useLocation();
-  const { product, bpp_id, location_id } = location.state;
-  const { id, descriptor, price, provider_details, category_id } = product;
-  let {
-    name: product_name,
-    images,
-    short_desc: product_description,
-  } = descriptor;
-  const { descriptor: provider_descriptor, id: bpp_provider_id } =
-    provider_details;
-  const { name: provider_name } = provider_descriptor;
-  const [quantityCount, setQuantityCount] = useState(0);
-  const [toggleAddToCart, setToggleAddToCart] = useState();
-  const [imageIndex, setImageIndex] = useState(0);
-  const { cartItems, onReduceQuantity, onAddQuantity, onAddProduct } =
-    useContext(CartContext);
+const ProductDetails = ({ productId }) => {
+  const classes = useStyles();
+  const history = useHistory();
+  const dispatch = useContext(ToastContext);
+  const { fetchCartItems } = useContext(CartContext);
+  const { locationData: deliveryAddressLocation } = useContext(SearchContext);
+  const { cancellablePromise } = useCancellablePromise();
 
-  useEffect(() => {
-    const isProductPresent = cartItems.find(({ product }) => product.id === id && provider_details.id === product.provider_details.id);
-    if (isProductPresent) {
-      setToggleAddToCart(true);
-      setQuantityCount(isProductPresent.quantity.count);
-    } else {
-      setToggleAddToCart(false);
-      setQuantityCount(0);
-    }
-  }, [cartItems, id]);
+  const [productPayload, setProductPayload] = useState(null);
+  const [productDetails, setProductDetails] = useState({});
 
-  const renderProductDetails = (detail) => {
-    const obj = product?.['@ondc/org/statutory_reqs_packaged_commodities'];
-    switch (detail) {
-      case 'manufacturer_or_packer_name':
-        return {
-          key: 'Manufacturer Name:',
-          value: obj?.['manufacturer_or_packer_name'],
-        };
-      case 'net_quantity_or_measure_of_commodity_in_pkg':
-        return {
-          key: 'Net Quantity:',
-          value: obj?.['net_quantity_or_measure_of_commodity_in_pkg'],
-        };
-      case 'month_year_of_manufacture_packing_import':
-        return {
-          key: 'Manufacturing Date:',
-          value: obj?.['month_year_of_manufacture_packing_import'],
-        };
-      case 'imported_product_country_of_origin':
-        return {
-          key: 'Country of Origin:',
-          value: obj?.['imported_product_country_of_origin'],
-        };
-      default:
-        return {
-          key: null,
-          value: null,
-        };
+  const [customization_state, setCustomizationState] = useState({});
+  const [variationState, setVariationState] = useState([]);
+
+  const [activeImage, setActiveImage] = useState("");
+  const [activeSize, setActiveSize] = useState("");
+
+  const [customizationPrices, setCustomizationPrices] = useState(0);
+  const [itemOutOfStock, setItemOutOfStock] = useState(false);
+
+  const handleImageClick = (imageUrl) => {
+    setActiveImage(imageUrl);
+  };
+
+  //   const getProductDetails = async (productId) => {
+  //     try {
+  // const data = await cancellablePromise(getCall(`/clientApis/v2/items/${productId}`));
+  //       const { item_details } = data.response;
+
+  //       setProductPayload(data.response);
+  //       setProductDetails(item_details);
+  //       setActiveImage(item_details?.descriptor?.symbol);
+  //     } catch (error) {
+  //       console.error("Error fetching product details:", error);
+  //     }
+  //   };
+
+  const getProductDetails = async (productId) => {
+    try {
+      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const { item_details } = data;
+
+      setProductPayload(data);
+      setProductDetails(item_details);
+      setActiveImage(item_details?.descriptor?.symbol);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
     }
   };
 
-  return (
-    <Fragment>
-      <Navbar />
+  const calculateSubtotal = (groupId, customization_state) => {
+    let group = customization_state[groupId];
+    if (!group) return;
 
-      <div className={styles.playground_height}>
-        <div
-          className={`py-2 ${cartItems.length > 0
-            ? styles.product_list_with_summary_wrapper
-            : styles.product_list_without_summary_wrapper
-            }`}
-        >
-          <div className="container">
-            <div className="row py-3 px-2">
-              <div className="d-inline-flex">
-                <Link to={{ pathname: '/application/products' }}>
-                  <p className={styles.back_text}><img className={styles.back_icon} src={back_icon} alt={"back_icon"} />Back</p>
-                </Link>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-12 col-lg-4 p-3">
-                {/* PRODUCT IMAGE  */}
-                <div className={styles.product_img_container}>
-                  <img
-                    src={images?.length > 0 ? images[imageIndex] : no_image_found}
-                    alt={product_name}
-                    width="300"
-                    height="300"
-                    className={styles.product_img}
-                    onError={(event) => {
-                      event.target.onerror = null;
-                      event.target.src = no_image_found;
-                    }}
-                  />
-                  {
-                    images?.length > 1
-                      ? (
-                        <>
-                          {
-                            (imageIndex < (images.length - 1))
-                              ? (
-                                <span className={styles.next_icon_container} onClick={() => setImageIndex(imageIndex + 1)}>
-                                  <img className={styles.next_icon} src={back_icon} alt={"next_icon"} />
-                                </span>
-                              )
-                              : <></>
-                          }
-                          {
-                            imageIndex > 0
-                              ? (
-                                <span className={styles.previous_icon_container} onClick={() => setImageIndex(imageIndex - 1)}>
-                                  <img className={styles.previous_icon} src={back_icon} alt={"previous_icon"} />
-                                </span>
-                              )
-                              : <></>
-                          }
-                        </>
-                      )
-                      : <></>
-                  }
-                </div>
-              </div>
-              <div className="col-md-12 col-lg-8 p-3">
-                {/* NAME AND ORDERING FROM  */}
-                <div className="pb-2">
-                  <p className={`${styles.product_name} ${styles.width}`}>
-                    {product_name}
-                  </p>
-                  <p className={styles.ordered_from}>
-                    Ordering from{' '}
-                    <span className={styles.bold}>{provider_name}</span>
-                  </p>
-                </div>
-                {/* DESCRIPTION  */}
-                <div className="pb-3">
-                  <p
-                    className={`${styles.product_description} ${styles.width}`}
-                  >
-                    {`${product_description} ${category_id ? " | " : ""} ${category_id}`}
-                  </p>
-                </div>
-                {/* PRICE  */}
-                <div className="pb-2">
-                  <p className={styles.product_price}>
-                    ₹ {Number(price.value).toFixed(2)}
-                  </p>
-                </div>
-                {/* DIVIDER  */}
-                <div className={styles.width}>
-                  <hr style={{ border: '1px solid #aaa' }} />
-                  {/* AVAILABLE QUANTITY  */}
-                  {Number(product?.AvailableQuantity > 0) ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>
-                        Available Quantity:
-                      </p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.AvailableQuantity}
-                      </p>
-                    </div>
-                  ) : null}
-                  {/* RETURNABLE  */}
-                  {typeof product?.['@ondc/org/returnable'] !== 'undefined' ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>Returnable:</p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.['@ondc/org/returnable'] == true
-                          ? 'Yes'
-                          : 'No'}
-                      </p>
-                    </div>
-                  ) : null}
-                  {/* CANCELABLE  */}
-                  {typeof product?.['@ondc/org/cancellable'] !== 'undefined' ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>Cancelable:</p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.['@ondc/org/cancellable'] == true
-                          ? 'Yes'
-                          : 'No'}
-                      </p>
-                    </div>
-                  ) : null}
-                  {/* COD  */}
-                  {typeof product?.['@ondc/org/available_on_cod'] !==
-                    'undefined' ? (
-                    <div className="d-flex align-items-center py-1">
-                      <p className={styles.prodcut_details_key}>
-                        Cash On Delivery:
-                      </p>
-                      <p className={styles.prodcut_details_value}>
-                        {product?.['@ondc/org/available_on_cod'] == true
-                          ? 'Yes'
-                          : 'No'}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-                {/* PRODUCT DETAILS  */}
-                {Object.keys(
-                  product?.['@ondc/org/statutory_reqs_packaged_commodities'] ||
-                  {}
-                ).length > 0 && (
-                    <div className="pt-4 pb-2">
-                      <p className={styles.product_details_header}>
-                        Product Details
-                      </p>
-                      <div className={`${styles.width} pt-2`}>
-                        {Object.keys(
-                          product?.[
-                          '@ondc/org/statutory_reqs_packaged_commodities'
-                          ]
-                        ).map((commodity, index) => {
-                          const { key, value } = renderProductDetails(commodity);
-                          if (key && value) {
-                            return (
-                              <div
-                                className="d-flex align-items-center py-1"
-                                key={`id-${index}`}
-                              >
-                                <p className={styles.prodcut_details_key}>
-                                  {key}
-                                </p>
-                                <p className={styles.prodcut_details_value}>
-                                  {value}
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    </div>
-                  )}
-                {/* ADD TO CART BUTTON  */}
-                <div className="py-3">
-                  {toggleAddToCart && quantityCount > 0 ? (
-                    <div className={styles.quantity_count_wrapper}>
-                      <div
-                        className={`${styles.subtract_svg_wrapper} d-flex align-items-center justify-content-center`}
-                        onClick={() => {
-                          setQuantityCount(quantityCount - 1);
-                          onReduceQuantity(id);
-                          if (quantityCount - 1 === 0) {
-                            setToggleAddToCart(false);
-                            return;
-                          }
-                        }}
-                      >
-                        <Subtract
-                          width="13"
-                          classes={styles.subtract_svg_color}
-                        />
-                      </div>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <p className={styles.quantity_count}>{quantityCount}</p>
-                      </div>
-                      <div
-                        className={`${styles.add_svg_wrapper} d-flex align-items-center justify-content-center`}
-                        onClick={() => {
-                          setQuantityCount(
-                            (quantityCount) => quantityCount + 1
-                          );
-                          onAddQuantity(id);
-                        }}
-                      >
-                        <Add
-                          width="13"
-                          height="13"
-                          classes={styles.add_svg_color}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      className={styles.add_to_cart_button}
-                      onClick={() => {
-                        setToggleAddToCart(true);
-                        setQuantityCount((quantityCount) => quantityCount + 1);
-                        onAddProduct({
-                          id,
-                          quantity: { count: quantityCount + 1 },
-                          bpp_id,
-                          provider: {
-                            id: bpp_provider_id,
-                            locations: [location_id],
-                          },
-                          product,
-                        });
-                      }}
-                    >
-                      Add
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+    let prices = group.selected.map((s) => s.price);
+    setCustomizationPrices((prevState) => {
+      return prevState + prices.reduce((a, b) => a + b, 0);
+    });
+
+    group?.childs?.map((child) => {
+      calculateSubtotal(child, customization_state);
+    });
+  };
+
+  let selectedCustomizationIds = [];
+
+  const getCustomization_ = (groupId) => {
+    let group = customization_state[groupId];
+    if (!group) return;
+
+    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    group?.childs?.map((child) => {
+      getCustomization_(child);
+    });
+  };
+
+  const getCustomizations = () => {
+    const { customisation_items } = productPayload;
+
+    if (!customisation_items.length) return null;
+    const customizations = [];
+
+    const firstGroupId = customization_state["firstGroup"]?.id;
+
+    if (!firstGroupId) return;
+    getCustomization_(firstGroupId);
+
+    for (const cId of selectedCustomizationIds) {
+      let c = customisation_items.find((item) => item.local_id === cId);
+      if (c) {
+        c = {
+          ...c,
+          quantity: {
+            count: 1,
+          },
+        };
+        customizations.push(c);
+      }
+    }
+
+    return customizations;
+  };
+
+  function findMinMaxSeq(customizationGroups) {
+    if (!customizationGroups || customizationGroups.length === 0) {
+      return { minSeq: undefined, maxSeq: undefined };
+    }
+
+    let minSeq = Infinity;
+    let maxSeq = -Infinity;
+
+    customizationGroups.forEach((group) => {
+      const seq = group.seq;
+      if (seq < minSeq) {
+        minSeq = seq;
+      }
+      if (seq > maxSeq) {
+        maxSeq = seq;
+      }
+    });
+
+    return { minSeq, maxSeq };
+  }
+
+  function areCustomisationsSame(existingIds, currentIds) {
+    if (existingIds.length !== currentIds.length) {
+      return false;
+    }
+
+    existingIds.sort();
+    currentIds.sort();
+
+    for (let i = 0; i < existingIds.length; i++) {
+      if (existingIds[i] !== currentIds[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  const addToCart = async (navigate = false) => {
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}`;
+    let subtotal = productPayload?.item_details?.price?.value;
+
+    const customisations = getCustomizations() ?? null;
+
+    if (customisations) {
+      calculateSubtotal(customization_state["firstGroup"]?.id, customization_state);
+      subtotal += customizationPrices;
+    }
+
+    const payload = {
+      id: productPayload.id,
+      local_id: productPayload.local_id,
+      bpp_id: productPayload.bpp_details.bpp_id,
+      bpp_uri: productPayload.context.bpp_uri,
+      domain: productPayload.context.domain,
+      tags: productPayload.item_details.tags,
+      customisationState: customization_state,
+      quantity: {
+        count: 1,
+      },
+      provider: {
+        id: productPayload.bpp_details.bpp_id,
+        locations: productPayload.locations,
+        ...productPayload.provider_details,
+      },
+      product: {
+        id: productPayload.id,
+        subtotal,
+        ...productPayload.item_details,
+      },
+      customisations,
+      hasCustomisations: customisations ? true : false,
+    };
+
+    const cartItems = await getCartItems();
+
+    let cartItem = [];
+    cartItem = cartItems.filter((ci) => {
+      return ci.item.id === payload.id;
+    });
+
+    if (customisations) {
+      cartItem = cartItem.filter((ci) => {
+        return ci.item.customisations != null;
+      });
+    }
+
+    if (cartItem.length > 0 && customisations) {
+      cartItem = cartItem.filter((ci) => {
+        return ci.item.customisations.length === customisations.length;
+      });
+    }
+
+    if (cartItem.length === 0) {
+      const res = await postCall(url, payload);
+      fetchCartItems();
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.success,
+          message: "Item added to cart successfully.",
+        },
+      });
+
+      if (navigate) {
+        history.push("/application/cart");
+      }
+    } else {
+      const currentCount = parseInt(cartItem[0].item.quantity.count);
+      const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
+
+      console.log(currentCount, maxCount);
+
+      if (currentCount < maxCount) {
+        if (!customisations) {
+          updateCartItem(cartItems, true, cartItem[0]._id);
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.success,
+              message: "Item quantity updated in your cart.",
+            },
+          });
+        } else {
+          console.log(3.2);
+          const currentIds = customisations.map((item) => item.id);
+          let matchingCustomisation = null;
+
+          for (let i = 0; i < cartItem.length; i++) {
+            let existingIds = cartItem[i].item.customisations.map((item) => item.id);
+            const areSame = areCustomisationsSame(existingIds, currentIds);
+            if (areSame) {
+              matchingCustomisation = cartItem[i];
+            }
+          }
+
+          if (matchingCustomisation) {
+            console.log(4);
+            updateCartItem(cartItems, true, matchingCustomisation._id);
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Item quantity updated in your cart.",
+              },
+            });
+          } else {
+            console.log(5);
+            const res = await postCall(url, payload);
+            fetchCartItems();
+            dispatch({
+              type: toast_actions.ADD_TOAST,
+              payload: {
+                id: Math.floor(Math.random() * 100),
+                type: toast_types.success,
+                message: "Item added to cart successfully.",
+              },
+            });
+          }
+        }
+      } else {
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: `The maximum available quantity for item is already in your cart.`,
+          },
+        });
+      }
+    }
+  };
+
+  // fetch product details
+  useEffect(() => {
+    getProductDetails(productId);
+  }, [deliveryAddressLocation]);
+
+  const renderVegNonVegTag = () => {
+    const FnB = "ONDC:RET11";
+    const grocery = "ONDC:RET10";
+
+    if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) {
+      const tags = productPayload.item_details.tags;
+      let category = "veg";
+
+      for (let i = 0; i < tags.length; i++) {
+        if (tags[i].code === "veg_nonveg") {
+          const vegNonVegValue = tags[i].list[0].value;
+
+          if (vegNonVegValue === "yes" || vegNonVegValue === "Yes") {
+            category = "veg";
+          } else if (vegNonVegValue === "no") {
+            category = "nonveg";
+          } else if (vegNonVegValue === "egg") {
+            category = "egg";
+          }
+        }
+      }
+
+      const getTagColor = () => {
+        if (category === "veg") {
+          return "#008001";
+        } else if (category == "non_veg") {
+          return "red";
+        } else {
+          return "#008001";
+        }
+      };
+
+      const getTextColor = () => {
+        if (category === "veg") {
+          return "#419E6A";
+        } else if (category == "nonVeg") {
+          return "red";
+        } else {
+          return "red";
+        }
+      };
+
+      const map = {
+        veg: "Veg",
+        nonveg: "Non Veg",
+        egg: "EGG",
+      };
+
+      return (
+        <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
+          <div className={classes.square} style={{ borderColor: getTagColor() }}>
+            <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
           </div>
-        </div>
+          <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
+            {map[category]}
+          </Typography>
+        </Grid>
+      );
+    }
 
-        {cartItems.length > 0 && <OrderSummary />}
-      </div>
-    </Fragment>
+    return null;
+  };
+
+  const renderStockStatus = () => {
+    if (parseInt(productDetails?.quantity?.available?.count) >= 1) {
+      return (
+        <Typography variant="body" color="#419E6A" sx={{ marginBottom: 1 }}>
+          <DoneIcon color="success" fontSize="small" /> In stock
+        </Typography>
+      );
+    } else {
+      return (
+        <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+          <CloseIcon color="error" fontSize="small" />
+          <Typography variant="body1" color="#D83232">
+            Out of Stock
+          </Typography>
+        </Grid>
+      );
+    }
+  };
+
+  const renderAttributeDetails = () => {
+    return Object.keys(productPayload?.attributes).map((key) => (
+      <Grid container className={classes.keyValueContainer}>
+        <Grid xs={3}>
+          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+            {key}
+          </Typography>
+        </Grid>
+        <Grid xs={8}>
+          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+            {productPayload?.attributes[key]}
+          </Typography>
+        </Grid>
+      </Grid>
+    ));
+  };
+
+  const renderItemDetails = () => {
+    let returnWindowValue = 0;
+    if (productPayload.item_details?.["@ondc/org/return_window"]) {
+      // Create a duration object from the ISO 8601 string
+      const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
+
+      // Get the number of hours from the duration object
+      const hours = duration.humanize();
+      returnWindowValue = `${hours}`;
+    }
+
+    const data = {
+      "Available on COD":
+        productPayload.item_details?.["@ondc/org/available_on_cod"].toString() === "true" ? "Yes" : "No",
+      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString() === "true" ? "Yes" : "No",
+      "Return window value": returnWindowValue,
+      Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString() === "true" ? "Yes" : "No",
+      "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
+      "Manufacturer name":
+        productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
+      "Manufacturer address":
+        productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.[
+          "manufacturer_or_packer_address"
+        ],
+    };
+    return Object.keys(data).map((key) => (
+      <Grid container className={classes.keyValueContainer}>
+        <Grid xs={3}>
+          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+            {key}
+          </Typography>
+        </Grid>
+        <Grid xs={8}>
+          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+            {data[key]}
+          </Typography>
+        </Grid>
+      </Grid>
+    ));
+  };
+
+  return (
+    <>
+      {productPayload == null ? (
+        <div className={classes.emptySpace}>
+          <Loading />
+        </div>
+      ) : (
+        <div>
+          <div className={classes.breadCrumbs} onClick={() => {}}>
+            <Breadcrumbs aria-label="breadcrumb">
+              <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
+                Home
+              </MuiLink>
+              {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>
+                {productPayload?.item_details?.category_id}
+              </MuiLink> */}
+              <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
+            </Breadcrumbs>
+          </div>
+
+          <Grid container className={classes.detailsContainer}>
+            <Grid item xs={7}>
+              <div className={classes.imgContainer}>
+                <img className={classes.productImg} src={activeImage} />
+              </div>
+              <div className={classes.moreImagesContainer}>
+                {productDetails?.descriptor?.images?.map((item, idx) => {
+                  return (
+                    <div
+                      style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                      className={classes.moreImages}
+                      onClick={() => handleImageClick(item)}
+                    >
+                      <div className={classes.greyContainer}>
+                        <img className={classes.moreImage} src={item} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Grid>
+            <Grid item xs={5}>
+              <Card className={classes.productCard}>
+                {renderVegNonVegTag()}
+                {renderStockStatus()}
+                <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
+                  {productDetails?.descriptor?.name}
+                </Typography>
+                <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+                  <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
+                    ₹{productDetails?.price?.value}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    color="black"
+                    sx={{ fontFamily: "inter", fontWeight: 400, marginLeft: 2, textDecoration: "line-through" }}
+                  >
+                    ₹{parseInt(productDetails?.price?.maximum_value).toFixed(0)}
+                  </Typography>
+                </Grid>
+                <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
+                <VariationsRenderer
+                  productPayload={productPayload}
+                  variationState={variationState}
+                  setVariationState={setVariationState}
+                  chartImage={productPayload?.attributes?.size_chart || ""}
+                  isFashion={productPayload?.context?.domain === "ONDC:RET12"}
+                />
+                <>
+                  {/* <Grid container alignItems="center" sx={{ marginBottom: 2 }}>
+              <Typography variant="body" color="#1D1D1D">
+                Select size
+              </Typography>
+              <Typography variant="body" color="secondary" sx={{ marginLeft: 2.5, cursor: "pointer" }}>
+                Size Guide <ArrowForwardIcon color="secondary" />
+              </Typography>
+            </Grid>
+            <Grid container sx={{ marginBottom: 2.5 }}>
+              {availabeSizes.map((item) => (
+                <div
+                  className={item.size === activeSize ? classes.activeSizeContainer : classes.sizeContainer}
+                  onClick={() => {
+                    setActiveSize(item.size);
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    color={item.size === activeSize ? "#ffffff" : "#3C4242"}
+                    sx={{ fontWeight: 700 }}
+                  >
+                    {item.size}
+                  </Typography>
+                </div>
+              ))}
+            </Grid>
+            <Grid sx={{ marginBottom: 2.5 }}>
+              <Typography color="#1d1d1d" variant="body1">
+                Not getting your style? Create your custom design now
+              </Typography>
+              <Button variant="outlined" sx={{ marginTop: 1, textTransform: "none" }}>
+                <Typography color="#419E6A">
+                  Customize Now &nbsp;
+                  <ArrowForwardIcon fontSize="small" />
+                </Typography>
+              </Button>
+            </Grid>
+            <Typography variant="body1" color="#1D1D1D" sx={{ marginBottom: 2.5 }}>
+              Colours Available
+            </Typography>
+            <div className={classes.moreImagesContainer} style={{ marginBottom: 16 }}>
+              {moreImages.map((item, idx) => {
+                return (
+                  <Grid container justifyContent="center">
+                    <div
+                      style={{ borderColor: item === activeImage ? "#008ECC" : "lightgrey" }}
+                      className={classes.availableColors}
+                      onClick={() => handleImageClick(item)}
+                    >
+                      <div className={classes.greyContainer}>
+                        <img className={classes.availableColorImg} src={item} />
+                      </div>
+                    </div>
+                    <Typography variant="body" color="black" sx={{ fontWeight: 600, marginRight: "14px" }}>
+                      ₹ 3999
+                    </Typography>
+                  </Grid>
+                );
+              })}
+            </div> */}
+                </>
+
+                {!parseInt(productDetails?.quantity?.available?.count) >= 1 && (
+                  <Grid container justifyContent="center" className={classes.outOfStock}>
+                    <Typography variant="body" color="#D83232">
+                      Item is out of Stock
+                    </Typography>
+                  </Grid>
+                )}
+
+                <CustomizationRenderer
+                  productPayload={productPayload}
+                  customization_state={customization_state}
+                  setCustomizationState={setCustomizationState}
+                  setItemOutOfStock={setItemOutOfStock}
+                />
+
+                <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
+                    onClick={() => addToCart(false)}
+                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock}
+                  >
+                    Add to cart
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    sx={{ flex: 1, textTransform: "none" }}
+                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock}
+                    onClick={() => addToCart(true)}
+                  >
+                    Order now
+                  </Button>
+                </Grid>
+              </Card>
+            </Grid>
+          </Grid>
+          <Grid container className={classes.productDetailsSection}>
+            <Grid item xs={7} className={classes.productDetailsLeft}>
+              <Accordion elevation={0} square defaultExpanded>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}
+                >
+                  <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 600 }}>
+                    Product Details
+                  </Typography>
+                  <Divider />
+                </AccordionSummary>
+                <AccordionDetails sx={{ padding: "20px 0" }}>
+                  {renderAttributeDetails()}
+                  {renderItemDetails()}
+                </AccordionDetails>
+              </Accordion>
+            </Grid>
+          </Grid>
+        </div>
+      )}
+    </>
   );
-}
+};
+
+export default ProductDetails;
