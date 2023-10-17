@@ -15,7 +15,7 @@ const StepAddressLabel = ({ activeStep, onUpdateActiveStep }) => {
     <div>
       <Typography variant="h4" className={classes.labelTypo}>
         Add Address
-        {activeStep > 1 && (
+        {activeStep > 2 && (
           <Button
             className={classes.editAddress}
             variant="text"
@@ -26,7 +26,7 @@ const StepAddressLabel = ({ activeStep, onUpdateActiveStep }) => {
           </Button>
         )}
       </Typography>
-      {activeStep > 1 && billingAddress && deliveryAddress && (
+      {activeStep > 2 && billingAddress && deliveryAddress && (
         <div className={classes.addressLabelTypo}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>

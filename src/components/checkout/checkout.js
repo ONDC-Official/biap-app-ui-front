@@ -36,12 +36,14 @@ import { ToastContext } from "../../context/toastContext";
 import { toast_actions, toast_types } from "../shared/toast/utils/toast";
 import Loading from "../shared/loading/loading";
 import { CartContext } from "../../context/cartContext";
+import StepFulfillmentLabel from "./StepFulfillment/stepFulfillmentLabel";
+import StepFulfillmentContent from "./StepFulfillment/stepFulfillmentContent";
 
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
 
-  const steps = ["Customer", "Add Address", "Payment"];
+  const steps = ["Customer", "Fulfillment", "Add Address", "Payment"];
   const [activeStep, setActiveStep] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [updatedCartItems, setUpdatedCartItems] = useState([]);
@@ -60,7 +62,7 @@ const Checkout = () => {
   const dispatch = useContext(ToastContext);
   const { fetchCartItems } = useContext(CartContext);
   const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
-
+  const [selectedFulfillment, setSelectedFulfillment] = useState(null);
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -73,6 +75,7 @@ const Checkout = () => {
     setUpdatedCartItems(updatedCartItemsData);
   }, []);
 
+  console.log("selected f", selectedFulfillment);
   useEffect(() => {
     try {
       if (updatedCartItems.length > 0) {
@@ -294,25 +297,38 @@ const Checkout = () => {
                 };
               }
               //for delivery
-              if (item.title_type === "delivery") {
+              console.log("selectedFulfillment", selectedFulfillment);
+              if (
+                item.title_type === "delivery" &&
+                item.id === selectedFulfillment
+              ) {
                 delivery["delivery"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-              if (item.title_type === "discount_f") {
+              if (
+                item.title_type === "discount_f" &&
+                item.id === selectedFulfillment
+              ) {
                 delivery["discount"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-              if (item.title_type === "tax_f") {
+              if (
+                item.title_type === "tax_f" &&
+                item.id === selectedFulfillment
+              ) {
                 delivery["tax"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-              if (item.title_type === "packing") {
+              if (
+                item.title_type === "packing" &&
+                item.id === selectedFulfillment
+              ) {
                 delivery["packing"] = {
                   title: item.title,
                   value: item.price,
@@ -329,7 +345,10 @@ const Checkout = () => {
                   };
                 }
               }
-              if (item.title_type === "misc") {
+              if (
+                item.title_type === "misc" &&
+                item.id === selectedFulfillment
+              ) {
                 delivery["misc"] = {
                   title: item.title,
                   value: item.price,
@@ -366,7 +385,12 @@ const Checkout = () => {
       console.log(err);
       showQuoteError();
     }
-  }, [updatedCartItems]);
+    if (!selectedFulfillment) {
+      setSelectedFulfillment(
+        updatedCartItems[0]?.message?.quote.items[0]?.fulfillment_id
+      );
+    }
+  }, [updatedCartItems, selectedFulfillment]);
 
   const showQuoteError = () => {
     let msg = "";
@@ -397,13 +421,21 @@ const Checkout = () => {
     return isCustomization;
   };
 
+  const getSelectedFulfillment = () => {
+    if (selectedFulfillment) {
+      return updatedCartItems[0]?.message?.quote?.fulfillments.find(
+        (fulfillment) => fulfillment.id === selectedFulfillment
+      );
+    }
+  };
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
         return <StepCustomerLabel activeStep={activeStep} />;
       case 1:
         return (
-          <StepAddressLabel
+          <StepFulfillmentLabel
+            fulfillment={getSelectedFulfillment()}
             activeStep={activeStep}
             onUpdateActiveStep={() => {
               setActiveStep(1);
@@ -411,6 +443,15 @@ const Checkout = () => {
           />
         );
       case 2:
+        return (
+          <StepAddressLabel
+            activeStep={activeStep}
+            onUpdateActiveStep={() => {
+              setActiveStep(2);
+            }}
+          />
+        );
+      case 3:
         return <StepPaymentLabel />;
       default:
         return <>stepLabel</>;
@@ -428,6 +469,17 @@ const Checkout = () => {
           />
         );
       case 1:
+        return (
+          <StepFulfillmentContent
+            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
+            selectedFulfillment={selectedFulfillment}
+            setSelectedFulfillment={setSelectedFulfillment}
+            handleNext={() => {
+              setActiveStep(2);
+            }}
+          />
+        );
+      case 2:
         return (
           <StepAddressContent
             isError={productsQuote.isError}
@@ -449,7 +501,7 @@ const Checkout = () => {
             })}
           />
         );
-      case 2:
+      case 3:
         return (
           <StepPaymentContent
             isError={productsQuote.isError}
