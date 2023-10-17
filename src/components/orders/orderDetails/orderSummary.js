@@ -522,7 +522,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         }
       });
     }
-    return parseInt(finalTotal).toFixed(2);
+    finalTotal = parseInt(finalTotal).toFixed(2);
+    return finalTotal;
   };
 
   const renderDeliveryLine = (quote, key) => {
@@ -797,6 +798,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           domain={orderDetails.domain}
           bpp_uri={orderDetails.bpp_uri}
           handleFetchUpdatedStatus={handleFetchUpdatedStatus}
+          onUpdateOrder={onUpdateOrder}
         />
       )}
 
@@ -827,6 +829,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           domain={orderDetails.domain}
           bpp_uri={orderDetails.bpp_uri}
           handleFetchUpdatedStatus={handleFetchUpdatedStatus}
+          onUpdateOrder={onUpdateOrder}
         />
       )}
     </Card>
