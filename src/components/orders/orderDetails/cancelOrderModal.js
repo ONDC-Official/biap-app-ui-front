@@ -39,6 +39,8 @@ export default function CancelOrderModal(props) {
     onUpdateOrder,
   } = props;
 
+  console.log(partailsCancelProductList);
+
   // CONSTANTS
   const CANCEL_ORDER_TYPES = {
     allOrder: "ALL_ORDERS",
@@ -372,7 +374,10 @@ export default function CancelOrderModal(props) {
 
   // use this effect to promatically navigate between the radio button
   useEffect(() => {
-    if (areProductsToBeCancled() && partailsCancelProductList.length !== 1) {
+    if (
+      areProductsToBeCancled() &&
+      (partailsCancelProductList.length !== 1 || (partailsCancelProductList.length == 1 && quantity[0].count > 1))
+    ) {
       setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
       return;
     }
@@ -444,8 +449,13 @@ export default function CancelOrderModal(props) {
                 <p className={cancelRadioStyles.address_name_and_phone}>Cancel Complete Orders</p>
               </div>
             </AddressRadioButton>
+            {console.log("radio log: ", quantity[0].count > 1)}
             <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled() || partailsCancelProductList.length === 1}
+              disabled={
+                loading ||
+                !areProductsToBeCancled() ||
+                (partailsCancelProductList.length === 1 && quantity[0]?.count === 1)
+              }
               checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
