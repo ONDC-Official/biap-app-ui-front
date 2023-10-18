@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Tooltip from '@mui/material/Tooltip'
 
 import OrderTimeline from "./orderTimeline";
 import SummaryItems from "./summaryItems";
@@ -26,6 +27,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const classes = useStyles();
 
   const [itemQuotes, setItemQuotes] = useState(null);
+  const [cancelledItems, setCancelledItems] = useState([]);
+  const [returnItems, setReturnItems] = useState([]);
   const [deliveryQuotes, setDeliveryQuotes] = useState(null);
   const dispatch = useContext(ToastContext);
   const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
@@ -70,189 +73,198 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
 
   useEffect(() => {
     try {
-      if (orderDetails && orderDetails.quote) {
-        const provided_by = orderDetails?.provider?.descriptor?.name;
-        let uuid = 0;
-        const breakup = orderDetails.quote.breakup;
-        const all_items = breakup?.map((break_up_item) => {
-          const items = orderDetails.items;
-          const itemIndex = items.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
-          const item = itemIndex > -1 ? items[itemIndex] : null;
-          let itemQuantity = item ? item?.quantity?.count : 0;
-          let quantity = break_up_item["@ondc/org/item_quantity"]
-            ? break_up_item["@ondc/org/item_quantity"]["count"]
-            : 0;
-          let textClass = "";
-          let quantityMessage = "";
-          if (quantity === 0) {
-            if (break_up_item["@ondc/org/title_type"] === "item") {
-              textClass = "text-error";
-              quantityMessage = "Out of stock";
+      if (orderDetails) {
+        if (orderDetails.updatedQuote) {
+          const provided_by = orderDetails?.provider?.descriptor?.name;
+          let uuid = 0;
+          const breakup = orderDetails.updatedQuote.breakup;
+          const all_items = breakup?.map((break_up_item) => {
+            const items = orderDetails.items;
+            const itemIndex = items.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
+            const item = itemIndex > -1 ? items[itemIndex] : null;
+            let itemQuantity = item ? item?.quantity?.count : 0;
+            let quantity = break_up_item["@ondc/org/item_quantity"]
+              ? break_up_item["@ondc/org/item_quantity"]["count"]
+              : 0;
+            let textClass = "";
+            let quantityMessage = "";
+            if (quantity === 0) {
+              if (break_up_item["@ondc/org/title_type"] === "item") {
+                textClass = "text-error";
+                quantityMessage = "Out of stock";
 
-              if (itemIndex > -1) {
-                items.splice(itemIndex, 1);
+                if (itemIndex > -1) {
+                  items.splice(itemIndex, 1);
+                }
               }
-            }
-          } else if (quantity !== itemQuantity) {
-            textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
-            quantityMessage = `Quantity: ${quantity}/${itemQuantity}`;
-            if (item) {
-              item.quantity.count = quantity;
-            }
-          } else {
-            quantityMessage = `Quantity: ${quantity}`;
-          }
-          uuid = uuid + 1;
-          return {
-            id: break_up_item["@ondc/org/item_id"],
-            title: break_up_item?.title,
-            title_type: break_up_item["@ondc/org/title_type"],
-            isCustomization: isItemCustomization(break_up_item?.item?.tags),
-            isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
-            parent_item_id: break_up_item?.item?.parent_item_id,
-            price: Number(break_up_item.price?.value)?.toFixed(2),
-            itemQuantity,
-            quantity,
-            provided_by,
-            textClass,
-            quantityMessage,
-            uuid: uuid,
-            fulfillment_status: item?.fulfillment_status,
-            cancellation_status: item?.cancellation_status,
-            return_status: item?.return_status,
-            isCancellable: item?.product?.["@ondc/org/cancellable"],
-            isReturnable: item?.product?.["@ondc/org/returnable"],
-          };
-        });
-        let items = {};
-        let delivery = {};
-        all_items.forEach((item) => {
-          setQuoteItemInProcessing(item.id);
-          // for type item
-          if (item.title_type === "item" && !item.isCustomization) {
-            let key = item.parent_item_id || item.id;
-            let price = {
-              title: item.quantity + " * Base Price",
-              value: item.price,
-            };
-            let prev_item_data = items[key];
-            let addition_item_data = { title: item.title, price: price };
-            addition_item_data.isCancellable = item.isCancellable;
-            addition_item_data.isReturnable = item.isReturnable;
-            addition_item_data.fulfillment_status = item?.fulfillment_status;
-            if (item?.return_status) {
-              addition_item_data.return_status = item?.return_status;
+            } else if (quantity !== itemQuantity) {
+              textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
+              quantityMessage = `Quantity: ${quantity}/${itemQuantity}`;
+              if (item) {
+                item.quantity.count = quantity;
+              }
             } else {
+              quantityMessage = `Quantity: ${quantity}`;
             }
-            if (item?.cancellation_status) {
-              addition_item_data.cancellation_status = item?.cancellation_status;
-            } else {
-            }
-            items[key] = { ...prev_item_data, ...addition_item_data };
-          }
-          if (item.title_type === "tax" && !item.isCustomization) {
-            let key = item.parent_item_id || item.id;
-            items[key] = items[key] || {};
-            items[key]["tax"] = {
-              title: item.title,
-              value: item.price,
+            uuid = uuid + 1;
+            return {
+              id: break_up_item["@ondc/org/item_id"],
+              title: break_up_item?.title,
+              title_type: break_up_item["@ondc/org/title_type"],
+              isCustomization: isItemCustomization(break_up_item?.item?.tags),
+              isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
+              parent_item_id: break_up_item?.item?.parent_item_id,
+              price: Number(break_up_item.price?.value)?.toFixed(2),
+              itemQuantity,
+              quantity,
+              provided_by,
+              textClass,
+              quantityMessage,
+              uuid: uuid,
+              fulfillment_status: item?.fulfillment_status,
+              cancellation_status: item?.cancellation_status,
+              return_status: item?.return_status,
+              isCancellable: item?.product?.["@ondc/org/cancellable"],
+              isReturnable: item?.product?.["@ondc/org/returnable"],
             };
-          }
-          if (item.title_type === "discount" && !item.isCustomization) {
-            let key = item.parent_item_id || item.id;
-            items[key] = items[key] || {};
-            items[key]["discount"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-
-          //for customizations
-          if (item.title_type === "item" && item.isCustomization) {
-            let key = item.parent_item_id;
-            items[key]["customizations"] = items[key]["customizations"] || {};
-            let existing_data = items[key]["customizations"][item.id] || {};
-            let customisation_details = {
-              title: item.title,
-              price: {
+          });
+          let items = {};
+          let delivery = {};
+          all_items.forEach((item) => {
+            setQuoteItemInProcessing(item.id);
+            // for type item
+            if (item.title_type === "item" && !item.isCustomization) {
+              let key = item.parent_item_id || item.id;
+              let price = {
                 title: item.quantity + " * Base Price",
                 value: item.price,
-              },
-              quantityMessage: item.quantityMessage,
-              textClass: item.textClass,
-              quantity: item.quantity,
-              cartQuantity: item.cartQuantity,
-            };
-            items[key]["customizations"][item.id] = {
-              ...existing_data,
-              ...customisation_details,
-            };
-          }
-          if (item.title_type === "tax" && item.isCustomization) {
-            let key = item.parent_item_id;
-            items[key]["customizations"] = items[key]["customizations"] || {};
-            items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
-            items[key]["customizations"][item.id]["tax"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "discount" && item.isCustomization) {
-            let key = item.parent_item_id;
-            items[key]["customizations"] = items[key]["customizations"] || {};
-            items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
-            items[key]["customizations"][item.id]["discount"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          //for delivery
-          if (item.title_type === "delivery") {
-            delivery["delivery"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "discount_f") {
-            delivery["discount"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "tax_f") {
-            delivery["tax"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "packing") {
-            delivery["packing"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "discount") {
-            if (item.isCustomization) {
-              let id = item.parent_item_id;
-            } else {
-              let id = item.id;
-              items[id]["discount"] = {
+              };
+              let prev_item_data = items[key];
+              let addition_item_data = { title: item.title, price: price };
+              addition_item_data.isCancellable = item.isCancellable;
+              addition_item_data.isReturnable = item.isReturnable;
+              addition_item_data.fulfillment_status = item?.fulfillment_status;
+              if (item?.return_status) {
+                addition_item_data.return_status = item?.return_status;
+              } else {
+              }
+              if (item?.cancellation_status) {
+                addition_item_data.cancellation_status = item?.cancellation_status;
+              } else {
+              }
+              items[key] = { ...prev_item_data, ...addition_item_data };
+            }
+            if (item.title_type === "tax" && !item.isCustomization) {
+              let key = item.parent_item_id || item.id;
+              items[key] = items[key] || {};
+              items[key]["tax"] = {
                 title: item.title,
                 value: item.price,
               };
             }
-          }
-          if (item.title_type === "misc") {
-            delivery["misc"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-        });
-        setQuoteItemInProcessing(null);
-        setItemQuotes(items);
-        setDeliveryQuotes(delivery);
+            if (item.title_type === "discount" && !item.isCustomization) {
+              let key = item.parent_item_id || item.id;
+              items[key] = items[key] || {};
+              items[key]["discount"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+
+            //for customizations
+            if (item.title_type === "item" && item.isCustomization) {
+              let key = item.parent_item_id;
+              items[key]["customizations"] = items[key]["customizations"] || {};
+              let existing_data = items[key]["customizations"][item.id] || {};
+              let customisation_details = {
+                title: item.title,
+                price: {
+                  title: item.quantity + " * Base Price",
+                  value: item.price,
+                },
+                quantityMessage: item.quantityMessage,
+                textClass: item.textClass,
+                quantity: item.quantity,
+                cartQuantity: item.cartQuantity,
+              };
+              items[key]["customizations"][item.id] = {
+                ...existing_data,
+                ...customisation_details,
+              };
+            }
+            if (item.title_type === "tax" && item.isCustomization) {
+              let key = item.parent_item_id;
+              items[key]["customizations"] = items[key]["customizations"] || {};
+              items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
+              items[key]["customizations"][item.id]["tax"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "discount" && item.isCustomization) {
+              let key = item.parent_item_id;
+              items[key]["customizations"] = items[key]["customizations"] || {};
+              items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
+              items[key]["customizations"][item.id]["discount"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            //for delivery
+            if (item.title_type === "delivery") {
+              delivery["delivery"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "discount_f") {
+              delivery["discount"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "tax_f") {
+              delivery["tax"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "packing") {
+              delivery["packing"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "discount") {
+              if (item.isCustomization) {
+                let id = item.parent_item_id;
+              } else {
+                let id = item.id;
+                items[id]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+            }
+            if (item.title_type === "misc") {
+              delivery["misc"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+          });
+          setQuoteItemInProcessing(null);
+          setItemQuotes(items);
+          setDeliveryQuotes(delivery);
+        }
+        if (orderDetails.items && orderDetails.items.length > 0) {
+          const filterCancelledItems = orderDetails.items.filter((item) => item.cancellation_status && item.cancellation_status === "Cancelled");
+          const filterReturnItems = orderDetails.items.filter((item) => item.cancellation_status && item.cancellation_status !== "Cancelled");
+          setCancelledItems(filterCancelledItems);
+          setReturnItems(filterReturnItems);
+        }
       }
+
     } catch (error) {
       console.log(error);
       showQuoteError();
@@ -279,7 +291,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   function generateProductsList(orderDetails, itemQuotes) {
     return orderDetails?.items
       ?.map(({ id }, index) => {
-        let findQuote = orderDetails.quote?.breakup.find(
+        let findQuote = orderDetails.updatedQuote?.breakup.find(
           (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
         );
         if (findQuote) {
@@ -316,7 +328,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             };
           }
         } else {
-          findQuote = orderDetails.quote?.breakup[index];
+          findQuote = orderDetails.updatedQuote?.breakup[index];
         }
         return null;
       })
@@ -453,6 +465,72 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     );
   };
 
+  const renderCancelledItems = () => {
+    return (
+      <div>
+        <div>
+          <Typography variant="body1" className={`${classes.summaryItemLabel}`}>
+            Cancelled Items
+          </Typography>
+        </div>
+        {
+          cancelledItems.map((item, itemIndex) => (
+            <div className={`${classes.summaryQuoteItemContainer} displayEllipsis`} key={`quote-${itemIndex}-price`}>
+              <Tooltip title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}>
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemPriceLabel}
+                >
+                  {`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
+                </Typography>
+              </Tooltip>
+              {item?.cancellation_status && (
+                <Chip
+                  size="small"
+                  className={classes.statusChip}
+                  label={item?.cancellation_status}
+                />
+              )}
+            </div>
+          ))
+        }
+      </div>
+    )
+  };
+
+  const renderReturnItems = () => {
+    return (
+      <div>
+        <div className={classes.summaryQuoteItemContainer}>
+          <Typography variant="body1" className={`${classes.summaryItemLabel}`}>
+            Return Items
+          </Typography>
+        </div>
+        {
+          returnItems.map((item, itemIndex) => (
+            <div className={`${classes.summaryQuoteItemContainer} displayEllipsis`} key={`quote-${itemIndex}-price`}>
+              <Tooltip title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}>
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemPriceLabel}
+                >
+                  {`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
+                </Typography>
+              </Tooltip>
+              {item?.cancellation_status && (
+                <Chip
+                  size="small"
+                  className={classes.statusChip}
+                  label={item?.cancellation_status}
+                />
+              )}
+            </div>
+          ))
+        }
+      </div>
+    )
+  };
+
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
       <div>
@@ -578,6 +656,15 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         <div>
           <div>
             {itemQuotes ? renderItems() : ""}
+
+            <Box component={"div"} className={classes.divider} />
+
+            {cancelledItems.length > 0 ? renderCancelledItems() : ""}
+
+            {returnItems.length > 0 ? renderReturnItems() : ""}
+
+            <Box component={"div"} className={classes.divider} />
+
             <div className={classes.summarySubtotalContainer}>
               <Typography variant="body2" className={classes.subTotalLabel}>
                 Total
@@ -734,10 +821,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"
               ? "primary"
               : orderDetails?.state === "Delivered"
-              ? "success"
-              : orderDetails?.state === "Cancelled"
-              ? "error"
-              : "primary"
+                ? "success"
+                : orderDetails?.state === "Cancelled"
+                  ? "error"
+                  : "primary"
           }
           label={orderDetails?.state}
         />
