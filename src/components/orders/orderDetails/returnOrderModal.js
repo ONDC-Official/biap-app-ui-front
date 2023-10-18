@@ -27,6 +27,9 @@ export default function ReturnOrderModal({
   onClose,
   onSuccess,
   quantity,
+  bpp_uri,
+  handleFetchUpdatedStatus,
+  onUpdateOrder,
 }) {
   // STATES
   const [inlineError, setInlineError] = useState({
@@ -85,6 +88,7 @@ export default function ReturnOrderModal({
     es.addEventListener("on_update", (e) => {
       const { messageId } = JSON.parse(e?.data);
       getPartialCancelOrderDetails(messageId);
+      onUpdateOrder();
     });
 
     const timer = setTimeout(() => {
@@ -141,6 +145,7 @@ export default function ReturnOrderModal({
             return {
               context: {
                 bpp_id,
+                bpp_uri,
                 transaction_id,
               },
               message: {

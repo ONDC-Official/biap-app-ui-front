@@ -92,7 +92,7 @@ const OutletDetails = (props) => {
             <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
               Home
             </MuiLink>
-            <MuiLink component={Link} underline="hover" color="inherit" to={`/application/brand/${brandId}`}>
+            <MuiLink component={Link} underline="hover" color="inherit" to={`/application/brand?brandId=${brandId}`}>
               {brandDetails?.descriptor?.name}
             </MuiLink>
             {brandId && <Typography color="text.primary">{`${brandDetails?.descriptor?.name} Details`}</Typography>}
