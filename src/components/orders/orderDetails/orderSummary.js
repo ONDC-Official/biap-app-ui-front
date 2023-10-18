@@ -877,7 +877,16 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           onClose={() => setToggleReturnOrderModal(false)}
           onSuccess={() => setToggleReturnOrderModal(false)}
           quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsReturnProductList={generateProductsList(orderDetails, itemQuotes)}
+          partailsReturnProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
+            if (
+              !item.hasOwnProperty("cancellation_status") ||
+              (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
+              !item.hasOwnProperty("return_status") ||
+              (item.hasOwnProperty("return_status") && item.return_status == "")
+            ) {
+              return item;
+            }
+          })}
           order_status={orderDetails.state}
           bpp_id={orderDetails.bppId}
           transaction_id={orderDetails.transactionId}
@@ -899,13 +908,21 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               return (
                 orderDetails.state === "Created" &&
                 item["@ondc/org/cancellable"] == true &&
-                item.fulfillment_status == "Pending"
+                item.fulfillment_status == "Pending" &&
+                (!item.hasOwnProperty("cancellation_status") ||
+                  (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
+                  !item.hasOwnProperty("return_status") ||
+                  (item.hasOwnProperty("return_status") && item.return_status == ""))
               );
             } else {
               return (
                 (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
                 item["@ondc/org/cancellable"] == true &&
-                item.fulfillment_status == "Pending"
+                item.fulfillment_status == "Pending" &&
+                (!item.hasOwnProperty("cancellation_status") ||
+                  (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
+                  !item.hasOwnProperty("return_status") ||
+                  (item.hasOwnProperty("return_status") && item.return_status == ""))
               );
             }
           })}
