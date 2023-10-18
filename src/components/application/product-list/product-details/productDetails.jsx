@@ -42,6 +42,8 @@ const ProductDetails = ({ productId }) => {
   const [customizationPrices, setCustomizationPrices] = useState(0);
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
+
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
   };
@@ -163,7 +165,19 @@ const ProductDetails = ({ productId }) => {
     return true;
   }
 
+  const getCartItems = async () => {
+    try {
+      const user = JSON.parse(getValueFromCookie("user"));
+      const url = `/clientApis/v2/cart/${user.id}`;
+      const res = await getCall(url);
+      return res;
+    } catch (error) {
+      console.log("Error fetching cart items:", error);
+    }
+  };
+
   const addToCart = async (navigate = false) => {
+    setAddToCartLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
     let subtotal = productPayload?.item_details?.price?.value;
@@ -222,6 +236,7 @@ const ProductDetails = ({ productId }) => {
     if (cartItem.length === 0) {
       const res = await postCall(url, payload);
       fetchCartItems();
+      setAddToCartLoading(false);
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -243,6 +258,7 @@ const ProductDetails = ({ productId }) => {
       if (currentCount < maxCount) {
         if (!customisations) {
           updateCartItem(cartItems, true, cartItem[0]._id);
+          setAddToCartLoading(false);
           dispatch({
             type: toast_actions.ADD_TOAST,
             payload: {
@@ -252,7 +268,6 @@ const ProductDetails = ({ productId }) => {
             },
           });
         } else {
-          console.log(3.2);
           const currentIds = customisations.map((item) => item.id);
           let matchingCustomisation = null;
 
@@ -267,6 +282,7 @@ const ProductDetails = ({ productId }) => {
           if (matchingCustomisation) {
             console.log(4);
             updateCartItem(cartItems, true, matchingCustomisation._id);
+            setAddToCartLoading(false);
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -279,6 +295,7 @@ const ProductDetails = ({ productId }) => {
             console.log(5);
             const res = await postCall(url, payload);
             fetchCartItems();
+            setAddToCartLoading(false);
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -290,6 +307,7 @@ const ProductDetails = ({ productId }) => {
           }
         }
       } else {
+        setAddToCartLoading(false);
         dispatch({
           type: toast_actions.ADD_TOAST,
           payload: {
@@ -595,12 +613,14 @@ const ProductDetails = ({ productId }) => {
 
                 <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
                   <Button
-                    variant="contained"
+                    variant={"contained"}
                     sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
                     onClick={() => addToCart(false)}
-                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock}
+                    disabled={
+                      !parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock || addToCartLoading
+                    }
                   >
-                    Add to cart
+                    {addToCartLoading ? <Loading /> : "Add to cart"}
                   </Button>
                   <Button
                     variant="outlined"
