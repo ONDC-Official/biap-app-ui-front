@@ -499,7 +499,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       <div>
         <div className={classes.summaryQuoteItemContainer}>
           <Typography variant="body1" className={`${classes.summaryItemLabel}`}>
-            Return Items
+            Returned Items
           </Typography>
         </div>
         {returnItems.map((item, itemIndex) => (
