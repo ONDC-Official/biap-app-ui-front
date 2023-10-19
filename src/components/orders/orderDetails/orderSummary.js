@@ -317,6 +317,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
                 fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
                 customizations: customizations ?? null,
                 ...orderDetails.items?.[index]?.product,
+                provider_details: orderDetails.provider
               };
             }
           } else {
@@ -328,6 +329,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
               customizations: null,
               ...orderDetails.items?.[index]?.product,
+              provider_details: orderDetails.provider
             };
           }
         } else {
@@ -369,7 +371,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   };
 
   const getItemsWithCustomizations = () => {
-    const breakup = orderDetails?.quote?.breakup;
+    const breakup = orderDetails?.updatedQuote?.breakup;
     let returnBreakup = [];
     const filterItems = breakup.filter((item) => item["@ondc/org/title_type"] === "item");
     const filterCustomizations = breakup.filter((item) => item["@ondc/org/title_type"] === "customization");
@@ -808,10 +810,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"
               ? "primary"
               : orderDetails?.state === "Delivered"
-              ? "success"
-              : orderDetails?.state === "Cancelled"
-              ? "error"
-              : "primary"
+                ? "success"
+                : orderDetails?.state === "Cancelled"
+                  ? "error"
+                  : "primary"
           }
           label={orderDetails?.state}
         />
@@ -866,7 +868,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             setToggleReturnOrderModal(false);
             onUpdateOrder();
           }}
-          quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+          // quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+          quantity={orderDetails.items?.filter((item) => !item.hasOwnProperty("cancellation_status") || (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") || !item.hasOwnProperty("return_status") || (item.hasOwnProperty("return_status") && item.return_status == "")).map(({ quantity }) => quantity)}
           partailsReturnProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
             if (
               !item.hasOwnProperty("cancellation_status") ||
@@ -887,7 +890,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           onUpdateOrder={onUpdateOrder}
         />
       )}
-
       {toggleCancelOrderModal && (
         <CancelOrderModal
           onClose={() => setToggleCancelOrderModal(false)}
@@ -895,7 +897,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             setToggleCancelOrderModal(false);
             onUpdateOrder();
           }}
-          quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+          quantity={orderDetails.items?.filter((item) => !item.hasOwnProperty("cancellation_status") || (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") || !item.hasOwnProperty("return_status") || (item.hasOwnProperty("return_status") && item.return_status == "")).map(({ quantity }) => quantity)}
           partailsCancelProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
             if (orderDetails.domain === "ONDC:RET11") {
               return (
