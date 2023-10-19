@@ -137,6 +137,7 @@ export default function ReturnOrderModal({
         image: "",
       },
     }));
+
     try {
       const data = await cancellablePromise(
         postCall(
@@ -368,9 +369,8 @@ export default function ReturnOrderModal({
                               <div>
                                 <div className={productCartStyles.quantity_count_wrapper}>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                    className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
@@ -388,11 +388,10 @@ export default function ReturnOrderModal({
                                     </p>
                                   </div>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count < quantity[idx]?.count
+                                    className={`${orderQty[idx]?.count < quantity[idx]?.count
                                         ? productCartStyles.add_svg_wrapper
                                         : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
