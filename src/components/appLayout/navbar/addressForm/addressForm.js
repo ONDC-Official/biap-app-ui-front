@@ -38,6 +38,7 @@ const AddressForm = (props) => {
   const [fetchCityStateLoading, setCityStateLoading] = useState(false);
   const [addAddressLoading, setAddAddressLoading] = useState(false);
   const [address, setAddress] = useState(selectedAddress);
+
   const [error, setError] = useState({
     name_error: "",
     email_error: "",
@@ -399,6 +400,8 @@ const AddressForm = (props) => {
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
+            lat: address.lat,
+            lng: address.lng,
           },
           email: address.email.trim(),
           phone: address.phone.trim(),
@@ -741,6 +744,7 @@ const MapPicker = (props) => {
   const [location, setLocation] = useState(gps);
 
   useEffect(() => {
+    console.log("address", address);
     if (address.lat && address.lng) {
       setLocation({ lat: address.lat, lng: address.lng });
     }

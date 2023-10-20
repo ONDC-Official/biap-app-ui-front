@@ -128,6 +128,8 @@ const SelectAddress = ({ addresses, onClose, setAddAddress, setUpdateAddress, on
                           state: address?.state,
                           street: address?.street,
                           tag: address?.tag,
+                          lat: address?.lat,
+                          lng: address?.lng,
                         });
                       }}
                     >
