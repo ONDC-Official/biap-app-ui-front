@@ -225,6 +225,7 @@ const AddressForm = (props) => {
       return;
     }
     setAddAddressLoading(true);
+
     try {
       const data = await cancellablePromise(
         postCall("/clientApis/v1/delivery_address", {
@@ -242,6 +243,8 @@ const AddressForm = (props) => {
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
+            lat: address.lat,
+            lng: address.lng,
           },
         })
       );
@@ -290,6 +293,8 @@ const AddressForm = (props) => {
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
+            lat: address.lat,
+            lng: address.lng,
           },
           email: address.email.trim(),
           phone: address.phone.trim(),
@@ -344,6 +349,8 @@ const AddressForm = (props) => {
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
+            lat: address.lat,
+            lng: address.lng,
           },
         })
       );
@@ -723,23 +730,32 @@ const AddressForm = (props) => {
 };
 
 const MapPicker = (props) => {
-  const { setAddress } = props;
+  const { address, setAddress } = props;
   let locationString = "28.679076630288467,77.06970870494843";
   locationString = locationString.split(",");
   const gps = {
     lat: locationString[0],
     lng: locationString[1],
   };
+
   const [location, setLocation] = useState(gps);
 
   useEffect(() => {
-    console.log("use effect", location);
+    if (address.lat && address.lng) {
+      setLocation({ lat: address.lat, lng: address.lng });
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("location", location.lat, location.lng);
     setAddress((address) => ({
       ...address,
       street: location.street,
       city: location.city,
       state: location.state,
       areaCode: location.pincode,
+      lat: location.lat,
+      lng: location.lng,
     }));
   }, [location]);
 

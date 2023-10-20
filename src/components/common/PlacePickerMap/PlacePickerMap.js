@@ -44,7 +44,6 @@ export default function MapPointer(props) {
     const { lat, lng } = data;
     if (lat && lng) {
       setLocation(data);
-      console.log("onChange", data);
     } else console.log("Location not found. Please try moving map.");
   };
 
@@ -71,7 +70,6 @@ export default function MapPointer(props) {
       };
     }
 
-    console.log(options);
     options.location = location?.lat && location?.lng ? location : { lat: 28.679079, lng: 77.06971 };
     // eslint-disable-next-line
     new MapmyIndia.placePicker(options);
