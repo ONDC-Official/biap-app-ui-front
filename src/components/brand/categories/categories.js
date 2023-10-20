@@ -22,11 +22,12 @@ const SingleCategory = ({ data, index }) => {
     return React.useMemo(() => new URLSearchParams(search), [search]);
   };
   let query = useQuery();
+  const brandId = query.get("brandId");
   const customMenuId = query.get("cm");
   const { id, descriptor } = data;
   const { name, images } = descriptor;
   const updateSearchParams = (cmId) => {
-    const params = new URLSearchParams({ ["cm"]: cmId });
+    const params = new URLSearchParams({ ["brandId"]: brandId, ["cm"]: cmId });
     history.replace({ pathname: locationData.pathname, search: params.toString() });
   };
 
