@@ -607,6 +607,7 @@ export default function Cart() {
     AddCookie("transaction_id", ttansactionId);
     responseRef.current = [];
     if (deliveryAddress) {
+      console.log("select req:", deliveryAddress.location.address.lat);
       try {
         setCheckoutLoading(true);
         const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
@@ -631,7 +632,7 @@ export default function Cart() {
               {
                 end: {
                   location: {
-                    gps: `${search_context?.location?.lat}, ${search_context?.location?.lng}`,
+                    gps: `${deliveryAddress?.location?.address?.lat}, ${deliveryAddress?.location?.address?.lng}`,
                     address: {
                       area_code: `${search_context?.location?.pincode}`,
                     },
