@@ -437,10 +437,10 @@ const ProductDetails = ({ productId }) => {
 
     const data = {
       "Available on COD":
-        productPayload.item_details?.["@ondc/org/available_on_cod"].toString() === "true" ? "Yes" : "No",
-      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString() === "true" ? "Yes" : "No",
+        productPayload.item_details?.["@ondc/org/available_on_cod"]?.toString() === "true" ? "Yes" : "No",
+      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"]?.toString() === "true" ? "Yes" : "No",
       "Return window value": returnWindowValue,
-      Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString() === "true" ? "Yes" : "No",
+      Returnable: productPayload.item_details?.["@ondc/org/returnable"]?.toString() === "true" ? "Yes" : "No",
       "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
       "Manufacturer name":
         productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
@@ -449,20 +449,27 @@ const ProductDetails = ({ productId }) => {
           "manufacturer_or_packer_address"
         ],
     };
-    return Object.keys(data).map((key) => (
-      <Grid container className={classes.keyValueContainer}>
-        <Grid xs={3}>
-          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
-            {key}
-          </Typography>
-        </Grid>
-        <Grid xs={8}>
-          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
-            {data[key]}
-          </Typography>
-        </Grid>
-      </Grid>
-    ));
+
+    return Object.keys(data).map((key) => {
+      const value = data[key];
+      if (value !== null && value !== undefined) {
+        return (
+          <Grid container className={classes.keyValueContainer} key={key}>
+            <Grid xs={3}>
+              <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+                {key}
+              </Typography>
+            </Grid>
+            <Grid xs={8}>
+              <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+                {value}
+              </Typography>
+            </Grid>
+          </Grid>
+        );
+      }
+      return null; // Return null for fields with null or undefined values
+    });
   };
 
   return (
