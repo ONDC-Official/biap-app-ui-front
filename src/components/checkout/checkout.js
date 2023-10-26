@@ -32,6 +32,8 @@ import Loading from "../shared/loading/loading";
 import { CartContext } from "../../context/cartContext";
 import StepFulfillmentLabel from "./StepFulfillment/stepFulfillmentLabel";
 import StepFulfillmentContent from "./StepFulfillment/stepFulfillmentContent";
+import StepCartLabel from "./stepCart/stepCartLabel";
+import StepCartContent from "./stepCart/stepCartContent";
 
 const Checkout = () => {
   const classes = useStyles();
@@ -67,7 +69,6 @@ const Checkout = () => {
     setUpdatedCartItems(updatedCartItemsData);
   }, []);
 
-  console.log("selected f", selectedFulfillment);
   useEffect(() => {
     try {
       if (updatedCartItems.length > 0) {
@@ -385,20 +386,13 @@ const Checkout = () => {
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
-        return <StepCustomerLabel activeStep={activeStep} />;
+        return <StepCartLabel activeStep={activeStep} />;
       case 1:
+        return <StepCustomerLabel activeStep={activeStep} />;
+      case 2:
         return (
           <StepFulfillmentLabel
             fulfillment={getSelectedFulfillment()}
-            activeStep={activeStep}
-            onUpdateActiveStep={() => {
-              setActiveStep(1);
-            }}
-          />
-        );
-      case 2:
-        return (
-          <StepAddressLabel
             activeStep={activeStep}
             onUpdateActiveStep={() => {
               setActiveStep(2);
@@ -406,16 +400,26 @@ const Checkout = () => {
           />
         );
       case 3:
+        return (
+          <StepAddressLabel
+            activeStep={activeStep}
+            onUpdateActiveStep={() => {
+              setActiveStep(3);
+            }}
+          />
+        );
+      case 4:
         return <StepPaymentLabel />;
       default:
         return <>stepLabel</>;
     }
   };
+
   const renderStepContent = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
         return (
-          <StepCustomerContent
+          <StepCartContent
             isError={productsQuote.isError}
             handleNext={() => {
               setActiveStep(1);
@@ -424,16 +428,25 @@ const Checkout = () => {
         );
       case 1:
         return (
-          <StepFulfillmentContent
-            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
-            selectedFulfillment={selectedFulfillment}
-            setSelectedFulfillment={setSelectedFulfillment}
+          <StepCustomerContent
+            isError={productsQuote.isError}
             handleNext={() => {
               setActiveStep(2);
             }}
           />
         );
       case 2:
+        return (
+          <StepFulfillmentContent
+            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
+            selectedFulfillment={selectedFulfillment}
+            setSelectedFulfillment={setSelectedFulfillment}
+            handleNext={() => {
+              setActiveStep(3);
+            }}
+          />
+        );
+      case 3:
         return (
           <StepAddressContent
             isError={productsQuote.isError}
@@ -446,7 +459,7 @@ const Checkout = () => {
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
-              setActiveStep(3);
+              setActiveStep(4);
             }}
             updateInitLoading={(value) => setInitLoading(value)}
             responseReceivedIds={updatedCartItems.map((item) => {
@@ -455,7 +468,7 @@ const Checkout = () => {
             })}
           />
         );
-      case 3:
+      case 4:
         return (
           <StepPaymentContent
             isError={productsQuote.isError}
@@ -879,6 +892,7 @@ const Checkout = () => {
       return <></>;
     }
   };
+
   const renderItems = (provider, pindex) => {
     return (
       <div key={`pindex-${pindex}`}>
@@ -1044,7 +1058,10 @@ const Checkout = () => {
               {steps.map((step, index) => (
                 <Step key={step.label} className={classes.stepRoot}>
                   <StepLabel className={classes.stepLabel}>{renderStepLabel(step, index)}</StepLabel>
-                  <StepContent className={activeStep === index ? classes.stepContent : classes.stepContentHidden}>
+                  <StepContent
+                    sx={{ padding: index === 0 ? "10px 0px !important" : "14px" }}
+                    className={activeStep === index ? classes.stepContent : classes.stepContentHidden}
+                  >
                     {renderStepContent(step, index)}
                   </StepContent>
                 </Step>
