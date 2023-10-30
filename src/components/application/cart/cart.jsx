@@ -22,7 +22,7 @@ import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { SearchContext } from "../../../context/searchContext";
 
-export default function Cart({ showOnlyItems = false }) {
+export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   let user = {};
   const userCookie = getValueFromCookie("user");
 
@@ -102,6 +102,9 @@ export default function Cart({ showOnlyItems = false }) {
       const res = await getCall(url);
       setCartItems(res);
       updatedCartItems.current = res;
+      if (setCheckoutCartItems) {
+        setCheckoutCartItems(res);
+      }
     } catch (error) {
       console.log("Error fetching cart items:", error);
       setLoading(false);
