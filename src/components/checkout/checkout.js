@@ -32,12 +32,14 @@ import Loading from "../shared/loading/loading";
 import { CartContext } from "../../context/cartContext";
 import StepFulfillmentLabel from "./StepFulfillment/stepFulfillmentLabel";
 import StepFulfillmentContent from "./StepFulfillment/stepFulfillmentContent";
+import StepCartLabel from "./stepCart/stepCartLabel";
+import StepCartContent from "./stepCart/stepCartContent";
 
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
 
-  const steps = ["Customer", "Fulfillment", "Add Address", "Payment"];
+  const steps = ["Cart", "Customer", "Fulfillment", "Add Address", "Payment"];
   const [activeStep, setActiveStep] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [updatedCartItems, setUpdatedCartItems] = useState([]);
@@ -60,16 +62,21 @@ const Checkout = () => {
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
-  useEffect(() => {
+  const resetCartItems = () => {
     const cartItemsData = JSON.parse(localStorage.getItem("cartItems"));
     const updatedCartItemsData = JSON.parse(localStorage.getItem("updatedCartItems"));
+
     setCartItems(cartItemsData);
     setUpdatedCartItems(updatedCartItemsData);
+  };
+
+  useEffect(() => {
+    resetCartItems();
   }, []);
 
-  console.log("selected f", selectedFulfillment);
   useEffect(() => {
     try {
+      console.log("** update useEffect", updatedCartItems);
       if (updatedCartItems.length > 0) {
         // fetch request object length and compare it with the response length
         let c = cartItems.map((item) => {
@@ -84,7 +91,7 @@ const Checkout = () => {
         // check if any one order contains error
         let total_payable = 0;
         let isAnyError = false;
-        const quotes = updatedCartItems?.map((item, index) => {
+        let quotes = updatedCartItems?.map((item, index) => {
           let { message, error } = item;
           let provider_payable = 0;
           const provider = {
@@ -105,6 +112,7 @@ const Checkout = () => {
             provider.name = provided_by;
             let uuid = 0;
             const all_items = breakup?.map((break_up_item) => {
+              console.log("breakup_item:", break_up_item);
               const cartIndex = cartList.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
               const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
               let findItemFromCartItems = null;
@@ -120,6 +128,7 @@ const Checkout = () => {
                 }
               } else {
               }
+              console.log("CART_ITEMS:", cartItems);
               cartItems.forEach((ci) => {
                 if (isCustimization) {
                   const cc = ci?.item?.customisations || [];
@@ -142,6 +151,7 @@ const Checkout = () => {
               let quantity = break_up_item["@ondc/org/item_quantity"]
                 ? break_up_item["@ondc/org/item_quantity"]["count"]
                 : 0;
+
               let textClass = "";
               let quantityMessage = "";
               let isError = false;
@@ -151,6 +161,8 @@ const Checkout = () => {
                   quantityMessage = "Out of stock";
                   isError = true;
 
+                  console.log("isError-1");
+
                   if (cartIndex > -1) {
                     cartList.splice(cartIndex, 1);
                   }
@@ -159,11 +171,13 @@ const Checkout = () => {
                 textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
                 quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
                 isError = true;
+                console.log("isError-2");
                 if (cartItem) {
                   cartItem.quantity.count = quantity;
                 }
               } else {
                 quantityMessage = `Quantity: ${quantity}`;
+                console.log("quantity =>", break_up_item["title"], quantity);
               }
 
               if (error && error.code === "30009") {
@@ -197,6 +211,7 @@ const Checkout = () => {
             let delivery = {};
             let outOfStock = [];
             let errorCode = "";
+
             all_items.forEach((item) => {
               errorCode = item.errorCode;
               setQuoteItemInProcessing(item.id);
@@ -272,7 +287,6 @@ const Checkout = () => {
                 };
               }
               //for delivery
-              console.log("selectedFulfillment", selectedFulfillment);
               if (item.title_type === "delivery" && item.id === selectedFulfillment) {
                 delivery["delivery"] = {
                   title: item.title,
@@ -340,6 +354,11 @@ const Checkout = () => {
           isError: isAnyError,
           total_payable: total_payable.toFixed(2),
         });
+        console.log("ProductQuote:", {
+          providers: quotes,
+          isError: isAnyError,
+          total_payable: total_payable.toFixed(2),
+        });
       }
     } catch (err) {
       console.log(err);
@@ -382,23 +401,17 @@ const Checkout = () => {
       );
     }
   };
+
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
-        return <StepCustomerLabel activeStep={activeStep} />;
+        return <StepCartLabel activeStep={activeStep} />;
       case 1:
+        return <StepCustomerLabel activeStep={activeStep} />;
+      case 2:
         return (
           <StepFulfillmentLabel
             fulfillment={getSelectedFulfillment()}
-            activeStep={activeStep}
-            onUpdateActiveStep={() => {
-              setActiveStep(1);
-            }}
-          />
-        );
-      case 2:
-        return (
-          <StepAddressLabel
             activeStep={activeStep}
             onUpdateActiveStep={() => {
               setActiveStep(2);
@@ -406,34 +419,59 @@ const Checkout = () => {
           />
         );
       case 3:
+        return (
+          <StepAddressLabel
+            activeStep={activeStep}
+            onUpdateActiveStep={() => {
+              setActiveStep(3);
+            }}
+          />
+        );
+      case 4:
         return <StepPaymentLabel />;
       default:
         return <>stepLabel</>;
     }
   };
+
   const renderStepContent = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
         return (
-          <StepCustomerContent
+          <StepCartContent
             isError={productsQuote.isError}
+            cartItemsData={cartItems}
+            updatedCartItemsData={updatedCartItems}
+            setUpdateCartItemsData={(data) => {
+              setUpdatedCartItems(data);
+            }}
             handleNext={() => {
               setActiveStep(1);
+              resetCartItems();
             }}
           />
         );
       case 1:
         return (
-          <StepFulfillmentContent
-            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
-            selectedFulfillment={selectedFulfillment}
-            setSelectedFulfillment={setSelectedFulfillment}
+          <StepCustomerContent
+            isError={productsQuote.isError}
             handleNext={() => {
               setActiveStep(2);
             }}
           />
         );
       case 2:
+        return (
+          <StepFulfillmentContent
+            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
+            selectedFulfillment={selectedFulfillment}
+            setSelectedFulfillment={setSelectedFulfillment}
+            handleNext={() => {
+              setActiveStep(3);
+            }}
+          />
+        );
+      case 3:
         return (
           <StepAddressContent
             isError={productsQuote.isError}
@@ -446,7 +484,7 @@ const Checkout = () => {
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
-              setActiveStep(3);
+              setActiveStep(4);
             }}
             updateInitLoading={(value) => setInitLoading(value)}
             responseReceivedIds={updatedCartItems.map((item) => {
@@ -455,7 +493,7 @@ const Checkout = () => {
             })}
           />
         );
-      case 3:
+      case 4:
         return (
           <StepPaymentContent
             isError={productsQuote.isError}
@@ -825,6 +863,10 @@ const Checkout = () => {
   };
 
   const renderOutofStockItems = (provider, pindex) => {
+    //  if (productsQuote.isError && provider.errorCode === "") {
+    //    throw new Error();
+    //  }
+
     if (productsQuote.isError && provider.errorCode === "40002" && provider.error) {
       return (
         <div key={`outof-stockpindex-${pindex}`}>
@@ -879,6 +921,7 @@ const Checkout = () => {
       return <></>;
     }
   };
+
   const renderItems = (provider, pindex) => {
     return (
       <div key={`pindex-${pindex}`}>
@@ -978,7 +1021,7 @@ const Checkout = () => {
                 productsQuote.isError ||
                 confirmOrderLoading ||
                 initLoading ||
-                activeStep !== 3
+                activeStep !== 4
               }
               onClick={() => {
                 if (activePaymentMethod) {
@@ -1023,6 +1066,7 @@ const Checkout = () => {
   if (cartItems === null || updatedCartItems === null) {
     return <Redirect to={"/application/cart"} />;
   }
+
   return (
     <>
       <div className={classes.header}>
@@ -1044,7 +1088,10 @@ const Checkout = () => {
               {steps.map((step, index) => (
                 <Step key={step.label} className={classes.stepRoot}>
                   <StepLabel className={classes.stepLabel}>{renderStepLabel(step, index)}</StepLabel>
-                  <StepContent className={activeStep === index ? classes.stepContent : classes.stepContentHidden}>
+                  <StepContent
+                    sx={{ padding: index === 0 ? "10px 0px !important" : "14px" }}
+                    className={activeStep === index ? classes.stepContent : classes.stepContentHidden}
+                  >
                     {renderStepContent(step, index)}
                   </StepContent>
                 </Step>
