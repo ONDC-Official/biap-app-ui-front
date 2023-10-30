@@ -11,7 +11,7 @@ export default function MapPointer(props) {
     search = true,
     hybrid = false,
     location,
-    setLocation,
+    setLocation = null,
   } = props;
   const [apiKey, setApiKey] = useState();
   const [map, setMap] = useState();
@@ -49,14 +49,27 @@ export default function MapPointer(props) {
 
   useEffect(() => {
     if (!mapInitialised) return;
-    const options = {
-      map,
-      // callback: () => {},
-      search: false,
-      closeBtn: false,
-      topText: " ",
-      geolocation: false,
-    };
+    let options = {};
+    if (!setLocation) {
+      options = {
+        map,
+        // callback: () => {},
+        search: false,
+        closeBtn: false,
+        topText: " ",
+        geolocation: false,
+      };
+    } else {
+      options = {
+        map,
+        callback: onChange,
+        search: true,
+        closeBtn: false,
+        topText: " ",
+        geolocation: true,
+      };
+    }
+
     options.location = location?.lat && location?.lng ? location : { lat: 28.679079, lng: 77.06971 };
     // eslint-disable-next-line
     new MapmyIndia.placePicker(options);
