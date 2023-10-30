@@ -241,6 +241,7 @@ const AddressForm = (props) => {
             city: address.city.trim(),
             country: "IND",
             door: address.door.trim(),
+            building: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
@@ -347,6 +348,7 @@ const AddressForm = (props) => {
             city: address.city.trim(),
             country: "IND",
             door: address.door.trim(),
+            building: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
@@ -397,6 +399,7 @@ const AddressForm = (props) => {
             city: address.city.trim(),
             country: "IND",
             door: address.door.trim(),
+            building: address.door.trim(),
             state: address.state.trim(),
             street: address.street.trim(),
             tag: address.tag.trim(),
@@ -536,12 +539,12 @@ const AddressForm = (props) => {
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <TextField
-          // required
+          required
           fullWidth
           id="Landmark-input"
-          name="Landmark"
-          label="Landmark"
-          placeholder="Enter Landmark"
+          name="Building"
+          label="Building"
+          placeholder="Enter Building"
           type="text"
           value={address?.door}
           onChange={(event) => {
