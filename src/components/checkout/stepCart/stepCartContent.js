@@ -206,7 +206,7 @@ const StepCartContent = (props) => {
           onClick={() => {
             handleNext();
           }}
-          disabled={getQuoteLoading || isError}
+          disabled={isError || getQuoteLoading}
         >
           Continue
         </Button>
