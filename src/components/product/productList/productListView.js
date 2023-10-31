@@ -57,7 +57,7 @@ const ProductListView = (props) => {
             View details
           </MuiLink>
 
-          <Button
+          {/* <Button
             className={classes.addToCartBtn}
             variant="contained"
             onClick={(e) => {
@@ -66,7 +66,7 @@ const ProductListView = (props) => {
             }}
           >
             Buy Now
-          </Button>
+          </Button> */}
           <Button
             className={classes.addToCartBtn}
             variant="outlined"
