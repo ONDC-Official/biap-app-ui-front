@@ -121,11 +121,12 @@ const StepCartContent = (props) => {
         `${process.env.REACT_APP_BASE_URL}clientApis/events/v2?messageId=${id}`,
         header
       );
+
       es.addEventListener("on_select", (e) => {
         const { messageId } = JSON.parse(e.data);
-
         onGetQuote(messageId);
       });
+
       const timer = setTimeout(() => {
         eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
           eventSource.close();
@@ -186,11 +187,6 @@ const StepCartContent = (props) => {
     }
     // eslint-disable-next-line
   };
-
-  //   console.log(cartItems.length == 0);
-  //   console.log(getQuoteLoading);
-  console.log(isError);
-
   return (
     <div>
       <Cart
@@ -206,7 +202,7 @@ const StepCartContent = (props) => {
           onClick={() => {
             handleNext();
           }}
-          disabled={isError || getQuoteLoading}
+          disabled={getQuoteLoading}
         >
           Continue
         </Button>
