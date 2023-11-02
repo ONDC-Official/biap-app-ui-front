@@ -3,11 +3,17 @@ import useStyles from "./style";
 import { Grid, Typography } from "@mui/material";
 import { Link, useHistory } from "react-router-dom";
 import RightArrowIcon from "@mui/icons-material/ArrowForwardRounded";
-
+import { colorCodeToName } from "./utils";
 import ModalComponent from "../../../common/Modal";
 
 const VariationsRenderer = (props) => {
-  const { productPayload, variationState, setVariationState, chartImage = "", isFashion = false } = props;
+  const {
+    productPayload,
+    variationState,
+    setVariationState,
+    chartImage = "",
+    isFashion = false,
+  } = props;
   const classes = useStyles();
   const history = useHistory();
 
@@ -20,7 +26,9 @@ const VariationsRenderer = (props) => {
 
   const getVariationGroups = () => {
     const parentId = productPayload.item_details.parent_item_id;
-    const parentData = productPayload.categories.find((item) => item.id === parentId);
+    const parentData = productPayload.categories.find(
+      (item) => item.id === parentId
+    );
 
     if (parentData) {
       const attrTags = productPayload.categories[0].tags;
@@ -47,7 +55,9 @@ const VariationsRenderer = (props) => {
               groupInfo.add(itemString);
             }
 
-            const uniqueGroupInfo = Array.from(groupInfo).map((itemString) => JSON.parse(itemString));
+            const uniqueGroupInfo = Array.from(groupInfo).map((itemString) =>
+              JSON.parse(itemString)
+            );
             setVariationGroups(uniqueGroupInfo);
             getRelatedVariations(uniqueGroupInfo);
             getInitialVariationState(uniqueGroupInfo);
@@ -62,7 +72,9 @@ const VariationsRenderer = (props) => {
   const getInitialVariationState = (groupInfo) => {
     const parentId = productPayload.item_details.parent_item_id;
 
-    const tags = productPayload.categories.find((item) => item.id == parentId)?.tags;
+    const tags = productPayload.categories.find(
+      (item) => item.id == parentId
+    )?.tags;
     const attr = tags?.find((tag) => tag.code === "attr");
     const name = attr?.list.find((a) => a.code === "name");
 
@@ -239,8 +251,11 @@ const VariationsRenderer = (props) => {
         };
 
         if (initialVariationState?.isUOM == true) {
-          const selectedOption = productPayload.item_details.quantity.unitized?.measure;
-          groupData.selected = [`${selectedOption.value} ${selectedOption.unit}`];
+          const selectedOption =
+            productPayload.item_details.quantity.unitized?.measure;
+          groupData.selected = [
+            `${selectedOption.value} ${selectedOption.unit}`,
+          ];
 
           productPayload.related_items.map((item) => {
             const option = item.item_details.quantity.unitized.measure;
@@ -284,10 +299,17 @@ const VariationsRenderer = (props) => {
       const groupName = groupData.name;
       return (
         <div key={groupId}>
-          <Typography variant="body" color="black" sx={{ fontWeight: 500, textTransform: "capitalize" }}>
+          <Typography
+            variant="body"
+            color="black"
+            sx={{ fontWeight: 500, textTransform: "capitalize" }}
+          >
             Available {groupName} Options
             {groupName === "size" && isFashion && (
-              <span onClick={() => setOpenSizeChart(true)} className={classes.sizeChart}>
+              <span
+                onClick={() => setOpenSizeChart(true)}
+                className={classes.sizeChart}
+              >
                 Size Guide <RightArrowIcon />
               </span>
             )}
@@ -298,7 +320,9 @@ const VariationsRenderer = (props) => {
                 <div
                   key={option}
                   className={
-                    groupData.selected.includes(option) ? classes.selectedCustomization : classes.customization
+                    groupData.selected.includes(option)
+                      ? classes.selectedCustomization
+                      : classes.customization
                   }
                   style={{ marginTop: "8px", marginBottom: "16px" }}
                   onClick={() => {
@@ -309,8 +333,15 @@ const VariationsRenderer = (props) => {
                     }
                   }}
                 >
-                  <Typography variant="body1" color={groupData.selected.includes(option) ? "white" : "#686868"}>
-                    {option}
+                  <Typography
+                    variant="body1"
+                    color={
+                      groupData.selected.includes(option) ? "white" : "#686868"
+                    }
+                  >
+                    {groupName === "colour"
+                      ? colorCodeToName[option] || option
+                      : option}
                   </Typography>
                 </div>
               );
@@ -325,7 +356,11 @@ const VariationsRenderer = (props) => {
               title="Size Chart"
             >
               <div className={classes.sizeChartContainer}>
-                <img className={classes.sizeChartImage} src={chartImage} alt="size-chart" />
+                <img
+                  className={classes.sizeChartImage}
+                  src={chartImage}
+                  alt="size-chart"
+                />
               </div>
             </ModalComponent>
           )}
