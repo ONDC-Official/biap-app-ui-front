@@ -76,7 +76,6 @@ const Checkout = () => {
 
   useEffect(() => {
     try {
-      console.log("** update useEffect", updatedCartItems);
       if (updatedCartItems.length > 0) {
         // fetch request object length and compare it with the response length
         let c = cartItems.map((item) => {
@@ -112,8 +111,7 @@ const Checkout = () => {
             provider.name = provided_by;
             let uuid = 0;
             const all_items = breakup?.map((break_up_item) => {
-              console.log("breakup_item:", break_up_item);
-              const cartIndex = cartList.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
+              const cartIndex = cartList?.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
               const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
               let findItemFromCartItems = null;
               let isCustimization = false;
@@ -128,7 +126,6 @@ const Checkout = () => {
                 }
               } else {
               }
-              console.log("CART_ITEMS:", cartItems);
               cartItems.forEach((ci) => {
                 if (isCustimization) {
                   const cc = ci?.item?.customisations || [];
@@ -161,8 +158,6 @@ const Checkout = () => {
                   quantityMessage = "Out of stock";
                   isError = true;
 
-                  console.log("isError-1");
-
                   if (cartIndex > -1) {
                     cartList.splice(cartIndex, 1);
                   }
@@ -171,13 +166,12 @@ const Checkout = () => {
                 textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
                 quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
                 isError = true;
-                console.log("isError-2");
+
                 if (cartItem) {
                   cartItem.quantity.count = quantity;
                 }
               } else {
                 quantityMessage = `Quantity: ${quantity}`;
-                console.log("quantity =>", break_up_item["title"], quantity);
               }
 
               if (error && error.code === "30009") {
@@ -354,14 +348,8 @@ const Checkout = () => {
           isError: isAnyError,
           total_payable: total_payable.toFixed(2),
         });
-        console.log("ProductQuote:", {
-          providers: quotes,
-          isError: isAnyError,
-          total_payable: total_payable.toFixed(2),
-        });
       }
     } catch (err) {
-      console.log(err);
       showQuoteError();
     }
     if (!selectedFulfillment) {
@@ -1058,7 +1046,6 @@ const Checkout = () => {
         </Grid>
       );
     } catch (error) {
-      console.log(error);
       showQuoteError();
     }
   };
