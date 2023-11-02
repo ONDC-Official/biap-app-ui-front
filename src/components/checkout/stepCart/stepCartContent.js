@@ -43,6 +43,7 @@ const StepCartContent = (props) => {
   const [cartItems, setCartItems] = useState([]);
   const updatedCartItems = useRef([]);
   const [loading, setLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState(false);
 
   const getQuote = async (items, searchContextData = null) => {
     responseRef.current = [];
@@ -87,6 +88,7 @@ const StepCartContent = (props) => {
         if (isNACK) {
           dispatchToast(toast_types.error, isNACK.error.message);
           setGetQuoteLoading(false);
+          setQuoteError(true);
         } else {
           // fetch through events
           onFetchQuote(
@@ -98,10 +100,12 @@ const StepCartContent = (props) => {
         }
       } catch (err) {
         setGetQuoteLoading(false);
+        setQuoteError(true);
         history.replace("/application/products");
       }
     } else {
       dispatchToast(toast_types.error, "Please select address");
+      setQuoteError(true);
     }
   };
 
@@ -135,6 +139,7 @@ const StepCartContent = (props) => {
         if (responseRef.current.length <= 0) {
           setGetQuoteLoading(false);
           dispatchToast(toast_types.error, "Cannot fetch details for this product");
+          setQuoteError(true);
 
           history.replace("/application/products");
           return;
@@ -144,6 +149,7 @@ const StepCartContent = (props) => {
           dispatchToast(toast_types.error, "Cannot fetch details for some product those products will be ignored!");
           setErrorMessageTimeOut("Cannot fetch details for this product");
           setGetQuoteLoading(false);
+          setQuoteError(true);
         }
         setToggleInit(true);
       }, SSE_TIMEOUT);
@@ -155,8 +161,6 @@ const StepCartContent = (props) => {
           timer,
         },
       ];
-
-      history.push(`/application/checkout`);
     });
   }
 
@@ -181,12 +185,26 @@ const StepCartContent = (props) => {
       localStorage.setItem("updatedCartItems", JSON.stringify([...[], data[0]]));
       setUpdateCartItemsData([...[], data[0]]);
       setGetQuoteLoading(false);
+
+      if (data[0].error != null) {
+        setQuoteError(true);
+      } else {
+        setQuoteError(false);
+      }
     } catch (err) {
       dispatchToast(toast_types.error, err?.response?.data?.error?.message);
       setGetQuoteLoading(false);
+      setQuoteError(true);
     }
     // eslint-disable-next-line
   };
+
+  useEffect(() => {
+    if (updatedCartItemsData) {
+      if (updatedCartItemsData[0]?.error != null) setQuoteError(true);
+    }
+  }, [updatedCartItemsData]);
+
   return (
     <div>
       <Cart
@@ -202,7 +220,7 @@ const StepCartContent = (props) => {
           onClick={() => {
             handleNext();
           }}
-          disabled={getQuoteLoading}
+          disabled={getQuoteLoading || quoteError}
         >
           Continue
         </Button>

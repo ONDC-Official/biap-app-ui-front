@@ -16,7 +16,7 @@ const useStyles = makeStyles({
     borderRadius: "12px !important",
     position: "relative !important",
     "&:hover $productImage": {
-      filter: "blur(5px)",
+      // filter: "blur(5px)",
     },
     "&:hover $buyNowButton": {
       display: "block !Important",
@@ -37,7 +37,7 @@ const useStyles = makeStyles({
     margin: "auto !important",
     maxHeight: "95%",
     maxWidth: "95%",
-    borderRadius: '5px'
+    borderRadius: "5px",
   },
   cartIcon: {
     position: "absolute !important",
@@ -112,11 +112,11 @@ const useStyles = makeStyles({
     marginTop: "16px !important",
     color: "#505050 !important",
 
-    display: '-webkit-box',
-    '-webkit-line-clamp': 2,
-    '-webkit-box-orient': 'vertical',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    display: "-webkit-box",
+    "-webkit-line-clamp": 2,
+    "-webkit-box-orient": "vertical",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   footerActions: {
     position: "absolute",

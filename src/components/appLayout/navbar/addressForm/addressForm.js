@@ -63,6 +63,7 @@ const AddressForm = (props) => {
     }
     return true;
   };
+
   const checkEmail = () => {
     if (validator.isEmpty(address?.email.trim())) {
       setError((error) => ({
@@ -80,6 +81,7 @@ const AddressForm = (props) => {
     }
     return true;
   };
+
   const checkPhoneNumber = () => {
     if (validator.isEmpty(address?.phone.trim())) {
       setError((error) => ({
@@ -97,16 +99,24 @@ const AddressForm = (props) => {
     }
     return true;
   };
+
   const checkStreetName = () => {
-    if (validator.isEmpty(address?.street.trim())) {
+    console.log("address", address);
+    if (!address.street || validator.isEmpty(address?.street.trim())) {
       setError((error) => ({
         ...error,
         street_name_error: "Street Name cannot be empty",
       }));
       return false;
+    } else {
+      setError((error) => ({
+        ...error,
+        street_name_error: "",
+      }));
     }
     return true;
   };
+
   const checkLandMark = () => {
     // if (validator.isEmpty(address?.door.trim())) {
     //   setError((error) => ({
@@ -117,26 +127,39 @@ const AddressForm = (props) => {
     // }
     return true;
   };
+
   const checkCity = () => {
-    if (validator.isEmpty(address?.city.trim())) {
+    if (!address.city || validator.isEmpty(address?.city.trim())) {
       setError((error) => ({
         ...error,
         city_name_error: "City Name cannot be empty",
       }));
       return false;
+    } else {
+      setError((error) => ({
+        ...error,
+        city_name_error: "",
+      }));
     }
     return true;
   };
+
   const checkState = () => {
-    if (validator.isEmpty(address?.state.trim())) {
+    if (!address.state || validator.isEmpty(address?.state.trim())) {
       setError((error) => ({
         ...error,
         state_name_error: "State Name cannot be empty",
       }));
       return false;
+    } else {
+      setError((error) => ({
+        ...error,
+        state_name_error: "",
+      }));
     }
     return true;
   };
+
   const checkTag = () => {
     if (validator.isEmpty(address?.tag.trim())) {
       setError((error) => ({
@@ -144,23 +167,49 @@ const AddressForm = (props) => {
         tag_error: "Please select tag",
       }));
       return false;
+    } else {
+      setError((error) => ({
+        ...error,
+        tag_error: "",
+      }));
     }
     return true;
   };
+
   const checkPinCode = () => {
-    if (validator.isEmpty(address?.areaCode.trim())) {
+    if (!address.areaCode || validator.isEmpty(address?.areaCode?.trim())) {
       setError((error) => ({
         ...error,
         areaCode_error: "Pin code cannot be empty",
       }));
       return false;
-    }
-    if (address?.areaCode?.length < 6) {
+    } else if (address?.areaCode?.length < 6) {
       setError((error) => ({
         ...error,
         areaCode_error: "Please enter a valid Pin Code",
       }));
       return false;
+    } else {
+      setError((error) => ({
+        ...error,
+        areaCode_error: "",
+      }));
+    }
+    return true;
+  };
+
+  const checkDoor = () => {
+    if (!address.door || validator.isEmpty(address?.name.trim())) {
+      setError((error) => ({
+        ...error,
+        door_error: "Building cannot be empty",
+      }));
+      return false;
+    } else {
+      setError((error) => ({
+        ...error,
+        door_error: "",
+      }));
     }
     return true;
   };
@@ -221,6 +270,7 @@ const AddressForm = (props) => {
       checkState(),
       checkTag(),
       checkPinCode(),
+      checkDoor(),
     ].every(Boolean);
     if (!allChecksPassed) {
       return;
@@ -277,6 +327,7 @@ const AddressForm = (props) => {
       checkState(),
       checkTag(),
       checkPinCode(),
+      checkDoor(),
     ].every(Boolean);
     if (!allChecksPassed) {
       return;
@@ -329,11 +380,15 @@ const AddressForm = (props) => {
       checkState(),
       checkTag(),
       checkPinCode(),
+      checkDoor(),
     ].every(Boolean);
     if (!allChecksPassed) {
       return;
     }
     setAddAddressLoading(true);
+
+    console.log("Address", address);
+
     try {
       const data = await cancellablePromise(
         postCall(`/clientApis/v1/update_delivery_address/${address.id}`, {
@@ -384,6 +439,7 @@ const AddressForm = (props) => {
       checkState(),
       checkTag(),
       checkPinCode(),
+      checkDoor(),
     ].every(Boolean);
     if (!allChecksPassed) {
       return;
@@ -747,14 +803,20 @@ const MapPicker = (props) => {
   const [location, setLocation] = useState(gps);
 
   useEffect(() => {
-    console.log("address", address);
     if (address.lat && address.lng) {
-      setLocation({ lat: address.lat, lng: address.lng });
+      console.log(address.areaCode);
+      setLocation({
+        lat: address.lat,
+        lng: address.lng,
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        pincode: address.areaCode,
+      });
     }
   }, []);
 
   useEffect(() => {
-    console.log("location", location.lat, location.lng);
     setAddress((address) => ({
       ...address,
       street: location.street,
