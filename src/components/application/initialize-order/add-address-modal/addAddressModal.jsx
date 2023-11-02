@@ -98,7 +98,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkStreetName() {
-    if (validator.isEmpty(address?.street.trim())) {
+    if (validator.isEmpty(address?.street?.trim())) {
       setError((error) => ({
         ...error,
         street_name_error: "Street Name cannot be empty",
@@ -280,6 +280,7 @@ export default function AddAddressModal(props) {
       checkLandMark(),
       checkCity(),
       checkState(),
+
       checkTag(),
       checkPinCode(),
     ].every(Boolean);
