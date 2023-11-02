@@ -101,6 +101,7 @@ const AddressForm = (props) => {
   };
 
   const checkStreetName = () => {
+    console.log("address", address);
     if (!address.street || validator.isEmpty(address?.street.trim())) {
       setError((error) => ({
         ...error,
@@ -176,7 +177,7 @@ const AddressForm = (props) => {
   };
 
   const checkPinCode = () => {
-    if (!address.areaCode || validator.isEmpty(address?.areaCode.trim())) {
+    if (!address.areaCode || validator.isEmpty(address?.areaCode?.trim())) {
       setError((error) => ({
         ...error,
         areaCode_error: "Pin code cannot be empty",
@@ -385,6 +386,8 @@ const AddressForm = (props) => {
       return;
     }
     setAddAddressLoading(true);
+
+    console.log("Address", address);
 
     try {
       const data = await cancellablePromise(
@@ -801,7 +804,15 @@ const MapPicker = (props) => {
 
   useEffect(() => {
     if (address.lat && address.lng) {
-      setLocation({ lat: address.lat, lng: address.lng });
+      console.log(address.areaCode);
+      setLocation({
+        lat: address.lat,
+        lng: address.lng,
+        street: address.street,
+        city: address.city,
+        state: address.state,
+        pincode: address.areaCode,
+      });
     }
   }, []);
 

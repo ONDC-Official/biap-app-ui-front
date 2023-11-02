@@ -280,7 +280,6 @@ export default function AddAddressModal(props) {
       checkLandMark(),
       checkCity(),
       checkState(),
-
       checkTag(),
       checkPinCode(),
     ].every(Boolean);
