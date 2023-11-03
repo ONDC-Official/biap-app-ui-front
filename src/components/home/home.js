@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useStyles from './style';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import {useHistory, useLocation} from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import Fashion1 from '../../assets/images/category/Fashion1.png';
 import Fashion2 from '../../assets/images/category/Fashion2.png';
 
@@ -25,6 +26,8 @@ import Home2 from '../../assets/images/category/Home2.png';
 
 import BPC from '../../assets/images/category/BPC.png';
 
+import Agriculture from '../../assets/images/category/Agriculture.png';
+
 import TopBrands from "./topBrands/topBrands";
 
 const Home = () => {
@@ -36,13 +39,14 @@ const Home = () => {
         return React.useMemo(() => new URLSearchParams(search), [search]);
     };
     let query = useQuery();
+    const [isViewAllCategories, setIsViewAllCategories] = useState(false);
 
     const updateQueryParams = (catName) => {
         const params = new URLSearchParams({});
         params.set("c", catName);
-        if(locationData.search === "" && query.get("c") === null){
+        if (locationData.search === "" && query.get("c") === null) {
             history.push({ pathname: locationData.pathname, search: params.toString() })
-        }else{
+        } else {
 
         }
 
@@ -56,8 +60,8 @@ const Home = () => {
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                             <Card className={classes.fashionCategory} onClick={() => updateQueryParams(`Fashion`)}>
                                 <div className={classes.fashionImages}>
-                                    <img src={Fashion1} alt="Fashio 1"/>
-                                    <img className={classes.fashionImage2} src={Fashion2} alt="Fashio 2"/>
+                                    <img src={Fashion1} alt="Fashio 1" />
+                                    <img className={classes.fashionImage2} src={Fashion2} alt="Fashio 2" />
                                 </div>
                                 <Typography variant={"h5"} className={classes.categoryTypo}>
                                     Fashion
@@ -68,10 +72,10 @@ const Home = () => {
                             <Card className={classes.electronicsCategory} onClick={() => updateQueryParams(`Electronics`)}>
                                 <Grid container spacing={0}>
                                     <Grid item xs={12} sm={12} md={8} lg={8} xl={8} className={classes.electronicsImages}>
-                                        <img className={classes.electronicsImage} src={Electronics1} alt="Electronics 1"/>
-                                        <img className={`${classes.electronicsImage} ${classes.tvImage}`} src={Electronics2} alt="Electronics 2"/>
-                                        <img className={`${classes.electronicsImage} ${classes.mobileImage}`} src={Electronics3} alt="Electronics 3"/>
-                                        <img className={`${classes.electronicsImage} ${classes.tabImage}`} src={Electronics4} alt="Electronics 4"/>
+                                        <img className={classes.electronicsImage} src={Electronics1} alt="Electronics 1" />
+                                        <img className={`${classes.electronicsImage} ${classes.tvImage}`} src={Electronics2} alt="Electronics 2" />
+                                        <img className={`${classes.electronicsImage} ${classes.mobileImage}`} src={Electronics3} alt="Electronics 3" />
+                                        <img className={`${classes.electronicsImage} ${classes.tabImage}`} src={Electronics4} alt="Electronics 4" />
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={4} lg={4} xl={4} className={classes.typoContainer}>
                                         <Typography variant={"h5"} className={`${classes.categoryTypo} ${classes.electronicsTypo}`}>
@@ -89,7 +93,7 @@ const Home = () => {
                             <Card className={classes.groceryCategory} onClick={() => updateQueryParams(`Grocery`)}>
                                 <Grid container spacing={0}>
                                     <Grid item xs={12} sm={12} md={8} lg={8} xl={8} className={classes.groceryImages}>
-                                        <img className={classes.groceryImage} src={Grocery} alt="Grocery 1"/>
+                                        <img className={classes.groceryImage} src={Grocery} alt="Grocery 1" />
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={4} lg={4} xl={4} className={classes.typoContainer}>
                                         <Typography variant={"h5"} className={`${classes.categoryTypo} ${classes.groceryTypo}`}>
@@ -101,21 +105,21 @@ const Home = () => {
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{height: '100%'}}>
+                                <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{ height: '100%' }}>
                                     <Card className={classes.foodCategory} onClick={() => updateQueryParams(`F&B`)}>
                                         <div className={classes.foodImages}>
-                                            <img src={Food} alt="Food 1"/>
+                                            <img src={Food} alt="Food 1" />
                                         </div>
                                         <Typography variant={"h5"} className={classes.categoryTypo}>
                                             Food & <br />Beverage
                                         </Typography>
                                     </Card>
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{height: '100%'}}>
+                                <Grid item xs={12} sm={12} md={6} lg={6} xl={6} style={{ height: '100%' }}>
                                     <Card className={classes.healthCategory} onClick={() => updateQueryParams(`Health & Wellness`)}>
                                         <div className={classes.healthImages}>
-                                            <img src={Health1} alt="Health 1"/>
-                                            <img className={classes.healthImage2} src={Health2} alt="Health 2"/>
+                                            <img src={Health1} alt="Health 1" />
+                                            <img className={classes.healthImage2} src={Health2} alt="Health 2" />
                                         </div>
                                         <Typography variant={"h5"} className={`${classes.categoryTypo} ${classes.healthTypo}`}>
                                             Health & <br />Wellness
@@ -131,8 +135,8 @@ const Home = () => {
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                             <Card className={classes.homeCategory} onClick={() => updateQueryParams(`Home & Decor`)}>
                                 <div className={classes.homeImages}>
-                                    <img src={Home1} alt="Home 1"/>
-                                    <img className={classes.homeImage2} src={Home2} alt="Home 2"/>
+                                    <img src={Home1} alt="Home 1" />
+                                    <img className={classes.homeImage2} src={Home2} alt="Home 2" />
                                 </div>
                                 <Typography variant={"h5"} className={classes.categoryTypo}>
                                     Home & Decor
@@ -143,7 +147,7 @@ const Home = () => {
                             <Card className={classes.bpcCategory} onClick={() => updateQueryParams(`BPC`)}>
                                 <Grid container spacing={0}>
                                     <Grid item xs={12} sm={12} md={6} lg={6} xl={6} className={classes.bpcImages}>
-                                        <img className={classes.bpcImage} src={BPC} alt="BPC 1"/>
+                                        <img className={classes.bpcImage} src={BPC} alt="BPC 1" />
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={6} lg={6} xl={6} className={classes.typoContainer}>
                                         <Typography variant={"h5"} className={`${classes.categoryTypo} ${classes.bpcTypo} ${classes.textAlignLeft}`}>
@@ -154,6 +158,38 @@ const Home = () => {
                             </Card>
                         </Grid>
                     </Grid>
+                </Grid>
+                {
+                    isViewAllCategories && (
+                        <>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                        <Card className={classes.agricultureCategory} onClick={() => updateQueryParams(`Agriculture`)}>
+                                            <div className={classes.agricultureImages}>
+                                                <img className={classes.agricultureImage} src={Agriculture} alt="Agriculture 1" />
+                                            </div>
+                                            <Typography variant={"h5"} className={classes.agricultureCategoryTypo}>
+                                                Agriculture
+                                            </Typography>
+                                        </Card>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
+                        </>
+                    )
+                }
+                <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.viewAllLessButtonContainer}>
+                    <Button
+                        variant='outlined'
+                        onClick={() => {
+                            setIsViewAllCategories(!isViewAllCategories)
+                        }}
+                    >
+                        {isViewAllCategories ? "View Less" : "View All"}
+                    </Button>
                 </Grid>
             </Grid>
 
