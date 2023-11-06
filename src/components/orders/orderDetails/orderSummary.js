@@ -955,6 +955,15 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         <Button fullWidth variant="outlined" className={classes.helpButton} onClick={() => handleFetchUpdatedStatus()}>
           {statusLoading ? <Loading /> : "Get Status"}
         </Button>
+        <Button
+          fullWidth
+          variant="outlined"
+          disabled={trackOrderLoading || statusLoading}
+          className={classes.helpButton}
+          onClick={() => handleFetchTrackOrderDetails()}
+        >
+          Track
+        </Button>
         {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
           <Button
             fullWidth
@@ -969,15 +978,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         )}
         {orderDetails?.state === "Completed" && (
           <>
-            <Button
-              fullWidth
-              variant="outlined"
-              disabled={trackOrderLoading || statusLoading}
-              className={classes.helpButton}
-              onClick={() => handleFetchTrackOrderDetails()}
-            >
-              Track
-            </Button>
             <Button
               fullWidth
               variant="contained"
@@ -1062,6 +1062,12 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           onUpdateOrder={onUpdateOrder}
         />
       )}
+      <a
+        ref={trackOrderRef}
+        style={{ visibility: "hidden", display: "none" }}
+      >
+        navigate
+      </a>
     </Card>
   );
 };
