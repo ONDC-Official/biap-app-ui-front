@@ -41,6 +41,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const statusEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
 
+  const [trackOrderLoading, setTrackOrderLoading] = useState(false);
+  const trackOrderRef = useRef(null);
+  const trackEventSourceResponseRef = useRef(null);
+
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -799,6 +803,122 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     }
   }
 
+  // TRACK APIS
+  // use this api to track and order
+  async function handleFetchTrackOrderDetails() {
+    trackEventSourceResponseRef.current = [];
+    setTrackOrderLoading(true);
+    const transaction_id = orderDetails?.transactionId;
+    const bpp_id = orderDetails?.bppId;
+    const order_id = orderDetails?.id;
+    try {
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/track", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              order_id,
+            },
+          },
+        ])
+      );
+      fetchTrackingDataThroughEvents(data[0]?.context?.message_id);
+    } catch (err) {
+      setTrackOrderLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  }
+
+  // use this function to fetch tracking info through events
+  function fetchTrackingDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_track", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getTrackOrderDetails(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (trackEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
+        setTrackOrderLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
+  // on track order
+  async function getTrackOrderDetails(message_id) {
+    try {
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_track?messageIds=${message_id}`)
+      );
+      trackEventSourceResponseRef.current = [
+        ...trackEventSourceResponseRef.current,
+        data[0],
+      ];
+      const { message } = data[0];
+      if (message.tracking.status === "active" && message.tracking.url === "") {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
+      } else if (message?.tracking?.url === "") {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information not available for this product",
+          toast_types.error
+        );
+        return;
+      } else if (message.tracking.status === "active" && message?.tracking?.url !== "") {
+        setTrackOrderLoading(false);
+        trackOrderRef.current.href = message?.tracking?.url;
+        trackOrderRef.current.target = "_blank";
+        trackOrderRef.current.click();
+      } else {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
+      }
+    } catch (err) {
+      setTrackOrderLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    }
+  }
+
   return (
     <Card className={classes.orderSummaryCard}>
       <Typography variant="h5" className={classes.orderNumberTypo}>
@@ -835,6 +955,15 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         <Button fullWidth variant="outlined" className={classes.helpButton} onClick={() => handleFetchUpdatedStatus()}>
           {statusLoading ? <Loading /> : "Get Status"}
         </Button>
+        <Button
+          fullWidth
+          variant="outlined"
+          disabled={trackOrderLoading || statusLoading}
+          className={classes.helpButton}
+          onClick={() => handleFetchTrackOrderDetails()}
+        >
+          Track
+        </Button>
         {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
           <Button
             fullWidth
@@ -842,22 +971,24 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             color="error"
             className={classes.cancelOrderButton}
             onClick={() => setToggleCancelOrderModal(true)}
-            disabled={allNonCancellable || statusLoading}
+            disabled={allNonCancellable || statusLoading || trackOrderLoading}
           >
             Cancel Order
           </Button>
         )}
         {orderDetails?.state === "Completed" && (
-          <Button
-            fullWidth
-            variant="contained"
-            color="error"
-            className={classes.cancelOrderButton}
-            onClick={() => setToggleReturnOrderModal(true)}
-            disabled={statusLoading}
-          >
-            Return Order
-          </Button>
+          <>
+            <Button
+              fullWidth
+              variant="contained"
+              color="error"
+              className={classes.cancelOrderButton}
+              onClick={() => setToggleReturnOrderModal(true)}
+              disabled={statusLoading || trackOrderLoading}
+            >
+              Return Order
+            </Button>
+          </>
         )}
       </div>
 
@@ -931,6 +1062,12 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           onUpdateOrder={onUpdateOrder}
         />
       )}
+      <a
+        ref={trackOrderRef}
+        style={{ visibility: "hidden", display: "none" }}
+      >
+        navigate
+      </a>
     </Card>
   );
 };
