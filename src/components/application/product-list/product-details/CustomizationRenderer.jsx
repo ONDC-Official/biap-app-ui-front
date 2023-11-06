@@ -98,8 +98,8 @@ const CustomizationRenderer = (props) => {
       const customGroup = productPayload.item_details.tags.find((item) => item.code == "custom_group");
       if (customGroup && customGroup.list.length > 0) {
         const customizationGroupIds = customGroup?.list.map((item) => item.value);
-        const filteredGroups = getCustomizationGroupsForProduct(customisation_groups, customizationGroupIds);
-        setCustomizationGroups(formatCustomizationGroups(filteredGroups));
+        //   const filteredGroups = getCustomizationGroupsForProduct(customisation_groups, customizationGroupIds);
+        setCustomizationGroups(formatCustomizationGroups(customisation_groups));
       } else {
         setCustomizationGroups([]);
       }
