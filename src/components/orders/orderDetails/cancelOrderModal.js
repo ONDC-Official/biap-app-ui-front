@@ -374,13 +374,13 @@ export default function CancelOrderModal(props) {
 
   // use this effect to promatically navigate between the radio button
   useEffect(() => {
-    if (
-      areProductsToBeCancled() &&
-      (partailsCancelProductList.length !== 1 || (partailsCancelProductList.length == 1 && quantity[0].count > 1))
-    ) {
-      setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
-      return;
-    }
+    //  if (
+    //    areProductsToBeCancled() &&
+    //    (partailsCancelProductList.length !== 1 || (partailsCancelProductList.length == 1 && quantity[0].count > 1))
+    //  ) {
+    //    setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
+    //    return;
+    //  }
     setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
     // eslint-disable-next-line
   }, []);
@@ -449,8 +449,8 @@ export default function CancelOrderModal(props) {
                 <p className={cancelRadioStyles.address_name_and_phone}>Cancel Complete Orders</p>
               </div>
             </AddressRadioButton>
-            {console.log("radio log: ", quantity[0].count > 1)}
-            <AddressRadioButton
+
+            {/* <AddressRadioButton
               disabled={
                 loading ||
                 !areProductsToBeCancled() ||
@@ -464,7 +464,7 @@ export default function CancelOrderModal(props) {
               <div className="px-3">
                 <p className={cancelRadioStyles.address_name_and_phone}>Cancel Selected</p>
               </div>
-            </AddressRadioButton>
+            </AddressRadioButton> */}
           </div>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
             {areProductsToBeCancled() && selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (
@@ -534,8 +534,9 @@ export default function CancelOrderModal(props) {
                               <div>
                                 <div className={productCartStyles.quantity_count_wrapper}>
                                   <div
-                                    className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
@@ -553,10 +554,11 @@ export default function CancelOrderModal(props) {
                                     </p>
                                   </div>
                                   <div
-                                    className={`${orderQty[idx]?.count < quantity[idx]?.count
-                                      ? productCartStyles.add_svg_wrapper
-                                      : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[idx]?.count < quantity[idx]?.count
+                                        ? productCartStyles.add_svg_wrapper
+                                        : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
