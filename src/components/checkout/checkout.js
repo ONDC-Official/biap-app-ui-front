@@ -836,6 +836,9 @@ const Checkout = () => {
           if (item?.tax) {
             finalTotal = finalTotal + parseFloat(item.tax.value);
           }
+          if (item?.discount) {
+            finalTotal = finalTotal + parseFloat(item.discount.value);
+          }
           if (item?.customizations) {
             Object.values(item.customizations)?.forEach((custItem) => {
               finalTotal = finalTotal + parseFloat(custItem.price.value);
