@@ -30,11 +30,14 @@ const StepCustomerContent = ({ handleNext, isError }) => {
   const classes = useStyles();
   const user = getUser();
   const stringAvatar = (name) => {
+    const splitted_name = name.split(" ");
     return {
       sx: {
         bgcolor: stringToColor(name),
       },
-      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+      children: `${splitted_name[0][0]}`.concat(
+        splitted_name[1] ? `${splitted_name[1][0]}` : ``
+      ),
     };
   };
   return (
