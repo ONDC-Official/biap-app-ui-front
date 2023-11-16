@@ -151,6 +151,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           });
           let items = {};
           let delivery = {};
+          let selected_fulfillment_id = orderDetails?.items[0]?.fulfillment_id;
           all_items.forEach((item) => {
             setQuoteItemInProcessing(item.id);
             // for type item
@@ -176,7 +177,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               }
               items[key] = { ...prev_item_data, ...addition_item_data };
             }
-            if (item.title_type === "tax" && !item.isCustomization) {
+            if (
+              item.title_type === "tax" &&
+              !item.isCustomization &&
+              item.id !== selected_fulfillment_id
+            ) {
               let key = item.parent_item_id || item.id;
               items[key] = items[key] || {};
               items[key]["tax"] = {
@@ -247,7 +252,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
                 value: item.price,
               };
             }
-            if (item.title_type === "tax_f") {
+            if (
+              (item.title_type === "tax_f" || item.title_type === "tax") &&
+              item.id === selected_fulfillment_id
+            ) {
               delivery["tax"] = {
                 title: item.title,
                 value: item.price,
