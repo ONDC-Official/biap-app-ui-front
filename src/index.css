@@ -53,3 +53,9 @@ body {
   top: 90px !important;
   right: 25px !important;
 }
+
+.displayEllipsis {
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+}

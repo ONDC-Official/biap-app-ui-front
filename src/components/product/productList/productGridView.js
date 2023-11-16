@@ -42,7 +42,7 @@ const ProductGridView = (props) => {
       <Card className={classes.productCard}>
         <img className={classes.productImage} src={symbol ? symbol : no_image_found} alt={`sub-cat-img-${bpp_id}`} />
         <Tooltip title="Add to cart">
-          <IconButton
+          {/* <IconButton
             onClick={(e) => {
               e.stopPropagation();
               // getProductDetails(productId).then((data) => handleAddToCart(data, true));
@@ -51,9 +51,9 @@ const ProductGridView = (props) => {
             className={classes.cartIcon}
           >
             <CartIcon />
-          </IconButton>
+          </IconButton> */}
         </Tooltip>
-        <Button
+        {/* <Button
           fullWidth
           className={classes.buyNowButton}
           variant="contained"
@@ -63,7 +63,7 @@ const ProductGridView = (props) => {
           }}
         >
           Buy Now
-        </Button>
+        </Button> */}
       </Card>
       <Typography component="div" variant="body" className={classes.productNameTypo}>
         {product_name}

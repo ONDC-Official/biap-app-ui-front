@@ -42,6 +42,8 @@ const ProductDetails = ({ productId }) => {
   const [customizationPrices, setCustomizationPrices] = useState(0);
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
+
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
   };
@@ -163,7 +165,19 @@ const ProductDetails = ({ productId }) => {
     return true;
   }
 
+  const getCartItems = async () => {
+    try {
+      const user = JSON.parse(getValueFromCookie("user"));
+      const url = `/clientApis/v2/cart/${user.id}`;
+      const res = await getCall(url);
+      return res;
+    } catch (error) {
+      console.log("Error fetching cart items:", error);
+    }
+  };
+
   const addToCart = async (navigate = false) => {
+    setAddToCartLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
     let subtotal = productPayload?.item_details?.price?.value;
@@ -222,6 +236,7 @@ const ProductDetails = ({ productId }) => {
     if (cartItem.length === 0) {
       const res = await postCall(url, payload);
       fetchCartItems();
+      setAddToCartLoading(false);
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -243,6 +258,7 @@ const ProductDetails = ({ productId }) => {
       if (currentCount < maxCount) {
         if (!customisations) {
           updateCartItem(cartItems, true, cartItem[0]._id);
+          setAddToCartLoading(false);
           dispatch({
             type: toast_actions.ADD_TOAST,
             payload: {
@@ -252,7 +268,6 @@ const ProductDetails = ({ productId }) => {
             },
           });
         } else {
-          console.log(3.2);
           const currentIds = customisations.map((item) => item.id);
           let matchingCustomisation = null;
 
@@ -267,6 +282,7 @@ const ProductDetails = ({ productId }) => {
           if (matchingCustomisation) {
             console.log(4);
             updateCartItem(cartItems, true, matchingCustomisation._id);
+            setAddToCartLoading(false);
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -279,6 +295,7 @@ const ProductDetails = ({ productId }) => {
             console.log(5);
             const res = await postCall(url, payload);
             fetchCartItems();
+            setAddToCartLoading(false);
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -290,6 +307,7 @@ const ProductDetails = ({ productId }) => {
           }
         }
       } else {
+        setAddToCartLoading(false);
         dispatch({
           type: toast_actions.ADD_TOAST,
           payload: {
@@ -419,10 +437,10 @@ const ProductDetails = ({ productId }) => {
 
     const data = {
       "Available on COD":
-        productPayload.item_details?.["@ondc/org/available_on_cod"].toString() === "true" ? "Yes" : "No",
-      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"].toString() === "true" ? "Yes" : "No",
+        productPayload.item_details?.["@ondc/org/available_on_cod"]?.toString() === "true" ? "Yes" : "No",
+      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"]?.toString() === "true" ? "Yes" : "No",
       "Return window value": returnWindowValue,
-      Returnable: productPayload.item_details?.["@ondc/org/returnable"].toString() === "true" ? "Yes" : "No",
+      Returnable: productPayload.item_details?.["@ondc/org/returnable"]?.toString() === "true" ? "Yes" : "No",
       "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
       "Manufacturer name":
         productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
@@ -431,20 +449,27 @@ const ProductDetails = ({ productId }) => {
           "manufacturer_or_packer_address"
         ],
     };
-    return Object.keys(data).map((key) => (
-      <Grid container className={classes.keyValueContainer}>
-        <Grid xs={3}>
-          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
-            {key}
-          </Typography>
-        </Grid>
-        <Grid xs={8}>
-          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
-            {data[key]}
-          </Typography>
-        </Grid>
-      </Grid>
-    ));
+
+    return Object.keys(data).map((key) => {
+      const value = data[key];
+      if (value !== null && value !== undefined) {
+        return (
+          <Grid container className={classes.keyValueContainer} key={key}>
+            <Grid xs={3}>
+              <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+                {key}
+              </Typography>
+            </Grid>
+            <Grid xs={8}>
+              <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+                {value}
+              </Typography>
+            </Grid>
+          </Grid>
+        );
+      }
+      return null; // Return null for fields with null or undefined values
+    });
   };
 
   return (
@@ -595,12 +620,14 @@ const ProductDetails = ({ productId }) => {
 
                 <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
                   <Button
-                    variant="contained"
+                    variant={"contained"}
                     sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
                     onClick={() => addToCart(false)}
-                    disabled={!parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock}
+                    disabled={
+                      !parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock || addToCartLoading
+                    }
                   >
-                    Add to cart
+                    {addToCartLoading ? <Loading /> : "Add to cart"}
                   </Button>
                   <Button
                     variant="outlined"

@@ -16,12 +16,12 @@ import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
 
-import StepOneLabel from "./stepOne/stepOneLabel";
-import StepOneContent from "./stepOne/stepOneContent";
-import StepTwoLabel from "./stepTwo/stepTwoLabel";
-import StepTwoContent from "./stepTwo/stepTwoContent";
-import StepThreeLabel from "./stepThree/stepThreeLabel";
-import StepThreeContent from "./stepThree/stepThreeContent";
+import StepCustomerLabel from "./stepCustomer/stepCustomerLabel";
+import StepCustomerContent from "./stepCustomer/stepCustomerContent";
+import StepAddressLabel from "./stepAddress/stepAddressLabel";
+import StepAddressContent from "./stepAddress/stepAddressContent";
+import StepPaymentLabel from "./stepPayment/stepPaymentLabel";
+import StepPaymentContent from "./stepPayment/stepPaymentContent";
 
 import { Link, Redirect, useHistory } from "react-router-dom";
 import Box from "@mui/material/Box";
@@ -36,12 +36,16 @@ import { ToastContext } from "../../context/toastContext";
 import { toast_actions, toast_types } from "../shared/toast/utils/toast";
 import Loading from "../shared/loading/loading";
 import { CartContext } from "../../context/cartContext";
+import StepFulfillmentLabel from "./StepFulfillment/stepFulfillmentLabel";
+import StepFulfillmentContent from "./StepFulfillment/stepFulfillmentContent";
+import StepCartLabel from "./stepCart/stepCartLabel";
+import StepCartContent from "./stepCart/stepCartContent";
 
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
 
-  const steps = ["Customer", "Add Address", "Payment"];
+  const steps = ["Cart", "Customer", "Fulfillment", "Add Address", "Payment"];
   const [activeStep, setActiveStep] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [updatedCartItems, setUpdatedCartItems] = useState([]);
@@ -60,17 +64,22 @@ const Checkout = () => {
   const dispatch = useContext(ToastContext);
   const { fetchCartItems } = useContext(CartContext);
   const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
-
+  const [selectedFulfillment, setSelectedFulfillment] = useState(null);
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
-  useEffect(() => {
+  const resetCartItems = () => {
     const cartItemsData = JSON.parse(localStorage.getItem("cartItems"));
     const updatedCartItemsData = JSON.parse(
       localStorage.getItem("updatedCartItems")
     );
+
     setCartItems(cartItemsData);
     setUpdatedCartItems(updatedCartItemsData);
+  };
+
+  useEffect(() => {
+    resetCartItems();
   }, []);
 
   useEffect(() => {
@@ -89,7 +98,7 @@ const Checkout = () => {
         // check if any one order contains error
         let total_payable = 0;
         let isAnyError = false;
-        const quotes = updatedCartItems?.map((item, index) => {
+        let quotes = updatedCartItems?.map((item, index) => {
           let { message, error } = item;
           let provider_payable = 0;
           const provider = {
@@ -110,26 +119,27 @@ const Checkout = () => {
             provider.name = provided_by;
             let uuid = 0;
             const all_items = breakup?.map((break_up_item) => {
-              const cartIndex = cartList.findIndex(
+              const cartIndex = cartList?.findIndex(
                 (one) => one.id === break_up_item["@ondc/org/item_id"]
               );
               const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
               let findItemFromCartItems = null;
               let isCustimization = false;
-              if(break_up_item?.item?.tags){
+              if (break_up_item?.item?.tags) {
                 const findTag = break_up_item?.item?.tags.find(
-                    (tag) => tag.code === "type"
+                  (tag) => tag.code === "type"
                 );
                 if (findTag) {
                   const findCust = findTag.list.find(
-                      (listItem) => listItem.value === "customization"
+                    (listItem) => listItem.value === "customization"
                   );
                   if (findCust) {
                     isCustimization = true;
                   } else {
                   }
                 }
-              }else{}
+              } else {
+              }
               cartItems.forEach((ci) => {
                 if (isCustimization) {
                   const cc = ci?.item?.customisations || [];
@@ -140,7 +150,7 @@ const Checkout = () => {
                   });
                 } else {
                   if (
-                      ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
+                    ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
                   ) {
                     findItemFromCartItems = ci?.item;
                   }
@@ -154,6 +164,7 @@ const Checkout = () => {
               let quantity = break_up_item["@ondc/org/item_quantity"]
                 ? break_up_item["@ondc/org/item_quantity"]["count"]
                 : 0;
+
               let textClass = "";
               let quantityMessage = "";
               let isError = false;
@@ -174,6 +185,7 @@ const Checkout = () => {
                     : "";
                 quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
                 isError = true;
+
                 if (cartItem) {
                   cartItem.quantity.count = quantity;
                 }
@@ -183,10 +195,11 @@ const Checkout = () => {
 
               if (error && error.code === "30009") {
                 cartList.splice(cartIndex, 1);
-              }else{}
+              } else {
+              }
               if (error && error.code === "40002") {
-
-              }else{}
+              } else {
+              }
               uuid = uuid + 1;
               return {
                 id: break_up_item["@ondc/org/item_id"],
@@ -204,7 +217,7 @@ const Checkout = () => {
                 quantityMessage,
                 uuid: uuid,
                 isError,
-                errorCode: error?.code || ""
+                errorCode: error?.code || "",
               };
             });
 
@@ -212,8 +225,16 @@ const Checkout = () => {
             let delivery = {};
             let outOfStock = [];
             let errorCode = "";
+            let selected_fulfillment_id = selectedFulfillment;
+
+            if (!selectedFulfillment) {
+              selected_fulfillment_id =
+                updatedCartItems[0]?.message?.quote.items[0]?.fulfillment_id;
+              setSelectedFulfillment(selected_fulfillment_id);
+            }
+
             all_items.forEach((item) => {
-              errorCode = item.errorCode
+              errorCode = item.errorCode;
               setQuoteItemInProcessing(item.id);
               if (item.isError) {
                 outOfStock.push(item);
@@ -230,7 +251,11 @@ const Checkout = () => {
                 let addition_item_data = { title: item.title, price: price };
                 items[key] = { ...prev_item_data, ...addition_item_data };
               }
-              if (item.title_type === "tax" && !item.isCustomization) {
+              if (
+                item.title_type === "tax" &&
+                !item.isCustomization &&
+                item.id !== selected_fulfillment_id
+              ) {
                 let key = item.parent_item_id || item.id;
                 items[key] = items[key] || {};
                 items[key]["tax"] = {
@@ -292,25 +317,37 @@ const Checkout = () => {
                 };
               }
               //for delivery
-              if (item.title_type === "delivery") {
+              if (
+                item.title_type === "delivery" &&
+                item.id === selected_fulfillment_id
+              ) {
                 delivery["delivery"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-              if (item.title_type === "discount_f") {
+              if (
+                item.title_type === "discount_f" &&
+                item.id === selected_fulfillment_id
+              ) {
                 delivery["discount"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-              if (item.title_type === "tax_f") {
+              if (
+                (item.title_type === "tax_f" || item.title_type === "tax") &&
+                item.id === selected_fulfillment_id
+              ) {
                 delivery["tax"] = {
                   title: item.title,
                   value: item.price,
                 };
               }
-              if (item.title_type === "packing") {
+              if (
+                item.title_type === "packing" &&
+                item.id === selected_fulfillment_id
+              ) {
                 delivery["packing"] = {
                   title: item.title,
                   value: item.price,
@@ -327,7 +364,10 @@ const Checkout = () => {
                   };
                 }
               }
-              if (item.title_type === "misc") {
+              if (
+                item.title_type === "misc" &&
+                item.id === selected_fulfillment_id
+              ) {
                 delivery["misc"] = {
                   title: item.title,
                   value: item.price,
@@ -339,7 +379,7 @@ const Checkout = () => {
             provider.delivery = delivery;
             provider.outOfStock = outOfStock;
             provider.errorCode = errorCode || "";
-            if(errorCode !== ""){
+            if (errorCode !== "") {
               isAnyError = true;
             }
           }
@@ -361,10 +401,10 @@ const Checkout = () => {
         });
       }
     } catch (err) {
-      console.log(err);
+      console.log("Calculating quote:", err);
       showQuoteError();
     }
-  }, [updatedCartItems]);
+  }, [updatedCartItems, selectedFulfillment]);
 
   const showQuoteError = () => {
     let msg = "";
@@ -395,40 +435,87 @@ const Checkout = () => {
     return isCustomization;
   };
 
+  const getSelectedFulfillment = () => {
+    if (selectedFulfillment) {
+      return updatedCartItems[0]?.message?.quote?.fulfillments.find(
+        (fulfillment) => fulfillment.id === selectedFulfillment
+      );
+    }
+  };
+
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
-        return <StepOneLabel activeStep={activeStep} />;
+        return <StepCartLabel activeStep={activeStep} />;
       case 1:
+        return <StepCustomerLabel activeStep={activeStep} />;
+      case 2:
         return (
-          <StepTwoLabel
+          <StepFulfillmentLabel
+            fulfillment={getSelectedFulfillment()}
             activeStep={activeStep}
             onUpdateActiveStep={() => {
-              setActiveStep(1);
+              setActiveStep(2);
             }}
           />
         );
-      case 2:
-        return <StepThreeLabel />;
+      case 3:
+        return (
+          <StepAddressLabel
+            activeStep={activeStep}
+            onUpdateActiveStep={() => {
+              setActiveStep(3);
+            }}
+          />
+        );
+      case 4:
+        return <StepPaymentLabel />;
       default:
         return <>stepLabel</>;
     }
   };
+
   const renderStepContent = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
         return (
-          <StepOneContent
+          <StepCartContent
             isError={productsQuote.isError}
+            cartItemsData={cartItems}
+            updatedCartItemsData={updatedCartItems}
+            setUpdateCartItemsData={(data) => {
+              setUpdatedCartItems(data);
+            }}
             handleNext={() => {
               setActiveStep(1);
+              resetCartItems();
             }}
           />
         );
       case 1:
         return (
-          <StepTwoContent
-              isError={productsQuote.isError}
+          <StepCustomerContent
+            isError={productsQuote.isError}
+            handleNext={() => {
+              setActiveStep(2);
+            }}
+          />
+        );
+      case 2:
+        return (
+          <StepFulfillmentContent
+            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
+            selectedFulfillment={selectedFulfillment}
+            setSelectedFulfillment={setSelectedFulfillment}
+            handleNext={() => {
+              setActiveStep(3);
+            }}
+          />
+        );
+      case 3:
+        return (
+          <StepAddressContent
+            isError={productsQuote.isError}
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
@@ -438,7 +525,7 @@ const Checkout = () => {
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
-              setActiveStep(2);
+              setActiveStep(4);
             }}
             updateInitLoading={(value) => setInitLoading(value)}
             responseReceivedIds={updatedCartItems.map((item) => {
@@ -447,10 +534,10 @@ const Checkout = () => {
             })}
           />
         );
-      case 2:
+      case 4:
         return (
-          <StepThreeContent
-              isError={productsQuote.isError}
+          <StepPaymentContent
+            isError={productsQuote.isError}
             responseReceivedIds={updatedCartItems.map((item) => {
               const { message } = item;
               return message?.quote?.provider?.id.toString();
@@ -460,6 +547,7 @@ const Checkout = () => {
               setActivePaymentMethod(value);
             }}
             cartItemsData={cartItems}
+            selectedFulfillmemtId={selectedFulfillment}
             updatedCartItemsData={updatedCartItems}
             updateInitLoading={(value) => setInitLoading(value)}
             setUpdateCartItemsDataOnInitialize={(data) => {
@@ -611,17 +699,17 @@ const Checkout = () => {
             city: search_context.location.name,
             state: search_context.location.state,
             parent_order_id: parentOrderIDMap.get(item?.provider?.id)
-                .parent_order_id,
+              .parent_order_id,
             transaction_id: parentOrderIDMap.get(item?.provider?.id)
-                .transaction_id,
+              .transaction_id,
           },
           message: {
             payment: {
               paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
               type:
-                  method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
               transaction_id: parentOrderIDMap.get(item?.provider?.id)
-                  .transaction_id,
+                .transaction_id,
               paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
             },
             quote: {
@@ -632,8 +720,8 @@ const Checkout = () => {
               },
             },
             providers: getItemProviderId(item),
-          }
-        }
+          },
+        },
       ];
       // const queryParams = items.map((item, index) => {
       //   return {
@@ -675,9 +763,7 @@ const Checkout = () => {
       // const isNACK = data.find(
       //   (item) => item.error && item.message.ack.status === "NACK"
       // );
-      const isNACK = data.find(
-          (item) => item.error && item.code !== ""
-      );
+      const isNACK = data.find((item) => item.error && item.code !== "");
       if (isNACK) {
         dispatchError(isNACK.error.message);
         setConfirmOrderLoading(false);
@@ -706,7 +792,7 @@ const Checkout = () => {
           {quote?.title}
         </Typography>
         <Typography variant="body1" className={classes.summaryItemPriceValue}>
-          {`₹${quote?.value}`}
+          {`₹${parseInt(quote?.value).toFixed(2)}`}
         </Typography>
       </div>
     );
@@ -720,8 +806,12 @@ const Checkout = () => {
         {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data.packing && renderDeliveryLine(data.packing, "packing")}
         {data.misc && renderDeliveryLine(data.misc, "misc")}
-        {
-          data && (data.delivery || data.discount || data.tax || data.packing || data.misc) && (
+        {data &&
+          (data.delivery ||
+            data.discount ||
+            data.tax ||
+            data.packing ||
+            data.misc) && (
             <>
               <div className={classes.summarySubtotalContainer}>
                 <Typography variant="body2" className={classes.subTotalLabel}>
@@ -733,8 +823,7 @@ const Checkout = () => {
               </div>
               <Box component={"div"} className={classes.orderTotalDivider} />
             </>
-          )
-        }
+          )}
       </div>
     );
   };
@@ -759,7 +848,7 @@ const Checkout = () => {
         total = total + parseFloat(data.misc.value);
       }
     });
-    return total;
+    return total.toFixed(2);
   };
 
   const renderItemDetails = (quote, qIndex, isCustomization) => {
@@ -787,7 +876,7 @@ const Checkout = () => {
                 : classes.summaryItemPriceValue
             }
           >
-            {`₹${quote?.price?.value}`}
+            {`₹${parseInt(quote?.price?.value).toFixed(2)}`}
           </Typography>
         </div>
         {quote?.tax && (
@@ -813,7 +902,7 @@ const Checkout = () => {
                   : classes.summaryItemPriceValue
               }
             >
-              {`₹${quote?.tax.value}`}
+              {`₹${parseInt(quote?.tax.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
@@ -836,7 +925,7 @@ const Checkout = () => {
               variant="body1"
               className={classes.summaryItemPriceValue}
             >
-              {`₹${quote?.discount.value}`}
+              {`₹${parseInt(quote?.discount.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
@@ -853,13 +942,16 @@ const Checkout = () => {
         );
         items.forEach((item) => {
           finalTotal = finalTotal + parseFloat(item.price.value);
-          if(item?.tax){
+          if (item?.tax) {
             finalTotal = finalTotal + parseFloat(item.tax.value);
+          }
+          if (item?.discount) {
+            finalTotal = finalTotal + parseFloat(item.discount.value);
           }
           if (item?.customizations) {
             Object.values(item.customizations)?.forEach((custItem) => {
               finalTotal = finalTotal + parseFloat(custItem.price.value);
-              if(custItem?.tax){
+              if (custItem?.tax) {
                 finalTotal = finalTotal + parseFloat(custItem.tax.value);
               }
             });
@@ -867,88 +959,96 @@ const Checkout = () => {
         });
       });
     }
-    return finalTotal;
+    return finalTotal.toFixed(2);
   };
 
   const renderOutofStockItems = (provider, pindex) => {
-    if(productsQuote.isError && provider.errorCode === "40002" && provider.error){
+    //  if (productsQuote.isError && provider.errorCode === "") {
+    //    throw new Error();
+    //  }
+
+    if (
+      productsQuote.isError &&
+      provider.errorCode === "40002" &&
+      provider.error
+    ) {
       return (
-          <div key={`outof-stockpindex-${pindex}`}>
-            {provider.error && provider.errorCode === "40002" ? (
-                <>
-                  <div>
-                    <Typography
-                        variant="body1"
-                        className={`${classes.summaryItemLabel} ${classes.marginBottom10} ${classes.marginTop20} text-error`}
-                    >
-                      Out of stock
-                    </Typography>
-                  </div>
+        <div key={`outof-stockpindex-${pindex}`}>
+          {provider.error && provider.errorCode === "40002" ? (
+            <>
+              <div>
+                <Typography
+                  variant="body1"
+                  className={`${classes.summaryItemLabel} ${classes.marginBottom10} ${classes.marginTop20} text-error`}
+                >
+                  Out of stock
+                </Typography>
+              </div>
+              <div>
+                <div
+                  className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+                >
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityLabel}
+                  >
+                    Items
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityValue}
+                  >
+                    Cart Quantity
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityValue}
+                  >
+                    Available Quantity
+                  </Typography>
+                </div>
+              </div>
+              {provider.outOfStock.map((outOfStockItems, i) => (
+                <div key={`outof-stock-item-index-${i}`}>
                   <div>
                     <div
-                        className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+                      className={classes.summaryQuoteItemContainer}
+                      key={`quote-${i}-price`}
                     >
                       <Typography
-                          variant="body1"
-                          className={classes.summaryItemQuantityLabel}
+                        variant="body1"
+                        className={classes.summaryItemQuantityLabel}
                       >
-                        Items
+                        {outOfStockItems?.title}
                       </Typography>
                       <Typography
-                          variant="body1"
-                          className={classes.summaryItemQuantityValue}
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
                       >
-                        Cart Quantity
+                        {`${outOfStockItems?.cartQuantity}`}
                       </Typography>
                       <Typography
-                          variant="body1"
-                          className={classes.summaryItemQuantityValue}
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
                       >
-                        Available Quantity
+                        {`${outOfStockItems?.quantity}`}
                       </Typography>
                     </div>
                   </div>
-                  {provider.outOfStock.map((outOfStockItems, i) => (
-                      <div key={`outof-stock-item-index-${i}`}>
-                        <div>
-                          <div
-                              className={classes.summaryQuoteItemContainer}
-                              key={`quote-${i}-price`}
-                          >
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemQuantityLabel}
-                            >
-                              {outOfStockItems?.title}
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemQuantityValue}
-                            >
-                              {`${outOfStockItems?.cartQuantity}`}
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                className={classes.summaryItemQuantityValue}
-                            >
-                              {`${outOfStockItems?.quantity}`}
-                            </Typography>
-                          </div>
-                        </div>
-                      </div>
-                  ))}
-                  <Box component={"div"} className={classes.divider} />
-                </>
-            ) : (
-                <></>
-            )}
-          </div>
+                </div>
+              ))}
+              <Box component={"div"} className={classes.divider} />
+            </>
+          ) : (
+            <></>
+          )}
+        </div>
       );
-    }else{
-      return <></>
+    } else {
+      return <></>;
     }
-
   };
+
   const renderItems = (provider, pindex) => {
     return (
       <div key={`pindex-${pindex}`}>
@@ -1014,15 +1114,18 @@ const Checkout = () => {
         {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
         {/*  </Typography>*/}
         {/*</div>*/}
-        {productsQuote.isError && provider.errorCode !== "" && provider.errorCode !== "40002" && provider.error && (
-          <Typography
-            variant="body1"
-            color="error"
-            className={classes.summaryItemLabel}
-          >
-            {provider.error}
-          </Typography>
-        )}
+        {productsQuote.isError &&
+          provider.errorCode !== "" &&
+          provider.errorCode !== "40002" &&
+          provider.error && (
+            <Typography
+              variant="body1"
+              color="error"
+              className={classes.summaryItemLabel}
+            >
+              {provider.error}
+            </Typography>
+          )}
       </div>
     );
   };
@@ -1059,13 +1162,15 @@ const Checkout = () => {
                 </div>
               );
             })}
-            <div className={`${classes.summaryItemContainer} ${classes.marginTop20}`}>
+            <div
+              className={`${classes.summaryItemContainer} ${classes.marginTop20}`}
+            >
               <Typography variant="body" className={classes.totalLabel}>
                 Order Total
               </Typography>
               <Typography variant="body" className={classes.totalValue}>
                 {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
-                {`₹${productsQuote?.total_payable}`}
+                {`₹${parseInt(productsQuote?.total_payable).toFixed(2)}`}
               </Typography>
             </div>
             <Button
@@ -1077,13 +1182,13 @@ const Checkout = () => {
                 productsQuote.isError ||
                 confirmOrderLoading ||
                 initLoading ||
-                activeStep !== 2
+                activeStep !== 4
               }
               onClick={() => {
-                if(activePaymentMethod) {
+                if (activePaymentMethod) {
                   const { productQuotes, successOrderIds } = JSON.parse(
-                      // getValueFromCookie("checkout_details") || "{}"
-                      localStorage.getItem("checkout_details") || "{}"
+                    // getValueFromCookie("checkout_details") || "{}"
+                    localStorage.getItem("checkout_details") || "{}"
                   );
                   setConfirmOrderLoading(true);
                   let c = cartItems.map((item) => {
@@ -1094,20 +1199,20 @@ const Checkout = () => {
                     // setLoadingSdkForPayment(true);
                     // initiateSDK();
                     const request_object = constructQouteObject(
-                        c.filter(({ provider }) =>
-                            successOrderIds.includes(provider.local_id.toString())
-                        )
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
                     );
                     confirmOrder(request_object[0], payment_methods.JUSPAY);
                   } else {
                     const request_object = constructQouteObject(
-                        c.filter(({ provider }) =>
-                            successOrderIds.includes(provider.local_id.toString())
-                        )
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
                     );
                     confirmOrder(request_object[0], payment_methods.COD);
                   }
-                }else {
+                } else {
                   dispatchError("Please select payment.");
                 }
               }}
@@ -1122,7 +1227,7 @@ const Checkout = () => {
         </Grid>
       );
     } catch (error) {
-      console.log(error);
+      console.log("Rendering quote", error);
       showQuoteError();
     }
   };
@@ -1130,6 +1235,7 @@ const Checkout = () => {
   if (cartItems === null || updatedCartItems === null) {
     return <Redirect to={"/application/cart"} />;
   }
+
   return (
     <>
       <div className={classes.header}>
@@ -1158,6 +1264,9 @@ const Checkout = () => {
                     {renderStepLabel(step, index)}
                   </StepLabel>
                   <StepContent
+                    sx={{
+                      padding: index === 0 ? "10px 0px !important" : "14px",
+                    }}
                     className={
                       activeStep === index
                         ? classes.stepContent

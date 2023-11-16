@@ -34,7 +34,12 @@ export default function CancelOrderModal(props) {
     onSuccess,
     quantity,
     domain,
+    bpp_uri,
+    handleFetchUpdatedStatus,
+    onUpdateOrder,
   } = props;
+
+  console.log(partailsCancelProductList);
 
   // CONSTANTS
   const CANCEL_ORDER_TYPES = {
@@ -101,6 +106,7 @@ export default function CancelOrderModal(props) {
     es.addEventListener("on_cancel", (e) => {
       const { messageId } = JSON.parse(e?.data);
       getCancelOrderDetails(messageId);
+      onUpdateOrder();
     });
 
     const timer = setTimeout(() => {
@@ -133,11 +139,12 @@ export default function CancelOrderModal(props) {
           context: {
             domain,
             bpp_id,
+            bpp_uri,
             transaction_id,
           },
           message: {
             order_id,
-            cancellation_reason_id: "1",
+            cancellation_reason_id: selectedCancelReasonId?.key,
           },
         })
       );
@@ -245,6 +252,7 @@ export default function CancelOrderModal(props) {
               context: {
                 domain,
                 bpp_id,
+                bpp_uri,
                 transaction_id,
               },
               message: {
@@ -366,10 +374,13 @@ export default function CancelOrderModal(props) {
 
   // use this effect to promatically navigate between the radio button
   useEffect(() => {
-    if (areProductsToBeCancled() && partailsCancelProductList.length !== 1) {
-      setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
-      return;
-    }
+    //  if (
+    //    areProductsToBeCancled() &&
+    //    (partailsCancelProductList.length !== 1 || (partailsCancelProductList.length == 1 && quantity[0].count > 1))
+    //  ) {
+    //    setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
+    //    return;
+    //  }
     setSelectedCancelType(CANCEL_ORDER_TYPES.allOrder);
     // eslint-disable-next-line
   }, []);
@@ -438,8 +449,13 @@ export default function CancelOrderModal(props) {
                 <p className={cancelRadioStyles.address_name_and_phone}>Cancel Complete Orders</p>
               </div>
             </AddressRadioButton>
-            <AddressRadioButton
-              disabled={loading || !areProductsToBeCancled() || partailsCancelProductList.length === 1}
+
+            {/* <AddressRadioButton
+              disabled={
+                loading ||
+                !areProductsToBeCancled() ||
+                (partailsCancelProductList.length === 1 && quantity[0]?.count === 1)
+              }
               checked={selectedCancelType === CANCEL_ORDER_TYPES.partialOrders}
               onClick={() => {
                 setSelectedCancelType(CANCEL_ORDER_TYPES.partialOrders);
@@ -448,7 +464,7 @@ export default function CancelOrderModal(props) {
               <div className="px-3">
                 <p className={cancelRadioStyles.address_name_and_phone}>Cancel Selected</p>
               </div>
-            </AddressRadioButton>
+            </AddressRadioButton> */}
           </div>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
             {areProductsToBeCancled() && selectedCancelType === CANCEL_ORDER_TYPES.partialOrders && (

@@ -22,7 +22,7 @@ import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { SearchContext } from "../../../context/searchContext";
 
-export default function Cart() {
+export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   let user = {};
   const userCookie = getValueFromCookie("user");
 
@@ -102,6 +102,9 @@ export default function Cart() {
       const res = await getCall(url);
       setCartItems(res);
       updatedCartItems.current = res;
+      if (setCheckoutCartItems) {
+        setCheckoutCartItems(res);
+      }
     } catch (error) {
       console.log("Error fetching cart items:", error);
       setLoading(false);
@@ -297,6 +300,41 @@ export default function Cart() {
               Special Instructions
             </Typography>
           </Grid>
+        </Grid>
+        <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
+      </Grid>
+    );
+  };
+
+  const renderTableHeadForCheckoutPage = () => {
+    return (
+      <Grid xs={14}>
+        <Grid container>
+          <Grid item xs={5.5}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Item
+            </Typography>
+          </Grid>
+          <Grid item xs={1.3}>
+            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "6px" }}>
+              Price
+            </Typography>
+          </Grid>
+          <Grid item xs={1.5}>
+            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "12px" }}>
+              Qty
+            </Typography>
+          </Grid>
+          <Grid item xs={1}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Subtotal
+            </Typography>
+          </Grid>
+          {/* <Grid item xs={4}>
+            <Typography variant="body1" className={classes.tableHead}>
+              Special Instructions
+            </Typography>
+          </Grid> */}
         </Grid>
         <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
       </Grid>
@@ -553,6 +591,140 @@ export default function Cart() {
     });
   };
 
+  const renderProductsForCheckoutPage = () => {
+    return cartItems?.map((cartItem, idx) => {
+      return (
+        <Grid key={cartItem._id}>
+          <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
+            <Grid item xs={5.5}>
+              <Grid container>
+                <div className={classes.moreImages}>
+                  <div className={classes.greyContainer}>
+                    <img
+                      className={classes.moreImage}
+                      alt="product-image"
+                      src={cartItem?.item?.product?.descriptor?.symbol}
+                      onClick={() => history.push(`/application/products?productId=${cartItem.item.id}`)}
+                    />
+                    {renderVegNonVegTag(cartItem)}
+                  </div>
+                </div>
+                <Grid sx={{ maxWidth: "200px" }}>
+                  <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
+                    {cartItem?.item?.product?.descriptor?.name}
+                  </Typography>
+                  {getCustomizations(cartItem)}
+                  {cartItem.item.hasCustomisations && (
+                    <Grid
+                      container
+                      sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
+                      alignItems="center"
+                      onClick={() => {
+                        setCustomizationState(cartItem.item.customisationState);
+                        getProductDetails(cartItem.item.id);
+                        setCurrentCartItem(cartItem);
+                        setOpenDrawer(true);
+                      }}
+                    >
+                      <EditOutlinedIcon size="small" sx={{ color: "#196AAB", fontSize: 16, marginRight: "5px" }} />
+                      <Typography variant="subtitle1" color="#196AAB">
+                        Customise
+                      </Typography>
+                    </Grid>
+                  )}
+                  <Grid container sx={{ marginTop: "4px" }} alignItems="center">
+                    <div className={classes.logoContainer}>
+                      <img
+                        className={classes.logo}
+                        alt={"store-logo"}
+                        src={cartItem?.item?.provider?.descriptor?.symbol}
+                      />
+                    </div>
+                    <Typography variant="subtitle1" color="#686868" sx={{ fontWeight: 500 }}>
+                      {cartItem?.item?.provider?.descriptor?.name}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              {/* {getCustomizations(cartItem)} */}
+            </Grid>
+            <Grid item xs={1.3}>
+              <Typography variant="body" sx={{ fontWeight: 600 }}>
+                {cartItem.item.hasCustomisations
+                  ? `₹ ${getPriceWithCustomisations(cartItem)}`
+                  : `₹ ${cartItem?.item?.product?.price?.value}`}
+              </Typography>
+            </Grid>
+            <Grid item xs={1.5}>
+              <div className={classes.qtyContainer}>
+                <Typography variant="body1" sx={{ marginRight: "12px", fontWeight: 600 }}>
+                  {cartItem?.item?.quantity?.count}
+                </Typography>
+                <KeyboardArrowUpIcon
+                  className={classes.qtyArrowUp}
+                  onClick={() => updateCartItem(cartItem.item.id, true, cartItem._id)}
+                />
+                <KeyboardArrowDownIcon
+                  className={classes.qtyArrowDown}
+                  onClick={() => updateCartItem(cartItem.item.id, false, cartItem._id)}
+                />
+              </div>
+            </Grid>
+            <Grid item xs={1.4}>
+              <Typography variant="body" sx={{ fontWeight: 600 }}>
+                {cartItem.item.hasCustomisations
+                  ? `₹ ${parseInt(getPriceWithCustomisations(cartItem)) * parseInt(cartItem?.item?.quantity?.count)}`
+                  : `₹ ${parseInt(cartItem?.item?.product?.subtotal)}`}
+              </Typography>
+            </Grid>
+            <Grid item xs={1.3}>
+              {/* {renderSpecialInstructions(cartItem.item, cartItem._id)} */}
+              <div style={{ marginTop: -10 }}>
+                <Button
+                  variant="text"
+                  startIcon={<DeleteOutlineIcon size="small" />}
+                  color="error"
+                  onClick={() => deleteCartItem(cartItem._id)}
+                >
+                  <Typography>Delete</Typography>
+                </Button>
+              </div>
+            </Grid>
+          </Grid>
+          {cartItem.item.quantity.count > cartItem.item.product.quantity.available.count && (
+            <Grid>
+              <div className={classes.infoBox}>
+                <Typography className={classes.infoText}>
+                  Only {cartItem.item.product.quantity.available.count} available instead of{" "}
+                  {cartItem.item.quantity.count}. Update the quantity or switch to another provider.
+                </Typography>
+              </div>
+            </Grid>
+          )}
+          {idx === cartItems.length - 1 && haveDistinctProviders && (
+            <Grid>
+              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
+                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
+                  You are ordering from different store. Please check your order again.
+                </Typography>
+              </div>
+            </Grid>
+          )}
+          {idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
+            <Grid>
+              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
+                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
+                  You are ordering from different category. Please check your order again.
+                </Typography>
+              </div>
+            </Grid>
+          )}
+          {cartItems.length > 1 && <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />}
+        </Grid>
+      );
+    });
+  };
+
   const renderSummaryCard = () => {
     return (
       <Card className={classes.summaryCard}>
@@ -607,6 +779,7 @@ export default function Cart() {
     AddCookie("transaction_id", ttansactionId);
     responseRef.current = [];
     if (deliveryAddress) {
+      console.log("select req:", deliveryAddress.location.address.lat);
       try {
         setCheckoutLoading(true);
         const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
@@ -631,7 +804,7 @@ export default function Cart() {
               {
                 end: {
                   location: {
-                    gps: `${search_context?.location?.lat}, ${search_context?.location?.lng}`,
+                    gps: `${deliveryAddress?.location?.address?.lat}, ${deliveryAddress?.location?.address?.lng}`,
                     address: {
                       area_code: `${search_context?.location?.pincode}`,
                     },
@@ -797,12 +970,13 @@ export default function Cart() {
 
   return (
     <div>
-      <div className={classes.headingContainer}>
-        <Typography variant="h3" className={classes.heading}>
-          My Cart
-        </Typography>
-      </div>
-
+      {!showOnlyItems && (
+        <div className={classes.headingContainer}>
+          <Typography variant="h3" className={classes.heading}>
+            My Cart
+          </Typography>
+        </div>
+      )}
       {loading ? (
         <div className={classes.loadingContainer}>
           <Loading />
@@ -812,17 +986,28 @@ export default function Cart() {
           {cartItems.length === 0 ? (
             emptyCartScreen()
           ) : (
-            <Grid container className={classes.cartContainer}>
-              <Grid item xs={8}>
-                {renderTableHeads()}
-                <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
-                  {renderProducts()}
-                </div>
-              </Grid>
+            <div>
+              {!showOnlyItems ? (
+                <Grid container className={classes.cartContainer}>
+                  <Grid item xs={8}>
+                    {renderTableHeads()}
+                    <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+                      {renderProducts()}
+                    </div>
+                  </Grid>
 
-              <Grid item xs={4}>
-                {renderSummaryCard()}
-              </Grid>
+                  <Grid item xs={4}>
+                    {renderSummaryCard()}
+                  </Grid>
+                </Grid>
+              ) : (
+                <div>
+                  {renderTableHeadForCheckoutPage()}
+                  <div style={{ alignItems: "flex-start", justifyContent: "flex-start" }}>
+                    {renderProductsForCheckoutPage()}
+                  </div>
+                </div>
+              )}
               <Drawer
                 anchor={"right"}
                 open={openDrawer}
@@ -842,7 +1027,7 @@ export default function Cart() {
                   currentCartItem={currentCartItem}
                 />
               </Drawer>
-            </Grid>
+            </div>
           )}
         </>
       )}

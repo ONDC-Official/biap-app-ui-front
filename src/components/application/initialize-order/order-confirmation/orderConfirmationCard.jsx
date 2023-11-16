@@ -198,7 +198,7 @@ export default function OrderConfirmationCard(props) {
                     email: deliveryAddress?.email,
                     phone: deliveryAddress?.phone,
                     location: {
-                      gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                      gps: `${deliveryAddress?.location?.address?.lat}, ${deliveryAddress?.location?.address?.lng}`,
                       ...deliveryAddress?.location,
                     },
                   },

@@ -20,7 +20,7 @@ import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 
-const StepThreeContent = ({
+const StepPaymentContent = ({
   activePaymentMethod,
   setActivePaymentMethod,
   updateInitLoading,
@@ -29,6 +29,7 @@ const StepThreeContent = ({
   setUpdateCartItemsData,
   setUpdateCartItemsDataOnInitialize,
   responseReceivedIds,
+  selectedFulfillmemtId,
 }) => {
   const classes = useStyles();
 
@@ -76,6 +77,7 @@ const StepThreeContent = ({
       // handleInitializaOrder();
     }
   }, [cartItems]);
+
   const handleSuccess = () => {
     setInitializeOrderLoading(false);
     updateInitLoading(false);
@@ -173,14 +175,17 @@ const StepThreeContent = ({
     setInitializeOrderLoading(true);
     try {
       const search_context = JSON.parse(getValueFromCookie("search_context"));
+
       const data = await cancellablePromise(
         postCall(
           "/clientApis/v2/initialize_order",
+
           items.map((item) => {
-            const fulfillments = item[0].product.fulfillments;
+            const fulfillments = item[0]?.product?.fulfillments;
+
             let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
             itemsData = itemsData.map((itemData) => {
-              itemData.fulfillment_id = itemData.product.fulfillment_id;
+              itemData.fulfillment_id = selectedFulfillmemtId;
               delete itemData.product.fulfillment_id;
               if (updatedCartItems.current) {
                 let findItemFromQuote = updatedCartItems.current[0].message.quote.items.find(
@@ -191,7 +196,6 @@ const StepThreeContent = ({
                 }
               } else {
               }
-              console.log(itemData);
               return itemData;
             });
 
@@ -204,7 +208,7 @@ const StepThreeContent = ({
               },
               message: {
                 items: itemsData,
-                fulfillments: fulfillments,
+                fulfillments: fulfillments.filter((fulfillment) => fulfillment.id === selectedFulfillmemtId),
                 billing_info: {
                   address: removeNullValues(billingAddress?.address),
                   phone: billingAddress?.phone,
@@ -217,7 +221,7 @@ const StepThreeContent = ({
                   email: deliveryAddress?.email,
                   phone: deliveryAddress?.phone,
                   location: {
-                    gps: `${latLongInfo?.latitude}, ${latLongInfo?.longitude}`,
+                    gps: `${deliveryAddress?.location?.address?.lat}, ${deliveryAddress?.location?.address?.lng}`,
                     ...deliveryAddress?.location,
                   },
                 },
@@ -229,6 +233,7 @@ const StepThreeContent = ({
           })
         )
       );
+
       //Error handling workflow eg, NACK
       const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
       if (isNACK) {
@@ -321,4 +326,4 @@ const StepThreeContent = ({
   );
 };
 
-export default StepThreeContent;
+export default StepPaymentContent;

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
 
 import OrderTimeline from "./orderTimeline";
 import SummaryItems from "./summaryItems";
@@ -22,10 +23,21 @@ import { getValueFromCookie } from "../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import Chip from "@mui/material/Chip";
 
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+
 const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const classes = useStyles();
 
   const [itemQuotes, setItemQuotes] = useState(null);
+  const [cancelledItems, setCancelledItems] = useState([]);
+  const [returnItems, setReturnItems] = useState([]);
+  const [returnOrCancelledItems, setReturnOrCancelledItems] = useState([]);
   const [deliveryQuotes, setDeliveryQuotes] = useState(null);
   const dispatch = useContext(ToastContext);
   const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
@@ -37,6 +49,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const [statusLoading, setStatusLoading] = useState(false);
   const statusEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
+
+  const [trackOrderLoading, setTrackOrderLoading] = useState(false);
+  const trackOrderRef = useRef(null);
+  const trackEventSourceResponseRef = useRef(null);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -58,7 +74,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     tags?.forEach((tag) => {
       if (tag.code === "type") {
         tag.list.forEach((listOption) => {
-          if (listOption.code === "type" && listOption.value == "customization") {
+          if (
+            listOption.code === "type" &&
+            listOption.value == "customization"
+          ) {
             isCustomization = true;
             return true;
           }
@@ -70,188 +89,221 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
 
   useEffect(() => {
     try {
-      if (orderDetails && orderDetails.quote) {
-        const provided_by = orderDetails?.provider?.descriptor?.name;
-        let uuid = 0;
-        const breakup = orderDetails.quote.breakup;
-        const all_items = breakup?.map((break_up_item) => {
-          const items = orderDetails.items;
-          const itemIndex = items.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
-          const item = itemIndex > -1 ? items[itemIndex] : null;
-          let itemQuantity = item ? item?.quantity?.count : 0;
-          let quantity = break_up_item["@ondc/org/item_quantity"]
-            ? break_up_item["@ondc/org/item_quantity"]["count"]
-            : 0;
-          let textClass = "";
-          let quantityMessage = "";
-          if (quantity === 0) {
-            if (break_up_item["@ondc/org/title_type"] === "item") {
-              textClass = "text-error";
-              quantityMessage = "Out of stock";
+      if (orderDetails) {
+        if (orderDetails.updatedQuote) {
+          const provided_by = orderDetails?.provider?.descriptor?.name;
+          let uuid = 0;
+          const breakup = orderDetails.updatedQuote.breakup;
+          const all_items = breakup?.map((break_up_item) => {
+            const items = orderDetails.items;
+            const itemIndex = items.findIndex(
+              (one) => one.id === break_up_item["@ondc/org/item_id"]
+            );
+            const item = itemIndex > -1 ? items[itemIndex] : null;
+            let itemQuantity = item ? item?.quantity?.count : 0;
+            let quantity = break_up_item["@ondc/org/item_quantity"]
+              ? break_up_item["@ondc/org/item_quantity"]["count"]
+              : 0;
+            let textClass = "";
+            let quantityMessage = "";
+            if (quantity === 0) {
+              if (break_up_item["@ondc/org/title_type"] === "item") {
+                textClass = "text-error";
+                quantityMessage = "Out of stock";
 
-              if (itemIndex > -1) {
-                items.splice(itemIndex, 1);
+                if (itemIndex > -1) {
+                  items.splice(itemIndex, 1);
+                }
               }
-            }
-          } else if (quantity !== itemQuantity) {
-            textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
-            quantityMessage = `Quantity: ${quantity}/${itemQuantity}`;
-            if (item) {
-              item.quantity.count = quantity;
-            }
-          } else {
-            quantityMessage = `Quantity: ${quantity}`;
-          }
-          uuid = uuid + 1;
-          return {
-            id: break_up_item["@ondc/org/item_id"],
-            title: break_up_item?.title,
-            title_type: break_up_item["@ondc/org/title_type"],
-            isCustomization: isItemCustomization(break_up_item?.item?.tags),
-            isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
-            parent_item_id: break_up_item?.item?.parent_item_id,
-            price: Number(break_up_item.price?.value)?.toFixed(2),
-            itemQuantity,
-            quantity,
-            provided_by,
-            textClass,
-            quantityMessage,
-            uuid: uuid,
-            fulfillment_status: item?.fulfillment_status,
-            cancellation_status: item?.cancellation_status,
-            return_status: item?.return_status,
-            isCancellable: item?.product?.["@ondc/org/cancellable"],
-            isReturnable: item?.product?.["@ondc/org/returnable"],
-          };
-        });
-        let items = {};
-        let delivery = {};
-        all_items.forEach((item) => {
-          setQuoteItemInProcessing(item.id);
-          // for type item
-          if (item.title_type === "item" && !item.isCustomization) {
-            let key = item.parent_item_id || item.id;
-            let price = {
-              title: item.quantity + " * Base Price",
-              value: item.price,
-            };
-            let prev_item_data = items[key];
-            let addition_item_data = { title: item.title, price: price };
-            addition_item_data.isCancellable = item.isCancellable;
-            addition_item_data.isReturnable = item.isReturnable;
-            addition_item_data.fulfillment_status = item?.fulfillment_status;
-            if (item?.return_status) {
-              addition_item_data.return_status = item?.return_status;
+            } else if (quantity !== itemQuantity) {
+              textClass =
+                break_up_item["@ondc/org/title_type"] === "item"
+                  ? "text-amber"
+                  : "";
+              quantityMessage = `Quantity: ${quantity}/${itemQuantity}`;
+              if (item) {
+                item.quantity.count = quantity;
+              }
             } else {
+              quantityMessage = `Quantity: ${quantity}`;
             }
-            if (item?.cancellation_status) {
-              addition_item_data.cancellation_status = item?.cancellation_status;
-            } else {
-            }
-            items[key] = { ...prev_item_data, ...addition_item_data };
-          }
-          if (item.title_type === "tax" && !item.isCustomization) {
-            let key = item.parent_item_id || item.id;
-            items[key] = items[key] || {};
-            items[key]["tax"] = {
-              title: item.title,
-              value: item.price,
+            uuid = uuid + 1;
+            return {
+              id: break_up_item["@ondc/org/item_id"],
+              title: break_up_item?.title,
+              title_type: break_up_item["@ondc/org/title_type"],
+              isCustomization: isItemCustomization(break_up_item?.item?.tags),
+              isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
+              parent_item_id: break_up_item?.item?.parent_item_id,
+              price: Number(break_up_item.price?.value)?.toFixed(2),
+              itemQuantity,
+              quantity,
+              provided_by,
+              textClass,
+              quantityMessage,
+              uuid: uuid,
+              fulfillment_status: item?.fulfillment_status,
+              cancellation_status: item?.cancellation_status,
+              return_status: item?.return_status,
+              isCancellable: item?.product?.["@ondc/org/cancellable"],
+              isReturnable: item?.product?.["@ondc/org/returnable"],
             };
-          }
-          if (item.title_type === "discount" && !item.isCustomization) {
-            let key = item.parent_item_id || item.id;
-            items[key] = items[key] || {};
-            items[key]["discount"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-
-          //for customizations
-          if (item.title_type === "item" && item.isCustomization) {
-            let key = item.parent_item_id;
-            items[key]["customizations"] = items[key]["customizations"] || {};
-            let existing_data = items[key]["customizations"][item.id] || {};
-            let customisation_details = {
-              title: item.title,
-              price: {
+          });
+          let items = {};
+          let delivery = {};
+          let selected_fulfillment_id = orderDetails?.items[0]?.fulfillment_id;
+          all_items.forEach((item) => {
+            setQuoteItemInProcessing(item.id);
+            // for type item
+            if (item.title_type === "item" && !item.isCustomization) {
+              let key = item.parent_item_id || item.id;
+              let price = {
                 title: item.quantity + " * Base Price",
                 value: item.price,
-              },
-              quantityMessage: item.quantityMessage,
-              textClass: item.textClass,
-              quantity: item.quantity,
-              cartQuantity: item.cartQuantity,
-            };
-            items[key]["customizations"][item.id] = {
-              ...existing_data,
-              ...customisation_details,
-            };
-          }
-          if (item.title_type === "tax" && item.isCustomization) {
-            let key = item.parent_item_id;
-            items[key]["customizations"] = items[key]["customizations"] || {};
-            items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
-            items[key]["customizations"][item.id]["tax"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "discount" && item.isCustomization) {
-            let key = item.parent_item_id;
-            items[key]["customizations"] = items[key]["customizations"] || {};
-            items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
-            items[key]["customizations"][item.id]["discount"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          //for delivery
-          if (item.title_type === "delivery") {
-            delivery["delivery"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "discount_f") {
-            delivery["discount"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "tax_f") {
-            delivery["tax"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "packing") {
-            delivery["packing"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-          if (item.title_type === "discount") {
-            if (item.isCustomization) {
-              let id = item.parent_item_id;
-            } else {
-              let id = item.id;
-              items[id]["discount"] = {
+              };
+              let prev_item_data = items[key];
+              let addition_item_data = { title: item.title, price: price };
+              addition_item_data.isCancellable = item.isCancellable;
+              addition_item_data.isReturnable = item.isReturnable;
+              addition_item_data.fulfillment_status = item?.fulfillment_status;
+              if (item?.return_status) {
+                addition_item_data.return_status = item?.return_status;
+              } else {
+              }
+              if (item?.cancellation_status) {
+                addition_item_data.cancellation_status =
+                  item?.cancellation_status;
+              } else {
+              }
+              items[key] = { ...prev_item_data, ...addition_item_data };
+            }
+            if (
+              item.title_type === "tax" &&
+              !item.isCustomization &&
+              item.id !== selected_fulfillment_id
+            ) {
+              let key = item.parent_item_id || item.id;
+              items[key] = items[key] || {};
+              items[key]["tax"] = {
                 title: item.title,
                 value: item.price,
               };
             }
-          }
-          if (item.title_type === "misc") {
-            delivery["misc"] = {
-              title: item.title,
-              value: item.price,
-            };
-          }
-        });
-        setQuoteItemInProcessing(null);
-        setItemQuotes(items);
-        setDeliveryQuotes(delivery);
+            if (item.title_type === "discount" && !item.isCustomization) {
+              let key = item.parent_item_id || item.id;
+              items[key] = items[key] || {};
+              items[key]["discount"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+
+            //for customizations
+            if (item.title_type === "item" && item.isCustomization) {
+              let key = item.parent_item_id;
+              items[key]["customizations"] = items[key]["customizations"] || {};
+              let existing_data = items[key]["customizations"][item.id] || {};
+              let customisation_details = {
+                title: item.title,
+                price: {
+                  title: item.quantity + " * Base Price",
+                  value: item.price,
+                },
+                quantityMessage: item.quantityMessage,
+                textClass: item.textClass,
+                quantity: item.quantity,
+                cartQuantity: item.cartQuantity,
+              };
+              items[key]["customizations"][item.id] = {
+                ...existing_data,
+                ...customisation_details,
+              };
+            }
+            if (item.title_type === "tax" && item.isCustomization) {
+              let key = item.parent_item_id;
+              items[key]["customizations"] = items[key]["customizations"] || {};
+              items[key]["customizations"][item.id] =
+                items[key]["customizations"][item.id] || {};
+              items[key]["customizations"][item.id]["tax"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "discount" && item.isCustomization) {
+              let key = item.parent_item_id;
+              items[key]["customizations"] = items[key]["customizations"] || {};
+              items[key]["customizations"][item.id] =
+                items[key]["customizations"][item.id] || {};
+              items[key]["customizations"][item.id]["discount"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            //for delivery
+            if (item.title_type === "delivery") {
+              delivery["delivery"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "discount_f") {
+              delivery["discount"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (
+              (item.title_type === "tax_f" || item.title_type === "tax") &&
+              item.id === selected_fulfillment_id
+            ) {
+              delivery["tax"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "packing") {
+              delivery["packing"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+            if (item.title_type === "discount") {
+              if (item.isCustomization) {
+                let id = item.parent_item_id;
+              } else {
+                let id = item.id;
+                items[id]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
+              }
+            }
+            if (item.title_type === "misc") {
+              delivery["misc"] = {
+                title: item.title,
+                value: item.price,
+              };
+            }
+          });
+          setQuoteItemInProcessing(null);
+          setItemQuotes(items);
+          setDeliveryQuotes(delivery);
+        }
+        if (orderDetails.items && orderDetails.items.length > 0) {
+          const filterCancelledItems = orderDetails.items.filter(
+            (item) =>
+              item.cancellation_status &&
+              item.cancellation_status === "Cancelled"
+          );
+          const filterReturnItems = orderDetails.items.filter(
+            (item) =>
+              item.cancellation_status &&
+              item.cancellation_status !== "Cancelled"
+          );
+          setCancelledItems(filterCancelledItems);
+          setReturnItems(filterReturnItems);
+        }
+        setReturnOrCancelledItems(getReturnOrCancelledItems());
       }
     } catch (error) {
       console.log(error);
@@ -279,8 +331,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   function generateProductsList(orderDetails, itemQuotes) {
     return orderDetails?.items
       ?.map(({ id }, index) => {
-        let findQuote = orderDetails.quote?.breakup.find(
-          (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
+        let findQuote = orderDetails.updatedQuote?.breakup.find(
+          (item) =>
+            item["@ondc/org/item_id"] === id &&
+            item["@ondc/org/title_type"] === "item"
         );
         if (findQuote) {
           if (findQuote?.item?.tags) {
@@ -297,26 +351,32 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               return {
                 id,
                 name: findQuote?.title ?? "NA",
-                cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+                cancellation_status:
+                  orderDetails.items?.[index]?.cancellation_status ?? "",
                 return_status: orderDetails.items?.[index]?.return_status ?? "",
-                fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+                fulfillment_status:
+                  orderDetails.items?.[index]?.fulfillment_status ?? "",
                 customizations: customizations ?? null,
                 ...orderDetails.items?.[index]?.product,
+                provider_details: orderDetails.provider,
               };
             }
           } else {
             return {
               id,
               name: findQuote?.title ?? "NA",
-              cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
+              cancellation_status:
+                orderDetails.items?.[index]?.cancellation_status ?? "",
               return_status: orderDetails.items?.[index]?.return_status ?? "",
-              fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
+              fulfillment_status:
+                orderDetails.items?.[index]?.fulfillment_status ?? "",
               customizations: null,
               ...orderDetails.items?.[index]?.product,
+              provider_details: orderDetails.provider,
             };
           }
         } else {
-          findQuote = orderDetails.quote?.breakup[index];
+          findQuote = orderDetails.updatedQuote?.breakup[index];
         }
         return null;
       })
@@ -340,7 +400,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     if (quoteItemInProcessing) {
       msg = `Looks like Quote mapping for item: ${quoteItemInProcessing} is invalid! Please check!`;
     } else {
-      msg = "Seems like issue with quote processing! Please confirm first if quote is valid!";
+      msg =
+        "Seems like issue with quote processing! Please confirm first if quote is valid!";
     }
     dispatchError(msg);
   };
@@ -354,13 +415,19 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   };
 
   const getItemsWithCustomizations = () => {
-    const breakup = orderDetails?.quote?.breakup;
+    const breakup = orderDetails?.updatedQuote?.breakup;
     let returnBreakup = [];
-    const filterItems = breakup.filter((item) => item["@ondc/org/title_type"] === "item");
-    const filterCustomizations = breakup.filter((item) => item["@ondc/org/title_type"] === "customization");
+    const filterItems = breakup.filter(
+      (item) => item["@ondc/org/title_type"] === "item"
+    );
+    const filterCustomizations = breakup.filter(
+      (item) => item["@ondc/org/title_type"] === "customization"
+    );
     filterItems.forEach((item) => {
       const itemId = item["@ondc/org/item_id"];
-      const filterCustomizationItems = filterCustomizations.filter((cust) => cust.item.parent_item_id === itemId);
+      const filterCustomizationItems = filterCustomizations.filter(
+        (cust) => cust.item.parent_item_id === itemId
+      );
       returnBreakup.push(item);
       if (filterCustomizationItems.length > 0) {
         filterCustomizationItems.forEach((custItem) => {
@@ -378,8 +445,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           .filter((quote) => quote?.title !== "")
           .map((quote, qIndex) => (
             <div key={`quote-${qIndex}`}>
-              <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-title`}>
-                <Typography variant="body1" className={`${classes.summaryItemLabel} ${quote.textClass}`}>
+              <div
+                className={classes.summaryQuoteItemContainer}
+                key={`quote-${qIndex}-title`}
+              >
+                <Typography
+                  variant="body1"
+                  className={`${classes.summaryItemLabel} ${quote.textClass}`}
+                >
                   {quote?.title}
                   {quote?.fulfillment_status && (
                     <Chip
@@ -389,10 +462,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
                       label={quote?.fulfillment_status}
                     />
                   )}
-                  <p className={`${styles.ordered_from} ${quote.textClass}`}>{quote.quantityMessage}</p>
+                  <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                    {quote.quantityMessage}
+                  </p>
                 </Typography>
               </div>
-              <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom12}`}>
+              <div
+                className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom12}`}
+              >
                 {quote.cancellation_status ? (
                   <Chip
                     size="small"
@@ -413,13 +490,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
                       size="small"
                       // variant="outlined"
                       className={classes.statusChip}
-                      label={quote?.isReturnable ? "returnable" : "non returnable"}
+                      label={
+                        quote?.isReturnable ? "returnable" : "non returnable"
+                      }
                     />
                     <Chip
                       size="small"
                       // variant="outlined"
                       className={classes.statusChip}
-                      label={quote?.isCancellable ? "cancelable" : "non cancelable"}
+                      label={
+                        quote?.isCancellable ? "cancelable" : "non cancelable"
+                      }
                     />
                   </>
                 )}
@@ -427,24 +508,35 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               {renderItemDetails(quote)}
               {quote?.customizations && (
                 <div key={`quote-${qIndex}-customizations`}>
-                  <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-customizations`}>
-                    <Typography variant="body1" className={classes.summaryItemPriceLabel}>
+                  <div
+                    className={classes.summaryQuoteItemContainer}
+                    key={`quote-${qIndex}-customizations`}
+                  >
+                    <Typography
+                      variant="body1"
+                      className={classes.summaryItemPriceLabel}
+                    >
                       Customizations
                     </Typography>
                   </div>
-                  {Object.values(quote?.customizations).map((customization, cIndex) => (
-                    <div>
-                      <div
-                        className={classes.summaryQuoteItemContainer}
-                        key={`quote-${qIndex}-customizations-${cIndex}`}
-                      >
-                        <Typography variant="body1" className={classes.summaryCustomizationLabel}>
-                          {customization.title}
-                        </Typography>
+                  {Object.values(quote?.customizations).map(
+                    (customization, cIndex) => (
+                      <div>
+                        <div
+                          className={classes.summaryQuoteItemContainer}
+                          key={`quote-${qIndex}-customizations-${cIndex}`}
+                        >
+                          <Typography
+                            variant="body1"
+                            className={classes.summaryCustomizationLabel}
+                          >
+                            {customization.title}
+                          </Typography>
+                        </div>
+                        {renderItemDetails(customization, cIndex, true)}
                       </div>
-                      {renderItemDetails(customization, cIndex, true)}
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -453,48 +545,152 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     );
   };
 
+  const renderCancelledItems = () => {
+    return (
+      <div>
+        <div>
+          <Typography variant="body1" className={`${classes.summaryItemLabel}`}>
+            Cancelled Items
+          </Typography>
+        </div>
+        {cancelledItems.map((item, itemIndex) => (
+          <div
+            className={`${classes.summaryQuoteItemContainer} displayEllipsis`}
+            key={`quote-${itemIndex}-price`}
+          >
+            <Tooltip
+              title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
+            >
+              <Typography
+                variant="body1"
+                className={classes.summaryItemPriceLabel}
+              >
+                {`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
+              </Typography>
+            </Tooltip>
+            {item?.cancellation_status && (
+              <Chip
+                size="small"
+                className={classes.statusChip}
+                label={item?.cancellation_status}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderReturnItems = () => {
+    return (
+      <div>
+        <div className={classes.summaryQuoteItemContainer}>
+          <Typography variant="body1" className={`${classes.summaryItemLabel}`}>
+            Returned Items
+          </Typography>
+        </div>
+        {returnItems.map((item, itemIndex) => (
+          <div
+            className={`${classes.summaryQuoteItemContainer} displayEllipsis`}
+            key={`quote-${itemIndex}-price`}
+          >
+            <Tooltip
+              title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
+            >
+              <Typography
+                variant="body1"
+                className={classes.summaryItemPriceLabel}
+              >
+                {`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
+              </Typography>
+            </Tooltip>
+            {item?.cancellation_status && (
+              <Chip
+                size="small"
+                className={classes.statusChip}
+                label={item?.cancellation_status}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
       <div>
-        <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-price`}>
+        <div
+          className={classes.summaryQuoteItemContainer}
+          key={`quote-${qIndex}-price`}
+        >
           <Typography
             variant="body1"
-            className={isCustomization ? classes.summaryCustomizationPriceLabel : classes.summaryItemPriceLabel}
+            className={
+              isCustomization
+                ? classes.summaryCustomizationPriceLabel
+                : classes.summaryItemPriceLabel
+            }
           >
             {quote?.price?.title}
           </Typography>
           <Typography
             variant="body1"
-            className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
+            className={
+              isCustomization
+                ? classes.summaryCustomizationPriceValue
+                : classes.summaryItemPriceValue
+            }
           >
             {`₹${parseInt(quote?.price?.value).toFixed(2)}`}
           </Typography>
         </div>
         {quote?.tax && (
-          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-tax`}>
+          <div
+            className={classes.summaryQuoteItemContainer}
+            key={`quote-${qIndex}-tax`}
+          >
             <Typography
               variant="body1"
-              className={isCustomization ? classes.summaryCustomizationTaxLabel : classes.summaryItemTaxLabel}
+              className={
+                isCustomization
+                  ? classes.summaryCustomizationTaxLabel
+                  : classes.summaryItemTaxLabel
+              }
             >
               {quote?.tax.title}
             </Typography>
             <Typography
               variant="body1"
-              className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
+              className={
+                isCustomization
+                  ? classes.summaryCustomizationPriceValue
+                  : classes.summaryItemPriceValue
+              }
             >
               {`₹${parseInt(quote?.tax.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
         {quote?.discount && (
-          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-discount`}>
+          <div
+            className={classes.summaryQuoteItemContainer}
+            key={`quote-${qIndex}-discount`}
+          >
             <Typography
               variant="body1"
-              className={isCustomization ? classes.summaryCustomizationDiscountLabel : classes.summaryItemDiscountLabel}
+              className={
+                isCustomization
+                  ? classes.summaryCustomizationDiscountLabel
+                  : classes.summaryItemDiscountLabel
+              }
             >
               {quote?.discount.title}
             </Typography>
-            <Typography variant="body1" className={classes.summaryItemPriceValue}>
+            <Typography
+              variant="body1"
+              className={classes.summaryItemPriceValue}
+            >
               {`₹${parseInt(quote?.discount.value).toFixed(2)}`}
             </Typography>
           </div>
@@ -506,7 +702,9 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const getItemsTotal = () => {
     let finalTotal = 0;
     if (itemQuotes) {
-      const items = Object.values(itemQuotes).filter((quote) => quote?.title !== "");
+      const items = Object.values(itemQuotes).filter(
+        (quote) => quote?.title !== ""
+      );
       items.forEach((item) => {
         finalTotal = finalTotal + parseFloat(item.price.value);
         if (item?.tax) {
@@ -522,12 +720,16 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         }
       });
     }
-    return parseInt(finalTotal).toFixed(2);
+    finalTotal = parseInt(finalTotal).toFixed(2);
+    return finalTotal;
   };
 
   const renderDeliveryLine = (quote, key) => {
     return (
-      <div className={classes.summaryDeliveryItemContainer} key={`d-quote-${key}-price`}>
+      <div
+        className={classes.summaryDeliveryItemContainer}
+        key={`d-quote-${key}-price`}
+      >
         <Typography variant="body1" className={classes.summaryDeliveryLabel}>
           {quote?.title}
         </Typography>
@@ -577,6 +779,21 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         <div>
           <div>
             {itemQuotes ? renderItems() : ""}
+
+            {cancelledItems.length > 0 ||
+              (returnItems.length > 0 && (
+                <Box component={"div"} className={classes.divider} />
+              ))}
+
+            {cancelledItems.length > 0 ? renderCancelledItems() : ""}
+
+            {returnItems.length > 0 ? renderReturnItems() : ""}
+
+            {cancelledItems.length > 0 ||
+              (returnItems.length > 0 && (
+                <Box component={"div"} className={classes.divider} />
+              ))}
+
             <div className={classes.summarySubtotalContainer}>
               <Typography variant="body2" className={classes.subTotalLabel}>
                 Total
@@ -607,7 +824,9 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0}`}
+              {`₹${
+                parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0
+              }`}
             </Typography>
           </div>
         </div>
@@ -621,8 +840,13 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   // on status
   async function getUpdatedStatus(message_id) {
     try {
-      const data = await cancellablePromise(getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`));
-      statusEventSourceResponseRef.current = [...statusEventSourceResponseRef.current, data[0]];
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`)
+      );
+      statusEventSourceResponseRef.current = [
+        ...statusEventSourceResponseRef.current,
+        data[0],
+      ];
       const { message, error = {} } = data[0];
       if (error?.message) {
         dispatchToast("Cannot get status for this product", toast_types.error);
@@ -674,7 +898,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     const timer = setTimeout(() => {
       es.close();
       if (statusEventSourceResponseRef.current.length <= 0) {
-        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
         setStatusLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -722,112 +949,384 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
     }
   }
 
+  // TRACK APIS
+  // use this api to track and order
+  async function handleFetchTrackOrderDetails() {
+    trackEventSourceResponseRef.current = [];
+    setTrackOrderLoading(true);
+    const transaction_id = orderDetails?.transactionId;
+    const bpp_id = orderDetails?.bppId;
+    const order_id = orderDetails?.id;
+    try {
+      const data = await cancellablePromise(
+        postCall("/clientApis/v2/track", [
+          {
+            context: {
+              transaction_id,
+              bpp_id,
+            },
+            message: {
+              order_id,
+            },
+          },
+        ])
+      );
+      fetchTrackingDataThroughEvents(data[0]?.context?.message_id);
+    } catch (err) {
+      setTrackOrderLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  }
+
+  // use this function to fetch tracking info through events
+  function fetchTrackingDataThroughEvents(message_id) {
+    const token = getValueFromCookie("token");
+    let header = {
+      headers: {
+        ...(token && {
+          Authorization: `Bearer ${token}`,
+        }),
+      },
+    };
+    let es = new window.EventSourcePolyfill(
+      `${process.env.REACT_APP_BASE_URL}clientApis/events?messageId=${message_id}`,
+      header
+    );
+    es.addEventListener("on_track", (e) => {
+      const { messageId } = JSON.parse(e?.data);
+      getTrackOrderDetails(messageId);
+    });
+
+    const timer = setTimeout(() => {
+      es.close();
+      if (trackEventSourceResponseRef.current.length <= 0) {
+        dispatchToast(
+          "Cannot proceed with you request now! Please try again",
+          toast_types.error
+        );
+        setTrackOrderLoading(false);
+      }
+    }, SSE_TIMEOUT);
+
+    eventTimeOutRef.current = [
+      ...eventTimeOutRef.current,
+      {
+        eventSource: es,
+        timer,
+      },
+    ];
+  }
+
+  // on track order
+  async function getTrackOrderDetails(message_id) {
+    try {
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_track?messageIds=${message_id}`)
+      );
+      trackEventSourceResponseRef.current = [
+        ...trackEventSourceResponseRef.current,
+        data[0],
+      ];
+      const { message } = data[0];
+      if (message.tracking.status === "active" && message.tracking.url === "") {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
+      } else if (message?.tracking?.url === "") {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information not available for this product",
+          toast_types.error
+        );
+        return;
+      } else if (
+        message.tracking.status === "active" &&
+        message?.tracking?.url !== ""
+      ) {
+        setTrackOrderLoading(false);
+        trackOrderRef.current.href = message?.tracking?.url;
+        trackOrderRef.current.target = "_blank";
+        trackOrderRef.current.click();
+      } else {
+        setTrackOrderLoading(false);
+        dispatchToast(
+          "Tracking information is not provided by the provider.",
+          toast_types.error
+        );
+        return;
+      }
+    } catch (err) {
+      setTrackOrderLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+      eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
+        eventSource.close();
+        clearTimeout(timer);
+      });
+    }
+  }
+
+  const getReturnOrCancelledItems = () => {
+    let items = [];
+    orderDetails?.fulfillments?.forEach((f) => {
+      if (f.type === "Return" || f.type === "Cancel") {
+        const details = f.tags[0].list;
+        items.push({
+          id: details.find((d) => d.code === "item_id")["value"],
+          quantity: details.find((d) => d.code === "item_quantity")["value"],
+          type: f.type,
+          status: f.state.descriptor.code,
+        });
+      }
+    });
+    return items;
+  };
+
+  const renderReturnOrCancel = () => {
+    return (
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 250 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell align="center">
+                <b>Item ID</b>
+              </TableCell>
+              <TableCell align="center">
+                <b>Type</b>
+              </TableCell>
+              <TableCell align="center">
+                <b>Quantity</b>
+              </TableCell>
+              <TableCell align="center">
+                <b>Status</b>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {returnOrCancelledItems.map((row, idx) => (
+              <TableRow
+                key={row.idx}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.type}</TableCell>
+                <TableCell align="center">{row.quantity}</TableCell>
+                <TableCell align="center">{row.status}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  };
+
   return (
-    <Card className={classes.orderSummaryCard}>
-      <Typography variant="h5" className={classes.orderNumberTypo}>
-        {`Order Number: `}
-        <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
-        <Chip
-          className={classes.statusChip}
-          color={
-            orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"
-              ? "primary"
-              : orderDetails?.state === "Delivered"
-              ? "success"
-              : orderDetails?.state === "Cancelled"
-              ? "error"
-              : "primary"
-          }
-          label={orderDetails?.state}
-        />
-      </Typography>
-      <Typography variant="body1" className={classes.orderOnTypo}>
-        {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(orderDetails?.createdAt).format(
-          "hh:mma"
-        )}`}{" "}
-        | Payment: {orderDetails?.payment?.type === "ON-FULFILLMENT" ? "Cash on delivery" : "Prepaid"}
-      </Typography>
-      <Box component={"div"} className={`${classes.orderSummaryDivider} ${classes.marginBottom0}`} />
-
-      {/*<OrderTimeline />*/}
-
-      {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
-
-      {renderQuote()}
-      <div className={classes.summaryItemActionContainer}>
-        <Button fullWidth variant="outlined" className={classes.helpButton} onClick={() => handleFetchUpdatedStatus()}>
-          {statusLoading ? <Loading /> : "Get Status"}
-        </Button>
-        {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
-          <Button
-            fullWidth
-            variant="contained"
-            color="error"
-            className={classes.cancelOrderButton}
-            onClick={() => setToggleCancelOrderModal(true)}
-            disabled={allNonCancellable || statusLoading}
-          >
-            Cancel Order
-          </Button>
-        )}
-        {orderDetails?.state === "Completed" && (
-          <Button
-            fullWidth
-            variant="contained"
-            color="error"
-            className={classes.cancelOrderButton}
-            onClick={() => setToggleReturnOrderModal(true)}
-            disabled={statusLoading}
-          >
-            Return Order
-          </Button>
-        )}
-      </div>
-
-      {toggleReturnOrderModal && (
-        <ReturnOrderModal
-          onClose={() => setToggleReturnOrderModal(false)}
-          onSuccess={() => setToggleReturnOrderModal(false)}
-          quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsReturnProductList={generateProductsList(orderDetails, itemQuotes)}
-          order_status={orderDetails.state}
-          bpp_id={orderDetails.bppId}
-          transaction_id={orderDetails.transactionId}
-          order_id={orderDetails.id}
-          domain={orderDetails.domain}
-        />
-      )}
-
-      {toggleCancelOrderModal && (
-        <CancelOrderModal
-          onClose={() => setToggleCancelOrderModal(false)}
-          onSuccess={() => setToggleCancelOrderModal(false)}
-          quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          partailsCancelProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
-            if (orderDetails.domain === "ONDC:RET11") {
-              console.log("a");
-              return (
-                orderDetails.state === "Created" &&
-                item["@ondc/org/cancellable"] == true &&
-                item.fulfillment_status == "Pending"
-              );
-            } else {
-              console.log("B:", item.fulfillment_status);
-              return (
-                (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
-                item["@ondc/org/cancellable"] == true &&
-                item.fulfillment_status == "Pending"
-              );
+    <div>
+      <Card className={classes.orderSummaryCard}>
+        <Typography variant="h5" className={classes.orderNumberTypo}>
+          {`Order Number: `}
+          <span className={classes.orderNumberTypoBold}>
+            {orderDetails?.id}
+          </span>
+          <Chip
+            className={classes.statusChip}
+            color={
+              orderDetails?.state === "Confirmed" ||
+              orderDetails?.state === "Created"
+                ? "primary"
+                : orderDetails?.state === "Delivered"
+                ? "success"
+                : orderDetails?.state === "Cancelled"
+                ? "error"
+                : "primary"
             }
-          })}
-          order_status={orderDetails.state}
-          bpp_id={orderDetails.bppId}
-          transaction_id={orderDetails.transactionId}
-          order_id={orderDetails.id}
-          domain={orderDetails.domain}
+            label={orderDetails?.state}
+          />
+        </Typography>
+        <Typography variant="body1" className={classes.orderOnTypo}>
+          {`Ordered On: ${moment(orderDetails?.createdAt).format(
+            "DD/MM/yy"
+          )} at ${moment(orderDetails?.createdAt).format("hh:mma")}`}{" "}
+          | Payment:{" "}
+          {orderDetails?.payment?.type === "ON-FULFILLMENT"
+            ? "Cash on delivery"
+            : "Prepaid"}
+        </Typography>
+        <Box
+          component={"div"}
+          className={`${classes.orderSummaryDivider} ${classes.marginBottom0}`}
         />
+        {/*<OrderTimeline />*/}
+        {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
+        {renderQuote()}
+        <div className={classes.summaryItemActionContainer}>
+          <Button
+            fullWidth
+            variant="outlined"
+            className={classes.helpButton}
+            onClick={() => handleFetchUpdatedStatus()}
+          >
+            {statusLoading ? <Loading /> : "Get Status"}
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            disabled={trackOrderLoading || statusLoading}
+            className={classes.helpButton}
+            onClick={() => handleFetchTrackOrderDetails()}
+          >
+            Track
+          </Button>
+          {(orderDetails?.state === "Accepted" ||
+            orderDetails?.state === "Created") && (
+            <Button
+              fullWidth
+              variant="contained"
+              color="error"
+              className={classes.cancelOrderButton}
+              onClick={() => setToggleCancelOrderModal(true)}
+              disabled={allNonCancellable || statusLoading || trackOrderLoading}
+            >
+              Cancel Order
+            </Button>
+          )}
+          {orderDetails?.state === "Completed" && (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                className={classes.cancelOrderButton}
+                onClick={() => setToggleReturnOrderModal(true)}
+                disabled={statusLoading || trackOrderLoading}
+              >
+                Return Order
+              </Button>
+            </>
+          )}
+        </div>
+        {toggleReturnOrderModal && (
+          <ReturnOrderModal
+            onClose={() => setToggleReturnOrderModal(false)}
+            onSuccess={() => {
+              setToggleReturnOrderModal(false);
+              onUpdateOrder();
+            }}
+            // quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+            quantity={orderDetails.items
+              ?.filter(
+                (item) =>
+                  !item.hasOwnProperty("cancellation_status") ||
+                  (item.hasOwnProperty("cancellation_status") &&
+                    item.cancellation_status == "") ||
+                  !item.hasOwnProperty("return_status") ||
+                  (item.hasOwnProperty("return_status") &&
+                    item.return_status == "")
+              )
+              .map(({ quantity }) => quantity)}
+            partailsReturnProductList={generateProductsList(
+              orderDetails,
+              itemQuotes
+            ).filter((item) => {
+              if (
+                !item.hasOwnProperty("cancellation_status") ||
+                (item.hasOwnProperty("cancellation_status") &&
+                  item.cancellation_status == "") ||
+                !item.hasOwnProperty("return_status") ||
+                (item.hasOwnProperty("return_status") &&
+                  item.return_status == "")
+              ) {
+                return item;
+              }
+            })}
+            order_status={orderDetails.state}
+            bpp_id={orderDetails.bppId}
+            transaction_id={orderDetails.transactionId}
+            order_id={orderDetails.id}
+            domain={orderDetails.domain}
+            bpp_uri={orderDetails.bpp_uri}
+            handleFetchUpdatedStatus={handleFetchUpdatedStatus}
+            onUpdateOrder={onUpdateOrder}
+          />
+        )}
+        {toggleCancelOrderModal && (
+          <CancelOrderModal
+            onClose={() => setToggleCancelOrderModal(false)}
+            onSuccess={() => {
+              setToggleCancelOrderModal(false);
+              onUpdateOrder();
+            }}
+            quantity={orderDetails.items
+              ?.filter(
+                (item) =>
+                  !item.hasOwnProperty("cancellation_status") ||
+                  (item.hasOwnProperty("cancellation_status") &&
+                    item.cancellation_status == "") ||
+                  !item.hasOwnProperty("return_status") ||
+                  (item.hasOwnProperty("return_status") &&
+                    item.return_status == "")
+              )
+              .map(({ quantity }) => quantity)}
+            partailsCancelProductList={generateProductsList(
+              orderDetails,
+              itemQuotes
+            ).filter((item) => {
+              if (orderDetails.domain === "ONDC:RET11") {
+                return (
+                  orderDetails.state === "Created" &&
+                  item["@ondc/org/cancellable"] == true &&
+                  item.fulfillment_status == "Pending" &&
+                  (!item.hasOwnProperty("cancellation_status") ||
+                    (item.hasOwnProperty("cancellation_status") &&
+                      item.cancellation_status == "") ||
+                    !item.hasOwnProperty("return_status") ||
+                    (item.hasOwnProperty("return_status") &&
+                      item.return_status == ""))
+                );
+              } else {
+                return (
+                  (orderDetails.state === "Accepted" ||
+                    orderDetails.state === "Created") &&
+                  item["@ondc/org/cancellable"] == true &&
+                  item.fulfillment_status == "Pending" &&
+                  (!item.hasOwnProperty("cancellation_status") ||
+                    (item.hasOwnProperty("cancellation_status") &&
+                      item.cancellation_status == "") ||
+                    !item.hasOwnProperty("return_status") ||
+                    (item.hasOwnProperty("return_status") &&
+                      item.return_status == ""))
+                );
+              }
+            })}
+            order_status={orderDetails.state}
+            bpp_id={orderDetails.bppId}
+            transaction_id={orderDetails.transactionId}
+            order_id={orderDetails.id}
+            domain={orderDetails.domain}
+            bpp_uri={orderDetails.bpp_uri}
+            handleFetchUpdatedStatus={handleFetchUpdatedStatus}
+            onUpdateOrder={onUpdateOrder}
+          />
+        )}
+        <a
+          ref={trackOrderRef}
+          style={{ visibility: "hidden", display: "none" }}
+        >
+          navigate
+        </a>
+      </Card>
+      <br />
+      {returnOrCancelledItems.length > 0 && (
+        <Card className={classes.orderSummaryCard}>
+          <Typography variant="body" className={classes.totalLabel}>
+            Returned / Cancelled Items
+          </Typography>
+          <div style={{ marginTop: "20px" }}>{renderReturnOrCancel()}</div>
+        </Card>
       )}
-    </Card>
+    </div>
   );
 };
 

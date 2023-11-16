@@ -64,10 +64,17 @@ const OrderDetails = () => {
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <div role="presentation">
           <Breadcrumbs aria-label="breadcrumb">
-            <MuiLink component={Link} underline="hover" color="inherit" to="/application/orders">
+            <MuiLink
+              component={Link}
+              underline="hover"
+              color="inherit"
+              to="/application/orders"
+            >
               Order History
             </MuiLink>
-            {orderId && <Typography color="text.primary">Order Details</Typography>}
+            {orderId && (
+              <Typography color="text.primary">Order Details</Typography>
+            )}
           </Breadcrumbs>
         </div>
       </Grid>
@@ -83,7 +90,15 @@ const OrderDetails = () => {
         </Typography>
       </Grid>
       {isLoading ? (
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.loaderContainer}>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          md={12}
+          lg={12}
+          xl={12}
+          className={classes.loaderContainer}
+        >
           <Loading />
         </Grid>
       ) : (

@@ -50,7 +50,7 @@ const useStyles = makeStyles({
         marginLeft: '2px'
     },
     typoContainer: {
-      display: 'flex'
+        display: 'flex'
     },
     electronicsTypo: {
         margin: 'auto !important',
@@ -107,7 +107,7 @@ const useStyles = makeStyles({
     },
 
     healthTypo: {
-      marginTop: '50px !important'
+        marginTop: '50px !important'
     },
 
     homeCategory: {
@@ -147,6 +147,30 @@ const useStyles = makeStyles({
     },
     textAlignLeft: {
         textAlign: 'left'
+    },
+    agricultureCategory: {
+        borderRadius: '8px !important',
+        background: 'linear-gradient(180deg, #E7F9DC 0%, #BFF2C1 100%) !important',
+        paddingTop: '33px !important',
+        paddingBottom: '23px !important',
+        boxShadow: 'none !important',
+        height: '317px !important',
+        cursor: 'pointer'
+    },
+    agricultureImages: {
+        textAlign: "center"
+    },
+    agricultureImage: {
+        height: '230px'
+    },
+    agricultureCategoryTypo: {
+        color: '#3A1500',
+        textAlign: "center",
+        marginTop: "-10px !important"
+    },
+    viewAllLessButtonContainer: {
+        textAlign: "center",
+        marginTop: '16px !important'
     }
 });
 
