@@ -98,6 +98,7 @@ export default function IssueOrderModal({
     setLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     try {
+      const createdDateTime = new Date().toISOString()
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
           context: {
@@ -111,8 +112,8 @@ export default function IssueOrderModal({
               sub_category: selectedIssueSubcategory.enums,
               bppId: bpp_id,
               bpp_uri,
-              created_at: new Date(),
-              updated_at: new Date(),
+              created_at: createdDateTime,
+              updated_at: createdDateTime,
               complainant_info: {
                 person: {
                   name: billing_address.name,
@@ -151,7 +152,7 @@ export default function IssueOrderModal({
         setLoading(false);
         dispatchToast("Something went wrong", toast_types.error);
       } else {
-        fetchCancelPartialOrderDataThroughEvents(data.context?.message_id);
+        fetchCancelPartialOrderDataThroughEvents(data.context?.message_id, createdDateTime);
       }
     } catch (err) {
       setLoading(false);
@@ -161,7 +162,7 @@ export default function IssueOrderModal({
 
   // PARTIAL CANCEL APIS
   // use this function to fetch cancel product through events
-  function fetchCancelPartialOrderDataThroughEvents(message_id) {
+  function fetchCancelPartialOrderDataThroughEvents(message_id, createdDateTime) {
     const token = getValueFromCookie("token");
     let header = {
       headers: {
@@ -178,15 +179,16 @@ export default function IssueOrderModal({
     es.addEventListener("on_issue", (e) => {
       if (e?.data) {
         const { messageId } = JSON.parse(e.data);
-        getPartialCancelOrderDetails(messageId);
+        getPartialCancelOrderDetails(messageId, createdDateTime);
       } else {
         setLoading(false);
         onSuccess();
       }
     });
 
+
     const timer = setTimeout(() => {
-      es.close();
+      // es.close();
       if (cancelPartialEventSourceResponseRef.current.length <= 0) {
         // dispatchToast(
         //   "Cannot proceed with you request now! Please try again",
@@ -207,10 +209,10 @@ export default function IssueOrderModal({
   }
 
   // on Issue api
-  async function getPartialCancelOrderDetails(message_id) {
+  async function getPartialCancelOrderDetails(message_id, createdDateTime) {
     try {
       const data = await cancellablePromise(
-        getCall(`/issueApis/v1/on_issue?messageId=${message_id}`)
+        getCall(`/issueApis/v1/on_issue?messageId=${message_id}&createdDateTime=${createdDateTime}`)
       );
       cancelPartialEventSourceResponseRef.current = [
         ...cancelPartialEventSourceResponseRef.current,
@@ -447,7 +449,7 @@ export default function IssueOrderModal({
                             : ""
                             } d-flex align-items-center justify-content-center`}
                           onClick={() => {
-                            if (orderQty[idx]?.count > 1) {
+                            if (orderQty[idx]?.count > 1 && isProductSelected(product?.id)) {
                               onUpdateQty(
                                 orderQty[idx]?.count - 1,
                                 idx,
@@ -474,7 +476,7 @@ export default function IssueOrderModal({
                             : ""
                             } d-flex align-items-center justify-content-center`}
                           onClick={() => {
-                            if (orderQty[idx]?.count < quantity[idx]?.count) {
+                            if (orderQty[idx]?.count < quantity[idx]?.count && isProductSelected(product?.id)) {
                               onUpdateQty(
                                 orderQty[idx]?.count + 1,
                                 idx,

@@ -13,6 +13,8 @@ import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
 import Loading from "../../../shared/loading/loading";
 import CustomerActionCard from "../action-card/actionCard";
 import { ISSUE_TYPES } from "../../../../constants/issue-types";
+import { compareDateWithDuration, parseDuration } from "../../../../utils/helper";
+import ErrorMessage from "../../../shared/error-message/errorMessage";
 
 export default function TicketCard(props) {
     const {
@@ -185,6 +187,17 @@ export default function TicketCard(props) {
         }
     }
 
+    async function isShowTakeAction() {
+        const lastAction = issueActions[issueActions.length - 1]?.respondent_action
+        if (lastAction === "PROCESSING" || lastAction === "OPEN" || lastAction === "ESCALATE") {
+            compareDateWithDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H', issueActions[issueActions.length - 1]?.updated_at)
+        } else if (lastAction !== "ESCALATE" && issueActions.some(x => x.respondent_action === "RESOLVED")) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     return (
         <div className={styles.orders_card}>
             {toggleActionModal && (
@@ -345,9 +358,9 @@ export default function TicketCard(props) {
                         </div>
                     )} */}
                     {description?.images &&
-                        description?.images?.map((image) => {
+                        description?.images?.map((image, index) => {
                             return (
-                                <div className="container py-2 px-0">
+                                <div className="container py-2 px-0" key={index}>
                                     <a href={image} rel="noreferrer" target="_blank">
                                         <img style={{ height: "25%", width: "25%" }} src={image} />
                                     </a>
@@ -368,7 +381,7 @@ export default function TicketCard(props) {
                             </p>
                             <p className={styles.address_name_and_phone}>
                                 {moment(created_at)
-                                    .add(2, "hours")
+                                    .add(parseDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H'), "milliseconds")
                                     .format("hh:mm a, MMMM Do, YYYY")}
                             </p>
                         </div>
@@ -378,11 +391,15 @@ export default function TicketCard(props) {
                             </p>
                             <p className={styles.address_name_and_phone}>
                                 {moment(created_at)
-                                    .add(1, "days")
+                                    .add(parseDuration(process.env.EXPECTED_RESOLUTION_TIME ?? 'P1D'), "milliseconds")
                                     .format("hh:mm a, MMMM Do, YYYY")}
                             </p>
                         </div>
                     </div>
+                    {
+                        ((issueActions[issueActions.length - 1]?.respondent_action === "OPEN") || (issueActions[issueActions.length - 1]?.respondent_action === "PROCESSING") || (issueActions[issueActions.length - 1]?.respondent_action === "ESCALATE")) && compareDateWithDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H', issueActions[issueActions.length - 1]?.updated_at) &&
+                        <ErrorMessage>No response was given for this issue</ErrorMessage>
+                    }
                 </div>
 
                 {/* RESPONDENT ACTIONS  */}
@@ -549,7 +566,7 @@ export default function TicketCard(props) {
                         <div className="ms-auto">
                             <div className="d-flex align-items-center justify-content-center flex-wrap">
                                 {
-                                    (issueActions[issueActions.length - 1]?.respondent_action !== "PROCESSING") && (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
+                                    isShowTakeAction() ?
                                         <button
                                             disabled={
                                                 statusLoading
