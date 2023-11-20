@@ -206,12 +206,12 @@ export const PRODUCT_SUBCATEGORY = {
         { key: "Ayush", value: "Ayush", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Ayush.png` },
     ],
     "Agriculture": [
-        { key: "Seed", value: "Seed", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
-        { key: "Pesticide", value: "Pesticide", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
-        { key: "Fertilizer", value: "Fertilizer", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
-        { key: "Organic Crop Protection", value: "Organic Crop Protection", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
-        { key: "Organic Crop Nutrition", value: "Organic Crop Nutrition", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
-        { key: "Tools and Machinery", value: "Tools and Machinery", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
-        { key: "Cattle Feed", value: "Cattle Feed", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Health & Wellness/Pain Relief.png` },
+        { key: "Seed", value: "Seed", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Seed.png` },
+        { key: "Pesticide", value: "Pesticide", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Pesticide.png` },
+        { key: "Fertilizer", value: "Fertilizer", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Fertilizer.png` },
+        { key: "Organic Crop Protection", value: "Organic Crop Protection", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Organic Crop Protection.png` },
+        { key: "Organic Crop Nutrition", value: "Organic Crop Nutrition", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Organic Crop Nutrition.png` },
+        { key: "Tools and Machinery", value: "Tools and Machinery", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Tools and Machinery.png` },
+        { key: "Cattle Feed", value: "Cattle Feed", protocolKey: "@ondc/org/statutory_reqs_packaged_commodities", imageUrl: `https://reference-buyer-app-assets.s3-ap-south-1.amazonaws.com/public-assets/Agriculture/Cattle Feed.png` },
     ]
 };
