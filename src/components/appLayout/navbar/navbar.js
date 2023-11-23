@@ -511,6 +511,13 @@ const NavBar = ({ isCheckout = false }) => {
                 >
                   Order History
                 </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    history.push(`/application/complaints`);
+                  }}
+                >
+                  Complaints
+                </MenuItem>
                 <Divider />
                 <MenuItem onClick={() => {}}>Support</MenuItem>
                 <MenuItem
