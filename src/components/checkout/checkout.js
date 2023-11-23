@@ -73,7 +73,6 @@ const Checkout = () => {
     const updatedCartItemsData = JSON.parse(
       localStorage.getItem("updatedCartItems")
     );
-
     setCartItems(cartItemsData);
     setUpdatedCartItems(updatedCartItemsData);
   };
@@ -553,6 +552,7 @@ const Checkout = () => {
             setUpdateCartItemsDataOnInitialize={(data) => {
               setUpdatedCartItems(data);
             }}
+            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
           />
         );
       default:
@@ -677,7 +677,6 @@ const Checkout = () => {
       };
     } else {
     }
-
     return provider;
   };
   const confirmOrder = async (items, method) => {
