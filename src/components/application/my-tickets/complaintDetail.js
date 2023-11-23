@@ -27,6 +27,8 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import { ReactComponent as TimelineIcon } from '../../../assets/images/timeline.svg';
+import { compareDateWithDuration, parseDuration } from "../../../utils/helper";
+import ErrorMessage from "../../shared/error-message/errorMessage";
 
 const ComplaintDetail = () => {
     const classes = useStyles();
@@ -246,6 +248,17 @@ const ComplaintDetail = () => {
                 eventSource.close();
                 clearTimeout(timer);
             });
+        }
+    }
+
+    async function isShowTakeAction() {
+        const lastAction = issueActions[issueActions.length - 1]?.respondent_action
+        if (lastAction === "PROCESSING" || lastAction === "OPEN" || lastAction === "ESCALATE") {
+            compareDateWithDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H', issueActions[issueActions.length - 1]?.updated_at)
+        } else if (lastAction !== "ESCALATE" && issueActions.some(x => x.respondent_action === "RESOLVED")) {
+            return true
+        } else {
+            return false
         }
     }
 
@@ -499,9 +512,9 @@ const ComplaintDetail = () => {
                                 {description?.long_desc ?? "NA"}
                             </Typography>
                             {description?.images &&
-                                description?.images?.map((image) => {
+                                description?.images?.map((image, index) => {
                                     return (
-                                        <div className="container py-2 px-0">
+                                        <div className="container py-2 px-0" key={index}>
                                             <a href={image} rel="noreferrer" target="_blank">
                                                 <img style={{ height: "25%", width: "25%" }} src={image} />
                                             </a>
@@ -521,7 +534,7 @@ const ComplaintDetail = () => {
                                 </Typography>
                                 <Typography component="div" variant="body" className={classes.customerDetailsValue}>
                                     {moment(created_at)
-                                        .add(2, "hours")
+                                        .add(parseDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H'), "milliseconds")
                                         .format("hh:mm a, MMMM Do, YYYY")}
                                 </Typography>
                             </div>
@@ -531,21 +544,22 @@ const ComplaintDetail = () => {
                                 </Typography>
                                 <Typography component="div" variant="body" className={classes.customerDetailsValue}>
                                     {moment(created_at)
-                                        .add(1, "days")
+                                        .add(parseDuration(process.env.EXPECTED_RESOLUTION_TIME ?? 'P1D'), "milliseconds")
                                         .format("hh:mm a, MMMM Do, YYYY")}
                                 </Typography>
                             </div>
                         </div>
 
-
+                        {isShowTakeAction() &&
+                            <ErrorMessage>No response was given for this issue</ErrorMessage>
+                        }
                         <Box component={"div"} className={classes.divider} />
                         <div className={classes.summaryItemActionContainer}>
                             {(!issueActions?.some(x => x.respondent_action === "CLOSE")) &&
                                 <div className="ms-auto">
                                     <div className="d-flex align-items-center justify-content-center flex-wrap">
                                         {
-                                            (issueActions[issueActions.length - 1]?.respondent_action !== "PROCESSING") && (issueActions[issueActions.length - 1]?.respondent_action !== "ESCALATE") && issueActions.some(x => x.respondent_action === "RESOLVED") ?
-
+                                            isShowTakeAction() ?
                                                 <Button
                                                     fullWidth
                                                     variant="outlined"
@@ -602,8 +616,8 @@ const ComplaintDetail = () => {
                                         "DD/MM/yy"
                                     )} at ${moment((issueActions.reverse().find(obj => obj.respondent_action === "RESOLVED") || {}).updated_at).format("hh:mma")}`}
                                 </Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                                 <Typography component="span" variant="body1" >
                                     {`Updated by: ${resolution_provider?.respondent_info?.organization?.person?.name}, ${resolution_provider?.respondent_info?.organization?.org?.name.split('::')[0]}`}
                                 </Typography>
