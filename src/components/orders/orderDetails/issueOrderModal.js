@@ -1,26 +1,27 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
-import CrossIcon from "../../../shared/svg/cross-icon";
-import { ONDC_COLORS } from "../../../shared/colors";
-import Button from "../../../shared/button/button";
-import { buttonTypes } from "../../../shared/button/utils";
-import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
-import productStyles from "../../../../styles/orders/orders.module.scss";
-import productCartStyles from "../../../../styles/products/productCard.module.scss";
-import ErrorMessage from "../../../shared/error-message/errorMessage";
-import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
-import { ToastContext } from "../../../../context/toastContext";
-import useCancellablePromise from "../../../../api/cancelRequest";
-import { getCall, postCall } from "../../../../api/axios";
-import Checkbox from "../../../shared/checkbox/checkbox";
-import Dropdown from "../../../shared/dropdown/dropdown";
-import DropdownSvg from "../../../shared/svg/dropdonw";
-import { ISSUE_TYPES } from "../../../../constants/issue-types";
-import Input from "../../../shared/input/input";
+import CrossIcon from "../../shared/svg/cross-icon";
+import { ONDC_COLORS } from "../../shared/colors";
+// import Button from "../../shared/button/button";
+import { buttonTypes } from "../../shared/button/utils";
+import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
+import productStyles from "../../../styles/orders/orders.module.scss";
+import productCartStyles from "../../../styles/products/productCard.module.scss";
+import ErrorMessage from "../../shared/error-message/errorMessage";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+import { ToastContext } from "../../../context/toastContext";
+import useCancellablePromise from "../../../api/cancelRequest";
+import { getCall, postCall } from "../../../api/axios";
+import Checkbox from "../../shared/checkbox/checkbox";
+import Dropdown from "../../shared/dropdown/dropdown";
+import DropdownSvg from "../../shared/svg/dropdonw";
+import { ISSUE_TYPES } from "../../../constants/issue-types";
+import Input from "../../shared/input/input";
 import validator from "validator";
-import { getValueFromCookie } from "../../../../utils/cookies";
-import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
-import Subtract from "../../../shared/svg/subtract";
-import Add from "../../../shared/svg/add";
+import { getValueFromCookie } from "../../../utils/cookies";
+import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
+import Subtract from "../../shared/svg/subtract";
+import Add from "../../shared/svg/add";
+import { Button, Grid, Typography } from "@mui/material";
 
 export default function IssueOrderModal({
   billing_address,
@@ -31,7 +32,7 @@ export default function IssueOrderModal({
   bpp_uri,
   order_id,
   order_status,
-  partailsCancelProductList = [],
+  partailsIssueProductList = [],
   onClose,
   onSuccess,
   quantity,
@@ -150,7 +151,7 @@ export default function IssueOrderModal({
       //Error handling workflow eg, NACK
       if (data.message && data.message.ack.status === "NACK") {
         setLoading(false);
-        dispatchToast("Something went wrong", toast_types.error);
+        dispatchToast("IGM is not implemented by this seller", toast_types.error);
       } else {
         fetchCancelPartialOrderDataThroughEvents(data.context?.message_id, createdDateTime);
       }
@@ -160,7 +161,6 @@ export default function IssueOrderModal({
     }
   }
 
-  // PARTIAL CANCEL APIS
   // use this function to fetch cancel product through events
   function fetchCancelPartialOrderDataThroughEvents(message_id, createdDateTime) {
     const token = getValueFromCookie("token");
@@ -397,7 +397,7 @@ export default function IssueOrderModal({
           </p>
           <div style={{ maxHeight: "250px", overflow: "auto" }}>
             <div className="px-1 py-2">
-              {partailsCancelProductList?.map((product, idx) => {
+              {partailsIssueProductList?.map((product, idx) => {
                 return (
                   <div key={product?.id} className="d-flex align-items-center">
                     <div
@@ -423,17 +423,37 @@ export default function IssueOrderModal({
                           addProductToCancel(product, orderQty[idx]?.count);
                         }}
                       >
-                        <p
+                        <Typography
                           className={productStyles.product_name}
                           title={product?.name}
                           style={{ fontSize: "16px", textAlign: "left" }}
                         >
                           {product?.name}
-                        </p>
+                        </Typography>
                         <div className="pt-1">
-                          <p className={productStyles.quantity_count}>
+                          <Typography
+                            className={productStyles.quantity_count}
+                            title={quantity[idx]?.count}
+                            style={{ textAlign: "left" }}
+                          >
                             QTY: {quantity[idx]?.count ?? "0"}
-                          </p>
+                          </Typography>
+
+                          {/* <Typography variant="subtitle1" color="#686868">
+                            QTY: {quantity?.[idx]?.count ?? "0"} X ₹{" "}
+                            {Number(product?.price?.value)?.toFixed(2) || "Price Not Available"}
+                          </Typography> */}
+                          {/* {Object.keys(product?.customizations || {}).map((key, idx) => {
+                            const isLastItem = idx === Object.keys(product.customizations || {}).length - 1;
+                            return (
+                              <Grid container key={key}>
+                                <Typography variant="subtitle1" color="#686868">
+                                  {product.customizations[key].title || "Customization Title"} (₹
+                                  {product.customizations[key].price.value || "0"}) {isLastItem ? "" : "+"}
+                                </Typography>
+                              </Grid>
+                            );
+                          })} */}
                         </div>
                       </Checkbox>
                     </div>
@@ -665,30 +685,32 @@ export default function IssueOrderModal({
 
         </div>
         <div
-          className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
+          className={`${styles.card_footer} d-flex align-items-center`}
         >
           <div className="px-3">
             <Button
+              sx={{ paddingLeft: 4, paddingRight: 4 }}
               disabled={loading}
-              button_type={buttonTypes.secondary}
-              button_hover_type={buttonTypes.secondary_hover}
-              button_text="Cancel"
+              variant="outlined"
               onClick={() => {
                 onClose();
               }}
-            />
+            >
+              Cancel
+            </Button>
           </div>
           <div className="px-3">
             <Button
+              sx={{ paddingLeft: 4, paddingRight: 4 }}
               isloading={loading ? 1 : 0}
               disabled={loading}
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Confirm"
+              variant="contained"
               onClick={() => {
                 handleRaiseOrderIssue();
               }}
-            />
+            >
+              Confirm
+            </Button>
           </div>
         </div>
       </div>

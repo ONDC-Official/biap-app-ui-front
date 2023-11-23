@@ -18,12 +18,13 @@ import Checkout from "../checkout/checkout";
 import Orders from "../orders/orders";
 import OrderDetails from "../orders/orderDetails/orderDetails";
 // import InitializeOrder from "./initialize-order/initializeOrder";
-// import MyTickets from "./my-tickets/myTickets";
+import MyTickets from "./my-tickets/myTickets";
 
 import AppLayout from "../appLayout";
 import Products from "../products/products";
 import BrandRoutes from "../brand/BrandRoutes";
 import ProductRoutes from "./product-list/ProductRoutes";
+import ComplaintDetail from "./my-tickets/complaintDetail";
 
 export default function Application() {
   return (
@@ -78,9 +79,16 @@ export default function Application() {
             {/*<PrivateRoute path={"/application/orders"}>*/}
             {/*  <Orders />*/}
             {/*</PrivateRoute>*/}
-            {/*<PrivateRoute path={"/application/tickets"}>*/}
-            {/*  <MyTickets />*/}
-            {/*</PrivateRoute>*/}
+            <PrivateRoute path={"/application/complaints"}>
+              <AppLayout>
+                <MyTickets />
+              </AppLayout>
+            </PrivateRoute>
+            <PrivateRoute path={"/application/complaint/:issueId"}>
+              <AppLayout>
+                <ComplaintDetail />
+              </AppLayout>
+            </PrivateRoute>
             {/*<PrivateRoute path={"/application/profile"}>*/}
             {/*  <Profile />*/}
             {/*</PrivateRoute>*/}

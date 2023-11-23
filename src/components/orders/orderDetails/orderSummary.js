@@ -30,9 +30,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import IssueOrderModal from "./issueOrderModal";
+import { useHistory } from "react-router-dom";
 
 const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const classes = useStyles();
+  const history = useHistory();
 
   const [itemQuotes, setItemQuotes] = useState(null);
   const [cancelledItems, setCancelledItems] = useState([]);
@@ -47,6 +50,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const [productsList, setProductsList] = useState([]);
   const [allNonCancellable, setAllNonCancellable] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [isIssueRaised, setIsIssueRaised] = useState(false);
+  const [issueLoading, setIssueLoading] = useState(false);
+  const [toggleIssueModal, setToggleIssueModal] = useState(false);
+
   const statusEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
 
@@ -323,6 +330,35 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       setAllNonCancellable(areAllItemsNonCancellable(productsList));
     }
   }, [productsList]);
+
+
+  useEffect(() => {
+    if (orderDetails) {
+      getTrackIssueDetails();
+    }
+  }, [orderDetails]);
+
+  // get issue status
+  async function getTrackIssueDetails() {
+    try {
+      setIssueLoading(true);
+      const data = await cancellablePromise(
+        getCall(`/issueApis/v1/issue?transactionId=${orderDetails?.transactionId}`)
+      );
+
+
+      const { issueExistance } = data;
+      if (issueExistance) {
+        setIssueLoading(false);
+        setIsIssueRaised(true);
+      } else {
+        setIssueLoading(false);
+      }
+    } catch (err) {
+      setIssueLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  }
 
   const areAllItemsNonCancellable = (products) => {
     return !products.some((obj) => obj["@ondc/org/cancellable"]);
@@ -824,9 +860,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${
-                parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0
-              }`}
+              {`₹${parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0
+                }`}
             </Typography>
           </div>
         </div>
@@ -1134,13 +1169,13 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             className={classes.statusChip}
             color={
               orderDetails?.state === "Confirmed" ||
-              orderDetails?.state === "Created"
+                orderDetails?.state === "Created"
                 ? "primary"
                 : orderDetails?.state === "Delivered"
-                ? "success"
-                : orderDetails?.state === "Cancelled"
-                ? "error"
-                : "primary"
+                  ? "success"
+                  : orderDetails?.state === "Cancelled"
+                    ? "error"
+                    : "primary"
             }
             label={orderDetails?.state}
           />
@@ -1162,6 +1197,43 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
+          {isIssueRaised ? (
+            <Button
+              fullWidth
+              variant="outlined"
+              className={classes.helpButton}
+              disabled={
+                trackOrderLoading ||
+                statusLoading ||
+                issueLoading
+              }
+              onClick={() => history.push("/application/tickets")}
+            >
+              {issueLoading ? (
+                <Loading />
+              ) : (
+                "Track Issue"
+              )}
+            </Button>
+          ) : (
+            <Button
+              fullWidth
+              variant="outlined"
+              className={classes.helpButton}
+              disabled={
+                trackOrderLoading ||
+                statusLoading ||
+                issueLoading
+              }
+              onClick={() => setToggleIssueModal(true)}
+            >
+              {issueLoading ? (
+                <Loading />
+              ) : (
+                "Raise Issue"
+              )}
+            </Button>
+          )}
           <Button
             fullWidth
             variant="outlined"
@@ -1181,17 +1253,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           </Button>
           {(orderDetails?.state === "Accepted" ||
             orderDetails?.state === "Created") && (
-            <Button
-              fullWidth
-              variant="contained"
-              color="error"
-              className={classes.cancelOrderButton}
-              onClick={() => setToggleCancelOrderModal(true)}
-              disabled={allNonCancellable || statusLoading || trackOrderLoading}
-            >
-              Cancel Order
-            </Button>
-          )}
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                className={classes.cancelOrderButton}
+                onClick={() => setToggleCancelOrderModal(true)}
+                disabled={allNonCancellable || statusLoading || trackOrderLoading}
+              >
+                Cancel Order
+              </Button>
+            )}
           {orderDetails?.state === "Completed" && (
             <>
               <Button
@@ -1308,6 +1380,36 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             bpp_uri={orderDetails.bpp_uri}
             handleFetchUpdatedStatus={handleFetchUpdatedStatus}
             onUpdateOrder={onUpdateOrder}
+          />
+        )}
+        {toggleIssueModal && (
+          <IssueOrderModal
+            onClose={() => setToggleIssueModal(false)}
+            onSuccess={() => {
+              setToggleIssueModal(false);
+              onUpdateOrder();
+              dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                  id: Math.floor(Math.random() * 100),
+                  type: toast_types.success,
+                  message: "Complaint raised successfully!",
+                },
+              });
+            }}
+            quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+            partailsIssueProductList={generateProductsList(
+              orderDetails,
+              itemQuotes
+            )}
+            order_status={orderDetails.state}
+            billing_address={orderDetails?.billing?.address}
+            delivery_address={orderDetails?.fulfillments?.[0]?.end?.location?.address}
+            transaction_id={orderDetails.transactionId}
+            order_id={orderDetails.id}
+            bpp_id={orderDetails.bppId}
+            bpp_uri={orderDetails.bpp_uri}
+            fulfillments={orderDetails.fulfillments}
           />
         )}
         <a
