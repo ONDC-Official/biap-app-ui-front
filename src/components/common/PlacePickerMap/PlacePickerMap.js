@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import axios from "axios";
 import ScriptTag from "react-script-tag";
 import "./PlacePickerMap.css";
+import useCancellablePromise from "../../../api/cancelRequest";
+import { getCall } from "../../../api/axios";
 
 export default function MapPointer(props) {
   const {
@@ -19,11 +21,17 @@ export default function MapPointer(props) {
   const [script1Loaded, setScript1Loaded] = useState(false);
   const [script2Loaded, setScript2Loaded] = useState(false);
 
+  const { cancellablePromise } = useCancellablePromise();
+
+  const getToken = async () => {
+    const res = await cancellablePromise(getCall(`/clientApis/v2/map/accesstoken`));
+    console.log("data: ", res);
+    setApiKey(res.access_token);
+  };
+
   // fetch MMI API token
   useEffect(() => {
-    axios.post("https://ref-seller-app-preprod.ondc.org/api/v1/auth/mmi/token").then((res) => {
-      setApiKey(res.data.access_token);
-    });
+    getToken();
   }, []);
 
   const ref = useCallback((node) => {
