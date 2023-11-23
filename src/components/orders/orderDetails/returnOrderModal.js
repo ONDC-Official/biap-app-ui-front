@@ -17,6 +17,9 @@ import Add from "../../shared/svg/add";
 import { RETURN_REASONS } from "../../../constants/cancelation-reasons";
 import { Button, Grid, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Input from "../../shared/input/input";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 export default function ReturnOrderModal({
   bpp_id,
@@ -41,6 +44,8 @@ export default function ReturnOrderModal({
   const [selectedIds, setSelectedIds] = useState([]);
   const [orderQty, setOrderQty] = useState([]);
   const [reasons, setReasons] = useState([]);
+
+  const [selectedImages, setSelectedImages] = useState({});
 
   // REFS
   const cancelPartialEventSourceResponseRef = useRef(null);
@@ -108,6 +113,35 @@ export default function ReturnOrderModal({
     ];
   }
 
+  const getSignUrl = async (file) => {
+    const url = `/clientApis/v2/getSignUrlForUpload/${order_id}`;
+    const file_type = file.type.split("/")[1];
+    const data = {
+      fileType: file_type,
+    };
+    try {
+      const res = await postCall(url, data);
+      const publicUrl = await uploadAsset(file, res);
+      return publicUrl;
+    } catch (error) {
+      console.error("Error getting signed URL or uploading file:", error);
+    }
+  };
+
+  const uploadAsset = async (file, res) => {
+    const token = Cookies.get("token");
+    const data = await axios(res.urls, {
+      method: "PUT",
+      data: file,
+      headers: {
+        ...(token && { "access-token": `Bearer ${token}` }),
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return res.publicUrl;
+  };
+
   // use this api to partial update orders
   async function handlePartialOrderCancel() {
     const allCheckPassed = [checkReason(), checkIsOrderSelected()].every(Boolean);
@@ -124,47 +158,87 @@ export default function ReturnOrderModal({
       return map.set(provider_id, [item]);
     });
     const requestObject = Array.from(map.values());
-    const payload = selectedIds?.map((item) => ({
-      id: item?.id,
-      quantity: {
-        count: item.quantity.count,
-      },
-      tags: {
-        update_type: "return",
-        reason_code: selectedCancelReasonId?.key,
-        ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
-        ttl_reverseqc: "P3D",
-        image: "",
-      },
-    }));
+    const payload = await Promise.all(
+      selectedIds?.map(async (item) => {
+        if (Object.keys(selectedImages).length == 0) {
+          setInlineError((error) => ({
+            ...error,
+            image_error: "Please choose atleast one image",
+          }));
+          return;
+        } else {
+          setInlineError((error) => ({
+            ...error,
+            image_error: "",
+          }));
+        }
+        const imageFiles = await Promise.all(selectedImages[item?.id]?.map((file) => getSignUrl(file)));
+        return {
+          id: item?.id,
+          quantity: {
+            count: item.quantity.count,
+          },
+          tags: {
+            update_type: "return",
+            reason_code: selectedCancelReasonId?.key,
+            ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
+            ttl_reverseqc: "P3D",
+            image: imageFiles.join(","),
+          },
+        };
+      })
+    );
+
+    const payloadData = requestObject?.map((item, index) => {
+      return {
+        context: {
+          bpp_id,
+          bpp_uri,
+          transaction_id,
+        },
+        message: {
+          update_target: "item",
+          order: {
+            id: order_id,
+            state: order_status,
+            provider: {
+              id: item?.[index]?.provider_details?.id,
+            },
+            items: payload,
+          },
+        },
+      };
+    });
 
     try {
       const data = await cancellablePromise(
-        postCall(
-          "clientApis/v2/update",
-          requestObject?.map((item, index) => {
-            return {
-              context: {
-                bpp_id,
-                bpp_uri,
-                transaction_id,
-              },
-              message: {
-                update_target: "item",
-                order: {
-                  id: order_id,
-                  state: order_status,
-                  provider: {
-                    id: item?.[index]?.provider_details?.id,
-                  },
-                  items: payload,
-                },
-              },
-            };
-          })
-        )
+        //   postCall(
+        //     "clientApis/v2/update",
+        //     requestObject?.map((item, index) => {
+        //       return {
+        //         context: {
+        //           bpp_id,
+        //           bpp_uri,
+        //           transaction_id,
+        //         },
+        //         message: {
+        //           update_target: "item",
+        //           order: {
+        //             id: order_id,
+        //             state: order_status,
+        //             provider: {
+        //               id: item?.[index]?.provider_details?.id,
+        //             },
+        //             items: payload,
+        //           },
+        //         },
+        //       };
+        //     })
+        //   )
+        // );
+        postCall("clientApis/v2/update", payloadData)
       );
-      //Error handling workflow eg, NACK
+      // Error handling workflow eg, NACK
       if (data[0].error && data[0].message.ack.status === "NACK") {
         setLoading(false);
         dispatchToast(data[0].error.message, toast_types.error);
@@ -335,6 +409,38 @@ export default function ReturnOrderModal({
                                 </Grid>
                               );
                             })}
+
+                            <div className="mt-1">
+                              {isProductSelected(product?.id) && (
+                                <Input
+                                  label_name="Upload Images *"
+                                  type="file"
+                                  id="images"
+                                  accept="image/png,image/jpg"
+                                  onChange={(event) => {
+                                    const file = event.target.files;
+                                    if (file?.size / 1024 > 2048) {
+                                      dispatchToast("File size cannot exceed more than 2MB", toast_types.error);
+                                    } else {
+                                      let selectedProductImages =
+                                        selectedImages[product.id] == undefined ? [] : selectedImages[product.id];
+                                      selectedProductImages.push(file[0]);
+                                      setSelectedImages({ ...selectedImages, [product.id]: selectedProductImages });
+                                    }
+                                  }}
+                                  //   required={["ITM02", "ITM03", "ITM04", "ITM05", "FLM04"].includes(
+                                  //     selectedIssueSubcategory?.enums
+                                  //   )}
+                                  has_error={inlineError.image_error}
+                                  //   disabled={baseImage.length === 4}
+                                />
+                              )}
+                              <ErrorMessage>{inlineError.image_error}</ErrorMessage>
+                              {isProductSelected(product?.id) &&
+                                selectedImages?.[product?.id]?.map((file) => {
+                                  return <p style={{ fontSize: 12, margin: 0 }}>{file.name}</p>;
+                                })}
+                            </div>
                           </div>
                         </div>
                         <div style={{ width: 100 }}>
@@ -364,13 +470,15 @@ export default function ReturnOrderModal({
                               }}
                             />
                           </div>
+
                           <div>
                             {isProductSelected(product?.id) && (
                               <div>
                                 <div className={productCartStyles.quantity_count_wrapper}>
                                   <div
-                                    className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
@@ -388,10 +496,11 @@ export default function ReturnOrderModal({
                                     </p>
                                   </div>
                                   <div
-                                    className={`${orderQty[idx]?.count < quantity[idx]?.count
+                                    className={`${
+                                      orderQty[idx]?.count < quantity[idx]?.count
                                         ? productCartStyles.add_svg_wrapper
                                         : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
