@@ -1,28 +1,24 @@
-import { useCallback, useEffect, useRef, useMemo, useState } from "react";
-import axios from "axios";
-import ScriptTag from "react-script-tag";
+import { useEffect, useState } from "react";
 import "./TrakingMap.css";
 
 import { mappls, mappls_plugin } from 'mappls-web-maps';
 
+import useCancellablePromise from "../../../api/cancelRequest";
+import { getCall } from "../../../api/axios";
+
 export default function TrakingMapComponent(props) {
 
   const {
-    center = [28.62, 77.09],
-    zoom = 15,
-    zoomControl = true,
-    search = true,
-    hybrid = false,
-    location,
-    setLocation = null,
+
   } = props;
 
+  const { cancellablePromise } = useCancellablePromise();
   const [apiKey, setApiKey] = useState();
   const mapProps = { center: [28.6330, 77.2194], traffic: false, zoom: 4, geolocation: false, clickableIcons: false }
   let mapObject;
   let mapplsClassObject = new mappls();
   let mapplsPluginObject = new mappls_plugin();
-  let map, add, direction_plugin, c = 0, ll = [
+  let add, direction_plugin, c = 0, ll = [
     { lat: 28.63124010064198, lng: 77.46734619140625 },
     { lat: 28.63395214251842, lng: 77.4635696411133 },
     { lat: 28.634253476178397, lng: 77.45704650878908 },
@@ -51,6 +47,8 @@ export default function TrakingMapComponent(props) {
       search: true,
       isDraggable: false,
       alternatives: false,
+      Resource: 'route_eta',
+      annotations: 'nodes',
       callback: function (data) { }
     };
     direction_plugin = mapplsPluginObject.direction(direction_option);
@@ -75,12 +73,15 @@ export default function TrakingMapComponent(props) {
     }, 2500);
   };
 
+  const getToken = async () => {
+    const res = await cancellablePromise(getCall(`/clientApis/v2/map/accesstoken`));
+    console.log("data: ", res);
+    setApiKey(res.access_token);
+  };
+
   // fetch MMI API token
   useEffect(() => {
-    axios.post("https://ref-seller-app-preprod.ondc.org/api/v1/auth/mmi/token").then((res) => {
-      console.log("res.data=====>", res.data);
-      setApiKey(res.data.access_token);
-    });
+    getToken();
   }, []);
 
   useEffect(() => {

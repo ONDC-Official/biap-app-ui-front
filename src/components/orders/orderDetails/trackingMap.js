@@ -15,11 +15,11 @@ const TrackingMapComponant = () => {
     }
     return (
         <div className={classes.map}>
-            {/*<img className={classes.map} src={ordermap} alt={`ordermap`} />*/}
-            {/* <PlacePickerMap
+            {/* <img className={classes.map} src={ordermap} alt={`ordermap`} /> */}
+            <PlacePickerMap
                 location={gps}
-            /> */}
-            <TrakingMap />
+            />
+            {/* <TrakingMap /> */}
         </div>
     )
 
