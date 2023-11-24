@@ -41,10 +41,7 @@ export default function TrakingMapComponent(props) {
     { lat: 28.631541442089226, lng: 77.37808227539064 },
   ];
 
-  console.log("mapplsClassObject=====>", mapplsClassObject);
-
   const onMapLoad = () => {
-    console.log("1111111111111111111111111111", mapplsClassObject);
     var direction_option = {
       map: mapObject,
       divWidth: '0px',
@@ -54,11 +51,9 @@ export default function TrakingMapComponent(props) {
       search: true,
       isDraggable: false,
       alternatives: false,
-      callback: function (data) { console.log("direction_option callback ======>", data); }
+      callback: function (data) { }
     };
-    console.log("2222222222222=====>", mapplsPluginObject);
     direction_plugin = mapplsPluginObject.direction(direction_option);
-    console.log("direction_plugin=====>", direction_plugin);
     add = setInterval(() => {
       c++;
       if (ll[c]) {
@@ -106,120 +101,8 @@ export default function TrakingMapComponent(props) {
     }
   }, [apiKey]);
 
-  // const ref = useCallback((node) => {
-  //   if (!mapInitialised && node != null) {
-  //     // eslint-disable-next-line
-  //     // const map = new MapmyIndia.Map(node, {
-  //     //   center,
-  //     //   zoom,
-  //     //   zoomControl,
-  //     //   search,
-  //     // });
-  //     // setMap(map);
-  //     // setMapInitialised(true);
-  //     // console.log("mappls=====>", new mappls);
-  //     // const map = new mappls.Map('map', {
-  //     //   center: [28.09, 78.3],
-  //     //   zoom: 5
-  //     // });
-  //     // setMap(map);
-  //     // setMapInitialised(true);
-  //   }
-  // }, []);
-
-  // const onChange = (data) => {
-  //   const { lat, lng } = data;
-  //   if (lat && lng) {
-  //     setLocation(data);
-  //   } else console.log("Location not found. Please try moving map.");
-  // };
-
-  // useEffect(() => {
-  //   if (!mapInitialised) return;
-  //   let options = {};
-  //   if (!setLocation) {
-  //     options = {
-  //       map,
-  //       // callback: () => {},
-  //       search: false,
-  //       closeBtn: false,
-  //       topText: " ",
-  //       geolocation: false,
-  //     };
-  //   } else {
-  //     options = {
-  //       map,
-  //       callback: onChange,
-  //       search: true,
-  //       closeBtn: false,
-  //       topText: " ",
-  //       geolocation: true,
-  //     };
-  //   }
-
-  //   options.location = location?.lat && location?.lng ? location : { lat: 28.679079, lng: 77.06971 };
-  //   // eslint-disable-next-line
-  //   new MapmyIndia.placePicker(options);
-  // }, [mapInitialised, props]);
-
-
-
-  // const initMap1 = () => {
-  //   map = new mappls.Map('map', {
-  //     center: [28.09, 78.3],
-  //     zoom: 5
-  //   });
-  //   map.addListener('load', function () {
-  //     /*direction plugin initialization*/
-  //     var direction_option = {
-  //       map: map,
-  //       divWidth: '350px',
-  //       start: { label: 'start', geoposition: "28.63124010064198,77.46734619140625" },
-  //       end: { label: 'end', geoposition: "28.631541442089226,77.37808227539064" },
-  //       steps: false,
-  //       search: true,
-  //       isDraggable: false,
-  //       alternatives: false,
-  //       callback: function (data) { }
-  //     }
-  //     direction_plugin = mappls.direction(direction_option);
-  //     add = setInterval(() => {
-  //       c++;
-  //       if (ll[c]) {
-  //         direction_plugin.tracking({
-  //           location: ll[c],
-  //           label: 'current location',
-  //           icon: "../img/mkr_start.png",
-  //           heading: false,
-  //           reRoute: true,
-  //           fitBounds: false,
-  //           animationSpeed: 5,
-  //           delay: 2000
-  //         });
-  //         if (ll[c].lat === 28.631541442089226) {
-  //           clearInterval(add);
-  //           setTimeout(() => { alert("reached."); }, 500);
-  //         }
-  //       }
-  //     }, 2000);
-  //   });
-  // }
-
   return (
     <div style={{ width: "100%", height: "100%", borderRadius: '50px' }}>
-      {/* <ScriptTag
-        isHydrating={true}
-        // type="text/javascript"
-        src={`https://apis.mappls.com/advancedmaps/api/${apiKey}/map_sdk?layer=vector&v=3.0&callback=initMap1`}
-        onLoad={(e) => setScript1Loaded(true)}
-      />
-      <ScriptTag
-        isHydrating={true}
-        // type="text/javascript"
-        src={`https://apis.mappls.com/advancedmaps/api/${apiKey}/map_sdk_plugins?v=3.0&libraries=direction`}
-        onLoad={() => setScript2Loaded(true)}
-      />
-      {script1Loaded && script2Loaded && <div id="map" ref={ref} />} */}
       <div id="map" ></div>
     </div>
   );
