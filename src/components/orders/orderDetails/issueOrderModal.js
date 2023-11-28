@@ -151,13 +151,14 @@ export default function IssueOrderModal({
       //Error handling workflow eg, NACK
       if (data.message && data.message.ack.status === "NACK") {
         setLoading(false);
-        dispatchToast("IGM is not implemented by this seller", toast_types.error);
+        dispatchToast("Something went wrong", toast_types.error);
       } else {
         fetchCancelPartialOrderDataThroughEvents(data.context?.message_id, createdDateTime);
       }
     } catch (err) {
       setLoading(false);
-      dispatchToast(err?.message, toast_types.error);
+      // dispatchToast(err?.message, toast_types.error);
+      dispatchToast("IGM is not implemented by this seller", toast_types.error);
     }
   }
 
