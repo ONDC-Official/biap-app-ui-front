@@ -17,7 +17,11 @@ import { ReactComponent as GridViewIcon } from "../../../assets/images/gridView.
 
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
-import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
+import {
+  getAllProductRequest,
+  getAllFiltersRequest,
+  getAllFilterValuesRequest,
+} from "../../../api/product.api";
 import { getValueFromCookie } from "../../../utils/cookies";
 import { getCall, postCall } from "../../../api/axios";
 import { CartContext } from "../../../context/cartContext";
@@ -59,12 +63,21 @@ const Products = ({ brandDetails, brandId }) => {
   const getAllProducts = async (brandId, customMenuId) => {
     setIsLoading(true);
     try {
-      let paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
-      paginationData.searchData = paginationData.searchData.filter((item) => item.selectedValues.length > 0);
-      paginationData.searchData = paginationData.searchData.reduce(function (r, e) {
+      let paginationData = Object.assign(
+        {},
+        JSON.parse(JSON.stringify(paginationModel))
+      );
+      paginationData.searchData = paginationData.searchData.filter(
+        (item) => item.selectedValues.length > 0
+      );
+      paginationData.searchData = paginationData.searchData.reduce(function (
+        r,
+        e
+      ) {
         r[e.code] = e.selectedValues.join();
         return r;
-      }, {});
+      },
+      {});
       paginationData.searchData.pageNumber = paginationData.page;
       paginationData.searchData.limit = paginationData.pageSize;
       if (brandId) {
@@ -74,7 +87,9 @@ const Products = ({ brandDetails, brandId }) => {
         paginationData.searchData.customMenu = customMenuId || "";
       } else {
       }
-      const data = await cancellablePromise(getAllProductRequest(paginationData.searchData));
+      const data = await cancellablePromise(
+        getAllProductRequest(paginationData.searchData)
+      );
       setProducts(data.data);
       setTotalProductCount(data.count);
     } catch (err) {
@@ -93,7 +108,9 @@ const Products = ({ brandDetails, brandId }) => {
 
   const getFilterValues = async (attributeCode) => {
     try {
-      const data = await cancellablePromise(getAllFilterValuesRequest(attributeCode, "", brandId));
+      const data = await cancellablePromise(
+        getAllFilterValuesRequest(attributeCode, "", brandId)
+      );
       let filterValues = data.data;
       filterValues = filterValues.map((value) => {
         const createObj = {
@@ -115,19 +132,27 @@ const Products = ({ brandDetails, brandId }) => {
       const data = await cancellablePromise(getAllFiltersRequest("", brandId));
       let filtersData = data.data;
       filtersData = filtersData.filter((item) => item.code !== "size_chart");
-      filtersData = Object.values(filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {}));
+      filtersData = Object.values(
+        filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {})
+      );
 
       for (let filter of filtersData) {
         const values = await getFilterValues(filter.code);
-        const findIndex = filtersData.findIndex((item) => item.code === filter.code);
+        const findIndex = filtersData.findIndex(
+          (item) => item.code === filter.code
+        );
         if (findIndex > -1) {
           filtersData[findIndex].options = values;
           filtersData[findIndex].selectedValues = [];
         }
       }
-      let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+      let paginationData = Object.assign(
+        JSON.parse(JSON.stringify(paginationModel))
+      );
       paginationData.searchData = filtersData;
-      setPaginationModel(paginationData);
+      if (JSON.stringify(paginationModel) !== JSON.stringify(paginationData)) {
+        setPaginationModel(paginationData);
+      }
     } catch (err) {
       dispatch({
         type: toast_actions.ADD_TOAST,
@@ -183,7 +208,9 @@ const Products = ({ brandDetails, brandId }) => {
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(true);
-      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const data = await cancellablePromise(
+        getCall(`/protocol/item-details?id=${productId}`)
+      );
       setProductPayload(data);
       return data;
     } catch (error) {
@@ -193,7 +220,11 @@ const Products = ({ brandDetails, brandId }) => {
     }
   };
 
-  const handleAddToCart = async (productPayload, isDefault = false, navigate) => {
+  const handleAddToCart = async (
+    productPayload,
+    isDefault = false,
+    navigate
+  ) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
@@ -219,7 +250,8 @@ const Products = ({ brandDetails, brandId }) => {
       },
       customisations: [],
       hasCustomisations:
-        productPayload.hasOwnProperty("customisation_groups") && productPayload.customisation_groups.length > 0,
+        productPayload.hasOwnProperty("customisation_groups") &&
+        productPayload.customisation_groups.length > 0,
     };
 
     const res = await postCall(url, payload);
@@ -234,16 +266,39 @@ const Products = ({ brandDetails, brandId }) => {
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <div role="presentation">
           <Breadcrumbs aria-label="breadcrumb">
-            <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
+            <MuiLink
+              component={Link}
+              underline="hover"
+              color="inherit"
+              to="/application/products"
+            >
               Home
             </MuiLink>
-            {brandName && <Typography color="text.primary">{brandName}</Typography>}
+            {brandName && (
+              <Typography color="text.primary">{brandName}</Typography>
+            )}
           </Breadcrumbs>
         </div>
       </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.catNameTypoContainer}>
-        <Typography variant="h4" className={classes.catNameTypo} color={"success"}>
-          <img className={classes.brandIcon} src={images?.length > 0 ? images[0] : no_image_found} alt={`brand-icon`} />
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        md={12}
+        lg={12}
+        xl={12}
+        className={classes.catNameTypoContainer}
+      >
+        <Typography
+          variant="h4"
+          className={classes.catNameTypo}
+          color={"success"}
+        >
+          <img
+            className={classes.brandIcon}
+            src={images?.length > 0 ? images[0] : no_image_found}
+            alt={`brand-icon`}
+          />
         </Typography>
         {products.length > 0 && (
           <>
@@ -279,7 +334,9 @@ const Products = ({ brandDetails, brandId }) => {
                 filterOn="id"
                 saveButtonText="Apply"
                 value={filter?.selectedValues || []}
-                onChangeFilter={(value) => handleChangeFilter(filterIndex, value)}
+                onChangeFilter={(value) =>
+                  handleChangeFilter(filterIndex, value)
+                }
                 clearButtonText="Clear"
                 disabled={false}
               />
@@ -313,9 +370,15 @@ const Products = ({ brandDetails, brandId }) => {
                             product={productItem?.item_details}
                             productId={productItem.id}
                             price={productItem?.item_details?.price}
-                            bpp_provider_descriptor={productItem?.provider_details?.descriptor}
+                            bpp_provider_descriptor={
+                              productItem?.provider_details?.descriptor
+                            }
                             bpp_id={productItem?.bpp_details?.bpp_id}
-                            location_id={productItem?.location_details ? productItem.location_details?.id : ""}
+                            location_id={
+                              productItem?.location_details
+                                ? productItem.location_details?.id
+                                : ""
+                            }
                             bpp_provider_id={productItem?.provider_details?.id}
                             handleAddToCart={handleAddToCart}
                             getProductDetails={getProductDetails}
@@ -324,14 +387,28 @@ const Products = ({ brandDetails, brandId }) => {
                       );
                     } else {
                       return (
-                        <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={3} lg={3} xl={3}>
+                        <Grid
+                          key={`product-item-${ind}`}
+                          item
+                          xs={12}
+                          sm={12}
+                          md={3}
+                          lg={3}
+                          xl={3}
+                        >
                           <ProductGridView
                             product={productItem?.item_details}
                             productId={productItem.id}
                             price={productItem?.item_details?.price}
-                            bpp_provider_descriptor={productItem?.provider_details?.descriptor}
+                            bpp_provider_descriptor={
+                              productItem?.provider_details?.descriptor
+                            }
                             bpp_id={productItem?.bpp_details?.bpp_id}
-                            location_id={productItem?.location_details ? productItem.location_details?.id : ""}
+                            location_id={
+                              productItem?.location_details
+                                ? productItem.location_details?.id
+                                : ""
+                            }
                             bpp_provider_id={productItem?.provider_details?.id}
                             handleAddToCart={handleAddToCart}
                             getProductDetails={getProductDetails}
@@ -351,7 +428,15 @@ const Products = ({ brandDetails, brandId }) => {
         </Grid>
       </Grid>
       {products.length > 0 && (
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.paginationContainer}>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          md={12}
+          lg={12}
+          xl={12}
+          className={classes.paginationContainer}
+        >
           <Pagination
             className={classes.pagination}
             count={Math.ceil(totalProductCount / paginationModel.pageSize)}

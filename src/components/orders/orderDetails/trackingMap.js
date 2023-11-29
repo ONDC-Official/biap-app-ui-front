@@ -3,7 +3,9 @@ import useStyles from "./style";
 
 import ordermap from '../../../assets/images/ordermap.png';
 import PlacePickerMap from "../../common/PlacePickerMap/PlacePickerMap";
-const TrackingMap = () => {
+import TrakingMap from "../../common/TrakingMap/TrakingMap";
+
+const TrackingMapComponant = () => {
     const classes = useStyles();
     let locationString = "28.679076630288467,77.06970870494843";
     locationString = locationString.split(',');
@@ -13,13 +15,14 @@ const TrackingMap = () => {
     }
     return (
         <div className={classes.map}>
-            {/*<img className={classes.map} src={ordermap} alt={`ordermap`} />*/}
+            {/* <img className={classes.map} src={ordermap} alt={`ordermap`} /> */}
             <PlacePickerMap
                 location={gps}
             />
+            {/* <TrakingMap /> */}
         </div>
     )
 
 };
 
-export default TrackingMap;
+export default TrackingMapComponant;

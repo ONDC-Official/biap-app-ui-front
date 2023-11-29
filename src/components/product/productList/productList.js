@@ -17,7 +17,11 @@ import { ReactComponent as ListViewIcon } from "../../../assets/images/listView.
 import { ReactComponent as GridViewIcon } from "../../../assets/images/gridView.svg";
 
 import useCancellablePromise from "../../../api/cancelRequest";
-import { getAllProductRequest, getAllFiltersRequest, getAllFilterValuesRequest } from "../../../api/product.api";
+import {
+  getAllProductRequest,
+  getAllFiltersRequest,
+  getAllFilterValuesRequest,
+} from "../../../api/product.api";
 import { getCall, postCall } from "../../../api/axios";
 import { getValueFromCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
@@ -69,12 +73,21 @@ const ProductList = () => {
   const getAllProducts = async (searchName) => {
     setIsLoading(true);
     try {
-      let paginationData = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
-      paginationData.searchData = paginationData.searchData.filter((item) => item.selectedValues.length > 0);
-      paginationData.searchData = paginationData.searchData.reduce(function (r, e) {
+      let paginationData = Object.assign(
+        {},
+        JSON.parse(JSON.stringify(paginationModel))
+      );
+      paginationData.searchData = paginationData.searchData.filter(
+        (item) => item.selectedValues.length > 0
+      );
+      paginationData.searchData = paginationData.searchData.reduce(function (
+        r,
+        e
+      ) {
         r[e.code] = e.selectedValues.join();
         return r;
-      }, {});
+      },
+      {});
       paginationData.searchData.pageNumber = paginationData.page;
       paginationData.searchData.limit = paginationData.pageSize;
       if (searchName) {
@@ -85,7 +98,9 @@ const ProductList = () => {
         paginationData.searchData.categoryIds = subCategoryName || "";
       } else {
       }
-      const data = await cancellablePromise(getAllProductRequest(paginationData.searchData));
+      const data = await cancellablePromise(
+        getAllProductRequest(paginationData.searchData)
+      );
       setProducts(data.data);
       setTotalProductCount(data.count);
     } catch (err) {
@@ -104,7 +119,9 @@ const ProductList = () => {
 
   const getFilterValues = async (attributeCode) => {
     try {
-      const data = await cancellablePromise(getAllFilterValuesRequest(attributeCode, subCategoryName));
+      const data = await cancellablePromise(
+        getAllFilterValuesRequest(attributeCode, subCategoryName)
+      );
       let filterValues = data.data;
       filterValues = filterValues.map((value) => {
         const createObj = {
@@ -123,22 +140,32 @@ const ProductList = () => {
   const getAllFilters = async () => {
     setIsLoading(true);
     try {
-      const data = await cancellablePromise(getAllFiltersRequest(subCategoryName));
+      const data = await cancellablePromise(
+        getAllFiltersRequest(subCategoryName)
+      );
       let filtersData = data.data;
       filtersData = filtersData.filter((item) => item.code !== "size_chart");
-      filtersData = Object.values(filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {}));
+      filtersData = Object.values(
+        filtersData.reduce((acc, obj) => ({ ...acc, [obj.code]: obj }), {})
+      );
 
       for (let filter of filtersData) {
         const values = await getFilterValues(filter.code);
-        const findIndex = filtersData.findIndex((item) => item.code === filter.code);
+        const findIndex = filtersData.findIndex(
+          (item) => item.code === filter.code
+        );
         if (findIndex > -1) {
           filtersData[findIndex].options = values;
           filtersData[findIndex].selectedValues = [];
         }
       }
-      let paginationData = Object.assign(JSON.parse(JSON.stringify(paginationModel)));
+      let paginationData = Object.assign(
+        JSON.parse(JSON.stringify(paginationModel))
+      );
       paginationData.searchData = filtersData;
-      setPaginationModel(paginationData);
+      if (JSON.stringify(paginationModel) !== JSON.stringify(paginationData)) {
+        setPaginationModel(paginationData);
+      }
     } catch (err) {
       dispatch({
         type: toast_actions.ADD_TOAST,
@@ -165,14 +192,25 @@ const ProductList = () => {
       const searchName = query.get("s");
       getAllProducts(searchName);
     }
-  }, [paginationModel, locationData, deliveryAddressLocation]);
+  }, [paginationModel]);
+
+  useEffect(() => {
+    // TODO: Check how many times use effect is being called after mmi call removal
+    // console.log("in use effect 3", locationData, deliveryAddressLocation);
+    if (locationData) {
+      const searchName = query.get("s");
+      getAllProducts(searchName);
+    }
+  }, [locationData, deliveryAddressLocation]);
 
   const handleChangeFilter = (filterIndex, value) => {
     const data = Object.assign({}, JSON.parse(JSON.stringify(paginationModel)));
     data.searchData[filterIndex].selectedValues = value;
     data.page = 1;
     data.pageSize = 10;
-    setPaginationModel(data);
+    if (JSON.stringify(paginationModel) !== JSON.stringify(data)) {
+      setPaginationModel(data);
+    }
   };
 
   //   const getProductDetails = async (productId) => {
@@ -191,7 +229,9 @@ const ProductList = () => {
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(true);
-      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const data = await cancellablePromise(
+        getCall(`/protocol/item-details?id=${productId}`)
+      );
       setProductPayload(data);
       return data;
     } catch (error) {
@@ -207,7 +247,10 @@ const ProductList = () => {
     for (const level in customization_state) {
       const selectedOptions = customization_state[level].selected;
       if (selectedOptions.length > 0) {
-        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
+        subtotal += selectedOptions.reduce(
+          (acc, option) => acc + option.price,
+          0
+        );
       }
     }
     return subtotal;
@@ -222,7 +265,9 @@ const ProductList = () => {
       const selectedItems = customization_state[level].selected;
 
       for (const selectedItem of selectedItems) {
-        let customization = customisation_items.find((item) => item.local_id === selectedItem.id);
+        let customization = customisation_items.find(
+          (item) => item.local_id === selectedItem.id
+        );
 
         if (customization) {
           customization = {
@@ -239,18 +284,32 @@ const ProductList = () => {
     return customizations;
   };
 
-  const addToCart = async (productPayload, isDefault = false, navigate = false) => {
+  const addToCart = async (
+    productPayload,
+    isDefault = false,
+    navigate = false
+  ) => {
     setProductLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
 
-    const subtotal = productPayload?.item_details?.price?.value + calculateSubtotal();
+    const subtotal =
+      productPayload?.item_details?.price?.value + calculateSubtotal();
 
-    const groups = await formatCustomizationGroups(productPayload.customisation_groups);
+    const groups = await formatCustomizationGroups(
+      productPayload.customisation_groups
+    );
     const cus = await formatCustomizations(productPayload.customisation_items);
-    const newState = await initializeCustomizationState(groups, cus, customization_state);
+    const newState = await initializeCustomizationState(
+      groups,
+      cus,
+      customization_state
+    );
 
-    getCustomizations(productPayload, isDefault ? newState : customization_state).then((customisations) => {
+    getCustomizations(
+      productPayload,
+      isDefault ? newState : customization_state
+    ).then((customisations) => {
       const payload = {
         id: productPayload.id,
         local_id: productPayload.local_id,
@@ -271,7 +330,8 @@ const ProductList = () => {
           ...productPayload.item_details,
         },
         hasCustomisations:
-          productPayload.hasOwnProperty("customisation_groups") && productPayload.customisation_groups.length > 0,
+          productPayload.hasOwnProperty("customisation_groups") &&
+          productPayload.customisation_groups.length > 0,
       };
 
       if (customisations.length > 0) {
@@ -301,7 +361,10 @@ const ProductList = () => {
       params.set("c", categoryName);
     } else {
     }
-    history.replace({ pathname: `/application/products`, search: params.toString() });
+    history.replace({
+      pathname: `/application/products`,
+      search: params.toString(),
+    });
   };
 
   return (
@@ -309,7 +372,12 @@ const ProductList = () => {
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <div role="presentation">
           <Breadcrumbs aria-label="breadcrumb">
-            <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
+            <MuiLink
+              component={Link}
+              underline="hover"
+              color="inherit"
+              to="/application/products"
+            >
               Home
             </MuiLink>
             {categoryName && (
@@ -319,21 +387,35 @@ const ProductList = () => {
                 color="inherit"
                 // to={`/category/${categoryName}`}
                 onClick={updateQueryParams}
-                href={`/application/products?${searchProductName ? `s=${searchProductName}&` : ""}${
-                  categoryName ? `c=${categoryName}` : ""
-                }`}
+                href={`/application/products?${
+                  searchProductName ? `s=${searchProductName}&` : ""
+                }${categoryName ? `c=${categoryName}` : ""}`}
               >
                 {categoryName}
               </MuiLink>
             )}
             {(subCategoryName || searchProductName) && (
-              <Typography color="text.primary">{subCategoryName || searchProductName}</Typography>
+              <Typography color="text.primary">
+                {subCategoryName || searchProductName}
+              </Typography>
             )}
           </Breadcrumbs>
         </div>
       </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.catNameTypoContainer}>
-        <Typography variant="h4" className={classes.catNameTypo} color={"success"}>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        md={12}
+        lg={12}
+        xl={12}
+        className={classes.catNameTypoContainer}
+      >
+        <Typography
+          variant="h4"
+          className={classes.catNameTypo}
+          color={"success"}
+        >
           {subCategoryName}
         </Typography>
         {products.length > 0 && (
@@ -370,7 +452,9 @@ const ProductList = () => {
                 filterOn="id"
                 saveButtonText="Apply"
                 value={filter?.selectedValues || []}
-                onChangeFilter={(value) => handleChangeFilter(filterIndex, value)}
+                onChangeFilter={(value) =>
+                  handleChangeFilter(filterIndex, value)
+                }
                 clearButtonText="Clear"
                 disabled={false}
               />
@@ -404,9 +488,15 @@ const ProductList = () => {
                             product={productItem?.item_details}
                             productId={productItem.id}
                             price={productItem?.item_details?.price}
-                            bpp_provider_descriptor={productItem?.provider_details?.descriptor}
+                            bpp_provider_descriptor={
+                              productItem?.provider_details?.descriptor
+                            }
                             bpp_id={productItem?.bpp_details?.bpp_id}
-                            location_id={productItem?.location_details ? productItem.location_details?.id : ""}
+                            location_id={
+                              productItem?.location_details
+                                ? productItem.location_details?.id
+                                : ""
+                            }
                             bpp_provider_id={productItem?.provider_details?.id}
                             getProductDetails={getProductDetails}
                             handleAddToCart={addToCart}
@@ -416,14 +506,28 @@ const ProductList = () => {
                       );
                     } else {
                       return (
-                        <Grid key={`product-item-${ind}`} item xs={12} sm={12} md={2} lg={2} xl={2}>
+                        <Grid
+                          key={`product-item-${ind}`}
+                          item
+                          xs={12}
+                          sm={12}
+                          md={2}
+                          lg={2}
+                          xl={2}
+                        >
                           <ProductGridView
                             product={productItem?.item_details}
                             productId={productItem.id}
                             price={productItem?.item_details?.price}
-                            bpp_provider_descriptor={productItem?.provider_details?.descriptor}
+                            bpp_provider_descriptor={
+                              productItem?.provider_details?.descriptor
+                            }
                             bpp_id={productItem?.bpp_details?.bpp_id}
-                            location_id={productItem?.location_details ? productItem.location_details?.id : ""}
+                            location_id={
+                              productItem?.location_details
+                                ? productItem.location_details?.id
+                                : ""
+                            }
                             bpp_provider_id={productItem?.provider_details?.id}
                             getProductDetails={getProductDetails}
                             handleAddToCart={addToCart}
@@ -444,7 +548,15 @@ const ProductList = () => {
         </Grid>
       </Grid>
       {products.length > 0 && (
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.paginationContainer}>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          md={12}
+          lg={12}
+          xl={12}
+          className={classes.paginationContainer}
+        >
           <Pagination
             className={classes.pagination}
             count={Math.ceil(totalProductCount / paginationModel.pageSize)}

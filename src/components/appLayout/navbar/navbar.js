@@ -142,6 +142,7 @@ const NavBar = ({ isCheckout = false }) => {
 
   // use this function to fetch existing address of the user
   const fetchDeliveryAddress = async () => {
+    if (deliveryAddress) return;
     setFetchDeliveryAddressLoading(true);
     try {
       const data = await cancellablePromise(getAllDeliveryAddressRequest());
@@ -193,6 +194,7 @@ const NavBar = ({ isCheckout = false }) => {
       const address = JSON.parse(getValueFromCookie("delivery_address"));
       if (address) {
         setDeliveryAddress(() => address);
+      } else {
         fetchLatLongFromEloc(address);
       }
     } else {
@@ -210,7 +212,7 @@ const NavBar = ({ isCheckout = false }) => {
   }, []);
 
   useEffect(() => {
-    getLastEnteredValues();
+    //  getLastEnteredValues();
     const anchor = document.querySelector("#back-to-top-anchor");
     if (anchor) {
       anchor.scrollIntoView({
