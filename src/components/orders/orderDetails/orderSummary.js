@@ -1071,7 +1071,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const getReturnOrCancelledItems = () => {
     let items = [];
     orderDetails?.fulfillments?.forEach((f) => {
-      if (f.type === "Return" || f.type === "Cancel") {
+      if (f.type === "Return") {
         const details = f.tags[0].list;
         items.push({
           id: details.find((d) => d.code === "item_id")["value"],
