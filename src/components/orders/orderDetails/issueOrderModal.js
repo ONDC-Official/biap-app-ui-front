@@ -103,8 +103,8 @@ export default function IssueOrderModal({
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
           context: {
-            city: delivery_address.location?.city,
-            state: delivery_address.location?.state,
+            city: delivery_address.city,
+            state: delivery_address.state,
             transaction_id,
           },
           message: {
@@ -157,8 +157,7 @@ export default function IssueOrderModal({
       }
     } catch (err) {
       setLoading(false);
-      // dispatchToast(err?.message, toast_types.error);
-      dispatchToast("IGM is not implemented by this seller", toast_types.error);
+      dispatchToast(err?.message, toast_types.error);
     }
   }
 

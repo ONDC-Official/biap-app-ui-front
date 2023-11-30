@@ -3,13 +3,9 @@ import useStyles from "./style";
 
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
-import { useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
-
-import OrderTimeline from "./orderTimeline";
-import SummaryItems from "./summaryItems";
 import moment from "moment";
 import styles from "../../../styles/cart/cartView.module.scss";
 import { ToastContext } from "../../../context/toastContext";
@@ -1197,43 +1193,46 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
-          {isIssueRaised ? (
-            <Button
-              fullWidth
-              variant="outlined"
-              className={classes.helpButton}
-              disabled={
-                trackOrderLoading ||
-                statusLoading ||
-                issueLoading
-              }
-              onClick={() => history.push("/application/tickets")}
-            >
-              {issueLoading ? (
-                <Loading />
+          {orderDetails?.state === "Completed" && (
+            <>
+              {isIssueRaised ? (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  className={classes.helpButton}
+                  disabled={
+                    trackOrderLoading ||
+                    statusLoading ||
+                    issueLoading
+                  }
+                  onClick={() => history.push("/application/tickets")}
+                >
+                  {issueLoading ? (
+                    <Loading />
+                  ) : (
+                    "Track Issue"
+                  )}
+                </Button>
               ) : (
-                "Track Issue"
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  className={classes.helpButton}
+                  disabled={
+                    trackOrderLoading ||
+                    statusLoading ||
+                    issueLoading
+                  }
+                  onClick={() => setToggleIssueModal(true)}
+                >
+                  {issueLoading ? (
+                    <Loading />
+                  ) : (
+                    "Raise Issue"
+                  )}
+                </Button>
               )}
-            </Button>
-          ) : (
-            <Button
-              fullWidth
-              variant="outlined"
-              className={classes.helpButton}
-              disabled={
-                trackOrderLoading ||
-                statusLoading ||
-                issueLoading
-              }
-              onClick={() => setToggleIssueModal(true)}
-            >
-              {issueLoading ? (
-                <Loading />
-              ) : (
-                "Raise Issue"
-              )}
-            </Button>
-          )}
+            </>)}
           <Button
             fullWidth
             variant="outlined"
