@@ -57,11 +57,12 @@ export const getCustomizationGroupsForProduct = (allGroups, ids) => {
 };
 
 export const hasCustomizations = (productPayload) => {
-  return productPayload.item_details.tags.find(
-    (item) => item.code === "custom_group"
-  )
-    ? productPayload?.customisation_groups?.length > 0
-    : false;
+  return productPayload.item_details.tags.find((item) => item.code === "custom_group") ? true : false;
+  // return productPayload.item_details.tags.find(
+  //   (item) => item.code === "custom_group"
+  // )
+  //   ? productPayload?.customisation_groups?.length > 0
+  //   : false;
 };
 
 export const initializeCustomizationState_ = async (customizationGroups, customizations, customization_state) => {
