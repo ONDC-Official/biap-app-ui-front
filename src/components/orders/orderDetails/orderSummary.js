@@ -1058,6 +1058,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
       const data = await cancellablePromise(
         getCall(`/clientApis/v2/on_track?messageIds=${message_id}`)
       );
+      setTrackOrderLoading(false);
       trackEventSourceResponseRef.current = [
         ...trackEventSourceResponseRef.current,
         data[0],
