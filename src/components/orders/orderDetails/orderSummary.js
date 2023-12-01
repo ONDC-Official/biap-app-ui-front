@@ -31,7 +31,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
-const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
+const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) => {
   const classes = useStyles();
 
   const [itemQuotes, setItemQuotes] = useState(null);
@@ -824,9 +824,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${
-                parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0
-              }`}
+              {`₹${parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0
+                }`}
             </Typography>
           </div>
         </div>
@@ -1029,6 +1028,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       ];
       const { message } = data[0];
       if (message.tracking.status === "active" && message.tracking.url === "") {
+        onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information is not provided by the provider.",
@@ -1036,21 +1036,26 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         );
         return;
       } else if (message?.tracking?.url === "") {
+        onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information not available for this product",
           toast_types.error
         );
         return;
+      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
+        onUpdateTrakingDetails(message?.tracking);
       } else if (
         message.tracking.status === "active" &&
-        message?.tracking?.url !== ""
+        (message?.tracking?.url !== "" || message?.tracking?.url !== undefined)
       ) {
         setTrackOrderLoading(false);
         trackOrderRef.current.href = message?.tracking?.url;
         trackOrderRef.current.target = "_blank";
         trackOrderRef.current.click();
+        onUpdateTrakingDetails(null);
       } else {
+        onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information is not provided by the provider.",
@@ -1134,13 +1139,13 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
             className={classes.statusChip}
             color={
               orderDetails?.state === "Confirmed" ||
-              orderDetails?.state === "Created"
+                orderDetails?.state === "Created"
                 ? "primary"
                 : orderDetails?.state === "Delivered"
-                ? "success"
-                : orderDetails?.state === "Cancelled"
-                ? "error"
-                : "primary"
+                  ? "success"
+                  : orderDetails?.state === "Cancelled"
+                    ? "error"
+                    : "primary"
             }
             label={orderDetails?.state}
           />
@@ -1181,17 +1186,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
           </Button>
           {(orderDetails?.state === "Accepted" ||
             orderDetails?.state === "Created") && (
-            <Button
-              fullWidth
-              variant="contained"
-              color="error"
-              className={classes.cancelOrderButton}
-              onClick={() => setToggleCancelOrderModal(true)}
-              disabled={allNonCancellable || statusLoading || trackOrderLoading}
-            >
-              Cancel Order
-            </Button>
-          )}
+              <Button
+                fullWidth
+                variant="contained"
+                color="error"
+                className={classes.cancelOrderButton}
+                onClick={() => setToggleCancelOrderModal(true)}
+                disabled={allNonCancellable || statusLoading || trackOrderLoading}
+              >
+                Cancel Order
+              </Button>
+            )}
           {orderDetails?.state === "Completed" && (
             <>
               <Button

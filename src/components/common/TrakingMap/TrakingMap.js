@@ -9,12 +9,17 @@ import { getCall } from "../../../api/axios";
 export default function TrakingMapComponent(props) {
 
   const {
-
+    mapCenter,
+    geoPositionStart,
+    geoPositionEnd,
+    currentLocation = null
   } = props;
+
+  console.log("mapCenter=====>", mapCenter(), geoPositionStart);
 
   const { cancellablePromise } = useCancellablePromise();
   const [apiKey, setApiKey] = useState();
-  const mapProps = { center: [28.6330, 77.2194], traffic: false, zoom: 4, geolocation: false, clickableIcons: false }
+  const mapProps = { center: mapCenter(), traffic: false, zoom: 4, geolocation: false, clickableIcons: false }
   let mapObject;
   let mapplsClassObject = new mappls();
   let mapplsPluginObject = new mappls_plugin();
@@ -37,12 +42,17 @@ export default function TrakingMapComponent(props) {
     { lat: 28.631541442089226, lng: 77.37808227539064 },
   ];
 
+  console.log("geoPositionStart=====>", geoPositionStart);
+  console.log("geoPositionEnd=====>", geoPositionEnd);
+
   const onMapLoad = () => {
     var direction_option = {
       map: mapObject,
       divWidth: '0px',
       start: { label: 'start', geoposition: "28.63124010064198,77.46734619140625" },
       end: { label: 'end', geoposition: "28.631541442089226,77.37808227539064" },
+      // start: { label: 'start', geoposition: geoPositionStart },
+      // end: { label: 'end', geoposition: geoPositionEnd },
       steps: false,
       search: true,
       isDraggable: false,
@@ -51,6 +61,31 @@ export default function TrakingMapComponent(props) {
       annotations: 'nodes',
       callback: function (data) { }
     };
+
+    // const defaultCenter = mapCenter();
+    // const defaultCurrentLocation = defaultCenter ? {
+    //   lat: parseFloat(defaultCenter[0]),
+    //   lng: parseFloat(defaultCenter[1]),
+    // } : null;
+    // if (currentLocation || defaultCurrentLocation) {
+    //   console.log("currentLocation 11111111111111=====>", currentLocation);
+    //   console.log("defaultCurrentLocation 2222222222222=====>", defaultCurrentLocation);
+    //   const location = currentLocation ? currentLocation : defaultCurrentLocation;
+    //   console.log("location 333333333333====>", location);
+    //   direction_plugin = mapplsPluginObject.direction(direction_option);
+    //   direction_plugin.tracking({
+    //     // location: { lat: 28.63124010064198, lng: 77.46734619140625 },
+    //     location: location,
+    //     label: 'current location',
+    //     icon: "https://apis.mapmyindia.com/map_v3/2.png",
+    //     heading: false,
+    //     reRoute: true,
+    //     fitBounds: false,
+    //     animationSpeed: 5,
+    //     delay: 2000
+    //   });
+    // }
+
     direction_plugin = mapplsPluginObject.direction(direction_option);
     add = setInterval(() => {
       c++;
@@ -66,11 +101,27 @@ export default function TrakingMapComponent(props) {
           delay: 2000
         });
         if (ll[c].lat === 28.631541442089226) {
-          clearInterval(add);
-          setTimeout(() => { alert("reached."); }, 500);
+          // clearInterval(add);
+          // setTimeout(() => { alert("reached."); }, 500);
         }
       }
     }, 2500);
+  };
+
+  const onInitializeMap = () => {
+    const loadObject = {
+      map: true,
+      plugins: ["direction"],
+    };
+    mapplsClassObject.initialize(apiKey, loadObject, () => {
+      mapObject = mapplsClassObject.Map({ id: "map", properties: mapProps });
+
+      //load map layers/components after map load, inside this callback (Recommended)
+      mapObject.on("load", () => {
+        // Activites after mapload
+        onMapLoad();
+      })
+    });
   };
 
   const getToken = async () => {
@@ -84,21 +135,17 @@ export default function TrakingMapComponent(props) {
     getToken();
   }, []);
 
+  console.log("currentLocation=====>", currentLocation);
+  useEffect(() => {
+    if (currentLocation) {
+      onMapLoad()
+      // onInitializeMap();
+    }
+  }, [currentLocation]);
+
   useEffect(() => {
     if (apiKey) {
-      const loadObject = {
-        map: true,
-        plugins: ["direction"],
-      };
-      mapplsClassObject.initialize(apiKey, loadObject, () => {
-        mapObject = mapplsClassObject.Map({ id: "map", properties: mapProps });
-
-        //load map layers/components after map load, inside this callback (Recommended)
-        mapObject.on("load", () => {
-          // Activites after mapload
-          onMapLoad();
-        })
-      });
+      onInitializeMap();
     }
   }, [apiKey]);
 
