@@ -323,7 +323,7 @@ const ProductDetails = ({ productId }) => {
   // fetch product details
   useEffect(() => {
     getProductDetails(productId);
-  }, [deliveryAddressLocation]);
+  }, [deliveryAddressLocation, productId]);
 
   const renderVegNonVegTag = () => {
     const FnB = "ONDC:RET11";
@@ -446,7 +446,7 @@ const ProductDetails = ({ productId }) => {
         productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
       "Manufacturer address":
         productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.[
-          "manufacturer_or_packer_address"
+        "manufacturer_or_packer_address"
         ],
     };
 
@@ -480,7 +480,7 @@ const ProductDetails = ({ productId }) => {
         </div>
       ) : (
         <div>
-          <div className={classes.breadCrumbs} onClick={() => {}}>
+          <div className={classes.breadCrumbs} onClick={() => { }}>
             <Breadcrumbs aria-label="breadcrumb">
               <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
                 Home
