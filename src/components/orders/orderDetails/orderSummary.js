@@ -33,7 +33,7 @@ import Paper from "@mui/material/Paper";
 import IssueOrderModal from "./issueOrderModal";
 import { useHistory } from "react-router-dom";
 
-const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
+const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) => {
   const classes = useStyles();
   const history = useHistory();
 
@@ -1064,6 +1064,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
       ];
       const { message } = data[0];
       if (message.tracking.status === "active" && message.tracking.url === "") {
+        onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information is not provided by the provider.",
@@ -1071,21 +1072,26 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
         );
         return;
       } else if (message?.tracking?.url === "") {
+        onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information not available for this product",
           toast_types.error
         );
         return;
+      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
+        onUpdateTrakingDetails(message?.tracking);
       } else if (
         message.tracking.status === "active" &&
-        message?.tracking?.url !== ""
+        (message?.tracking?.url !== "" || message?.tracking?.url !== undefined)
       ) {
         setTrackOrderLoading(false);
         trackOrderRef.current.href = message?.tracking?.url;
         trackOrderRef.current.target = "_blank";
         trackOrderRef.current.click();
+        onUpdateTrakingDetails(null);
       } else {
+        onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
         dispatchToast(
           "Tracking information is not provided by the provider.",
@@ -1106,7 +1112,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder }) => {
   const getReturnOrCancelledItems = () => {
     let items = [];
     orderDetails?.fulfillments?.forEach((f) => {
-      if (f.type === "Return" || f.type === "Cancel") {
+      if (f.type === "Return") {
         const details = f.tags[0].list;
         items.push({
           id: details.find((d) => d.code === "item_id")["value"],

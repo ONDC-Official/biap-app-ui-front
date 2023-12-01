@@ -30,6 +30,7 @@ const OrderDetails = () => {
   const { orderId } = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
+  const [trakingDetails, setTrakingDetails] = useState(null);
   const dispatch = useContext(ToastContext);
 
   // HOOKS
@@ -104,7 +105,10 @@ const OrderDetails = () => {
       ) : (
         <>
           <Grid item xs={12} sm={12} md={7} lg={7} xl={7}>
-            <TrackingMap />
+            <TrackingMap
+              orderDetails={orderDetails}
+              trakingDetails={trakingDetails}
+            />
             <Box component={"div"} className={classes.divider} />
             <CustomerDetails orderDetails={orderDetails} />
           </Grid>
@@ -114,6 +118,9 @@ const OrderDetails = () => {
               onUpdateOrder={(data) => {
                 // setOrderDetails(data);
                 getOrderDetails();
+              }}
+              onUpdateTrakingDetails={(data) => {
+                setTrakingDetails(data);
               }}
             />
           </Grid>
