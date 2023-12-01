@@ -1,25 +1,56 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import useStyles from "./style";
 
-import ordermap from '../../../assets/images/ordermap.png';
-import PlacePickerMap from "../../common/PlacePickerMap/PlacePickerMap";
 import TrakingMap from "../../common/TrakingMap/TrakingMap";
 
-const TrackingMapComponant = () => {
+const TrackingMapComponant = ({ orderDetails, trakingDetails }) => {
     const classes = useStyles();
-    let locationString = "28.679076630288467,77.06970870494843";
-    locationString = locationString.split(',');
-    const gps = {
-        lat: locationString[0],
-        lng: locationString[1]
-    }
+
+    const [deliveryDetails, setDeliveryDetails] = useState(null);
+    const [trakData, setTrakData] = useState(null);
+
+    // fulfillments
+    useEffect(() => {
+        if (orderDetails && orderDetails.fulfillments && orderDetails.fulfillments.length > 0) {
+            const findDeliveryFullfillment = orderDetails.fulfillments.find((item) => item.type === "Delivery");
+            if (findDeliveryFullfillment) {
+                setDeliveryDetails(findDeliveryFullfillment);
+            } else {
+                setDeliveryDetails(null);
+            }
+        }
+    }, [orderDetails]);
+
+    useEffect(() => {
+        if (trakingDetails) {
+            let data = Object.assign({}, JSON.parse(JSON.stringify(trakingDetails)));
+            // let locationString = "30.749469, 76.642282".replaceAll(' ', '');//data.location.gps.replaceAll(' ', '');
+            let locationString = data.location.gps.replaceAll(' ', '');
+            locationString = locationString.split(',');
+            data.location.latlng = {
+                lat: parseFloat(locationString[0]),
+                lng: parseFloat(locationString[1])
+            };
+            setTrakData(data);
+        }
+    }, [trakingDetails]);
+
     return (
         <div className={classes.map}>
-            {/* <img className={classes.map} src={ordermap} alt={`ordermap`} /> */}
-            <PlacePickerMap
-                location={gps}
-            />
-            {/* <TrakingMap /> */}
+            {
+                orderDetails && deliveryDetails && (
+                    <TrakingMap
+                        mapCenter={() => {
+                            let locationString = deliveryDetails.start.location.gps;
+                            locationString = locationString.split(',');
+                            return [parseFloat(locationString[0]), parseFloat(locationString[1])]
+                        }}
+                        geoPositionStart={deliveryDetails.start.location.gps.replaceAll(' ', '')}
+                        geoPositionEnd={deliveryDetails.end.location.gps.replaceAll(' ', '')}
+                        currentLocation={trakData ? trakData.location.latlng : null}
+                    />
+                )
+            }
         </div>
     )
 
