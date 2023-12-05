@@ -115,11 +115,10 @@ const OutletDetails = (props) => {
                 {outletDetails?.description}
               </Typography>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${
-                  outletDetails?.address
-                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                    : "-"
-                }`}
+                {`${outletDetails?.address
+                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                  : "-"
+                  }`}
               </Typography>
               <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
                 {outletDetails?.isOpen && <span className={classes.isOpen}>Open now</span>}
@@ -150,14 +149,26 @@ const OutletDetails = (props) => {
                 {/*    src={map}*/}
                 {/*    alt={`map-img-${outletDetails?.id}`}*/}
                 {/*/>*/}
-                <PlacePickerMap location={outletDetails?.circle?.gps} setLocation={() => {}} />
+                <PlacePickerMap
+                  location={outletDetails?.circle?.gps}
+                  setLocation={() => { }}
+                  search={false}
+                  scrollZoom={false}
+                  scaleControl={false}
+                  rotateControl={false}
+                  rotateControlOptions={false}
+                  scrollWheel={false}
+                  draggable={false}
+                  clickableIcons={false}
+                  disableDoubleClickZoom={false}
+                  fullscreenControl={false}
+                />
               </div>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${
-                  outletDetails?.address
-                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                    : "-"
-                }`}
+                {`${outletDetails?.address
+                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                  : "-"
+                  }`}
               </Typography>
               {/* <Typography
                                 color="primary.main" component="div" variant="body"
