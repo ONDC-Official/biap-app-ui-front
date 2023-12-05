@@ -32,9 +32,8 @@ const SingleCategory = ({ data, index }) => {
   return (
     <div className={classes.categoryItem} onClick={() => updateSearchParams()}>
       <div
-        className={`${classes.categoryItemImageContainer} ${
-          subCategoryName === data.value ? classes.selectedCategory : ""
-        }`}
+        className={`${classes.categoryItemImageContainer} ${subCategoryName === data.value ? classes.selectedCategory : ""
+          }`}
       >
         <img className={classes.categoryImage} src={data.imageUrl} alt={`sub-category-img-${index}`} />
       </div>
@@ -68,17 +67,76 @@ const CategoriesComponent = () => {
     }
   }, [categoryName, locationData, deliveryAddressLocation]);
 
-  useEffect(() => {
-    if (subCategoryName && subCatList.length > 0) {
-      const findsubCatIndex = subCatList.findIndex((item) => item.value === subCategoryName);
-      setPage(findsubCatIndex);
-    }
-  }, [subCategoryName, subCatList, locationData]);
+  // useEffect(() => {
+  //   if (subCategoryName && subCatList.length > 0) {
+  //     const findsubCatIndex = subCatList.findIndex((item) => item.value === subCategoryName);
+  //     setPage(findsubCatIndex);
+  //   }
+  // }, [subCategoryName, subCatList, locationData]);
+
+  const rowsPerPage = 7;
+  const totalPageCount = Math.ceil(subCatList.length / rowsPerPage);
   return (
     <Grid container spacing={3} className={classes.categoriesRootContainer}>
       <Grid item xs={12} sm={12} md={1.5} lg={1.5} xl={1.5}></Grid>
-      <Grid item xs={12} sm={12} md={9} lg={9} xl={9}>
-        <Pagination
+      <Grid item xs={12} sm={12} md={9} lg={9} xl={9} className={classes.subCatContainer}>
+        <div style={{ marginLeft: 'auto', marginTop: 'auto', marginBottom: 'auto' }} className={classes.previousIconContainer}>
+          <IconButton
+            color="inherit" className={classes.actionButton}
+            onClick={() => {
+              setPage(page - 1)
+              // setActiveSubCatIndex(activeSubCatIndex-1)
+            }}
+            disabled={page === 0}
+          >
+            <PreviousIcon />
+          </IconButton>
+          <div
+            className={classes.allOptionsContainer}
+            onClick={(e) => {
+              e.preventDefault();
+              const params = new URLSearchParams({});
+              if (searchProductName) {
+                params.set("s", searchProductName);
+              }
+              if (categoryName) {
+                params.set("c", categoryName);
+              }
+              history.replace({ pathname: locationData.pathname, search: params.toString() });
+            }}
+          >
+            <AllIcon />
+            <Typography variant="body1" color="primary" className={classes.allNameTypo}>
+              All Options
+            </Typography>
+          </div>
+        </div>
+        {
+          subCatList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((subCat, subCatIndex) => (
+            // <SubCaregoryCard
+            //   key={`sub-cat-index-${subCatIndex}`}
+            //   data={subCat}
+            //   // isActive={subCatIndex === activeSubCatIndex}
+            //   onMouseOver={() => {
+            //     setActiveSubCatIndex(subCatIndex);
+            //   }}
+            // />
+            <SingleCategory data={subCat} index={subCatIndex} />
+          ))
+        }
+        <div style={{ marginRight: 'auto', marginTop: 'auto', marginBottom: 'auto' }}>
+          <IconButton
+            color="inherit" className={classes.actionButton}
+            onClick={() => {
+              setPage(page + 1)
+              // setActiveSubCatIndex(activeSubCatIndex+1)
+            }}
+            disabled={page === (totalPageCount - 1)}
+          >
+            <NextIcon />
+          </IconButton>
+        </div>
+        {/* <Pagination
           count={subCatList.length}
           page={page}
           className={classes.categoriesContainer}
@@ -181,7 +239,7 @@ const CategoriesComponent = () => {
               return <PaginationItem {...item} />;
             }
           }}
-        />
+        /> */}
       </Grid>
       <Grid item xs={12} sm={12} md={1.5} lg={1.5} xl={1.5}></Grid>
     </Grid>
