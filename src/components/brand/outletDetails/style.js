@@ -29,7 +29,7 @@ const useStyles = makeStyles({
         width: '100%'
     },
     detailsContainer: {
-      marginTop: '21px !important'
+        marginTop: '21px !important'
     },
     descriptionTypo: {
         marginTop: '16px !important'
@@ -51,7 +51,7 @@ const useStyles = makeStyles({
     },
     isOpen: {},
     actionButtonContainer: {
-      marginTop: '24px !important',
+        marginTop: '24px !important',
     },
     actionButton: {
         padding: '10px 56px 10px 54px !important',
@@ -64,7 +64,7 @@ const useStyles = makeStyles({
         lineHeight: '18px !important',
     },
     directionTypo: {
-      marginTop: '24px !important'
+        //   marginTop: '24px !important'
     },
     mapImage: {
         width: '100% !important',
