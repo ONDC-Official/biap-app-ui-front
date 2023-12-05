@@ -17,6 +17,9 @@ const useStyles = makeStyles({
     marginTop: "30px !important",
     marginLeft: "34px !important",
   },
+  editAddress: {
+    float: 'right'
+  }
 });
 
 export default useStyles;
