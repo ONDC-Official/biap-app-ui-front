@@ -84,19 +84,43 @@ export default function MapPointer(props) {
       options = {
         map,
         // callback: () => {},
-        search: false,
+        search,
         closeBtn: false,
         topText: " ",
         geolocation: false,
+
+        minZoom: 15,
+        maxZoom: 15,
+        scrollZoom,
+        scaleControl,
+        rotateControl,
+        rotateControlOptions,
+        scrollWheel,
+        draggable,
+        clickableIcons,
+        disableDoubleClickZoom,
+        fullscreenControl,
       };
     } else {
       options = {
         map,
         callback: onChange,
-        search: true,
+        search,
         closeBtn: false,
         topText: " ",
         geolocation: true,
+
+        minZoom: 15,
+        maxZoom: 15,
+        scrollZoom,
+        scaleControl,
+        rotateControl,
+        rotateControlOptions,
+        scrollWheel,
+        draggable,
+        clickableIcons,
+        disableDoubleClickZoom,
+        fullscreenControl,
       };
     }
 

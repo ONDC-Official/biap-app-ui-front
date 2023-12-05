@@ -154,6 +154,7 @@ const OutletDetails = (props) => {
                   setLocation={() => { }}
                   search={false}
                   scrollZoom={false}
+                  zoomControl={false}
                   scaleControl={false}
                   rotateControl={false}
                   rotateControlOptions={false}
