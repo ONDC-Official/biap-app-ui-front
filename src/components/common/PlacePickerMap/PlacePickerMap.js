@@ -14,16 +14,6 @@ export default function MapPointer(props) {
     hybrid = false,
     location,
     setLocation = null,
-
-    scrollZoom = true,
-    scaleControl = true,
-    rotateControl = true,
-    rotateControlOptions = true,
-    scrollWheel = true,
-    draggable = true,
-    clickableIcons = true,
-    disableDoubleClickZoom = true,
-    fullscreenControl = true,
   } = props;
   const [apiKey, setApiKey] = useState();
   const [map, setMap] = useState();
@@ -52,18 +42,6 @@ export default function MapPointer(props) {
         zoom,
         zoomControl,
         search,
-
-        minZoom: 15,
-        maxZoom: 15,
-        scrollZoom,
-        scaleControl,
-        rotateControl,
-        rotateControlOptions,
-        scrollWheel,
-        draggable,
-        clickableIcons,
-        disableDoubleClickZoom,
-        fullscreenControl,
       });
       setMap(map);
       setMapInitialised(true);
@@ -84,43 +62,19 @@ export default function MapPointer(props) {
       options = {
         map,
         // callback: () => {},
-        search,
+        search: false,
         closeBtn: false,
         topText: " ",
         geolocation: false,
-
-        minZoom: 15,
-        maxZoom: 15,
-        scrollZoom,
-        scaleControl,
-        rotateControl,
-        rotateControlOptions,
-        scrollWheel,
-        draggable,
-        clickableIcons,
-        disableDoubleClickZoom,
-        fullscreenControl,
       };
     } else {
       options = {
         map,
         callback: onChange,
-        search,
+        search: true,
         closeBtn: false,
         topText: " ",
         geolocation: true,
-
-        minZoom: 15,
-        maxZoom: 15,
-        scrollZoom,
-        scaleControl,
-        rotateControl,
-        rotateControlOptions,
-        scrollWheel,
-        draggable,
-        clickableIcons,
-        disableDoubleClickZoom,
-        fullscreenControl,
       };
     }
 

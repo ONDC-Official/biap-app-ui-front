@@ -15,6 +15,7 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 
 import CustomMenu from "./customMenu/customMenu";
 import PlacePickerMap from "../../common/PlacePickerMap/PlacePickerMap";
+import ViewOnlyMap from "../../common/ViewOnlyMap/ViewOnlyMap";
 
 import { getBrandDetailsRequest, getOutletDetailsRequest } from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
@@ -155,21 +156,13 @@ const OutletDetails = (props) => {
                 {/*    src={map}*/}
                 {/*    alt={`map-img-${outletDetails?.id}`}*/}
                 {/*/>*/}
-                <PlacePickerMap
-                  location={outletDetails?.circle?.gps}
-                  setLocation={() => { }}
-                  search={false}
-                  scrollZoom={false}
-                  zoomControl={false}
-                  scaleControl={false}
-                  rotateControl={false}
-                  rotateControlOptions={false}
-                  scrollWheel={false}
-                  draggable={false}
-                  clickableIcons={false}
-                  disableDoubleClickZoom={false}
-                  fullscreenControl={false}
-                />
+                {
+                  outletDetails?.circle?.gps && (
+                    <ViewOnlyMap
+                      location={outletDetails?.circle?.gps ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)] : null}
+                    />
+                  )
+                }
               </div>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
                 {`${outletDetails?.address
