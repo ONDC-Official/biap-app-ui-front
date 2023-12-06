@@ -197,6 +197,7 @@ const ProductDetails = ({ productId }) => {
       domain: productPayload.context.domain,
       tags: productPayload.item_details.tags,
       customisationState: customization_state,
+      contextCity: productPayload.context.city,
       quantity: {
         count: 1,
       },

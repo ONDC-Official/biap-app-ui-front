@@ -52,16 +52,19 @@ const StepCartContent = (props) => {
         setGetQuoteLoading(true);
         const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
         let domain = "";
+        let contextCity = "";
         const updatedItems = items.map((item) => {
           domain = item.domain;
+          contextCity = item.contextCity
           delete item.context;
+          delete item.contextCity;
           return item;
         });
         let selectPayload = {
           context: {
             transaction_id: transaction_id,
             domain: domain,
-            city: deliveryAddress.location.address.city,
+            city: contextCity || deliveryAddress.location.address.city,
             state: deliveryAddress.location.address.state,
           },
           message: {
