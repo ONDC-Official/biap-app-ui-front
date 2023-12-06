@@ -6,18 +6,17 @@ import MuiLink from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import VariationsRenderer from "./VariationsRenderer";
-import { getCall, postCall } from "../../../../api/axios";
+import { deleteCall, getCall, postCall } from "../../../../api/axios";
 import CustomizationRenderer from "./CustomizationRenderer";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { Link, useHistory } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid, ButtonGroup } from "@mui/material";
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
 import moment from "moment";
 import { SearchContext } from "../../../../context/searchContext";
-import { getCartItems } from "../../cart/utils/getCartItems";
 import { updateCartItem } from "../../cart/utils/updateCartItem";
 import { ToastContext } from "../../../../context/toastContext";
 import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
@@ -31,6 +30,9 @@ const ProductDetails = ({ productId }) => {
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
+  const [availableCartItems, setAvailableCartItems] = useState([]);
+  const [isItemAvailableInCart, setIsItemAvailableInCart] = useState(false);
+  const [itemAvailableInCart, setItemAvailableInCart] = useState(null);
   const [productDetails, setProductDetails] = useState({});
 
   const [customization_state, setCustomizationState] = useState({});
@@ -43,6 +45,10 @@ const ProductDetails = ({ productId }) => {
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
 
   const [addToCartLoading, setAddToCartLoading] = useState(false);
+
+  useEffect(() => {
+
+  }, []);
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
@@ -65,7 +71,7 @@ const ProductDetails = ({ productId }) => {
     try {
       const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
       const { item_details } = data;
-
+      getCartItems(data.id)
       setProductPayload(data);
       setProductDetails(item_details);
       setActiveImage(item_details?.descriptor?.symbol);
@@ -165,18 +171,31 @@ const ProductDetails = ({ productId }) => {
     return true;
   }
 
-  const getCartItems = async () => {
+  const getCartItems = async (pId = null) => {
     try {
       const user = JSON.parse(getValueFromCookie("user"));
       const url = `/clientApis/v2/cart/${user.id}`;
       const res = await getCall(url);
+      if (pId) {
+        let isItemAvailable = false;
+        const findItem = res.find((item) => item.item.id === pId);
+        if (findItem) {
+          isItemAvailable = true;
+          setItemAvailableInCart(findItem);
+        } else { }
+        setIsItemAvailableInCart(isItemAvailable);
+      } else {
+        setItemAvailableInCart(null);
+        setIsItemAvailableInCart(false);
+      }
+      setAvailableCartItems(res);
       return res;
     } catch (error) {
       console.log("Error fetching cart items:", error);
     }
   };
 
-  const addToCart = async (navigate = false) => {
+  const addToCart = async (navigate = false, isIncrement = true) => {
     setAddToCartLoading(true);
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}`;
@@ -215,7 +234,7 @@ const ProductDetails = ({ productId }) => {
       hasCustomisations: customisations ? true : false,
     };
 
-    const cartItems = await getCartItems();
+    const cartItems = await getCartItems(productPayload.id);
 
     let cartItem = [];
     cartItem = cartItems.filter((ci) => {
@@ -238,6 +257,7 @@ const ProductDetails = ({ productId }) => {
       const res = await postCall(url, payload);
       fetchCartItems();
       setAddToCartLoading(false);
+      getCartItems(productPayload.id);
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -258,7 +278,7 @@ const ProductDetails = ({ productId }) => {
 
       if (currentCount < maxCount) {
         if (!customisations) {
-          updateCartItem(cartItems, true, cartItem[0]._id);
+          updateCartItem(cartItems, isIncrement, cartItem[0]._id);
           setAddToCartLoading(false);
           dispatch({
             type: toast_actions.ADD_TOAST,
@@ -282,7 +302,7 @@ const ProductDetails = ({ productId }) => {
 
           if (matchingCustomisation) {
             console.log(4);
-            updateCartItem(cartItems, true, matchingCustomisation._id);
+            updateCartItem(cartItems, isIncrement, matchingCustomisation._id);
             setAddToCartLoading(false);
             dispatch({
               type: toast_actions.ADD_TOAST,
@@ -297,6 +317,7 @@ const ProductDetails = ({ productId }) => {
             const res = await postCall(url, payload);
             fetchCartItems();
             setAddToCartLoading(false);
+            getCartItems(productPayload.id);
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -473,6 +494,14 @@ const ProductDetails = ({ productId }) => {
     });
   };
 
+  const deleteCartItem = async (itemId) => {
+    const user = JSON.parse(getValueFromCookie("user"));
+    const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
+    const res = await deleteCall(url);
+    getCartItems();
+    fetchCartItems();
+  };
+
   return (
     <>
       {productPayload == null ? (
@@ -620,16 +649,53 @@ const ProductDetails = ({ productId }) => {
                 />
 
                 <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
-                  <Button
-                    variant={"contained"}
-                    sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
-                    onClick={() => addToCart(false)}
-                    disabled={
-                      !parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock || addToCartLoading
-                    }
-                  >
-                    {addToCartLoading ? <Loading /> : "Add to cart"}
-                  </Button>
+                  {
+                    productPayload?.context.domain !== "ONDC:RET11" && isItemAvailableInCart && itemAvailableInCart
+                      ? (
+                        <ButtonGroup
+                          variant={"contained"}
+                          fullWidth
+                          color="primary"
+                          sx={{ flex: 1, marginRight: "16px", textTransform: "none", borderRadius: '18px' }}
+                          disabled={
+                            !parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock || addToCartLoading
+                          }
+                        >
+                          <Button
+                            onClick={() => addToCart(false, true)}
+                            sx={{ fontSize: '24px !important' }}
+                          >
+                            +
+                          </Button>
+                          <Button variant={"outlined"} sx={{ fontSize: '20px !important' }}>
+                            {addToCartLoading ? <Loading /> : itemAvailableInCart.item.quantity.count}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              if (itemAvailableInCart.item.quantity.count === 1) {
+                                deleteCartItem(itemAvailableInCart._id)
+                              } else {
+                                addToCart(false, false);
+                              }
+                            }}
+                            sx={{ fontSize: '30px !important' }}
+                          >
+                            -
+                          </Button>
+                        </ButtonGroup>
+                      ) : (
+                        <Button
+                          variant={"contained"}
+                          sx={{ flex: 1, marginRight: "16px", textTransform: "none" }}
+                          onClick={() => addToCart(false, true)}
+                          disabled={
+                            !parseInt(productDetails?.quantity?.available?.count) >= 1 || itemOutOfStock || addToCartLoading
+                          }
+                        >
+                          {addToCartLoading ? <Loading /> : "Add to cart"}
+                        </Button>
+                      )
+                  }
                   <Button
                     variant="outlined"
                     sx={{ flex: 1, textTransform: "none" }}
