@@ -113,7 +113,7 @@ const StepAddressContent = ({
     fetchDeliveryAddress();
   }, []);
 
-  useEffect(() => {}, [cartItems, updatedCartItems]);
+  useEffect(() => { }, [cartItems, updatedCartItems]);
 
   const onGetQuote = async (message_id) => {
     try {
@@ -215,22 +215,26 @@ const StepAddressContent = ({
   }
 
   const getQuote = async (items, searchContextData = null) => {
+    console.log("getQuote 222222=====>", items);
     responseRef.current = [];
     if (deliveryAddress) {
       try {
         const search_context =
           searchContextData || JSON.parse(getValueFromCookie("search_context"));
         let domain = "";
+        let contextCity = "";
         const updatedItems = items.map((item) => {
           domain = item.domain;
+          contextCity = item.contextCity
           delete item.context;
+          delete item.contextCity;
           return item;
         });
         let selectPayload = {
           context: {
             transaction_id: transaction_id,
             domain: domain,
-            city: deliveryAddress.location.address.city,
+            city: contextCity || deliveryAddress.location.address.city,
             state: deliveryAddress.location.address.state,
           },
           message: {
@@ -379,8 +383,8 @@ const StepAddressContent = ({
                           billingAddress
                             ? deliveryAddress?.id !== billingAddress?.id
                             : addressType === address_types.billing
-                            ? true
-                            : false
+                              ? true
+                              : false
                         }
                       />
                     }

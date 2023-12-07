@@ -158,8 +158,8 @@ const Checkout = () => {
               let cartQuantity = findItemFromCartItems
                 ? findItemFromCartItems?.quantity?.count
                 : cartItem
-                ? cartItem?.quantity?.count
-                : 0;
+                  ? cartItem?.quantity?.count
+                  : 0;
               let quantity = break_up_item["@ondc/org/item_quantity"]
                 ? break_up_item["@ondc/org/item_quantity"]["count"]
                 : 0;
@@ -445,7 +445,13 @@ const Checkout = () => {
   const renderStepLabel = (stepLabel, stepIndex) => {
     switch (stepIndex) {
       case 0:
-        return <StepCartLabel activeStep={activeStep} />;
+        return (
+          <StepCartLabel
+            activeStep={activeStep}
+            onUpdateActiveStep={() => {
+              setActiveStep(0);
+            }}
+          />);
       case 1:
         return <StepCustomerLabel activeStep={activeStep} />;
       case 2:
