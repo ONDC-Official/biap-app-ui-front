@@ -32,7 +32,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
 const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) => {
-  console.log("orderDetails=====>", orderDetails);
   const classes = useStyles();
 
   const [itemQuotes, setItemQuotes] = useState(null);
