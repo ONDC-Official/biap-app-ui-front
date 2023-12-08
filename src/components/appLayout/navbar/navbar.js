@@ -56,7 +56,7 @@ const NavBar = ({ isCheckout = false }) => {
   const { setSearchData, setLocationData } = useContext(SearchContext);
   const { deliveryAddress, setDeliveryAddress } = useContext(AddressContext);
 
-  useEffect(() => {}, [locationData]);
+  useEffect(() => { }, [locationData]);
 
   // STATES
   const [inlineError, setInlineError] = useState({
@@ -142,7 +142,7 @@ const NavBar = ({ isCheckout = false }) => {
 
   // use this function to fetch existing address of the user
   const fetchDeliveryAddress = async () => {
-    if (deliveryAddress) return;
+    // if (deliveryAddress) return;
     setFetchDeliveryAddressLoading(true);
     try {
       const data = await cancellablePromise(getAllDeliveryAddressRequest());
@@ -381,10 +381,10 @@ const NavBar = ({ isCheckout = false }) => {
                     disabled
                     // className={classes.searchIcon}
                     aria-label="search"
-                    // onClick={() => {
-                    //     setSearchData(() => search);
-                    //     history.push(`/products?s=${search.value}`);
-                    // }}
+                  // onClick={() => {
+                  //     setSearchData(() => search);
+                  //     history.push(`/products?s=${search.value}`);
+                  // }}
                   >
                     <SearchIcon />
                   </IconButton>
@@ -505,7 +505,7 @@ const NavBar = ({ isCheckout = false }) => {
                   horizontal: "right",
                 }}
               >
-                <MenuItem onClick={() => {}}>My Profile</MenuItem>
+                <MenuItem onClick={() => { }}>My Profile</MenuItem>
                 <MenuItem
                   onClick={() => {
                     history.push(`/application/orders`);
@@ -521,7 +521,7 @@ const NavBar = ({ isCheckout = false }) => {
                   Complaints
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={() => {}}>Support</MenuItem>
+                <MenuItem onClick={() => { }}>Support</MenuItem>
                 <MenuItem
                   onClick={() => {
                     history.push(`/testYourCatalogue`);

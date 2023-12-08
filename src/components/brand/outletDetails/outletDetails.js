@@ -11,16 +11,16 @@ import Box from "@mui/material/Box";
 
 import moment from "moment";
 import { Link, useHistory, useParams } from "react-router-dom";
-import OutletImage from "../../../assets/images/outlet.png";
 import no_image_found from "../../../assets/images/no_image_found.png";
-import map from "../../../assets/images/map.png";
 
 import CustomMenu from "./customMenu/customMenu";
 import PlacePickerMap from "../../common/PlacePickerMap/PlacePickerMap";
+import ViewOnlyMap from "../../common/ViewOnlyMap/ViewOnlyMap";
 
 import { getBrandDetailsRequest, getOutletDetailsRequest } from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import { SearchContext } from "../../../context/searchContext";
+import ModalComponent from "../../common/Modal";
 
 const OutletDetails = (props) => {
   const { brandId, outletId } = props;
@@ -31,6 +31,7 @@ const OutletDetails = (props) => {
   const [brandDetails, setBrandDetails] = useState(null);
   const [outletDetails, setOutletDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [callNowModal, setCallNowModal] = useState(false);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -115,11 +116,10 @@ const OutletDetails = (props) => {
                 {outletDetails?.description}
               </Typography>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${
-                  outletDetails?.address
-                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                    : "-"
-                }`}
+                {`${outletDetails?.address
+                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                  : "-"
+                  }`}
               </Typography>
               <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
                 {outletDetails?.isOpen && <span className={classes.isOpen}>Open now</span>}
@@ -129,7 +129,13 @@ const OutletDetails = (props) => {
                 <Button className={classes.actionButton} variant="outlined" color="error">
                   Get Direction
                 </Button>
-                <Button className={classes.actionButton} variant="outlined" color="primary">
+                <Button
+                  className={classes.actionButton}
+                  variant="outlined" color="primary"
+                  onClick={() => {
+                    setCallNowModal(true)
+                  }}
+                >
                   Call Now
                 </Button>
               </div>
@@ -137,10 +143,10 @@ const OutletDetails = (props) => {
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
             <Card className={classes.outletContactInfoCard}>
-              <Typography variant="h4">Call</Typography>
+              {/* <Typography variant="h4">Call</Typography>
               <Typography component="div" variant="body" className={classes.contactNumbers}>
                 +91 92729282982, +91 92729282982
-              </Typography>
+              </Typography> */}
               <Typography variant="h4" className={classes.directionTypo}>
                 Direction
               </Typography>
@@ -150,14 +156,19 @@ const OutletDetails = (props) => {
                 {/*    src={map}*/}
                 {/*    alt={`map-img-${outletDetails?.id}`}*/}
                 {/*/>*/}
-                <PlacePickerMap location={outletDetails?.circle?.gps} setLocation={() => {}} />
+                {
+                  outletDetails?.circle?.gps && (
+                    <ViewOnlyMap
+                      location={outletDetails?.circle?.gps ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)] : null}
+                    />
+                  )
+                }
               </div>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${
-                  outletDetails?.address
-                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                    : "-"
-                }`}
+                {`${outletDetails?.address
+                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                  : "-"
+                  }`}
               </Typography>
               {/* <Typography
                                 color="primary.main" component="div" variant="body"
@@ -179,6 +190,17 @@ const OutletDetails = (props) => {
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
         </Grid>
       </Grid>
+      <ModalComponent
+        open={callNowModal}
+        onClose={() => {
+          setCallNowModal(false);
+        }}
+        title="Call Now"
+      >
+        <Typography component="div" variant="body" className={classes.contactNumbers}>
+          +91 92729282982, +91 92729282982
+        </Typography>
+      </ModalComponent>
     </Grid>
   );
 };

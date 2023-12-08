@@ -30,7 +30,7 @@ const MenuItem = (props) => {
     bpp_provider_id,
     bpp_provider_descriptor,
     show_quantity_button = true,
-    onUpdateCart = () => {},
+    onUpdateCart = () => { },
     handleAddToCart,
     setCustomizationModal,
     getProductDetails,
@@ -67,9 +67,8 @@ const MenuItem = (props) => {
           {product_name}
         </Typography>
         <Typography variant="h5" className={classes.itemPriceTypo}>
-          {`₹${
-            Number.isInteger(Number(price?.value)) ? Number(price?.value).toFixed(2) : Number(price?.value).toFixed(2)
-          }`}
+          {`₹${Number.isInteger(Number(price?.value)) ? Number(price?.value).toFixed(2) : Number(price?.value).toFixed(2)
+            }`}
         </Typography>
         <Typography variant="body1" className={classes.itemDescriptionTypo}>
           {product_description}
@@ -94,9 +93,14 @@ const MenuItem = (props) => {
             endIcon={productLoading === productId ? null : <PlusIcon />}
             className={classes.addToCartIcon}
             onClick={() => {
-              getProductDetails(productId).then((data) => {
-                handleAddToCart(data, true);
-              });
+              if (hasCustomizations(productPayload)) {
+                getProductDetails(productId);
+                setCustomizationModal(true);
+              } else {
+                getProductDetails(productId).then((data) => {
+                  handleAddToCart(data, true);
+                });
+              }
             }}
             disabled={productLoading}
           >

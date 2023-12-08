@@ -69,6 +69,11 @@ const useStyles = makeStyles({
         marginTop: '8px !important',
         maxWidth: '50px',
         height: '40px !important'
+    },
+    subCatContainer: {
+        display: 'flex',
+        gap: '25px',
+        paddingBottom: '10px',
     }
 });
 

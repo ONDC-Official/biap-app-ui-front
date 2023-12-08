@@ -52,10 +52,14 @@ export const updateCartItem = async (cartItems, increment, uniqueId) => {
           updatedCartItem.item.quantity.count -= 1;
 
           let customisations = updatedCartItem.item.customisations;
-          customisations = customisations.map((c) => {
-            return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
-          });
-          updatedCartItem.item.customisations = customisations;
+          if (customisations) {
+            customisations = customisations.map((c) => {
+              return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
+            });
+            updatedCartItem.item.customisations = customisations;
+          } else {
+            updatedCartItem.item.customisations = null;
+          }
           updatedCartItem = updatedCartItem.item;
           const res = await putCall(url, updatedCartItem);
         }
