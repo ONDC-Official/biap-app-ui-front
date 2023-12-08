@@ -358,10 +358,12 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                   orderDetails.items?.[index]?.fulfillment_status ?? "",
                 customizations: customizations ?? null,
                 ...orderDetails.items?.[index]?.product,
+                parent_item_id: parentId,
                 provider_details: orderDetails.provider,
               };
             }
           } else {
+            const parentId = findQuote?.item?.parent_item_id;
             return {
               id,
               name: findQuote?.title ?? "NA",
@@ -372,6 +374,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                 orderDetails.items?.[index]?.fulfillment_status ?? "",
               customizations: null,
               ...orderDetails.items?.[index]?.product,
+              parent_item_id: parentId,
               provider_details: orderDetails.provider,
             };
           }

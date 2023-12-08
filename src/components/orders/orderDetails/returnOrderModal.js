@@ -179,6 +179,7 @@ export default function ReturnOrderModal({
             count: item.quantity.count,
           },
           tags: {
+            parent_item_id: item.parent_item_id,
             update_type: "return",
             reason_code: selectedCancelReasonId?.key,
             ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
@@ -212,30 +213,6 @@ export default function ReturnOrderModal({
 
     try {
       const data = await cancellablePromise(
-        //   postCall(
-        //     "clientApis/v2/update",
-        //     requestObject?.map((item, index) => {
-        //       return {
-        //         context: {
-        //           bpp_id,
-        //           bpp_uri,
-        //           transaction_id,
-        //         },
-        //         message: {
-        //           update_target: "item",
-        //           order: {
-        //             id: order_id,
-        //             state: order_status,
-        //             provider: {
-        //               id: item?.[index]?.provider_details?.id,
-        //             },
-        //             items: payload,
-        //           },
-        //         },
-        //       };
-        //     })
-        //   )
-        // );
         postCall("clientApis/v2/update", payloadData)
       );
       // Error handling workflow eg, NACK
@@ -432,7 +409,7 @@ export default function ReturnOrderModal({
                                   //     selectedIssueSubcategory?.enums
                                   //   )}
                                   has_error={inlineError.image_error}
-                                  //   disabled={baseImage.length === 4}
+                                //   disabled={baseImage.length === 4}
                                 />
                               )}
                               <ErrorMessage>{inlineError.image_error}</ErrorMessage>
@@ -476,9 +453,8 @@ export default function ReturnOrderModal({
                               <div>
                                 <div className={productCartStyles.quantity_count_wrapper}>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                    className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
@@ -496,11 +472,10 @@ export default function ReturnOrderModal({
                                     </p>
                                   </div>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count < quantity[idx]?.count
-                                        ? productCartStyles.add_svg_wrapper
-                                        : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                    className={`${orderQty[idx]?.count < quantity[idx]?.count
+                                      ? productCartStyles.add_svg_wrapper
+                                      : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
