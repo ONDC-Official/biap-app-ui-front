@@ -587,7 +587,7 @@ const Checkout = () => {
         // remove parent_order_id, search_context from cookies
         removeCookie("transaction_id");
         removeCookie("parent_order_id");
-        removeCookie("search_context");
+        // removeCookie("search_context");
         // removeCookie("delivery_address");
         removeCookie("billing_address");
         // removeCookie("checkout_details");
