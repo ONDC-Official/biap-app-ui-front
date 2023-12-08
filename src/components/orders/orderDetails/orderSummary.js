@@ -32,6 +32,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
 const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) => {
+  console.log("orderDetails=====>", orderDetails);
   const classes = useStyles();
 
   const [itemQuotes, setItemQuotes] = useState(null);
@@ -358,10 +359,12 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                   orderDetails.items?.[index]?.fulfillment_status ?? "",
                 customizations: customizations ?? null,
                 ...orderDetails.items?.[index]?.product,
+                parent_item_id: parentId,
                 provider_details: orderDetails.provider,
               };
             }
           } else {
+            const parentId = findQuote?.item?.parent_item_id;
             return {
               id,
               name: findQuote?.title ?? "NA",
@@ -372,6 +375,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                 orderDetails.items?.[index]?.fulfillment_status ?? "",
               customizations: null,
               ...orderDetails.items?.[index]?.product,
+              parent_item_id: parentId,
               provider_details: orderDetails.provider,
             };
           }
