@@ -807,7 +807,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               {
                 end: {
                   location: {
-                    gps: `${deliveryAddress?.location?.address?.lat}, ${deliveryAddress?.location?.address?.lng}`,
+                    gps: `${deliveryAddress?.location?.address?.lat},${deliveryAddress?.location?.address?.lng}`,
                     address: {
                       area_code: `${search_context?.location?.pincode}`,
                     },

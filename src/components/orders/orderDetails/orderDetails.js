@@ -38,11 +38,13 @@ const OrderDetails = () => {
 
   useEffect(() => {
     if (orderId) {
-      getOrderDetails();
+      getOrderDetails(true);
     }
   }, [orderId]);
-  const getOrderDetails = async () => {
-    setIsLoading(true);
+  const getOrderDetails = async (isLoading = true) => {
+    if (isLoading) {
+      setIsLoading(true);
+    } else { }
     try {
       const data = await cancellablePromise(getOrderDetailsRequest(orderId));
       setOrderDetails(data[0]);
@@ -117,7 +119,7 @@ const OrderDetails = () => {
               orderDetails={orderDetails}
               onUpdateOrder={(data) => {
                 // setOrderDetails(data);
-                getOrderDetails();
+                getOrderDetails(false);
               }}
               onUpdateTrakingDetails={(data) => {
                 setTrakingDetails(data);
