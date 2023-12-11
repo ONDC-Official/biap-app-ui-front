@@ -859,7 +859,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${parseInt(orderDetails?.quote?.price?.value).toFixed(2) || 0
+              {`₹${parseInt(orderDetails?.updatedQuote?.price?.value).toFixed(2) || 0
                 }`}
             </Typography>
           </div>

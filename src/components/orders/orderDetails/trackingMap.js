@@ -41,12 +41,12 @@ const TrackingMapComponant = ({ orderDetails, trakingDetails }) => {
                 orderDetails && deliveryDetails && (
                     <TrakingMap
                         mapCenter={() => {
-                            let locationString = deliveryDetails.start.location.gps;
+                            let locationString = deliveryDetails?.start?.location?.gps || "";
                             locationString = locationString.split(',');
-                            return [parseFloat(locationString[0]), parseFloat(locationString[1])]
+                            return deliveryDetails?.start?.location?.gps ? [parseFloat(locationString[0]), parseFloat(locationString[1])] : [28.638698386592438, 77.27604556863412]
                         }}
-                        geoPositionStart={deliveryDetails.start.location.gps.replaceAll(' ', '')}
-                        geoPositionEnd={deliveryDetails.end.location.gps.replaceAll(' ', '')}
+                        geoPositionStart={deliveryDetails?.start?.location?.gps.replaceAll(' ', '') || "28.638698386592438,77.27604556863412"}
+                        geoPositionEnd={deliveryDetails?.end?.location?.gps.replaceAll(' ', '') || "28.638698386592438,77.27604556863412"}
                         currentLocation={trakData ? trakData.location.latlng : null}
                     />
                 )
