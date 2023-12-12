@@ -35,6 +35,7 @@ export default function IssueOrderModal({
   onClose,
   onSuccess,
   quantity,
+  domain
 }) {
   // STATES
   const [inlineError, setInlineError] = useState({
@@ -105,6 +106,7 @@ export default function IssueOrderModal({
             city: delivery_address.location?.city,
             state: delivery_address.location?.state,
             transaction_id,
+            domain
           },
           message: {
             issue: {
