@@ -37,6 +37,8 @@ const StepPaymentContent = ({
   const { deliveryAddress, billingAddress, setBillingAddress } =
     useContext(AddressContext);
 
+  console.log("billingAddress====>", billingAddress);
+
   const transaction_id = getValueFromCookie("transaction_id");
   const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
 
@@ -214,6 +216,7 @@ const StepPaymentContent = ({
               context: {
                 transaction_id: transaction_id,
                 city: search_context.location.name,
+                city: item[0].contextCity,
                 state: search_context.location.state,
                 domain: item[0].domain,
               },
@@ -234,7 +237,7 @@ const StepPaymentContent = ({
                   email: deliveryAddress?.email,
                   phone: deliveryAddress?.phone,
                   location: {
-                    gps: `${deliveryAddress?.location?.address?.lat}, ${deliveryAddress?.location?.address?.lng}`,
+                    gps: `${deliveryAddress?.location?.address?.lat},${deliveryAddress?.location?.address?.lng}`,
                     ...deliveryAddress?.location,
                   },
                 },
@@ -308,11 +311,10 @@ const StepPaymentContent = ({
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Card
-          className={`${classes.paymentCard} ${
-            activePaymentMethod === payment_methods.COD
-              ? classes.activeCard
-              : ""
-          } ${initializeOrderLoading ? classes.nonClickable : ""}`}
+          className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.COD
+            ? classes.activeCard
+            : ""
+            } ${initializeOrderLoading ? classes.nonClickable : ""}`}
           onClick={() => {
             if (
               !initializeOrderLoading &&
@@ -339,11 +341,10 @@ const StepPaymentContent = ({
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Card
-          className={`${classes.paymentCard} ${
-            activePaymentMethod === payment_methods.JUSPAY
-              ? classes.activeCard
-              : ""
-          } ${initializeOrderLoading ? classes.nonClickable : ""}`}
+          className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.JUSPAY
+            ? classes.activeCard
+            : ""
+            } ${initializeOrderLoading ? classes.nonClickable : ""}`}
           onClick={() => {
             if (
               !initializeOrderLoading &&
