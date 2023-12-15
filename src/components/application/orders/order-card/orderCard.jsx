@@ -39,6 +39,7 @@ export default function OrderCard(props) {
     accoodion_id,
     currentSelectedAccordion,
     setCurrentSelectedAccordion,
+    domain
   } = props;
 
   // HELPERS
@@ -522,6 +523,7 @@ export default function OrderCard(props) {
           bpp_id={bpp_id}
           bpp_uri={bpp_uri}
           fulfillments={fulfillments}
+          domain={ domain }
         />
       )}
       <div

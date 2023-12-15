@@ -204,7 +204,8 @@ export default function Orders() {
                       bpp_id,
                       bpp_uri,
                       quote,
-                      fulfillments
+                      fulfillments,
+                      domain
                     },
                     index
                   ) => {
@@ -223,6 +224,7 @@ export default function Orders() {
                           order_id={order_id}
                           created_at={createdAt}
                           bpp_id={bpp_id}
+                          domain={domain}
                           accoodion_id={`order_id_${index}`}
                           onUpdateOrder={(data) => {
                             let orderData = Object.assign([], orders);
