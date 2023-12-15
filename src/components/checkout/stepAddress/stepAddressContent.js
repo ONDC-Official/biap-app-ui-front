@@ -227,7 +227,7 @@ const StepAddressContent = ({
           domain = item.domain;
           contextCity = item.contextCity
           delete item.context;
-          delete item.contextCity;
+          // delete item.contextCity;
           return item;
         });
         let selectPayload = {

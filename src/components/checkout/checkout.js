@@ -701,7 +701,7 @@ const Checkout = () => {
         {
           context: {
             domain: item.domain,
-            city: search_context.location.name,
+            city: item.contextCity,
             state: search_context.location.state,
             parent_order_id: parentOrderIDMap.get(item?.provider?.id)
               .parent_order_id,
