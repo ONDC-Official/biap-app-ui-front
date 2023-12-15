@@ -37,6 +37,8 @@ const StepPaymentContent = ({
   const { deliveryAddress, billingAddress, setBillingAddress } =
     useContext(AddressContext);
 
+  console.log("billingAddress====>", billingAddress);
+
   const transaction_id = getValueFromCookie("transaction_id");
   const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
 

@@ -66,6 +66,31 @@ const StepAddressContent = ({
     });
   }
 
+  useEffect(() => {
+    if (deliveryAddress && billingAddress) {
+      if (deliveryAddress?.id !== billingAddress?.id) {
+        const addressObject = {
+          id: billingAddress?.id || "",
+          name: billingAddress?.name || "",
+          email: billingAddress?.email || "",
+          phone: billingAddress?.phone || "",
+          areaCode: billingAddress?.address?.areaCode || "",
+          city: billingAddress?.address?.city || "",
+          door: billingAddress?.address?.door || "",
+          state: billingAddress?.address?.state || "",
+          street: billingAddress?.address?.street || "",
+          tag: billingAddress?.address?.tag || "Other"
+        };
+        setAddressType(address_types.billing)
+        setToggleAddressForm({
+          actionType: "edit",
+          toggle: true,
+          address: addressObject,
+        });
+      } else { }
+    }
+  }, [deliveryAddress, billingAddress]);
+
   const transaction_id = getValueFromCookie("transaction_id");
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
@@ -429,32 +454,101 @@ const StepAddressContent = ({
                   setAddressType("");
                 }}
                 onAddAddress={(address) => {
+                  const addressObject = {
+                    id: address?.id || "",
+                    name: address?.name || "",
+                    email: address?.email || "",
+                    phone: address?.phone || "",
+                    areaCode: address?.address?.areaCode || "",
+                    city: address?.address?.city || "",
+                    door: address?.address?.door || "",
+                    state: address?.address?.state || "",
+                    street: address?.address?.street || "",
+                    tag: address?.address?.tag || "Other"
+                  };
                   setToggleAddressForm({
-                    actionType: "",
-                    toggle: false,
-                    address: restoreToDefault(),
+                    actionType: "edit",
+                    toggle: true,
+                    address: addressObject,
                   });
                   setAddressList([...addressList, address]);
                   setAddressType("");
                   if (addressType === address_types.billing) {
+                    setBillingAddress({
+                      id: address?.id,
+                      address: address?.address,
+                      phone: address?.phone || "",
+                      name: address?.name || "",
+                      email: address?.email || "",
+                    });
+                    AddCookie(
+                      "billing_address",
+                      JSON.stringify({
+                        id: address?.id,
+                        address: address?.address,
+                        phone: address?.phone || "",
+                        name: address?.name || "",
+                        email: address?.email || "",
+                      })
+                    );
                     handleNext();
                     // handleInitializaOrder();
                   }
                 }}
                 onUpdateAddress={(address) => {
-                  const updatedAddress = addressList.map((d) => {
-                    if (d.id === address.id) {
-                      return address;
-                    }
-                    return d;
-                  });
-                  setAddressList(updatedAddress);
+                  // const updatedAddress = addressList.map((d) => {
+                  //   if (d.id === address.id) {
+                  //     return address;
+                  //   }
+                  //   return d;
+                  // });
+                  // setAddressList(updatedAddress);
+                  // setToggleAddressForm({
+                  //   actionType: "",
+                  //   toggle: false,
+                  //   address: restoreToDefault(),
+                  // });
+                  // setAddressType("");
+                  const addressObject = {
+                    id: address?.id || "",
+                    name: address?.name || "",
+                    email: address?.email || "",
+                    phone: address?.phone || "",
+                    areaCode: address?.address?.areaCode || "",
+                    city: address?.address?.city || "",
+                    door: address?.address?.door || "",
+                    state: address?.address?.state || "",
+                    street: address?.address?.street || "",
+                    tag: address?.address?.tag || "Other"
+                  };
                   setToggleAddressForm({
-                    actionType: "",
-                    toggle: false,
-                    address: restoreToDefault(),
+                    actionType: "edit",
+                    toggle: true,
+                    address: addressObject,
                   });
+                  setAddressList([...addressList, address]);
                   setAddressType("");
+                  if (addressType === address_types.billing) {
+                    setBillingAddress({
+                      id: address?.id,
+                      address: address?.address,
+                      phone: address?.phone || "",
+                      name: address?.name || "",
+                      email: address?.email || "",
+                    });
+                    AddCookie(
+                      "billing_address",
+                      JSON.stringify({
+                        id: address?.id,
+                        address: address?.address,
+                        phone: address?.phone || "",
+                        name: address?.name || "",
+                        email: address?.email || "",
+                      })
+                    );
+                    handleNext();
+                    // handleInitializaOrder();
+                  }
                 }}
               />
             </>
