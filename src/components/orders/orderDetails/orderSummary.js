@@ -1419,6 +1419,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             bpp_id={orderDetails.bppId}
             bpp_uri={orderDetails.bpp_uri}
             fulfillments={orderDetails.fulfillments}
+            domain={orderDetails.domain}
           />
         )}
         <a
