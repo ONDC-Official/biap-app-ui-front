@@ -251,10 +251,10 @@ const ComplaintDetail = () => {
         }
     }
 
-    async function isShowTakeAction() {
+     function isShowTakeAction() {
         const lastAction = issueActions[issueActions.length - 1]?.respondent_action
         if (lastAction === "PROCESSING" || lastAction === "OPEN" || lastAction === "ESCALATE") {
-            compareDateWithDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H', issueActions[issueActions.length - 1]?.updated_at)
+           return compareDateWithDuration(process.env.EXPECTED_RESPONSE_TIME ?? 'PT1H', issueActions[issueActions.length - 1]?.updated_at)
         } else if (lastAction !== "ESCALATE" && issueActions.some(x => x.respondent_action === "RESOLVED")) {
             return true
         } else {
@@ -550,8 +550,9 @@ const ComplaintDetail = () => {
                             </div>
                         </div>
 
-                        {isShowTakeAction() &&
+                        {isShowTakeAction() ?
                             <ErrorMessage>No response was given for this issue</ErrorMessage>
+                            : null
                         }
                         <Box component={"div"} className={classes.divider} />
                         <div className={classes.summaryItemActionContainer}>

@@ -1,8 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import CrossIcon from "../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../shared/colors";
-// import Button from "../../shared/button/button";
-import { buttonTypes } from "../../shared/button/utils";
 import styles from "../../../styles/search-product-modal/searchProductModal.module.scss";
 import productStyles from "../../../styles/orders/orders.module.scss";
 import productCartStyles from "../../../styles/products/productCard.module.scss";
@@ -21,7 +19,8 @@ import { getValueFromCookie } from "../../../utils/cookies";
 import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import Subtract from "../../shared/svg/subtract";
 import Add from "../../shared/svg/add";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
+import Loading from "../../shared/loading/loading";
 
 export default function IssueOrderModal({
   billing_address,
@@ -704,14 +703,17 @@ export default function IssueOrderModal({
           <div className="px-3">
             <Button
               sx={{ paddingLeft: 4, paddingRight: 4 }}
-              isloading={loading ? 1 : 0}
               disabled={loading}
               variant="contained"
               onClick={() => {
                 handleRaiseOrderIssue();
               }}
             >
-              Confirm
+               {loading ? (
+                    <Loading />
+                  ) : (
+                    "Confirm"
+                  )}
             </Button>
           </div>
         </div>
