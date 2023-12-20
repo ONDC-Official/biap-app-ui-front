@@ -233,6 +233,13 @@ export default function IssueOrderModal({
   }
 
   useEffect(() => {
+    if (order_status === "Accepted" || order_status === "In-progress") {
+      const type = AllCategory.find(
+        ({ enums }) =>
+          enums === "FLM02"
+      );
+      setSelectedIssueSubcategory(type);
+    }
     return () => {
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
         eventSource.close();
@@ -534,56 +541,66 @@ export default function IssueOrderModal({
           {inlineError.selected_id_error && (
             <ErrorMessage>{inlineError.selected_id_error}</ErrorMessage>
           )}
+          {
+            order_status === "Completed" &&
+            <div className="px-2">
+              <p className={`${styles.cancel_dropdown_label_text} ${styles.required}`}>
+                Select Issue Subcategory
+              </p>
+              <Dropdown
+                header={
+                  <div
+                    className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
+                  >
+                    <div className="px-2">
+                      <p className={styles.cancel_dropdown_text}>
+                        {selectedIssueSubcategory?.value
+                          ? selectedIssueSubcategory?.value
+                          : "Select issue subcategory"}
+                      </p>
+                    </div>
+                    <div className="px-2 ms-auto">
+                      <DropdownSvg
+                        width="15"
+                        height="10"
+                        color={ONDC_COLORS.ACCENTCOLOR}
+                      />
+                    </div>
+                  </div>
+                }
+                body_classes="dropdown-menu-right"
+                style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
+                click={(reasonValue) => {
+                  const type = AllCategory.find(
+                    ({ value }) =>
+                      value.toLowerCase() === reasonValue.toLowerCase()
+                  );
+                  setSelectedIssueSubcategory(type);
+                  setInlineError((error) => ({
+                    ...error,
+                    subcategory_error: "",
+                  }));
+                }}
+                options={AllCategory.filter(({ enums }) => enums !== "FLM02").map(({ value }) => ({ value }))}
+                show_icons={false}
+              />
+              {inlineError.subcategory_error && (
+                <ErrorMessage>{inlineError.subcategory_error}</ErrorMessage>
+              )}
+            </div>
+          }
 
           <div className="px-2">
-            <p className={`${styles.cancel_dropdown_label_text} ${styles.required}`}>
-              Select Issue Subcategory
-            </p>
-            <Dropdown
-              header={
-                <div
-                  className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
-                >
-                  <div className="px-2">
-                    <p className={styles.cancel_dropdown_text}>
-                      {selectedIssueSubcategory?.value
-                        ? selectedIssueSubcategory?.value
-                        : "Select issue subcategory"}
-                    </p>
-                  </div>
-                  <div className="px-2 ms-auto">
-                    <DropdownSvg
-                      width="15"
-                      height="10"
-                      color={ONDC_COLORS.ACCENTCOLOR}
-                    />
-                  </div>
-                </div>
-              }
-              body_classes="dropdown-menu-right"
-              style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
-              click={(reasonValue) => {
-                const type = AllCategory.find(
-                  ({ value }) =>
-                    value.toLowerCase() === reasonValue.toLowerCase()
-                );
-                setSelectedIssueSubcategory(type);
-                setInlineError((error) => ({
-                  ...error,
-                  subcategory_error: "",
-                }));
-              }}
-              options={AllCategory.map(({ value }) => ({
-                value,
-              }))}
-              show_icons={false}
-            />
-            {inlineError.subcategory_error && (
-              <ErrorMessage>{inlineError.subcategory_error}</ErrorMessage>
-            )}
-          </div>
-
-          <div className="px-2">
+            {
+              (order_status === "Accepted" || order_status === "In-progress") && (
+                <Input
+                  label_name="Select Issue Subcategory"
+                  disabled
+                  type="text"
+                  value={'Delay in delivery'}
+                />
+              )
+            }
             <Input
               label_name="Short Description"
               type="text"
@@ -709,11 +726,11 @@ export default function IssueOrderModal({
                 handleRaiseOrderIssue();
               }}
             >
-               {loading ? (
-                    <Loading />
-                  ) : (
-                    "Confirm"
-                  )}
+              {loading ? (
+                <Loading />
+              ) : (
+                "Confirm"
+              )}
             </Button>
           </div>
         </div>
