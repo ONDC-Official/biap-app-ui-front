@@ -47,6 +47,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   const [allNonCancellable, setAllNonCancellable] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [isIssueRaised, setIsIssueRaised] = useState(false);
+  const [orderIssueId, setOrderIssueId] = useState("");
   const [issueLoading, setIssueLoading] = useState(false);
   const [toggleIssueModal, setToggleIssueModal] = useState(false);
 
@@ -343,10 +344,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
       );
 
 
-      const { issueExistance } = data;
+      const { issueExistance, issue } = data;
       if (issueExistance) {
         setIssueLoading(false);
         setIsIssueRaised(true);
+        setOrderIssueId(issue.issueId)
       } else {
         setIssueLoading(false);
       }
@@ -1215,7 +1217,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                     statusLoading ||
                     issueLoading
                   }
-                  onClick={() => history.push("/application/tickets")}
+                  onClick={() => history.push(`/application/complaints/${orderIssueId}`)}
                 >
                   {issueLoading ? (
                     <Loading />
