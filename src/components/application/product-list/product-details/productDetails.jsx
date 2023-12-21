@@ -25,12 +25,11 @@ const ProductDetails = ({ productId }) => {
   const classes = useStyles();
   const history = useHistory();
   const dispatch = useContext(ToastContext);
-  const { fetchCartItems } = useContext(CartContext);
+  const { fetchCartItems, cartItems } = useContext(CartContext);
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
   const { cancellablePromise } = useCancellablePromise();
 
   const [productPayload, setProductPayload] = useState(null);
-  const [availableCartItems, setAvailableCartItems] = useState([]);
   const [isItemAvailableInCart, setIsItemAvailableInCart] = useState(false);
   const [itemAvailableInCart, setItemAvailableInCart] = useState(null);
   const [productDetails, setProductDetails] = useState({});
@@ -71,7 +70,7 @@ const ProductDetails = ({ productId }) => {
     try {
       const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
       const { item_details } = data;
-      getCartItems(data.id)
+      fetchCartItems();
       setProductPayload(data);
       setProductDetails(item_details);
       setActiveImage(item_details?.descriptor?.symbol);
@@ -171,29 +170,40 @@ const ProductDetails = ({ productId }) => {
     return true;
   }
 
-  const getCartItems = async (pId = null) => {
-    try {
-      const user = JSON.parse(getValueFromCookie("user"));
-      const url = `/clientApis/v2/cart/${user.id}`;
-      const res = await getCall(url);
-      if (pId) {
-        let isItemAvailable = false;
-        const findItem = res.find((item) => item.item.id === pId);
-        if (findItem) {
-          isItemAvailable = true;
-          setItemAvailableInCart(findItem);
-        } else { }
-        setIsItemAvailableInCart(isItemAvailable);
-      } else {
-        setItemAvailableInCart(null);
-        setIsItemAvailableInCart(false);
+  const checkCustomisationIsAvailableInCart = (customisations, cartItemData) => {
+    const cartItem = Object.assign({}, JSON.parse(JSON.stringify(cartItemData)));
+    let matchingCustomisation = null;
+    if (customisations) {
+      const currentIds = customisations.map((item) => item.id);
+      let existingIds = cartItem.item.customisations.map((item) => item.id);
+      const areSame = areCustomisationsSame(existingIds, currentIds);
+      if (areSame) {
+        matchingCustomisation = cartItem;
       }
-      setAvailableCartItems(res);
-      return res;
-    } catch (error) {
-      console.log("Error fetching cart items:", error);
-    }
+    } else { }
+    return matchingCustomisation ? true : false;
   };
+
+  useEffect(() => {
+    if (productPayload && productPayload?.id && cartItems && cartItems.length > 0) {
+      let isItemAvailable = false;
+      let findItem = null;
+      if (productPayload?.context.domain === "ONDC:RET11") {
+        const customisations = getCustomizations() ?? null;
+        findItem = customisations ? cartItems.find((item) => item.item.id === productPayload.id && checkCustomisationIsAvailableInCart(customisations, item)) : cartItems.find((item) => item.item.id === productPayload.id);
+      } else {
+        findItem = cartItems.find((item) => item.item.id === productPayload.id);
+      }
+      if (findItem) {
+        isItemAvailable = true;
+        setItemAvailableInCart(findItem);
+      } else { }
+      setIsItemAvailableInCart(isItemAvailable);
+    } else {
+      setItemAvailableInCart(null);
+      setIsItemAvailableInCart(false);
+    }
+  }, [cartItems, customization_state]);
 
   const addToCart = async (navigate = false, isIncrement = true) => {
     setAddToCartLoading(true);
@@ -234,8 +244,6 @@ const ProductDetails = ({ productId }) => {
       hasCustomisations: customisations ? true : false,
     };
 
-    const cartItems = await getCartItems(productPayload.id);
-
     let cartItem = [];
     cartItem = cartItems.filter((ci) => {
       return ci.item.id === payload.id;
@@ -257,7 +265,6 @@ const ProductDetails = ({ productId }) => {
       const res = await postCall(url, payload);
       fetchCartItems();
       setAddToCartLoading(false);
-      getCartItems(productPayload.id);
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -274,11 +281,10 @@ const ProductDetails = ({ productId }) => {
       const currentCount = parseInt(cartItem[0].item.quantity.count);
       const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
 
-      console.log(currentCount, maxCount);
-
       if (currentCount < maxCount) {
         if (!customisations) {
-          updateCartItem(cartItems, isIncrement, cartItem[0]._id);
+          await updateCartItem(cartItems, isIncrement, cartItem[0]._id);
+          fetchCartItems();
           setAddToCartLoading(false);
           dispatch({
             type: toast_actions.ADD_TOAST,
@@ -301,9 +307,9 @@ const ProductDetails = ({ productId }) => {
           }
 
           if (matchingCustomisation) {
-            console.log(4);
-            updateCartItem(cartItems, isIncrement, matchingCustomisation._id);
+            await updateCartItem(cartItems, isIncrement, matchingCustomisation._id);
             setAddToCartLoading(false);
+            fetchCartItems();
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -313,11 +319,9 @@ const ProductDetails = ({ productId }) => {
               },
             });
           } else {
-            console.log(5);
             const res = await postCall(url, payload);
             fetchCartItems();
             setAddToCartLoading(false);
-            getCartItems(productPayload.id);
             dispatch({
               type: toast_actions.ADD_TOAST,
               payload: {
@@ -498,7 +502,6 @@ const ProductDetails = ({ productId }) => {
     const user = JSON.parse(getValueFromCookie("user"));
     const url = `/clientApis/v2/cart/${user.id}/${itemId}`;
     const res = await deleteCall(url);
-    getCartItems();
     fetchCartItems();
   };
 
@@ -650,7 +653,8 @@ const ProductDetails = ({ productId }) => {
 
                 <Grid container alignItems="center" sx={{ marginTop: 2.5 }}>
                   {
-                    productPayload?.context.domain !== "ONDC:RET11" && isItemAvailableInCart && itemAvailableInCart
+                    // productPayload?.context.domain !== "ONDC:RET11" && 
+                    isItemAvailableInCart && itemAvailableInCart
                       ? (
                         <ButtonGroup
                           variant={"contained"}

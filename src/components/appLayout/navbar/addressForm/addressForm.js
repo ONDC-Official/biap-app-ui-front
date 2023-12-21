@@ -39,6 +39,7 @@ const AddressForm = (props) => {
   const [addAddressLoading, setAddAddressLoading] = useState(false);
   const [address, setAddress] = useState(selectedAddress);
 
+  console.log("selectedAddress=====>0000", selectedAddress);
   const [error, setError] = useState({
     name_error: "",
     email_error: "",
@@ -793,6 +794,7 @@ const AddressForm = (props) => {
 
 const MapPicker = (props) => {
   const { address, setAddress } = props;
+  console.log("MapPicker props=====>", props);
   let locationString = "28.679076630288467,77.06970870494843";
   locationString = locationString.split(",");
   const gps = {
@@ -800,7 +802,7 @@ const MapPicker = (props) => {
     lng: locationString[1],
   };
 
-  const [location, setLocation] = useState(gps);
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
     if (address.lat && address.lng) {
@@ -817,20 +819,22 @@ const MapPicker = (props) => {
   }, []);
 
   useEffect(() => {
-    setAddress((address) => ({
-      ...address,
-      street: location.street,
-      city: location.city,
-      state: location.state,
-      areaCode: location.pincode,
-      lat: location.lat,
-      lng: location.lng,
-    }));
+    if (location) {
+      setAddress((address) => ({
+        ...address,
+        street: location.street,
+        city: location.city,
+        state: location.state,
+        areaCode: location.pincode,
+        lat: location.lat,
+        lng: location.lng,
+      }));
+    }
   }, [location]);
 
   return (
     <div style={{ width: "100%", height: "400px" }}>
-      <PlacePickerMap location={location} setLocation={setLocation} />
+      <PlacePickerMap location={location || gps} setLocation={setLocation} />
     </div>
   );
 };
