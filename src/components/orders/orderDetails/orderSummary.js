@@ -1205,7 +1205,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
-          {orderDetails?.state === "Completed" && (
+          { (orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
             <>
               {isIssueRaised ? (
                 <Button
@@ -1217,7 +1217,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                     statusLoading ||
                     issueLoading
                   }
-                  onClick={() => history.push(`/application/complaints/${orderIssueId}`)}
+                  onClick={() => history.push(`/application/complaint/${orderIssueId}`)}
                 >
                   {issueLoading ? (
                     <Loading />

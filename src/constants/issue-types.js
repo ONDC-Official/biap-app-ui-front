@@ -87,6 +87,11 @@ export const ISSUE_TYPES = [
         value: 'Package info mismatch',
         enums: 'FLM07'
       },
+      {
+        key: '08',
+        value: 'Incorrectly marked as delivered',
+        enums: 'FLM08'
+      }
     ]
   },
   // {
