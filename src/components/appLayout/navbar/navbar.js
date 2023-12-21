@@ -194,9 +194,10 @@ const NavBar = ({ isCheckout = false }) => {
       const address = JSON.parse(getValueFromCookie("delivery_address"));
       if (address) {
         setDeliveryAddress(() => address);
-      } else {
-        fetchLatLongFromEloc(address);
       }
+      // else {
+      //   fetchLatLongFromEloc(address);
+      // }
     } else {
     }
   }
@@ -260,75 +261,108 @@ const NavBar = ({ isCheckout = false }) => {
     //sum of two variable
   }, [search]);
 
-  // get the area code of the location selected
-  const getAreadCodeFromLatLong = async (location) => {
-    try {
-      const { data } = await cancellablePromise(
-        axios.get(
-          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
-        )
-      );
-      const { lat, lng, pincode, city, state } = data?.results?.[0];
-      setSearchedLocation({
-        ...searchedLocation,
-        name: location?.name,
-        lat,
-        lng,
-        pincode,
-        city,
-        state,
-        tag: location?.tag,
-      });
-      let search_context_data = getValueFromCookie("search_context");
-      search_context_data = search_context_data ? Object.assign({}, JSON.parse(search_context_data)) : {};
-      // generating context for search
-      const search_context = {
-        search: search_context_data?.search || "",
-        location: {
-          ...searchedLocation,
-          name: location?.name,
-          lat,
-          lng,
-          pincode,
-          city,
-          state,
-          tag: location?.tag,
-        },
-      };
-      setLocationData(() => search_context.location);
-      AddCookie("search_context", JSON.stringify(search_context));
-      setToggleLocationListCard(false);
-    } catch (err) {
-      dispatchError(err?.response?.data?.error?.message);
-    }
-  };
+  // // get the area code of the location selected
+  // const getAreadCodeFromLatLong = async (location) => {
+  //   try {
+  //     const { data } = await cancellablePromise(
+  //       axios.get(
+  //         `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_latlong_info?lat=${location?.lat}&long=${location?.long}`
+  //       )
+  //     );
+  //     const { lat, lng, pincode, city, state } = data?.results?.[0];
+  //     setSearchedLocation({
+  //       ...searchedLocation,
+  //       name: location?.name,
+  //       lat,
+  //       lng,
+  //       pincode,
+  //       city,
+  //       state,
+  //       tag: location?.tag,
+  //     });
+  //     let search_context_data = getValueFromCookie("search_context");
+  //     search_context_data = search_context_data ? Object.assign({}, JSON.parse(search_context_data)) : {};
+  //     // generating context for search
+  //     const search_context = {
+  //       search: search_context_data?.search || "",
+  //       location: {
+  //         ...searchedLocation,
+  //         name: location?.name,
+  //         lat,
+  //         lng,
+  //         pincode,
+  //         city,
+  //         state,
+  //         tag: location?.tag,
+  //       },
+  //     };
+  //     setLocationData(() => search_context.location);
+  //     AddCookie("search_context", JSON.stringify(search_context));
+  //     setToggleLocationListCard(false);
+  //   } catch (err) {
+  //     dispatchError(err?.response?.data?.error?.message);
+  //   }
+  // };
+
 
   // get the lat and long of a place
   const fetchLatLongFromEloc = async (locationData) => {
-    try {
-      const { data } = await cancellablePromise(
-        axios.get(
-          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${locationData?.location?.address?.areaCode}`
-        )
-      );
-      if (data?.latitude && data?.longitude) {
-        const { latitude, longitude } = data;
-        AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
-        getAreadCodeFromLatLong({
-          name: locationData?.name,
-          lat: data?.latitude,
-          long: data?.longitude,
-          tag: locationData?.location?.address?.tag,
-        });
-      } else {
-        setInlineError((error) => ({
-          ...error,
-          location_error: "Unable to get location, Please try again!",
-        }));
-      }
-    } catch (err) {
-      dispatchError(err?.response?.data?.error?.message);
-    }
+    const { name, email, phone, location } = locationData;
+    const { areaCode, building, city, country, door, lat, lng, locality, state, street, tag, ward } = location?.address;
+    AddCookie("LatLongInfo", JSON.stringify({ lat, lng }));
+    setSearchedLocation({
+      ...searchedLocation,
+      name: name,
+      lat,
+      lng,
+      pincode: areaCode,
+      city,
+      state,
+      tag: tag,
+    });
+    let search_context_data = getValueFromCookie("search_context");
+    search_context_data = search_context_data ? Object.assign({}, JSON.parse(search_context_data)) : {};
+    // generating context for search
+    const search_context = {
+      search: search_context_data?.search || "",
+      location: {
+        ...searchedLocation,
+        name: name,
+        lat,
+        lng,
+        pincode: areaCode,
+        city,
+        state,
+        tag: tag,
+      },
+    };
+    setLocationData(() => search_context.location);
+    AddCookie("search_context", JSON.stringify(search_context));
+
+    // try {
+    //   const { data } = await cancellablePromise(
+    //     axios.get(
+    //       `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_place_info?eloc=${locationData?.location?.address?.areaCode}`
+    //     )
+    //   );
+    //   if (data?.latitude && data?.longitude) {
+    //     const { latitude, longitude } = data;
+    //     AddCookie("LatLongInfo", JSON.stringify({ latitude, longitude }));
+    //     getAreadCodeFromLatLong({
+    //       name: locationData?.name,
+    //       lat: data?.latitude,
+    //       long: data?.longitude,
+    //       tag: locationData?.location?.address?.tag,
+    //     });
+    //   } else {
+    //     setInlineError((error) => ({
+    //       ...error,
+    //       location_error: "Unable to get location, Please try again!",
+    //     }));
+    //   }
+    // } catch (err) {
+    //   dispatchError(err?.response?.data?.error?.message);
+    // }
   };
 
   const updateSearchParams = () => {

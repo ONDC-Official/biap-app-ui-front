@@ -75,7 +75,7 @@ const StepCartContent = (props) => {
               {
                 end: {
                   location: {
-                    gps: `${search_context?.location?.lat},${search_context?.location?.lng}`,
+                    gps: `${deliveryAddress?.location?.address?.lat},${deliveryAddress?.location?.address?.lng}`,
                     address: {
                       area_code: `${search_context?.location?.pincode}`,
                     },
