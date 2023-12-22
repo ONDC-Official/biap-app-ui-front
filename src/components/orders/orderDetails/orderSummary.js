@@ -1217,7 +1217,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                     statusLoading ||
                     issueLoading
                   }
-                  onClick={() => history.push(`/application/complaint/${orderIssueId}`)}
+                  onClick={() => history.push(`/application/complaints/`)}
                 >
                   {issueLoading ? (
                     <Loading />

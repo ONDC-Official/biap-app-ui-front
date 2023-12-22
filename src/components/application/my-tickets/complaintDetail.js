@@ -34,7 +34,7 @@ const ComplaintDetail = () => {
     const classes = useStyles();
     const location = useLocation();
     const { data } = location.state || {};
-    const { order_details, description, category, sub_category, issueId, issue_status, created_at, issue_actions, transaction_id, bppId, resolution, message_id, resolution_provider } = data;
+    const { order_details, description, category, sub_category, issueId, issue_status, created_at, issue_actions, transaction_id, bppId, resolution, message_id, resolution_provider, domain } = data;
 
     // STATES
     const [statusLoading, setStatusLoading] = useState(false);
@@ -157,7 +157,8 @@ const ComplaintDetail = () => {
                 postCall("/issueApis/v1/issue_status", {
                     context: {
                         transaction_id,
-                        bpp_id: bppId
+                        bpp_id: bppId,
+                        domain
                     },
                     message: {
                         issue_id: issueId,
