@@ -64,7 +64,7 @@ const Checkout = () => {
   const dispatch = useContext(ToastContext);
   const { fetchCartItems } = useContext(CartContext);
   const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
-  const [selectedFulfillment, setSelectedFulfillment] = useState(null);
+  const [selectedFulfillments, setSelectedFulfillments] = useState({});
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -158,8 +158,8 @@ const Checkout = () => {
               let cartQuantity = findItemFromCartItems
                 ? findItemFromCartItems?.quantity?.count
                 : cartItem
-                  ? cartItem?.quantity?.count
-                  : 0;
+                ? cartItem?.quantity?.count
+                : 0;
               let quantity = break_up_item["@ondc/org/item_quantity"]
                 ? break_up_item["@ondc/org/item_quantity"]["count"]
                 : 0;
@@ -224,13 +224,18 @@ const Checkout = () => {
             let delivery = {};
             let outOfStock = [];
             let errorCode = "";
-            let selected_fulfillment_id = selectedFulfillment;
+            let selected_fulfillments = selectedFulfillments;
 
-            if (!selectedFulfillment) {
-              selected_fulfillment_id =
-                updatedCartItems[0]?.message?.quote.items[0]?.fulfillment_id;
-              setSelectedFulfillment(selected_fulfillment_id);
+            if (Object.keys(selectedFulfillments).length === 0) {
+              updatedCartItems[0]?.message?.quote.items.forEach((item) => {
+                selected_fulfillments[item.id] = item.fulfillment_id;
+              });
+              // selected_fulfillments =
+              //   updatedCartItems[0]?.message?.quote.items[0]?.fulfillment_id;
+              setSelectedFulfillments(selected_fulfillments);
             }
+
+            let selected_fulfillment_ids = Object.values(selected_fulfillments);
 
             all_items.forEach((item) => {
               errorCode = item.errorCode;
@@ -253,7 +258,8 @@ const Checkout = () => {
               if (
                 item.title_type === "tax" &&
                 !item.isCustomization &&
-                item.id !== selected_fulfillment_id
+                !selected_fulfillment_ids.includes(item.id)
+                // item.id !== selected_fulfillments
               ) {
                 let key = item.parent_item_id || item.id;
                 items[key] = items[key] || {};
@@ -318,7 +324,8 @@ const Checkout = () => {
               //for delivery
               if (
                 item.title_type === "delivery" &&
-                item.id === selected_fulfillment_id
+                selected_fulfillment_ids.includes(item.id)
+                // item.id === selected_fulfillments
               ) {
                 delivery["delivery"] = {
                   title: item.title,
@@ -327,7 +334,8 @@ const Checkout = () => {
               }
               if (
                 item.title_type === "discount_f" &&
-                item.id === selected_fulfillment_id
+                selected_fulfillment_ids.includes(item.id)
+                // item.id === selected_fulfillments
               ) {
                 delivery["discount"] = {
                   title: item.title,
@@ -336,7 +344,8 @@ const Checkout = () => {
               }
               if (
                 (item.title_type === "tax_f" || item.title_type === "tax") &&
-                item.id === selected_fulfillment_id
+                selected_fulfillment_ids.includes(item.id)
+                // item.id === selected_fulfillments
               ) {
                 delivery["tax"] = {
                   title: item.title,
@@ -345,7 +354,8 @@ const Checkout = () => {
               }
               if (
                 item.title_type === "packing" &&
-                item.id === selected_fulfillment_id
+                selected_fulfillment_ids.includes(item.id)
+                // item.id === selected_fulfillments
               ) {
                 delivery["packing"] = {
                   title: item.title,
@@ -365,7 +375,8 @@ const Checkout = () => {
               }
               if (
                 item.title_type === "misc" &&
-                item.id === selected_fulfillment_id
+                selected_fulfillment_ids.includes(item.id)
+                // item.id === selected_fulfillments
               ) {
                 delivery["misc"] = {
                   title: item.title,
@@ -403,7 +414,7 @@ const Checkout = () => {
       console.log("Calculating quote:", err);
       showQuoteError();
     }
-  }, [updatedCartItems, selectedFulfillment]);
+  }, [updatedCartItems, selectedFulfillments]);
 
   const showQuoteError = () => {
     let msg = "";
@@ -435,11 +446,21 @@ const Checkout = () => {
   };
 
   const getSelectedFulfillment = () => {
-    if (selectedFulfillment) {
+    if (selectedFulfillments) {
       return updatedCartItems[0]?.message?.quote?.fulfillments.find(
-        (fulfillment) => fulfillment.id === selectedFulfillment
+        (fulfillment) => fulfillment.id === selectedFulfillments
       );
     }
+  };
+
+  const getCartProducts = () => {
+    let products = {};
+    return cartItems?.map((cartItem) => {
+      return {
+        name: cartItem?.item?.product?.descriptor?.name,
+        id: cartItem.item.local_id,
+      };
+    });
   };
 
   const renderStepLabel = (stepLabel, stepIndex) => {
@@ -451,13 +472,17 @@ const Checkout = () => {
             onUpdateActiveStep={() => {
               setActiveStep(0);
             }}
-          />);
+          />
+        );
       case 1:
         return <StepCustomerLabel activeStep={activeStep} />;
       case 2:
         return (
           <StepFulfillmentLabel
             fulfillment={getSelectedFulfillment()}
+            selectedFulfillments={selectedFulfillments}
+            fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
+            products={getCartProducts()}
             activeStep={activeStep}
             onUpdateActiveStep={() => {
               setActiveStep(2);
@@ -510,8 +535,8 @@ const Checkout = () => {
         return (
           <StepFulfillmentContent
             fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
-            selectedFulfillment={selectedFulfillment}
-            setSelectedFulfillment={setSelectedFulfillment}
+            selectedFulfillment={selectedFulfillments}
+            setSelectedFulfillment={setSelectedFulfillments}
             handleNext={() => {
               setActiveStep(3);
             }}
@@ -552,7 +577,7 @@ const Checkout = () => {
               setActivePaymentMethod(value);
             }}
             cartItemsData={cartItems}
-            selectedFulfillmemtId={selectedFulfillment}
+            selectedFulfillments={selectedFulfillments}
             updatedCartItemsData={updatedCartItems}
             updateInitLoading={(value) => setInitLoading(value)}
             setUpdateCartItemsDataOnInitialize={(data) => {
