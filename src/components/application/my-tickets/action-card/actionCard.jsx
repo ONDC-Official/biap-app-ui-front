@@ -101,13 +101,13 @@ export default function CustomerActionCard({
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
     try {
-      const { bpp_id, issue_actions, issue_id, transaction_id, created_at } = supportActionDetails;
+      const { bpp_id, issue_actions, issue_id, transaction_id, created_at, domain } = supportActionDetails;
 
       const dataObject = {
         context: {
           action: "issue",
           bpp_id,
-          // bpp_uri,
+          domain,
           timestamp: new Date(),
           transaction_id
         },
