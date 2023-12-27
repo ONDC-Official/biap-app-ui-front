@@ -551,7 +551,7 @@ const ComplaintDetail = () => {
                             </div>
                         </div>
 
-                        {isShowTakeAction() ?
+                        {isShowTakeAction() && !issueActions.some(x => x.respondent_action === "RESOLVED") ?
                             <ErrorMessage>No response was given for this issue</ErrorMessage>
                             : null
                         }
