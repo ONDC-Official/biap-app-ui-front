@@ -1047,8 +1047,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           toast_types.error
         );
         return;
-      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
-        onUpdateTrakingDetails(message?.tracking);
       } else if (
         message.tracking.status === "active" &&
         (message?.tracking?.url !== "" || message?.tracking?.url !== undefined)
@@ -1058,6 +1056,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         trackOrderRef.current.target = "_blank";
         trackOrderRef.current.click();
         onUpdateTrakingDetails(null);
+      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
+        onUpdateTrakingDetails(message?.tracking);
       } else {
         onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
