@@ -377,6 +377,12 @@ const MenuItems = (props) => {
               <Loading />
             ) : (
               <>
+                <Typography variant="body" color="black" component="div">
+                  {productPayload?.item_details?.descriptor?.name}
+                  <span style={{ float: 'right' }}>
+                    {`₹${productPayload?.item_details?.price ? Number.isInteger(Number(productPayload?.item_details?.price?.value)) ? Number(productPayload?.item_details?.price?.value).toFixed(2) : Number(productPayload?.item_details?.price?.value).toFixed(2) : "0"}`}
+                  </span>
+                </Typography>
                 <CustomizationRenderer
                   productPayload={productPayload}
                   customization_state={customization_state}
@@ -472,6 +478,13 @@ const MenuItems = (props) => {
             <Loading />
           ) : (
             <>
+              <Typography variant="body" color="black" component="div">
+                {productPayload?.item_details?.descriptor?.name}
+                <span style={{ float: 'right' }}>
+                  {`₹${productPayload?.item_details?.price ? Number.isInteger(Number(productPayload?.item_details?.price?.value)) ? Number(productPayload?.item_details?.price?.value).toFixed(2) : Number(productPayload?.item_details?.price?.value).toFixed(2) : "0"}`}
+                </span>
+              </Typography>
+
               <CustomizationRenderer
                 productPayload={productPayload}
                 customization_state={customization_state}
