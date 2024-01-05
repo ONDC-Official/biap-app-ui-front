@@ -90,9 +90,11 @@
 }
 
 .quantity_count_wrapper {
-  width: 120px;
-  height: 35px;
-  background-color: $accentColor;
+  width: 90px;
+  height: 30px;
+  background: #eaf6ff;
+  border: 1px solid $accentColor;
+  color: $accentColor;
   border-radius: 36px;
   display: flex;
   align-items: center;
@@ -105,7 +107,7 @@
 
 .subtract_svg_color,
 .add_svg_color {
-  fill: $white;
+  fill: $accentColor;
 }
 
 .subtract_svg_wrapper {
@@ -115,10 +117,9 @@
 }
 
 .subtract_svg_wrapper:hover {
-  background-color: rgba($white, $alpha: 0.75);
   transition: all 0.3s;
   .subtract_svg_color {
-    fill: $accentColor;
+    fill: darkblue;
   }
 }
 
@@ -129,17 +130,16 @@
 }
 
 .add_svg_wrapper:hover {
-  background-color: rgba($white, $alpha: 0.75);
   transition: all 0.3s;
   .add_svg_color {
-    fill: $accentColor;
+    fill: darkblue;
   }
 }
 
 .quantity_count {
   font-size: $font-14;
   font-weight: $medium;
-  color: $white;
+  color: $accentColor;
   text-align: center;
   margin: 0;
 }

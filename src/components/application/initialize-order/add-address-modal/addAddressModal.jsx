@@ -98,7 +98,7 @@ export default function AddAddressModal(props) {
   }
 
   function checkStreetName() {
-    if (validator.isEmpty(address?.street.trim())) {
+    if (validator.isEmpty(address?.street?.trim())) {
       setError((error) => ({
         ...error,
         street_name_error: "Street Name cannot be empty",
@@ -379,13 +379,9 @@ export default function AddAddressModal(props) {
     setCityStateLoading(true);
     try {
       const { data } = await cancellablePromise(
-        axios.get(
-          `${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_pin_info?pincode=${areaCode}`
-        )
+        axios.get(`${process.env.REACT_APP_MMI_BASE_URL}mmi/api/mmi_pin_info?pincode=${areaCode}`)
       );
-      const cityName = data?.copResults?.city
-        ? data?.copResults?.city
-        : data?.copResults?.district;
+      const cityName = data?.copResults?.city ? data?.copResults?.city : data?.copResults?.district;
       const stateName = data?.copResults?.state;
       setAddress((address) => ({
         ...address,
@@ -401,7 +397,8 @@ export default function AddAddressModal(props) {
       let message = "Please enter valid Pin Code";
       if (err.response.status !== 500) {
         message = err.response.data.message;
-      } else { }
+      } else {
+      }
       dispatch({
         type: toast_actions.ADD_TOAST,
         payload: {
@@ -501,11 +498,7 @@ export default function AddAddressModal(props) {
                     has_error={error.phone_error}
                     onChange={(event) => {
                       const regexp = /^[0-9]+$/;
-                      if (
-                        !regexp.test(event.target.value) &&
-                        event.target.value !== ""
-                      )
-                        return;
+                      if (!regexp.test(event.target.value) && event.target.value !== "") return;
                       const name = event.target.value;
                       setAddress((address) => ({
                         ...address,
@@ -565,7 +558,7 @@ export default function AddAddressModal(props) {
                       }));
                     }}
                     onBlur={checkLandMark}
-                  // required
+                    // required
                   />
                   <ErrorMessage>{error.door_error}</ErrorMessage>
                 </div>
@@ -581,11 +574,7 @@ export default function AddAddressModal(props) {
                     has_error={error.areaCode_error}
                     onChange={(event) => {
                       const regexp = /^[0-9]+$/;
-                      if (
-                        !regexp.test(event.target.value) &&
-                        event.target.value !== ""
-                      )
-                        return;
+                      if (!regexp.test(event.target.value) && event.target.value !== "") return;
                       const areaCode = event.target.value;
                       // if the length is 6 than call the city and state fetch call
                       if (areaCode.length === 6) {
@@ -631,16 +620,13 @@ export default function AddAddressModal(props) {
                   />
                   <ErrorMessage>{error.state_name_error}</ErrorMessage>
                 </div>
-                <div className="col-sm-12" style={{ position: 'relative' }}>
-                  <label
-                    htmlFor={"tag"}
-                    className={`${inputStyles.form_label} ${inputStyles.required}`}
-                  >
+                <div className="col-sm-12" style={{ position: "relative" }}>
+                  <label htmlFor={"tag"} className={`${inputStyles.form_label} ${inputStyles.required}`}>
                     Tag
                   </label>
                   <div className="py-2 d-flex align-items-center">
-                    {
-                      address_tags.length > 0 && address_tags.map((tag) => {
+                    {address_tags.length > 0 &&
+                      address_tags.map((tag) => {
                         return (
                           <AddressRadioButton
                             // disabled={loading}
@@ -657,14 +643,11 @@ export default function AddAddressModal(props) {
                             }}
                           >
                             <div className="px-3">
-                              <p className={cancelRadioStyles.address_name_and_phone}>
-                                {tag}
-                              </p>
+                              <p className={cancelRadioStyles.address_name_and_phone}>{tag}</p>
                             </div>
                           </AddressRadioButton>
-                        )
-                      })
-                    }
+                        );
+                      })}
                   </div>
                   <ErrorMessage>{error.tag_error}</ErrorMessage>
                 </div>
@@ -672,9 +655,7 @@ export default function AddAddressModal(props) {
             </div>
           </div>
         </div>
-        <div
-          className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
-        >
+        <div className={`${styles.card_footer} d-flex align-items-center justify-content-center`}>
           {action_type === "edit" ? (
             <Button
               isloading={addAddressLoading ? 1 : 0}
@@ -683,8 +664,7 @@ export default function AddAddressModal(props) {
               button_hover_type={buttonTypes.primary_hover}
               button_text="Update Address"
               onClick={() => {
-                if (address_type === address_types.delivery)
-                  return handleUpdateDeliveryAddress();
+                if (address_type === address_types.delivery) return handleUpdateDeliveryAddress();
                 handleUpdateBillingAddress();
               }}
             />
@@ -696,8 +676,7 @@ export default function AddAddressModal(props) {
               button_hover_type={buttonTypes.primary_hover}
               button_text="Add Address"
               onClick={() => {
-                if (address_type === address_types.delivery)
-                  return handleAddDeliveryAddress();
+                if (address_type === address_types.delivery) return handleAddDeliveryAddress();
                 handleAddBillingAddress();
               }}
             />

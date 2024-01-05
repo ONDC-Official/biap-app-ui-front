@@ -204,7 +204,8 @@ export default function Orders() {
                       bpp_id,
                       bpp_uri,
                       quote,
-                      fulfillments
+                      fulfillments,
+                      domain
                     },
                     index
                   ) => {
@@ -223,6 +224,7 @@ export default function Orders() {
                           order_id={order_id}
                           created_at={createdAt}
                           bpp_id={bpp_id}
+                          domain={domain}
                           accoodion_id={`order_id_${index}`}
                           onUpdateOrder={(data) => {
                             let orderData = Object.assign([], orders);
@@ -237,14 +239,14 @@ export default function Orders() {
                           }}
                           onFetchUpdatedOrder={() => {
                             setCurrentSelectedAccordion("");
-                            // dispatch({
-                            //   type: toast_actions.ADD_TOAST,
-                            //   payload: {
-                            //     id: Math.floor(Math.random() * 100),
-                            //     type: toast_types.success,
-                            //     message: "Order status updated successfully!",
-                            //   },
-                            // });
+                            dispatch({
+                              type: toast_actions.ADD_TOAST,
+                              payload: {
+                                id: Math.floor(Math.random() * 100),
+                                type: toast_types.success,
+                                message: "Order status updated successfully!",
+                              },
+                            });
                             getAllOrders();
                           }}
                           currentSelectedAccordion={currentSelectedAccordion}

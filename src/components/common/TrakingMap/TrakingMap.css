@@ -1,0 +1,51 @@
+#map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: 99;
+  /* border-radius: 10px !important; */
+}
+
+#mmiPickerTop {
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+/* .leaflet-left{*/
+/*    display: none !important;*/
+/*} */
+
+.leaflet-right {
+  display: none !important;
+}
+
+#Dv_mmiSearch_map {
+  font-size: 14px;
+}
+
+.mmi_search_dv .highligher-search {
+  font-size: 14px;
+}
+
+.resultMmi_img {
+  margin-left: 4px;
+  margin-top: 7px;
+}
+
+/* .expand-map-control li:has(#geo_location) { */
+/* display: none; */
+/* } */
+
+/* .expand-map-control li:has(#lyrs_map) { */
+/* display: none; */
+/* } */
+/* .expand-map-control li { */
+/* margin-top: 5px !important; */
+/* } */
+
+/* div.map-control { */
+/* top: 5px !important; */
+/* margin-top: 0px !important; */
+/* margin-right: 5px; */
+/* } */
