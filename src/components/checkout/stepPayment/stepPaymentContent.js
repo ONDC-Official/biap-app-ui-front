@@ -29,7 +29,7 @@ const StepPaymentContent = ({
   setUpdateCartItemsData,
   setUpdateCartItemsDataOnInitialize,
   responseReceivedIds,
-  selectedFulfillmemtId,
+  selectedFulfillments,
   fulfillments,
 }) => {
   const classes = useStyles();
@@ -197,7 +197,7 @@ const StepPaymentContent = ({
           items.map((item) => {
             let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
             itemsData = itemsData.map((itemData) => {
-              itemData.fulfillment_id = selectedFulfillmemtId;
+              itemData.fulfillment_id = selectedFulfillments[itemData.local_id];
               delete itemData.product.fulfillment_id;
               if (updatedCartItems.current) {
                 let findItemFromQuote =
@@ -222,8 +222,8 @@ const StepPaymentContent = ({
               },
               message: {
                 items: itemsData,
-                fulfillments: fulfillments.filter(
-                  (fulfillment) => fulfillment.id === selectedFulfillmemtId
+                fulfillments: fulfillments.filter((fulfillment) =>
+                  Object.values(selectedFulfillments).includes(fulfillment.id)
                 ),
                 billing_info: {
                   address: removeNullValues(billingAddress?.address),
@@ -311,10 +311,11 @@ const StepPaymentContent = ({
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Card
-          className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.COD
-            ? classes.activeCard
-            : ""
-            } ${initializeOrderLoading ? classes.nonClickable : ""}`}
+          className={`${classes.paymentCard} ${
+            activePaymentMethod === payment_methods.COD
+              ? classes.activeCard
+              : ""
+          } ${initializeOrderLoading ? classes.nonClickable : ""}`}
           onClick={() => {
             if (
               !initializeOrderLoading &&
@@ -341,10 +342,11 @@ const StepPaymentContent = ({
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Card
-          className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.JUSPAY
-            ? classes.activeCard
-            : ""
-            } ${initializeOrderLoading ? classes.nonClickable : ""}`}
+          className={`${classes.paymentCard} ${
+            activePaymentMethod === payment_methods.JUSPAY
+              ? classes.activeCard
+              : ""
+          } ${initializeOrderLoading ? classes.nonClickable : ""}`}
           onClick={() => {
             if (
               !initializeOrderLoading &&
