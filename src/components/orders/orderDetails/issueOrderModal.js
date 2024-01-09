@@ -24,7 +24,6 @@ import Loading from "../../shared/loading/loading";
 
 export default function IssueOrderModal({
   billing_address,
-  delivery_address,
   transaction_id,
   fulfillments,
   bpp_id,
@@ -103,8 +102,6 @@ export default function IssueOrderModal({
       const data = await cancellablePromise(
         postCall("/issueApis/v1/issue", {
           context: {
-            city: delivery_address.city,
-            state: delivery_address.state,
             transaction_id,
             domain
           },
