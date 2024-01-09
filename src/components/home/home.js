@@ -133,13 +133,13 @@ const Home = () => {
                 <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                            <Card className={classes.homeCategory} onClick={() => updateQueryParams(`Home & Decor`)}>
+                            <Card className={classes.homeCategory} onClick={() => updateQueryParams(`Home & Kitchen`)}>
                                 <div className={classes.homeImages}>
                                     <img src={Home1} alt="Home 1" />
                                     <img className={classes.homeImage2} src={Home2} alt="Home 2" />
                                 </div>
                                 <Typography variant={"h5"} className={classes.categoryTypo}>
-                                    Home & Decor
+                                    Home & Kitchen
                                 </Typography>
                             </Card>
                         </Grid>
@@ -162,7 +162,20 @@ const Home = () => {
                 {
                     isViewAllCategories && (
                         <>
-                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
+                            <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+                                        <Card className={classes.agricultureCategory} onClick={() => updateQueryParams(`Appliances`)}>
+                                            <div className={classes.agricultureImages}>
+                                                <img className={classes.agricultureImage} src={Agriculture} alt="Appliances 1" />
+                                            </div>
+                                            <Typography variant={"h5"} className={classes.agricultureCategoryTypo}>
+                                                Appliances
+                                            </Typography>
+                                        </Card>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
                             <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
