@@ -1415,7 +1415,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             )}
             order_status={orderDetails.state}
             billing_address={orderDetails?.billing}
-            delivery_address={orderDetails?.fulfillments?.[0]?.end?.location?.address}
             transaction_id={orderDetails.transactionId}
             order_id={orderDetails.id}
             bpp_id={orderDetails.bppId}
