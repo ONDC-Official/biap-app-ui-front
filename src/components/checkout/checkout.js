@@ -735,6 +735,7 @@ const Checkout = () => {
           },
           message: {
             payment: {
+              ...updatedCartItems[0].message.quote.payment,
               paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
               type:
                 method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
@@ -753,39 +754,6 @@ const Checkout = () => {
           },
         },
       ];
-      // const queryParams = items.map((item, index) => {
-      //   return {
-      //     // pass the map of parent order id and transaction id
-      //     context: {
-      //       domain: item.domain,
-      //       city: search_context.location.name,
-      //       state: search_context.location.state,
-      //       parent_order_id: parentOrderIDMap.get(item?.provider?.id)
-      //         .parent_order_id,
-      //       transaction_id: parentOrderIDMap.get(item?.provider?.id)
-      //         .transaction_id,
-      //     },
-      //     message: {
-      //       payment: {
-      //         paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
-      //         type:
-      //           method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
-      //         transaction_id: parentOrderIDMap.get(item?.provider?.id)
-      //           .transaction_id,
-      //         paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
-      //       },
-      //       quote: {
-      //         ...productQuotesForCheckout[0],
-      //         price: {
-      //           currency: productQuotesForCheckout[0].price.currency,
-      //           value: String(productQuotesForCheckout[0].price.value),
-      //         },
-      //       },
-      //       providers: getItemProviderId(item),
-      //     },
-      //   };
-      // });
-
       const data = await cancellablePromise(
         postCall("clientApis/v2/confirm_order", queryParams)
       );
@@ -1257,7 +1225,7 @@ const Checkout = () => {
         </Grid>
       );
     } catch (error) {
-      console.log("Rendering quote", error);
+      console.log("Rendering quote error", error);
       showQuoteError();
     }
   };

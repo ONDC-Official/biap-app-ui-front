@@ -37,8 +37,6 @@ const StepPaymentContent = ({
   const { deliveryAddress, billingAddress, setBillingAddress } =
     useContext(AddressContext);
 
-  console.log("billingAddress====>", billingAddress);
-
   const transaction_id = getValueFromCookie("transaction_id");
   const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
 
@@ -115,6 +113,7 @@ const StepPaymentContent = ({
 
       let oldData = updatedCartItems.current;
       oldData[0].message.quote.quote = data[0].message.order.quote;
+      oldData[0].message.quote.payment = data[0].message.order.payment
 
       setUpdateCartItemsDataOnInitialize(oldData);
       handleSuccess();
@@ -311,11 +310,10 @@ const StepPaymentContent = ({
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Card
-          className={`${classes.paymentCard} ${
-            activePaymentMethod === payment_methods.COD
-              ? classes.activeCard
-              : ""
-          } ${initializeOrderLoading ? classes.nonClickable : ""}`}
+          className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.COD
+            ? classes.activeCard
+            : ""
+            } ${initializeOrderLoading ? classes.nonClickable : ""}`}
           onClick={() => {
             if (
               !initializeOrderLoading &&
@@ -342,11 +340,10 @@ const StepPaymentContent = ({
       </Grid>
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Card
-          className={`${classes.paymentCard} ${
-            activePaymentMethod === payment_methods.JUSPAY
-              ? classes.activeCard
-              : ""
-          } ${initializeOrderLoading ? classes.nonClickable : ""}`}
+          className={`${classes.paymentCard} ${activePaymentMethod === payment_methods.JUSPAY
+            ? classes.activeCard
+            : ""
+            } ${initializeOrderLoading ? classes.nonClickable : ""}`}
           onClick={() => {
             if (
               !initializeOrderLoading &&
