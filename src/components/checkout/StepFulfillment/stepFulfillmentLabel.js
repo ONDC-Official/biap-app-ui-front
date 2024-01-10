@@ -26,7 +26,13 @@ const StepFulfillmentLabel = ({
     const fulfillment = fulfillments.find(
       (fulfillment) => fulfillment.id === Object.values(selectedFulfillments)[0]
     );
-    return fulfillment["@ondc/org/category"];
+    let deliveryTime = fulfillment["@ondc/org/TAT"];
+    // Create a duration object from the ISO 8601 string
+    const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
+    // Get the number of hours from the duration object
+    const hours = duration.humanize();
+    deliveryTime = `${hours}`;
+    return `${fulfillment["@ondc/org/category"]} - Delivery in ${deliveryTime}`;
   };
 
   const renderAllFulfillments = () => {
