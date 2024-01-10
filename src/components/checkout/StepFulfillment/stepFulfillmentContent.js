@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import moment from "moment";
 
 function stringToColor(string) {
   let hash = 0;
@@ -69,12 +70,19 @@ const StepFulfillmentContent = ({
         defaultValue={Object.values(selectedFulfillment)[0]}
       >
         {fulfillments?.map((fulfillment) => {
+          let deliveryTime = fulfillment["@ondc/org/TAT"];
+          // Create a duration object from the ISO 8601 string
+          const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
+
+          // Get the number of hours from the duration object
+          const hours = duration.humanize();
+          deliveryTime = `${hours}`;
           return (
             <div className={classes.fulfillment} key={fulfillment.id}>
               <FormControlLabel
                 value={fulfillment.id}
                 control={<Radio style={{ paddingRight: "20px" }} />}
-                label={fulfillment["@ondc/org/category"]}
+                label={`${fulfillment["@ondc/org/category"]} - Delivery in ${deliveryTime}`}
               />
             </div>
           );
@@ -83,7 +91,7 @@ const StepFulfillmentContent = ({
     );
   };
 
-  const renderSelectedFulfillments = () => {};
+  const renderSelectedFulfillments = () => { };
 
   return (
     <Grid container spacing={3}>

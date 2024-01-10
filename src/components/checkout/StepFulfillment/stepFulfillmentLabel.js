@@ -4,6 +4,7 @@ import useStyles from "./style";
 import Typography from "@mui/material/Typography";
 
 import { getUser, isLoggedIn } from "../../../utils/validateToken";
+import moment from "moment";
 
 const StepFulfillmentLabel = ({
   activeStep,
@@ -35,9 +36,17 @@ const StepFulfillmentLabel = ({
           const fulfillment = fulfillments.find(
             (fulfillment) => fulfillment.id === selectedFulfillments[product.id]
           );
+          let deliveryTime = fulfillment["@ondc/org/TAT"];
+          // Create a duration object from the ISO 8601 string
+          const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
+
+          // Get the number of hours from the duration object
+          const hours = duration.humanize();
+          deliveryTime = `${hours}`;
           return (
             <div>
-              {product.name + " : " + fulfillment["@ondc/org/category"]}
+              {/* {product.name + " : " + fulfillment["@ondc/org/category"]} */}
+              {`${product.name} : ${fulfillment["@ondc/org/category"]} - Delivery in ${deliveryTime}`}
             </div>
           );
         })}
