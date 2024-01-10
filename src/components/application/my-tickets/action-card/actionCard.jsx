@@ -1,7 +1,6 @@
 import React, { useContext, useState, useRef } from "react";
 import CrossIcon from "../../../shared/svg/cross-icon";
 import { ONDC_COLORS } from "../../../shared/colors";
-import Button from "../../../shared/button/button";
 import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/search-product-modal/searchProductModal.module.scss";
 import ErrorMessage from "../../../shared/error-message/errorMessage";
@@ -19,6 +18,7 @@ import Dislike from "../../../shared/svg/dislike";
 import labelStyles from "../../../shared/input/input.module.scss";
 import { getCall, postCall } from "../../../../api/axios";
 import { SSE_TIMEOUT } from "../../../../constants/sse-waiting-time";
+import { Button } from "@mui/material";
 
 export default function CustomerActionCard({
   supportActionDetails,
@@ -101,13 +101,13 @@ export default function CustomerActionCard({
     cancelPartialEventSourceResponseRef.current = [];
     setLoading(true);
     try {
-      const { bpp_id, issue_actions, issue_id, transaction_id, created_at } = supportActionDetails;
+      const { bpp_id, issue_actions, issue_id, transaction_id, created_at, domain } = supportActionDetails;
 
       const dataObject = {
         context: {
           action: "issue",
           bpp_id,
-          // bpp_uri,
+          domain,
           timestamp: new Date(),
           transaction_id
         },
@@ -288,7 +288,7 @@ export default function CustomerActionCard({
           </div>
         </div>
 
-        <div className="p-2 d-flex align-items-center">
+        <div className="p-3 d-flex align-items-center">
           <AddressRadioButton
             disabled={loading}
             checked={selectedCancelType === ACTION_TYPES.closeIssue}
@@ -375,26 +375,28 @@ export default function CustomerActionCard({
         >
           <div className="px-3">
             <Button
+              fullWidth
               disabled={loading}
-              button_type={buttonTypes.secondary}
-              button_hover_type={buttonTypes.secondary_hover}
-              button_text="Cancel"
+              variant="outlined"
               onClick={() => {
                 onClose();
               }}
-            />
+            >
+              Cancel
+            </Button>
           </div>
           <div className="px-3">
             <Button
+              fullWidth
               isloading={loading ? 1 : 0}
               disabled={loading}
-              button_type={buttonTypes.primary}
-              button_hover_type={buttonTypes.primary_hover}
-              button_text="Submit"
+              variant="contained"
               onClick={() => {
                 contactSupport();
               }}
-            />
+            >
+              Confirm
+            </Button>
           </div>
         </div>
       </div>

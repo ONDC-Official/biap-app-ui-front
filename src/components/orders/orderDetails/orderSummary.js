@@ -3,13 +3,9 @@ import useStyles from "./style";
 
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
-import { useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
-
-import OrderTimeline from "./orderTimeline";
-import SummaryItems from "./summaryItems";
 import moment from "moment";
 import styles from "../../../styles/cart/cartView.module.scss";
 import { ToastContext } from "../../../context/toastContext";
@@ -30,9 +26,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import IssueOrderModal from "./issueOrderModal";
+import { useHistory } from "react-router-dom";
 
 const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) => {
   const classes = useStyles();
+  const history = useHistory();
 
   const [itemQuotes, setItemQuotes] = useState(null);
   const [cancelledItems, setCancelledItems] = useState([]);
@@ -47,6 +46,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   const [productsList, setProductsList] = useState([]);
   const [allNonCancellable, setAllNonCancellable] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
+  const [isIssueRaised, setIsIssueRaised] = useState(false);
+  const [orderIssueId, setOrderIssueId] = useState("");
+  const [issueLoading, setIssueLoading] = useState(false);
+  const [toggleIssueModal, setToggleIssueModal] = useState(false);
+
   const statusEventSourceResponseRef = useRef(null);
   const eventTimeOutRef = useRef([]);
 
@@ -323,6 +327,36 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
       setAllNonCancellable(areAllItemsNonCancellable(productsList));
     }
   }, [productsList]);
+
+
+  useEffect(() => {
+    if (orderDetails) {
+      getTrackIssueDetails();
+    }
+  }, [orderDetails]);
+
+  // get issue status
+  async function getTrackIssueDetails() {
+    try {
+      setIssueLoading(true);
+      const data = await cancellablePromise(
+        getCall(`/issueApis/v1/issue?transactionId=${orderDetails?.transactionId}`)
+      );
+
+
+      const { issueExistance, issue } = data;
+      if (issueExistance) {
+        setIssueLoading(false);
+        setIsIssueRaised(true);
+        setOrderIssueId(issue.issueId)
+      } else {
+        setIssueLoading(false);
+      }
+    } catch (err) {
+      setIssueLoading(false);
+      dispatchToast(err?.message, toast_types.error);
+    }
+  }
 
   const areAllItemsNonCancellable = (products) => {
     return !products.some((obj) => obj["@ondc/org/cancellable"]);
@@ -1171,6 +1205,46 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
+          { (orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
+            <>
+              {isIssueRaised ? (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  className={classes.helpButton}
+                  disabled={
+                    trackOrderLoading ||
+                    statusLoading ||
+                    issueLoading
+                  }
+                  onClick={() => history.push(`/application/complaints/`)}
+                >
+                  {issueLoading ? (
+                    <Loading />
+                  ) : (
+                    "Track Issue"
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  className={classes.helpButton}
+                  disabled={
+                    trackOrderLoading ||
+                    statusLoading ||
+                    issueLoading
+                  }
+                  onClick={() => setToggleIssueModal(true)}
+                >
+                  {issueLoading ? (
+                    <Loading />
+                  ) : (
+                    "Raise Issue"
+                  )}
+                </Button>
+              )}
+            </>)}
           <Button
             fullWidth
             variant="outlined"
@@ -1317,6 +1391,36 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             bpp_uri={orderDetails.bpp_uri}
             handleFetchUpdatedStatus={handleFetchUpdatedStatus}
             onUpdateOrder={onUpdateOrder}
+          />
+        )}
+        {toggleIssueModal && (
+          <IssueOrderModal
+            onClose={() => setToggleIssueModal(false)}
+            onSuccess={() => {
+              setToggleIssueModal(false);
+              onUpdateOrder();
+              dispatch({
+                type: toast_actions.ADD_TOAST,
+                payload: {
+                  id: Math.floor(Math.random() * 100),
+                  type: toast_types.success,
+                  message: "Complaint raised successfully!",
+                },
+              });
+            }}
+            quantity={orderDetails.items?.map(({ quantity }) => quantity)}
+            partailsIssueProductList={generateProductsList(
+              orderDetails,
+              itemQuotes
+            )}
+            order_status={orderDetails.state}
+            billing_address={orderDetails?.billing}
+            transaction_id={orderDetails.transactionId}
+            order_id={orderDetails.id}
+            bpp_id={orderDetails.bppId}
+            bpp_uri={orderDetails.bpp_uri}
+            fulfillments={orderDetails.fulfillments}
+            domain={orderDetails.domain}
           />
         )}
         <a
