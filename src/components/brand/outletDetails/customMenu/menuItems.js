@@ -198,6 +198,7 @@ const MenuItems = (props) => {
       domain: productPayload.context.domain,
       tags: productPayload.item_details.tags,
       customisationState: customizationState,
+      contextCity: productPayload.context.city,
       quantity: {
         count: itemQty,
       },
