@@ -327,6 +327,18 @@ const MenuItems = (props) => {
   }, [customization_state]);
 
   if (firstMenuItemDetails) {
+    let rangePriceTag = null;
+    if (productPayload && productPayload?.item_details && productPayload?.item_details?.price && productPayload?.item_details?.price?.tags && productPayload?.item_details?.price?.tags.length > 0) {
+      const findRangePriceTag = productPayload?.item_details?.price?.tags.find((item) => item.code === "range");
+      if (findRangePriceTag) {
+        const findLowerPriceObj = findRangePriceTag.list.find((item) => item.code === "lower");
+        const findUpperPriceObj = findRangePriceTag.list.find((item) => item.code === "upper");
+        rangePriceTag = {
+          maxPrice: findUpperPriceObj.value,
+          minPrice: findLowerPriceObj.value
+        };
+      }
+    } else { }
     return (
       <Accordion defaultExpanded={true}>
         <AccordionSummary
@@ -381,7 +393,11 @@ const MenuItems = (props) => {
                 <Typography variant="body" color="black" component="div">
                   {productPayload?.item_details?.descriptor?.name}
                   <span style={{ float: 'right' }}>
-                    {`₹${productPayload?.item_details?.price ? Number.isInteger(Number(productPayload?.item_details?.price?.value)) ? Number(productPayload?.item_details?.price?.value).toFixed(2) : Number(productPayload?.item_details?.price?.value).toFixed(2) : "0"}`}
+                    {
+                      rangePriceTag
+                        ? `₹${rangePriceTag?.minPrice} - ₹${rangePriceTag?.maxPrice}`
+                        : `₹${productPayload?.item_details?.price ? Number.isInteger(Number(productPayload?.item_details?.price?.value)) ? Number(productPayload?.item_details?.price?.value).toFixed(2) : Number(productPayload?.item_details?.price?.value).toFixed(2) : "0"}`
+                    }
                   </span>
                 </Typography>
                 <CustomizationRenderer
