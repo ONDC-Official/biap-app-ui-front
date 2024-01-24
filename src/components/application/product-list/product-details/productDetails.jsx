@@ -505,6 +505,20 @@ const ProductDetails = ({ productId }) => {
     fetchCartItems();
   };
 
+  console.log("productDetails=====>", productDetails);
+  let rangePriceTag = null;
+  if (productDetails && productDetails?.price && productDetails?.price?.tags && productDetails?.price?.tags.length > 0) {
+    const findRangePriceTag = productDetails?.price?.tags.find((item) => item.code === "range");
+    if (findRangePriceTag) {
+      const findLowerPriceObj = findRangePriceTag.list.find((item) => item.code === "lower");
+      const findUpperPriceObj = findRangePriceTag.list.find((item) => item.code === "upper");
+      rangePriceTag = {
+        maxPrice: findUpperPriceObj.value,
+        minPrice: findLowerPriceObj.value
+      };
+    }
+  } else { }
+
   return (
     <>
       {productPayload == null ? (
@@ -553,18 +567,29 @@ const ProductDetails = ({ productId }) => {
                 <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
                   {productDetails?.descriptor?.name}
                 </Typography>
-                <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
-                  <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
-                    ₹{productDetails?.price?.value}
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    color="black"
-                    sx={{ fontFamily: "inter", fontWeight: 400, marginLeft: 2, textDecoration: "line-through" }}
-                  >
-                    ₹{parseInt(productDetails?.price?.maximum_value).toFixed(0)}
-                  </Typography>
-                </Grid>
+                {
+                  rangePriceTag
+                    ? (
+                      <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+                        <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
+                          {`₹${rangePriceTag?.minPrice} - ₹${rangePriceTag?.maxPrice}`}
+                        </Typography>
+                      </Grid>
+                    ) : (
+                      <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+                        <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
+                          ₹{productDetails?.price?.value}
+                        </Typography>
+                        <Typography
+                          variant="h4"
+                          color="black"
+                          sx={{ fontFamily: "inter", fontWeight: 400, marginLeft: 2, textDecoration: "line-through" }}
+                        >
+                          ₹{parseInt(productDetails?.price?.maximum_value).toFixed(0)}
+                        </Typography>
+                      </Grid>
+                    )
+                }
                 <Divider sx={{ color: "#E0E0E0", marginBottom: 1.5 }} />
                 <VariationsRenderer
                   productPayload={productPayload}
