@@ -1081,8 +1081,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           toast_types.error
         );
         return;
-      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
-        onUpdateTrakingDetails(message?.tracking);
       } else if (
         message.tracking.status === "active" &&
         (message?.tracking?.url !== "" || message?.tracking?.url !== undefined)
@@ -1092,6 +1090,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         trackOrderRef.current.target = "_blank";
         trackOrderRef.current.click();
         onUpdateTrakingDetails(null);
+      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
+        onUpdateTrakingDetails(message?.tracking);
       } else {
         onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
@@ -1415,7 +1415,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             )}
             order_status={orderDetails.state}
             billing_address={orderDetails?.billing}
-            delivery_address={orderDetails?.fulfillments?.[0]?.end?.location?.address}
             transaction_id={orderDetails.transactionId}
             order_id={orderDetails.id}
             bpp_id={orderDetails.bppId}

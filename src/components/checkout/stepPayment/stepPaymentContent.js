@@ -29,15 +29,13 @@ const StepPaymentContent = ({
   setUpdateCartItemsData,
   setUpdateCartItemsDataOnInitialize,
   responseReceivedIds,
-  selectedFulfillmemtId,
+  selectedFulfillments,
   fulfillments,
 }) => {
   const classes = useStyles();
 
   const { deliveryAddress, billingAddress, setBillingAddress } =
     useContext(AddressContext);
-
-  console.log("billingAddress====>", billingAddress);
 
   const transaction_id = getValueFromCookie("transaction_id");
   const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
@@ -115,6 +113,7 @@ const StepPaymentContent = ({
 
       let oldData = updatedCartItems.current;
       oldData[0].message.quote.quote = data[0].message.order.quote;
+      oldData[0].message.quote.payment = data[0].message.order.payment
 
       setUpdateCartItemsDataOnInitialize(oldData);
       handleSuccess();
@@ -197,7 +196,7 @@ const StepPaymentContent = ({
           items.map((item) => {
             let itemsData = Object.assign([], JSON.parse(JSON.stringify(item)));
             itemsData = itemsData.map((itemData) => {
-              itemData.fulfillment_id = selectedFulfillmemtId;
+              itemData.fulfillment_id = selectedFulfillments[itemData.local_id];
               delete itemData.product.fulfillment_id;
               if (updatedCartItems.current) {
                 let findItemFromQuote =
@@ -222,8 +221,8 @@ const StepPaymentContent = ({
               },
               message: {
                 items: itemsData,
-                fulfillments: fulfillments.filter(
-                  (fulfillment) => fulfillment.id === selectedFulfillmemtId
+                fulfillments: fulfillments.filter((fulfillment) =>
+                  Object.values(selectedFulfillments).includes(fulfillment.id)
                 ),
                 billing_info: {
                   address: removeNullValues(billingAddress?.address),
