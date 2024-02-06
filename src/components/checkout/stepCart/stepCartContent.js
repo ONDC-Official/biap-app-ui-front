@@ -148,7 +148,10 @@ const StepCartContent = (props) => {
           history.replace("/application/products");
           return;
         }
-        const request_object = constructQouteObject(cartItems);
+        let c = cartItems.map((item) => {
+          return item.item;
+        });
+        const request_object = constructQouteObject(c);
         if (responseRef.current.length !== request_object.length) {
           dispatchToast(toast_types.error, "Cannot fetch details for some product those products will be ignored!");
           setErrorMessageTimeOut("Cannot fetch details for this product");
