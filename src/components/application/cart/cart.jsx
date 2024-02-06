@@ -908,8 +908,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
           });
           history.replace("/application/products");
           return;
-        }
-        const request_object = constructQouteObject(cartItems);
+        } else { }
+        let c = cartItems.map((item) => {
+          return item.item;
+        });
+        const request_object = constructQouteObject(c);
         if (responseRef.current.length !== request_object.length) {
           dispatch({
             type: toast_actions.ADD_TOAST,

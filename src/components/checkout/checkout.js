@@ -226,14 +226,12 @@ const Checkout = () => {
             let errorCode = "";
             let selected_fulfillments = selectedFulfillments;
 
-            if (Object.keys(selectedFulfillments).length === 0) {
-              updatedCartItems[0]?.message?.quote.items.forEach((item) => {
-                selected_fulfillments[item.id] = item.fulfillment_id;
-              });
-              // selected_fulfillments =
-              //   updatedCartItems[0]?.message?.quote.items[0]?.fulfillment_id;
-              setSelectedFulfillments(selected_fulfillments);
-            }
+            // if (Object.keys(selectedFulfillments).length === 0) {
+            updatedCartItems[0]?.message?.quote.items.forEach((item) => {
+              selected_fulfillments[item.id] = item.fulfillment_id;
+            });
+            setSelectedFulfillments(selected_fulfillments);
+            // }
 
             let selected_fulfillment_ids = Object.values(selected_fulfillments);
 
