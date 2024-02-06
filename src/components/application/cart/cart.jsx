@@ -786,11 +786,12 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         let domain = "";
         let contextCity = "";
         const updatedItems = items.map((item) => {
-          domain = item.domain;
-          contextCity = item.contextCity
-          delete item.context;
-          // delete item.contextCity;
-          return item;
+          const newItem = Object.assign({}, item);
+          domain = newItem.domain;
+          contextCity = newItem.contextCity
+          delete newItem.context;
+          delete newItem.contextCity;
+          return newItem;
         });
         let selectPayload = {
           context: {
@@ -907,8 +908,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
           });
           history.replace("/application/products");
           return;
-        }
-        const request_object = constructQouteObject(cartItems);
+        } else { }
+        let c = cartItems.map((item) => {
+          return item.item;
+        });
+        const request_object = constructQouteObject(c);
         if (responseRef.current.length !== request_object.length) {
           dispatch({
             type: toast_actions.ADD_TOAST,
