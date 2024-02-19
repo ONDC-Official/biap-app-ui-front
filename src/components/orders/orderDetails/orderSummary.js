@@ -1048,9 +1048,9 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         );
         return;
       } else if (
-        message.tracking.status === "active" &&
-        (message?.tracking?.url !== "" || message?.tracking?.url !== undefined)
+        message.tracking.status === "active" && message?.tracking?.url
       ) {
+        console.log("message?.tracking?.url=====>", message?.tracking?.url);
         setTrackOrderLoading(false);
         trackOrderRef.current.href = message?.tracking?.url;
         trackOrderRef.current.target = "_blank";
