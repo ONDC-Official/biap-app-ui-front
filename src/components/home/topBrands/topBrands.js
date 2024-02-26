@@ -20,6 +20,7 @@ import { ReactComponent as PreviousIcon } from "../../../assets/images/previous.
 import { ReactComponent as NextIcon } from "../../../assets/images/next.svg";
 
 import Loading from "../../shared/loading/loading";
+import Offers from "../../common/Offers/Offers";
 
 const BrandCard = ({ data, index, onMouseOver }) => {
   const classes = useStyles();
@@ -89,58 +90,61 @@ const TopBrands = () => {
   const rowsPerPage = parseInt(screenWidth / 120) - 7;
   const totalPageCount = Math.ceil(brands.length / rowsPerPage);
   return (
-    <Grid container spacing={3} className={classes.topBrandsContainer}>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <Typography variant="h4">All Providers</Typography>
-      </Grid>
-      {isLoading ? (
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
-          <Loading />
+    <>
+      <Offers />
+      <Grid container spacing={3} className={classes.topBrandsContainer}>
+        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+          <Typography variant="h4">All Providers</Typography>
         </Grid>
-      ) : (
-        <>
+        {isLoading ? (
           <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
-            <div style={{ marginLeft: "auto", marginTop: "auto", marginBottom: "auto" }}>
-              <IconButton
-                color="inherit"
-                className={classes.actionButton}
-                onClick={() => {
-                  setPage(page - 1);
-                  // setActiveSubCatIndex(activeSubCatIndex-1)
-                }}
-                disabled={page === 0}
-              >
-                <PreviousIcon />
-              </IconButton>
-            </div>
-            {brands.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((brand, brandIndex) => (
-              <BrandCard
-                key={`btand-index-${brandIndex}`}
-                data={brand}
-                index={brandIndex}
-                // isActive={brandIndex === activeBrandIndex}
-                onMouseOver={() => {
-                  setActiveBrandIndex(brandIndex);
-                }}
-              />
-            ))}
-            <div style={{ marginRight: "auto", marginTop: "auto", marginBottom: "auto" }}>
-              <IconButton
-                color="inherit"
-                className={classes.actionButton}
-                onClick={() => {
-                  setPage(page + 1);
-                  // setActiveSubCatIndex(activeSubCatIndex+1)
-                }}
-                disabled={page === totalPageCount - 1}
-              >
-                <NextIcon />
-              </IconButton>
-            </div>
+            <Loading />
           </Grid>
-        </>
-      )}
-    </Grid>
+        ) : (
+          <>
+            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
+              <div style={{ marginLeft: "auto", marginTop: "auto", marginBottom: "auto" }}>
+                <IconButton
+                  color="inherit"
+                  className={classes.actionButton}
+                  onClick={() => {
+                    setPage(page - 1);
+                    // setActiveSubCatIndex(activeSubCatIndex-1)
+                  }}
+                  disabled={page === 0}
+                >
+                  <PreviousIcon />
+                </IconButton>
+              </div>
+              {brands.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((brand, brandIndex) => (
+                <BrandCard
+                  key={`btand-index-${brandIndex}`}
+                  data={brand}
+                  index={brandIndex}
+                  // isActive={brandIndex === activeBrandIndex}
+                  onMouseOver={() => {
+                    setActiveBrandIndex(brandIndex);
+                  }}
+                />
+              ))}
+              <div style={{ marginRight: "auto", marginTop: "auto", marginBottom: "auto" }}>
+                <IconButton
+                  color="inherit"
+                  className={classes.actionButton}
+                  onClick={() => {
+                    setPage(page + 1);
+                    // setActiveSubCatIndex(activeSubCatIndex+1)
+                  }}
+                  disabled={page === totalPageCount - 1}
+                >
+                  <NextIcon />
+                </IconButton>
+              </div>
+            </Grid>
+          </>
+        )}
+      </Grid>
+    </>
   );
 };
 export default TopBrands;
