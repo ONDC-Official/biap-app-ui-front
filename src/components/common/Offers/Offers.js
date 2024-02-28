@@ -1,7 +1,10 @@
-import React from "react";
+import { useRef } from "react";
+import React, { useState } from "react";
 import useStyles from "./styles";
 import OfferCard from "./OfferCard";
-import { Grid, Typography } from "@mui/material";
+import { Grid, IconButton, Typography } from "@mui/material";
+import { ReactComponent as PreviousIcon } from "../../../assets/images/previous.svg";
+import { ReactComponent as NextIcon } from "../../../assets/images/next.svg";
 
 const offers = [
   {
@@ -161,7 +164,13 @@ const offers = [
 ];
 
 const Offers = () => {
+  const ref = useRef(null);
   const classes = useStyles();
+
+  const scroll = (scrollOffset) => {
+    ref.current.scrollLeft += scrollOffset;
+  };
+
   return (
     <>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -169,8 +178,31 @@ const Offers = () => {
           Offers
         </Typography>
       </Grid>
+
       <div className={classes.offersContainer}>
-        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.offersRow}>
+        <div className={classes.leftIcon}>
+          <IconButton
+            color="inherit"
+            className={classes.actionButton}
+            onClick={() => {
+              scroll(-1000);
+            }}
+          >
+            <PreviousIcon />
+          </IconButton>
+        </div>
+        <div className={classes.rightIcon}>
+          <IconButton
+            color="inherit"
+            className={classes.actionButton}
+            onClick={() => {
+              scroll(1000);
+            }}
+          >
+            <NextIcon style={{ fontSize: 30 }} />
+          </IconButton>
+        </div>
+        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.offersRow} ref={ref}>
           {offers.map((offer) => {
             return (
               <OfferCard

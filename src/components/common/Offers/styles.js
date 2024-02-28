@@ -6,6 +6,7 @@ const useStyles = makeStyles({
     display: "flex",
     marginTop: 24,
     position: "relative",
+    padding: "0px 11rem",
   },
   offersRow: {
     display: "flex",
@@ -15,6 +16,9 @@ const useStyles = makeStyles({
     "&::-webkit-scrollbar": {
       display: "none",
     },
+    //  overflow: "hidden",
+    transition: "transform 0.5s ease",
+    scrollBehavior: "smooth",
   },
   offerCard: {
     width: "max-content",
@@ -51,6 +55,16 @@ const useStyles = makeStyles({
   },
   brandImage: {
     height: 30,
+  },
+  leftIcon: {
+    position: "absolute",
+    left: 100,
+    top: 50,
+  },
+  rightIcon: {
+    position: "absolute",
+    right: 100,
+    top: 50,
   },
 });
 
