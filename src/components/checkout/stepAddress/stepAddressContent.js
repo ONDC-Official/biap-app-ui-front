@@ -79,15 +79,16 @@ const StepAddressContent = ({
           door: billingAddress?.address?.door || "",
           state: billingAddress?.address?.state || "",
           street: billingAddress?.address?.street || "",
-          tag: billingAddress?.address?.tag || "Other"
+          tag: billingAddress?.address?.tag || "Other",
         };
-        setAddressType(address_types.billing)
+        setAddressType(address_types.billing);
         setToggleAddressForm({
           actionType: "edit",
           toggle: true,
           address: addressObject,
         });
-      } else { }
+      } else {
+      }
     }
   }, [deliveryAddress, billingAddress]);
 
@@ -138,7 +139,7 @@ const StepAddressContent = ({
     fetchDeliveryAddress();
   }, []);
 
-  useEffect(() => { }, [cartItems, updatedCartItems]);
+  useEffect(() => {}, [cartItems, updatedCartItems]);
 
   const onGetQuote = async (message_id) => {
     try {
@@ -251,7 +252,7 @@ const StepAddressContent = ({
         const updatedItems = items.map((item) => {
           const newItem = Object.assign({}, item);
           domain = newItem.domain;
-          contextCity = newItem.contextCity
+          contextCity = newItem.contextCity;
           delete newItem.context;
           delete newItem.contextCity;
           return newItem;
@@ -262,6 +263,8 @@ const StepAddressContent = ({
             domain: domain,
             city: contextCity || deliveryAddress.location.address.city,
             state: deliveryAddress.location.address.state,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
           },
           message: {
             cart: {
@@ -409,8 +412,8 @@ const StepAddressContent = ({
                           billingAddress
                             ? deliveryAddress?.id !== billingAddress?.id
                             : addressType === address_types.billing
-                              ? true
-                              : false
+                            ? true
+                            : false
                         }
                       />
                     }
@@ -465,7 +468,7 @@ const StepAddressContent = ({
                     door: address?.address?.door || "",
                     state: address?.address?.state || "",
                     street: address?.address?.street || "",
-                    tag: address?.address?.tag || "Other"
+                    tag: address?.address?.tag || "Other",
                   };
                   setToggleAddressForm({
                     actionType: "edit",
@@ -520,7 +523,7 @@ const StepAddressContent = ({
                     door: address?.address?.door || "",
                     state: address?.address?.state || "",
                     street: address?.address?.street || "",
-                    tag: address?.address?.tag || "Other"
+                    tag: address?.address?.tag || "Other",
                   };
                   setToggleAddressForm({
                     actionType: "edit",

@@ -158,8 +158,8 @@ const Checkout = () => {
               let cartQuantity = findItemFromCartItems
                 ? findItemFromCartItems?.quantity?.count
                 : cartItem
-                  ? cartItem?.quantity?.count
-                  : 0;
+                ? cartItem?.quantity?.count
+                : 0;
               let quantity = break_up_item["@ondc/org/item_quantity"]
                 ? break_up_item["@ondc/org/item_quantity"]["count"]
                 : 0;
@@ -730,6 +730,8 @@ const Checkout = () => {
               .parent_order_id,
             transaction_id: parentOrderIDMap.get(item?.provider?.id)
               .transaction_id,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
           },
           message: {
             payment: {

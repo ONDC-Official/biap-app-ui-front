@@ -14,7 +14,13 @@ import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import Loading from "../../shared/loading/loading";
 
 const StepCartContent = (props) => {
-  const { isError, handleNext, cartItemsData, updatedCartItemsData, setUpdateCartItemsData } = props;
+  const {
+    isError,
+    handleNext,
+    cartItemsData,
+    updatedCartItemsData,
+    setUpdateCartItemsData,
+  } = props;
 
   const classes = useStyles();
   const history = useHistory();
@@ -37,7 +43,9 @@ const StepCartContent = (props) => {
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
   const [getQuoteLoading, setGetQuoteLoading] = useState(false);
-  const [errorMessageTimeOut, setErrorMessageTimeOut] = useState("Fetching details for this product");
+  const [errorMessageTimeOut, setErrorMessageTimeOut] = useState(
+    "Fetching details for this product"
+  );
   const [toggleInit, setToggleInit] = useState(false);
   const [eventData, setEventData] = useState([]);
   const [cartItems, setCartItems] = useState([]);
@@ -50,13 +58,14 @@ const StepCartContent = (props) => {
     if (deliveryAddress) {
       try {
         setGetQuoteLoading(true);
-        const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
+        const search_context =
+          searchContextData || JSON.parse(getValueFromCookie("search_context"));
         let domain = "";
         let contextCity = "";
         const updatedItems = items.map((item) => {
           const newItem = Object.assign({}, item);
           domain = newItem.domain;
-          contextCity = newItem.contextCity
+          contextCity = newItem.contextCity;
           delete newItem.context;
           delete newItem.contextCity;
           return newItem;
@@ -67,6 +76,8 @@ const StepCartContent = (props) => {
             domain: domain,
             city: contextCity || deliveryAddress.location.address.city,
             state: deliveryAddress.location.address.state,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
           },
           message: {
             cart: {
@@ -86,9 +97,13 @@ const StepCartContent = (props) => {
             ],
           },
         };
-        const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
+        const data = await cancellablePromise(
+          postCall("/clientApis/v2/select", [selectPayload])
+        );
         //Error handling workflow eg, NACK
-        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+        const isNACK = data.find(
+          (item) => item.error && item.message.ack.status === "NACK"
+        );
         if (isNACK) {
           dispatchToast(toast_types.error, isNACK.error.message);
           setGetQuoteLoading(false);
@@ -142,7 +157,10 @@ const StepCartContent = (props) => {
         });
         if (responseRef.current.length <= 0) {
           setGetQuoteLoading(false);
-          dispatchToast(toast_types.error, "Cannot fetch details for this product");
+          dispatchToast(
+            toast_types.error,
+            "Cannot fetch details for this product"
+          );
           setQuoteError(true);
 
           history.replace("/application/products");
@@ -153,7 +171,10 @@ const StepCartContent = (props) => {
         });
         const request_object = constructQouteObject(c);
         if (responseRef.current.length !== request_object.length) {
-          dispatchToast(toast_types.error, "Cannot fetch details for some product those products will be ignored!");
+          dispatchToast(
+            toast_types.error,
+            "Cannot fetch details for some product those products will be ignored!"
+          );
           setErrorMessageTimeOut("Cannot fetch details for this product");
           setGetQuoteLoading(false);
           setQuoteError(true);
@@ -173,23 +194,36 @@ const StepCartContent = (props) => {
 
   const onGetQuote = async (message_id) => {
     try {
-      const data = await cancellablePromise(getCall(`/clientApis/v2/on_select?messageIds=${message_id}`));
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_select?messageIds=${message_id}`)
+      );
       responseRef.current = [...responseRef.current, data[0]];
 
       setEventData((eventData) => [...eventData, data[0]]);
 
       // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
       data[0].message.quote.items.forEach((item) => {
-        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.item.product.id === item.id);
+        const findItemIndexFromCart = updatedCartItems.current.findIndex(
+          (prod) => prod.item.product.id === item.id
+        );
         if (findItemIndexFromCart > -1) {
-          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillment_id = item.fulfillment_id;
-          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments =
-            data[0].message.quote.fulfillments;
+          updatedCartItems.current[
+            findItemIndexFromCart
+          ].item.product.fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[
+            findItemIndexFromCart
+          ].item.product.fulfillments = data[0].message.quote.fulfillments;
         }
       });
 
-      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems.current));
-      localStorage.setItem("updatedCartItems", JSON.stringify([...[], data[0]]));
+      localStorage.setItem(
+        "cartItems",
+        JSON.stringify(updatedCartItems.current)
+      );
+      localStorage.setItem(
+        "updatedCartItems",
+        JSON.stringify([...[], data[0]])
+      );
       setUpdateCartItemsData([...[], data[0]]);
       setGetQuoteLoading(false);
 
@@ -245,7 +279,11 @@ const StepCartContent = (props) => {
           }}
           disabled={cartItems.length == 0 || getQuoteLoading}
         >
-          {getQuoteLoading ? <Loading width="8px" height="8px" /> : "Update Cart"}
+          {getQuoteLoading ? (
+            <Loading width="8px" height="8px" />
+          ) : (
+            "Update Cart"
+          )}
         </Button>
       </div>
     </div>
