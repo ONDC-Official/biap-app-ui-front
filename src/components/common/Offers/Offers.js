@@ -6,166 +6,234 @@ import { Grid, IconButton, Typography } from "@mui/material";
 import { ReactComponent as PreviousIcon } from "../../../assets/images/previous.svg";
 import { ReactComponent as NextIcon } from "../../../assets/images/next.svg";
 
-const offers = [
+const _offers = [
   {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
+    id: "sellerNP.com_ONDC:RET11_P1_L1_TRYNEW",
+    local_id: "TRYNEW",
+    domain: "ONDC:RET11",
+    provider: "sellerNP.com_ONDC:RET11_P1",
+    provider_descriptor: {
+      name: "Store 1",
+      symbol: "https://sellerNP.com/images/store1.png",
+      short_desc: "Store 1",
+      long_desc: "Store 1",
+      images: ["https://sellerNP.com/images/store1.png"],
+    },
+    descriptor: {
+      code: "Disc_Pct",
+      images: ["https://sellerNP.com/images/offer2-banner.png"],
+    },
+    location_id: "sellerNP.com_ONDC:RET11_P1_L1",
+    item_ids: ["sellerNP.com_ONDC:RET11_P1_I1"],
+    time: {
+      label: "valid",
+      range: {
+        start: "2023-06-21T16:00:00.000Z",
+        end: "2023-06-21T23:00:00.000Z",
+      },
+    },
+    tags: [
+      {
+        code: "cart",
+        list: [
+          {
+            code: "min_value",
+            value: "159",
+          },
+        ],
+      },
+      {
+        code: "offer",
+        list: [
+          {
+            code: "offered_value_type",
+            value: "percent",
+          },
+          {
+            code: "offered_value_amt",
+            value: "-60.00",
+          },
+          {
+            code: "offered_value_cap",
+            value: "-120.00",
+          },
+        ],
+      },
+    ],
+    timestamp: "2023-06-03T08:00:30.000Z",
+    location: "sellerNP.com_ONDC:RET11_P1_L1",
   },
   {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
+    id: "sellerNP.com_ONDC:RET11_P1_L1_FLAT150",
+    local_id: "FLAT150",
+    domain: "ONDC:RET11",
+    provider: "sellerNP.com_ONDC:RET11_P1",
+    provider_descriptor: {
+      name: "Store 1",
+      symbol: "https://sellerNP.com/images/store1.png",
+      short_desc: "Store 1",
+      long_desc: "Store 1",
+      images: ["https://sellerNP.com/images/store1.png"],
+    },
+    descriptor: {
+      code: "Disc_Amt",
+      images: ["https://sellerNP.com/images/offer2-banner.png"],
+    },
+    location_id: "sellerNP.com_ONDC:RET11_P1_L1",
+    item_ids: ["sellerNP.com_ONDC:RET11_P1_I1"],
+    time: {
+      label: "valid",
+      range: {
+        start: "2023-06-22T16:00:00.000Z",
+        end: "2023-06-22T23:00:00.000Z",
+      },
+    },
+    tags: [
+      {
+        code: "cart",
+        list: [
+          {
+            code: "min_value",
+            value: "499.00",
+          },
+        ],
+      },
+      {
+        code: "offer",
+        list: [
+          {
+            code: "offered_value_type",
+            value: "amount",
+          },
+          {
+            code: "offered_value_amt",
+            value: "-150.00",
+          },
+        ],
+      },
+    ],
+    timestamp: "2023-06-03T08:00:30.000Z",
+    location: "sellerNP.com_ONDC:RET11_P1_L1",
   },
   {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
+    id: "sellerNP.com_ONDC:RET11_P1_L1_BUY2GET3",
+    local_id: "BUY2GET3",
+    domain: "ONDC:RET11",
+    provider: "sellerNP.com_ONDC:RET11_P1",
+    provider_descriptor: {
+      name: "Store 1",
+      symbol: "https://sellerNP.com/images/store1.png",
+      short_desc: "Store 1",
+      long_desc: "Store 1",
+      images: ["https://sellerNP.com/images/store1.png"],
+    },
+    descriptor: {
+      code: "BuyXGetY",
+      images: ["https://sellerNP.com/images/offer1-banner.png"],
+    },
+    location_id: "sellerNP.com_ONDC:RET11_P1_L1",
+    item_ids: ["sellerNP.com_ONDC:RET11_P1_I1"],
+    time: {
+      label: "valid",
+      range: {
+        start: "2023-06-23T16:00:00.000Z",
+        end: "2023-06-23T23:00:00.000Z",
+      },
+    },
+    tags: [
+      {
+        code: "cart",
+        list: [
+          {
+            code: "item_count",
+            value: "2",
+          },
+        ],
+      },
+      {
+        code: "offer",
+        list: [
+          {
+            code: "item_count",
+            value: "3",
+          },
+          {
+            code: "item_id",
+            value: "sku_id_for_extra_item",
+          },
+        ],
+      },
+    ],
+    timestamp: "2023-06-03T08:00:30.000Z",
+    location: "sellerNP.com_ONDC:RET11_P1_L1",
   },
   {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
-  },
-  {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
-  },
-  {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
-  },
-  {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
-  },
-  {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
-  },
-  {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "Pizza Hut",
-    offerText: "flat 10% off",
-    link: "",
-    //  brandImage: "https://www.pizzahut.co.in/order/images/logos/logo_wide@x2.38f9109e24d22d58d048837b27f54390.png",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
-  },
-  {
-    title: "H&M",
-    offerText: "flat 10% off",
-    link: "",
-    brandImage:
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAdVBMVEX////NICbKAADNHSPHAADMFx799/f+/PzMExvmo6TceHrLAAnLDhfOJiv129z89PTrt7jqsrPLBBHUTlHwycrRPEDabnHXXmHyz9Dtvb7YZWjora777/D56Oj34eLoqarkmZregoTgi4zVVFjjkpTQMzfSRUkBFS+6AAACTUlEQVRIie1U7bKrIAwkAeoXaouftWprbfv+j3gT8HTOmcrMfYDmBzCRlc1mQYhvfOMb/xv97KYxqaKfVHmZt9V5qEO4WSU8pSqTW6ZoEW9udUTESwiY4kjjhGAfW8YYsG57iRJwDuAOOPB0N4DTxg4BsrNLWpAmdOBV9TRGRup1ywwxABb8zwxAdyHgM+fxlAGefygAAZn+zQLYWwBXeGleWupN02PGQMdC0yIkqpemQDDLlumIqWy4CFwlqHIft0mTxm/1SqyoMs7qpZIyDxx4UUyFVHhLc8TEgrmTuKo3ELcBYOOafslAru3gmZo6c21sOirAJvu4Qj2Ka9pQVSCx89xbApIkveovFrDfLbDutEYbS8KB9aTO6sz7ZzE8XeWHD9R0WxE1bCGx8d1oUTzIRIdRnagO+fw87q48SmqaZX702Sjr6CAJ4oEiwn1tanKwtmjWQTt/uGpqdRGdpjZmdxHUpm7i9VT4Jk6iAlZ1IT+8yLa1mpwNd7URiXJWRtCVEPbOqsqXELnU7dD5C/OpDcfTlU7ezE5CrNnI7SHOUsqGLVrpPW3E29+d5h8f1RJF4kYcIkOWY6fZkG8Wxf4unXaTeuTUvBeQsCQqi8VvwnUXiOvGlHhd8WFTMSJfEZDuMagxoE2tXO+GWMbUC6XylPiy5Qfjrj15fV+b1qfpJqZcMLmTLifbp8zdY0A+2NUmQlf5H0LbAzO7K/PS+9r07pESMzJTH6U6/tqw4L5vosLPBS7vXPFnR6KCj7gnNoa+1FHoyze+8Y3f8Q+bxB4od6UNJQAAAABJRU5ErkJggg==",
-  },
-  {
-    title: "Baskin Robbins",
-    offerText: "50% off",
-    link: "",
-    brandImage:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Baskin-Robbins_logo_2022.svg/1600px-Baskin-Robbins_logo_2022.svg.png",
+    id: "sellerNP.com_ONDC:RET11_P1_L1_FREEBIE",
+    local_id: "FREEBIE",
+    domain: "ONDC:RET11",
+    provider: "sellerNP.com_ONDC:RET11_P1",
+    provider_descriptor: {
+      name: "Store 1",
+      symbol: "https://sellerNP.com/images/store1.png",
+      short_desc: "Store 1",
+      long_desc: "Store 1",
+      images: ["https://sellerNP.com/images/store1.png"],
+    },
+    descriptor: {
+      code: "Freebie",
+      images: ["https://sellerNP.com/images/offer3-banner.png"],
+    },
+    location_id: "sellerNP.com_ONDC:RET11_P1_L1",
+    item_ids: ["sellerNP.com_ONDC:RET11_P1_I1"],
+    time: {
+      label: "valid",
+      range: {
+        start: "2023-06-24T16:00:00.000Z",
+        end: "2023-06-24T23:00:00.000Z",
+      },
+    },
+    tags: [
+      {
+        code: "cart",
+        list: [
+          {
+            code: "min_value",
+            value: "598.00",
+          },
+        ],
+      },
+      {
+        code: "offer",
+        list: [
+          {
+            code: "offered_value",
+            value: "0.00",
+          },
+          {
+            code: "item_count",
+            value: "1",
+          },
+          {
+            code: "item_id",
+            value: "sku_id_for_extra_item",
+          },
+          {
+            code: "item_value",
+            value: "200.00",
+          },
+        ],
+      },
+    ],
+    timestamp: "2023-06-03T08:00:30.000Z",
+    location: "sellerNP.com_ONDC:RET11_P1_L1",
   },
 ];
 
 const Offers = () => {
   const ref = useRef(null);
   const classes = useStyles();
+
+  const [offers, setOffers] = useState(_offers);
 
   const scroll = (scrollOffset) => {
     ref.current.scrollLeft += scrollOffset;
@@ -206,10 +274,10 @@ const Offers = () => {
           {offers.map((offer) => {
             return (
               <OfferCard
-                title={offer.title}
+                title={offer.provider_descriptor.name}
                 offerText={offer.offerText}
                 link={offer.link}
-                brandImage={offer.brandImage}
+                brandImage={offer.provider_descriptor.symbol}
               />
             );
           })}
