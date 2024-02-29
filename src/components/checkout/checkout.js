@@ -74,6 +74,7 @@ const Checkout = () => {
       localStorage.getItem("updatedCartItems")
     );
     setCartItems(cartItemsData);
+    setSelectedFulfillments({});
     setUpdatedCartItems(updatedCartItemsData);
   };
 
@@ -512,6 +513,7 @@ const Checkout = () => {
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
@@ -547,9 +549,11 @@ const Checkout = () => {
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             setUpdateCartItemsDataOnInitialize={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
@@ -579,6 +583,7 @@ const Checkout = () => {
             updatedCartItemsData={updatedCartItems}
             updateInitLoading={(value) => setInitLoading(value)}
             setUpdateCartItemsDataOnInitialize={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
