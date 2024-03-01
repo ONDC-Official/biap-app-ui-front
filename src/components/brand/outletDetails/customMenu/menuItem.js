@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 
 import Card from "@mui/material/Card";
@@ -41,6 +41,27 @@ const MenuItem = (props) => {
 
   const { name: product_name, images, short_desc: product_description, symbol } = descriptor;
   const history = useHistory();
+  const [isProductAvailable, setIsProductAvailable] = useState(true);
+
+  const checkProductDisability = (data) => {
+    const itemTags = data.item_details?.time?.label;
+    const providerTags = data.provider_details?.time?.label;
+    const locationTags = data.location_details?.time?.label;
+
+    const isItemEnabled = itemTags === "enable";
+    const isProviderEnabled = providerTags === "enable";
+    const isLocationEnabled = locationTags === "enable";
+
+    if (isItemEnabled || isProviderEnabled || isLocationEnabled) {
+      setIsProductAvailable(true);
+    } else {
+      setIsProductAvailable(false);
+    }
+  };
+
+  useEffect(() => {
+    checkProductDisability(productPayload);
+  }, [productPayload]);
 
   const renderVegNonvegIcon = (isVeg) => {
     const tags = product.tags;
@@ -87,6 +108,13 @@ const MenuItem = (props) => {
         >
           {product_description}
         </Typography>
+        {!isProductAvailable && (
+          <Grid container justifyContent="start">
+            <Typography variant="body" color="#D83232">
+              Item is unavailable at the moment
+            </Typography>
+          </Grid>
+        )}
       </Grid>
       <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
         <Card className={classes.itemCard}>
@@ -116,7 +144,7 @@ const MenuItem = (props) => {
                 });
               }
             }}
-            disabled={productLoading || !isStoreDelivering}
+            disabled={productLoading || !isStoreDelivering || !isProductAvailable}
           >
             {productLoading === productId ? <Loading height="8px" width="8px" /> : "Add to cart"}
           </Button>
@@ -131,7 +159,7 @@ const MenuItem = (props) => {
                 getProductDetails(productId);
                 setCustomizationModal(true);
               }}
-              disabled={!isStoreDelivering}
+              disabled={!isStoreDelivering || !isProductAvailable}
             >
               Customise
             </Button>
