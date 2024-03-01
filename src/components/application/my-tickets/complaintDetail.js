@@ -63,6 +63,37 @@ const ComplaintDetail = () => {
         });
     }).flat();
 
+    const getIssue = async () => {
+      setStatusLoading(true);
+      try {
+        const response = await cancellablePromise(
+          getCall(`/issueApis/v1/issue`, {
+            transactionId: data?.transaction_id,
+          })
+        );
+
+        if (response?.issue?.issue_actions) {
+          mergeRespondantArrays({
+            respondent_actions:
+              response.issue?.issue_actions?.respondent_actions,
+            complainant_actions:
+              response.issue?.issue_actions?.complainant_actions,
+          });
+        }
+        setStatusLoading(false);
+      } catch (err) {
+        dispatch({
+          type: toast_actions.ADD_TOAST,
+          payload: {
+            id: Math.floor(Math.random() * 100),
+            type: toast_types.error,
+            message: "Something went wrong!",
+          },
+        });
+        setStatusLoading(false);
+      }
+      // eslint-disable-next-line
+    };
 
     // use this function to dispatch error
     function dispatchToast(message, type) {
@@ -76,10 +107,11 @@ const ComplaintDetail = () => {
         });
     }
 
-    useEffect(() => {
-        mergeRespondantArrays(issue_actions)
-        fetchOnIssueDataThroughEvents()
-    }, [])
+     useEffect(() => {
+       // mergeRespondantArrays(issue_actions);
+       getIssue();
+       fetchOnIssueDataThroughEvents();
+     }, []);
 
 
     // use this function to fetch on_issue through events
