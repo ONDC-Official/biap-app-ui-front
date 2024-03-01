@@ -30,11 +30,12 @@ const MenuItem = (props) => {
     bpp_provider_id,
     bpp_provider_descriptor,
     show_quantity_button = true,
-    onUpdateCart = () => { },
+    onUpdateCart = () => {},
     handleAddToCart,
     setCustomizationModal,
     getProductDetails,
     productLoading,
+    isStoreDelivering,
   } = props;
   const { descriptor, isVeg } = product;
 
@@ -63,14 +64,27 @@ const MenuItem = (props) => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5}>
-        <Typography variant="h6" className={classes.itemNameTypo}>
+        <Typography
+          variant="h6"
+          className={classes.itemNameTypo}
+          style={{ color: isStoreDelivering ? "black" : "lightgrey" }}
+        >
           {product_name}
         </Typography>
-        <Typography variant="h5" className={classes.itemPriceTypo}>
-          {`₹${Number.isInteger(Number(price?.value)) ? Number(price?.value).toFixed(2) : Number(price?.value).toFixed(2)
-            }`}
+        <Typography
+          variant="h5"
+          className={classes.itemPriceTypo}
+          style={{ color: isStoreDelivering ? "black" : "lightgrey" }}
+        >
+          {`₹${
+            Number.isInteger(Number(price?.value)) ? Number(price?.value).toFixed(2) : Number(price?.value).toFixed(2)
+          }`}
         </Typography>
-        <Typography variant="body1" className={classes.itemDescriptionTypo}>
+        <Typography
+          variant="h5"
+          className={classes.itemDescriptionTypo}
+          style={{ color: isStoreDelivering ? "black" : "lightgrey" }}
+        >
           {product_description}
         </Typography>
       </Grid>
@@ -102,7 +116,7 @@ const MenuItem = (props) => {
                 });
               }
             }}
-            disabled={productLoading}
+            disabled={productLoading || !isStoreDelivering}
           >
             {productLoading === productId ? <Loading height="8px" width="8px" /> : "Add to cart"}
           </Button>
@@ -117,6 +131,7 @@ const MenuItem = (props) => {
                 getProductDetails(productId);
                 setCustomizationModal(true);
               }}
+              disabled={!isStoreDelivering}
             >
               Customise
             </Button>
