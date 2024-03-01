@@ -113,7 +113,6 @@ const ComplaintDetail = () => {
        fetchOnIssueDataThroughEvents();
      }, []);
 
-
     // use this function to fetch on_issue through events
     function fetchOnIssueDataThroughEvents(issue) {
         onIssueEventSourceResponseRef.current = [];
