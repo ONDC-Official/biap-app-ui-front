@@ -33,6 +33,8 @@ const OutletDetails = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [callNowModal, setCallNowModal] = useState(false);
 
+  const [isStoreDelivering, setIsStoreDelivering] = useState(true);
+
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
 
@@ -73,6 +75,11 @@ const OutletDetails = (props) => {
       } else {
       }
       setOutletDetails(data);
+      if (data.time.label === "enable") {
+        setIsStoreDelivering(true);
+      } else {
+        setIsStoreDelivering(false);
+      }
     } catch (err) {
     } finally {
       setIsLoading(false);
@@ -116,10 +123,11 @@ const OutletDetails = (props) => {
                 {outletDetails?.description}
               </Typography>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${outletDetails?.address
-                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                  : "-"
-                  }`}
+                {`${
+                  outletDetails?.address
+                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                    : "-"
+                }`}
               </Typography>
               <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
                 {outletDetails?.isOpen && <span className={classes.isOpen}>Open now</span>}
@@ -131,14 +139,23 @@ const OutletDetails = (props) => {
                 </Button>
                 <Button
                   className={classes.actionButton}
-                  variant="outlined" color="primary"
+                  variant="outlined"
+                  color="primary"
                   onClick={() => {
-                    setCallNowModal(true)
+                    setCallNowModal(true);
                   }}
                 >
                   Call Now
                 </Button>
               </div>
+
+              {!isStoreDelivering && (
+                <Grid container justifyContent="start" style={{ marginTop: 30, marginBottom: 10 }}>
+                  <Typography variant="body" color="#D83232" style={{ fontSize: 20 }}>
+                    {brandDetails?.descriptor?.name} is not delivering at the moment
+                  </Typography>
+                </Grid>
+              )}
             </div>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
@@ -156,19 +173,22 @@ const OutletDetails = (props) => {
                 {/*    src={map}*/}
                 {/*    alt={`map-img-${outletDetails?.id}`}*/}
                 {/*/>*/}
-                {
-                  outletDetails?.circle?.gps && (
-                    <ViewOnlyMap
-                      location={outletDetails?.circle?.gps ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)] : null}
-                    />
-                  )
-                }
+                {outletDetails?.circle?.gps && (
+                  <ViewOnlyMap
+                    location={
+                      outletDetails?.circle?.gps
+                        ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)]
+                        : null
+                    }
+                  />
+                )}
               </div>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${outletDetails?.address
-                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                  : "-"
-                  }`}
+                {`${
+                  outletDetails?.address
+                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                    : "-"
+                }`}
               </Typography>
               {/* <Typography
                                 color="primary.main" component="div" variant="body"
@@ -185,7 +205,12 @@ const OutletDetails = (props) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
             <Box component={"div"} className={classes.divider} />
-            <CustomMenu brandId={brandId} brandDetails={brandDetails} outletDetails={outletDetails} />
+            <CustomMenu
+              brandId={brandId}
+              brandDetails={brandDetails}
+              outletDetails={outletDetails}
+              isStoreDelivering={isStoreDelivering}
+            />
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
         </Grid>
