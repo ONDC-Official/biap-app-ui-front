@@ -26,13 +26,18 @@ const StepFulfillmentLabel = ({
     const fulfillment = fulfillments.find(
       (fulfillment) => fulfillment.id === Object.values(selectedFulfillments)[0]
     );
-    let deliveryTime = fulfillment["@ondc/org/TAT"];
-    // Create a duration object from the ISO 8601 string
-    const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
-    // Get the number of hours from the duration object
-    const hours = duration.humanize();
-    deliveryTime = `${hours}`;
-    return `${fulfillment["@ondc/org/category"]} - Delivery in ${deliveryTime}`;
+    if(fulfillment){
+      let deliveryTime = fulfillment["@ondc/org/TAT"];
+      // Create a duration object from the ISO 8601 string
+      const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
+      // Get the number of hours from the duration object
+      const hours = duration.humanize();
+      deliveryTime = `${hours}`;
+      return `${fulfillment["@ondc/org/category"]} - Delivery in ${deliveryTime}`;
+    }else{
+      return ''
+    }
+
   };
 
   const renderAllFulfillments = () => {
@@ -42,17 +47,23 @@ const StepFulfillmentLabel = ({
           const fulfillment = fulfillments.find(
             (fulfillment) => fulfillment.id === selectedFulfillments[product.id]
           );
-          let deliveryTime = fulfillment["@ondc/org/TAT"];
-          // Create a duration object from the ISO 8601 string
-          const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
+          let deliveryTime = "";
+          let category = "";
+          if(fulfillment){
+            category=fulfillment["@ondc/org/category"]
+            deliveryTime = fulfillment["@ondc/org/TAT"];
+            // Create a duration object from the ISO 8601 string
+            const duration = moment.duration(fulfillment["@ondc/org/TAT"]);
 
-          // Get the number of hours from the duration object
-          const hours = duration.humanize();
-          deliveryTime = `${hours}`;
+            // Get the number of hours from the duration object
+            const hours = duration.humanize();
+            deliveryTime = `${hours}`;
+          }
+
           return (
             <div>
               {/* {product.name + " : " + fulfillment["@ondc/org/category"]} */}
-              {`${product.name} : ${fulfillment["@ondc/org/category"]} - Delivery in ${deliveryTime}`}
+              {`${product.name} : ${category} - Delivery in ${deliveryTime}`}
             </div>
           );
         })}
