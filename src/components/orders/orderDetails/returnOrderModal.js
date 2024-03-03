@@ -20,6 +20,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Input from "../../shared/input/input";
 import axios from "axios";
 import Cookies from "js-cookie";
+import Radio from "@mui/material/Radio";
 
 export default function ReturnOrderModal({
   bpp_id,
@@ -148,7 +149,7 @@ export default function ReturnOrderModal({
     if (!allCheckPassed) return;
 
     cancelPartialEventSourceResponseRef.current = [];
-    setLoading(true);
+    //  setLoading(true);
     const map = new Map();
     selectedIds.map((item) => {
       const provider_id = item?.provider_details?.id;
@@ -158,37 +159,60 @@ export default function ReturnOrderModal({
       return map.set(provider_id, [item]);
     });
     const requestObject = Array.from(map.values());
-    const payload = await Promise.all(
+    let payload = await Promise.all(
       selectedIds?.map(async (item) => {
         if (Object.keys(selectedImages).length == 0) {
           setInlineError((error) => ({
             ...error,
-            image_error: "Please choose atleast one image",
+            image_error: { [item.id]: "Please choose atleast one image" },
           }));
           return;
         } else {
           setInlineError((error) => ({
             ...error,
-            image_error: "",
+            image_error: { [item.id]: "" },
           }));
         }
         const imageFiles = await Promise.all(selectedImages[item?.id]?.map((file) => getSignUrl(file)));
-        return {
-          id: item?.id,
-          quantity: {
-            count: item.quantity.count,
+        const customizations = item.customizations;
+        const customizationPayload = customizations
+          ? Object.entries(customizations).map(([customizationId, customization]) => ({
+              id: customizationId,
+              quantity: {
+                count: customization.quantity.count,
+              },
+              tags: {
+                parent_item_id: item.parent_item_id,
+                update_type: "return",
+                reason_code: selectedCancelReasonId?.key,
+                ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
+                ttl_reverseqc: "P3D",
+                image: imageFiles.join(","),
+              },
+            }))
+          : [];
+
+        return [
+          {
+            id: item?.id,
+            quantity: {
+              count: item.quantity.count,
+            },
+            tags: {
+              parent_item_id: item.parent_item_id,
+              update_type: "return",
+              reason_code: selectedCancelReasonId?.key,
+              ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
+              ttl_reverseqc: "P3D",
+              image: imageFiles.join(","),
+            },
           },
-          tags: {
-            parent_item_id: item.parent_item_id,
-            update_type: "return",
-            reason_code: selectedCancelReasonId?.key,
-            ttl_approval: item?.["@ondc/org/return_window"] ? item?.["@ondc/org/return_window"] : "",
-            ttl_reverseqc: "P3D",
-            image: imageFiles.join(","),
-          },
-        };
+          ...customizationPayload,
+        ];
       })
     );
+
+    payload = payload.flat().filter(Boolean);
 
     const payloadData = requestObject?.map((item, index) => {
       return {
@@ -211,10 +235,10 @@ export default function ReturnOrderModal({
       };
     });
 
+    console.log("return payload: ", payloadData);
+
     try {
-      const data = await cancellablePromise(
-        postCall("clientApis/v2/update", payloadData)
-      );
+      const data = await cancellablePromise(postCall("clientApis/v2/update", payloadData));
       // Error handling workflow eg, NACK
       if (data[0].error && data[0].message.ack.status === "NACK") {
         setLoading(false);
@@ -408,11 +432,11 @@ export default function ReturnOrderModal({
                                   //   required={["ITM02", "ITM03", "ITM04", "ITM05", "FLM04"].includes(
                                   //     selectedIssueSubcategory?.enums
                                   //   )}
-                                  has_error={inlineError.image_error}
-                                //   disabled={baseImage.length === 4}
+                                  has_error={inlineError["image_error"][product.id]}
+                                  //   disabled={baseImage.length === 4}
                                 />
                               )}
-                              <ErrorMessage>{inlineError.image_error}</ErrorMessage>
+                              <ErrorMessage>{inlineError?.["image_error"]?.[product.id]}</ErrorMessage>
                               {isProductSelected(product?.id) &&
                                 selectedImages?.[product?.id]?.map((file) => {
                                   return <p style={{ fontSize: 12, margin: 0 }}>{file.name}</p>;
@@ -425,25 +449,26 @@ export default function ReturnOrderModal({
                             <Typography className={productStyles.quantity_count}>
                               ₹{Number(product?.price?.value)?.toFixed(2)}
                             </Typography>
-                            <Checkbox
+
+                            <Radio
                               style={{
                                 padding: 0,
+                                color: isProductSelected(product?.id) ? "#3f51b5" : "rgba(0, 0, 0, 0.54)",
                               }}
                               id={product?.id}
                               checked={isProductSelected(product?.id)}
                               disabled={loading}
-                              boxBasis="8%"
-                              nameBasis="92%"
-                              onClick={() => {
+                              name="selectedProduct"
+                              onChange={() => {
+                                //   onUpdateQty(orderQty[idx]?.count, idx, product?.id);
                                 setInlineError((error) => ({
                                   ...error,
                                   selected_id_error: "",
+                                  image_error: "",
                                 }));
-                                if (isProductSelected(product?.id)) {
-                                  removeProductToCancel(product);
-                                  return;
+                                if (!isProductSelected(product?.id)) {
+                                  setSelectedIds([product]);
                                 }
-                                addProductToCancel(product, orderQty[idx]?.count);
                               }}
                             />
                           </div>
@@ -453,8 +478,9 @@ export default function ReturnOrderModal({
                               <div>
                                 <div className={productCartStyles.quantity_count_wrapper}>
                                   <div
-                                    className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
@@ -472,10 +498,11 @@ export default function ReturnOrderModal({
                                     </p>
                                   </div>
                                   <div
-                                    className={`${orderQty[idx]?.count < quantity[idx]?.count
-                                      ? productCartStyles.add_svg_wrapper
-                                      : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[idx]?.count < quantity[idx]?.count
+                                        ? productCartStyles.add_svg_wrapper
+                                        : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
