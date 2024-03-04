@@ -41,6 +41,10 @@ import StepFulfillmentContent from "./StepFulfillment/stepFulfillmentContent";
 import StepCartLabel from "./stepCart/stepCartLabel";
 import StepCartContent from "./stepCart/stepCartContent";
 
+import moment from "moment";
+
+import { v4 as uuidv4 } from "uuid";
+
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
@@ -78,9 +82,32 @@ const Checkout = () => {
     setUpdatedCartItems(updatedCartItemsData);
   };
 
+  function dispatchToast(type, message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type,
+        message,
+      },
+    });
+  }
+
   useEffect(() => {
     resetCartItems();
-  }, []);
+    let timeout;
+    const duration = moment.duration(
+      updatedCartItems[0]?.message.quote.quote.ttl
+    );
+    timeout = setTimeout(() => {
+      history.push("/application/cart");
+      dispatchToast(toast_types.error, "Request Timed out, please try again!");
+    }, duration.milliseconds);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [updatedCartItems[0]?.message.quote.quote.ttl]);
 
   useEffect(() => {
     try {
@@ -232,7 +259,8 @@ const Checkout = () => {
                 selected_fulfillments[item.id] = item.fulfillment_id;
               });
               setSelectedFulfillments(selected_fulfillments);
-            } else { }
+            } else {
+            }
 
             let selected_fulfillment_ids = Object.values(selected_fulfillments);
 
@@ -621,6 +649,7 @@ const Checkout = () => {
         // removeCookie("checkout_details");
         localStorage.removeItem("checkout_details");
         removeCookie("parent_and_transaction_id_map");
+        localStorage.setItem("transaction_id", uuidv4());
         // removeCookie("LatLongInfo");
         setCartItems([]);
         history.replace("/application/orders");

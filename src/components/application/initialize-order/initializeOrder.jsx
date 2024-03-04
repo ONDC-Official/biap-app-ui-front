@@ -34,7 +34,7 @@ import { AddressContext } from "../../../context/addressContext";
 export default function InitializeOrder() {
   // CONSTANTS
   const { location } = JSON.parse(getValueFromCookie("search_context") || "{}");
-  const transaction_id = getValueFromCookie("transaction_id");
+  const transaction_id = localStorage.getItem("transaction_id");
   const history = useHistory();
 
   // STATES

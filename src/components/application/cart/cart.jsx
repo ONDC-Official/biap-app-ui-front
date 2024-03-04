@@ -50,7 +50,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { cancellablePromise } = useCancellablePromise();
-  const transaction_id = getValueFromCookie("transaction_id");
+  const transaction_id = localStorage.getItem("transaction_id");
 
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
@@ -964,8 +964,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   };
 
   const getQuote = async (items, searchContextData = null) => {
-    const ttansactionId = uuidv4();
-    AddCookie("transaction_id", ttansactionId);
+    const ttansactionId = localStorage.getItem("transaction_id");
     responseRef.current = [];
     if (deliveryAddress) {
       console.log("select req:", deliveryAddress.location.address.lat);

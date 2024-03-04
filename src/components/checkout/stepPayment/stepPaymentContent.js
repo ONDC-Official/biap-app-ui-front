@@ -37,7 +37,7 @@ const StepPaymentContent = ({
   const { deliveryAddress, billingAddress, setBillingAddress } =
     useContext(AddressContext);
 
-  const transaction_id = getValueFromCookie("transaction_id");
+  const transaction_id = localStorage.getItem("transaction_id");
   const latLongInfo = JSON.parse(Cookies.get("LatLongInfo") || "{}");
 
   const [initializeOrderLoading, setInitializeOrderLoading] = useState(false);
