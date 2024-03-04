@@ -99,14 +99,20 @@ const Checkout = () => {
     const duration = moment.duration(
       updatedCartItems[0]?.message.quote.quote.ttl
     );
-    timeout = setTimeout(() => {
-      history.push("/application/cart");
-      dispatchToast(toast_types.error, "Request Timed out, please try again!");
-    }, duration.milliseconds);
 
-    return () => {
-      clearTimeout(timeout);
-    };
+    if (updatedCartItems[0]?.message.quote.quote.ttl) {
+      timeout = setTimeout(() => {
+        history.push("/application/cart");
+        dispatchToast(
+          toast_types.error,
+          "Request Timed out, please try again!"
+        );
+      }, duration._milliseconds);
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
   }, [updatedCartItems[0]?.message.quote.quote.ttl]);
 
   useEffect(() => {
