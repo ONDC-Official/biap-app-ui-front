@@ -92,7 +92,7 @@ const StepAddressContent = ({
     }
   }, [deliveryAddress, billingAddress]);
 
-  const transaction_id = getValueFromCookie("transaction_id");
+  const transaction_id = localStorage.getItem("transaction_id");
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
   const [getQuoteLoading, setGetQuoteLoading] = useState(true);

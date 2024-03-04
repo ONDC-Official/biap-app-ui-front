@@ -39,7 +39,7 @@ const StepCartContent = (props) => {
     });
   }
 
-  const transaction_id = getValueFromCookie("transaction_id");
+  const transaction_id = localStorage.getItem("transaction_id");
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
   const [getQuoteLoading, setGetQuoteLoading] = useState(false);
