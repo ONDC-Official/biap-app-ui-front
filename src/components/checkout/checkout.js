@@ -1212,8 +1212,11 @@ const Checkout = () => {
                 Order Total
               </Typography>
               <Typography variant="body" className={classes.totalValue}>
-                {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
-                {`₹${parseInt(productsQuote?.total_payable).toFixed(2)}`}
+                {`₹${(
+                  parseInt(getItemsTotal(productsQuote?.providers)) +
+                  parseInt(getDeliveryTotalAmount(productsQuote?.providers))
+                ).toFixed(2)}`}
+                {/* {`₹${parseInt(productsQuote?.total_payable).toFixed(2)}`} */}
               </Typography>
             </div>
             <Button
