@@ -101,13 +101,18 @@ const Checkout = () => {
     );
 
     if (updatedCartItems[0]?.message.quote.quote.ttl) {
+      console.log(
+        "Request timeout",
+        updatedCartItems[0]?.message.quote.quote.ttl,
+        duration.asMilliseconds()
+      );
       timeout = setTimeout(() => {
         history.push("/application/cart");
         dispatchToast(
           toast_types.error,
           "Request Timed out, please try again!"
         );
-      }, duration._milliseconds);
+      }, duration.asMilliseconds());
 
       return () => {
         clearTimeout(timeout);
