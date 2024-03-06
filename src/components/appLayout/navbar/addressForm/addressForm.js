@@ -818,6 +818,8 @@ const MapPicker = (props) => {
   }, []);
 
   useEffect(() => {
+
+
     if (location) {
       setAddress((address) => ({
         ...address,
@@ -825,8 +827,8 @@ const MapPicker = (props) => {
         city: location.city,
         state: location.state,
         areaCode: location.pincode,
-        lat: location.lat.toFixed(6),
-        lng: location.lng.toFixed(6),
+        lat: parseFloat(location.lat).toFixed(6).toString(),
+        lng: parseFloat(location.lng).toFixed(6).toString(),
       }));
     }
   }, [location]);
