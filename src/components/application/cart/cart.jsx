@@ -7,7 +7,15 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Button, Card, Divider, Drawer, Grid, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  Divider,
+  Drawer,
+  Grid,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { deleteCall, getCall, postCall, putCall } from "../../../api/axios";
 import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
 import Loading from "../../shared/loading/loading";
@@ -42,7 +50,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const { locationData: deliveryAddressLocation } = useContext(SearchContext);
 
   const { cancellablePromise } = useCancellablePromise();
-  const transaction_id = getValueFromCookie("transaction_id");
+  const transaction_id = localStorage.getItem("transaction_id");
 
   const responseRef = useRef([]);
   const eventTimeOutRef = useRef([]);
@@ -54,7 +62,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [haveDistinctProviders, setHaveDistinctProviders] = useState(false);
-  const [errorMessageTimeOut, setErrorMessageTimeOut] = useState("Fetching details for this product");
+  const [errorMessageTimeOut, setErrorMessageTimeOut] = useState(
+    "Fetching details for this product"
+  );
 
   const [openDrawer, setOpenDrawer] = useState(false);
   const [productPayload, setProductPayload] = useState(null);
@@ -62,16 +72,23 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const [productLoading, setProductLoading] = useState(false);
   const [currentCartItem, setCurrentCartItem] = useState(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [isProductAvailableQuantityIsZero, setIsProductAvailableQuantityIsZero] = useState(false);
-  const [isProductCategoryIsDifferent, setIsProductCategoryIsDifferent] = useState(false);
+  const [
+    isProductAvailableQuantityIsZero,
+    setIsProductAvailableQuantityIsZero,
+  ] = useState(false);
+  const [isProductCategoryIsDifferent, setIsProductCategoryIsDifferent] =
+    useState(false);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
     cartItems.map((cartItem) => {
       if (cartItem.item.hasCustomisations) {
-        subtotal += getPriceWithCustomisations(cartItem) * cartItem?.item?.quantity?.count;
+        subtotal +=
+          getPriceWithCustomisations(cartItem) *
+          cartItem?.item?.quantity?.count;
       } else {
-        subtotal += cartItem?.item?.product?.subtotal * cartItem?.item?.quantity?.count;
+        subtotal +=
+          cartItem?.item?.product?.subtotal * cartItem?.item?.quantity?.count;
       }
     });
     return subtotal;
@@ -135,16 +152,22 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
 
       if (increment !== null) {
         if (increment) {
-          const productMaxQuantity = updatedCartItem?.item?.product?.quantity?.maximum;
+          const productMaxQuantity =
+            updatedCartItem?.item?.product?.quantity?.maximum;
           if (productMaxQuantity) {
-            if (updatedCartItem.item.quantity.count < productMaxQuantity.count) {
+            if (
+              updatedCartItem.item.quantity.count < productMaxQuantity.count
+            ) {
               updatedCartItem.item.quantity.count += 1;
 
               let customisations = updatedCartItem.item.customisations;
 
               if (customisations) {
                 customisations = customisations.map((c) => {
-                  return { ...c, quantity: { ...c.quantity, count: c.quantity.count + 1 } };
+                  return {
+                    ...c,
+                    quantity: { ...c.quantity, count: c.quantity.count + 1 },
+                  };
                 });
 
                 updatedCartItem.item.customisations = customisations;
@@ -159,7 +182,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               getCartItems();
               fetchCartItems();
             } else {
-              dispatchError(`Maximum allowed quantity is ${updatedCartItem.item.quantity.count}`);
+              dispatchError(
+                `Maximum allowed quantity is ${updatedCartItem.item.quantity.count}`
+              );
             }
           } else {
             updatedCartItem.item.quantity.count += 1;
@@ -177,7 +202,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
 
             if (customisations) {
               customisations = customisations.map((c) => {
-                return { ...c, quantity: { ...c.quantity, count: c.quantity.count - 1 } };
+                return {
+                  ...c,
+                  quantity: { ...c.quantity, count: c.quantity.count - 1 },
+                };
               });
               updatedCartItem.item.customisations = customisations;
             } else {
@@ -218,7 +246,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(true);
-      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const data = await cancellablePromise(
+        getCall(`/protocol/item-details?id=${productId}`)
+      );
       setProductPayload(data);
       return data;
     } catch (error) {
@@ -244,7 +274,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   };
 
   const checkDifferentCategory = () => {
-    const everyEnvHasSameValue = cartItems.every(({ item }) => item.domain === cartItems[0].item.domain); // use proper name
+    const everyEnvHasSameValue = cartItems.every(
+      ({ item }) => item.domain === cartItems[0].item.domain
+    ); // use proper name
     setIsProductCategoryIsDifferent(!everyEnvHasSameValue);
   };
 
@@ -257,8 +289,14 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const emptyCartScreen = () => {
     return (
       <div className={classes.emptyCartScreen}>
-        <InfoOutlinedIcon color="warning" sx={{ fontSize: 90, marginBottom: 2 }} />
-        <Typography variant="h3" sx={{ fontFamily: "Inter", fontWeight: 700, textTransform: "none" }}>
+        <InfoOutlinedIcon
+          color="warning"
+          sx={{ fontSize: 90, marginBottom: 2 }}
+        />
+        <Typography
+          variant="h3"
+          sx={{ fontFamily: "Inter", fontWeight: 700, textTransform: "none" }}
+        >
           Your Cart is Empty. Please add items
         </Typography>
         <Typography variant="body" sx={{ marginTop: 2, marginBottom: 2 }}>
@@ -281,12 +319,20 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             </Typography>
           </Grid>
           <Grid item xs={1}>
-            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "6px" }}>
+            <Typography
+              variant="body1"
+              className={classes.tableHead}
+              sx={{ marginLeft: "6px" }}
+            >
               Price
             </Typography>
           </Grid>
           <Grid item xs={1.2}>
-            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "12px" }}>
+            <Typography
+              variant="body1"
+              className={classes.tableHead}
+              sx={{ marginLeft: "12px" }}
+            >
               Qty
             </Typography>
           </Grid>
@@ -301,7 +347,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             </Typography>
           </Grid>
         </Grid>
-        <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
+        <Divider
+          sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }}
+        />
       </Grid>
     );
   };
@@ -316,12 +364,20 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             </Typography>
           </Grid>
           <Grid item xs={1.3}>
-            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "6px" }}>
+            <Typography
+              variant="body1"
+              className={classes.tableHead}
+              sx={{ marginLeft: "6px" }}
+            >
               Price
             </Typography>
           </Grid>
           <Grid item xs={1.5}>
-            <Typography variant="body1" className={classes.tableHead} sx={{ marginLeft: "12px" }}>
+            <Typography
+              variant="body1"
+              className={classes.tableHead}
+              sx={{ marginLeft: "12px" }}
+            >
               Qty
             </Typography>
           </Grid>
@@ -336,7 +392,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             </Typography>
           </Grid> */}
         </Grid>
-        <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
+        <Divider
+          sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }}
+        />
       </Grid>
     );
   };
@@ -350,7 +408,8 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         return (
           <Grid container>
             <Typography variant="subtitle1" color="#686868">
-              {c.item_details.descriptor.name} (₹{c.item_details.price.value}) {isLastItem ? "" : "+"}
+              {c.item_details.descriptor.name} (₹{c.item_details.price.value}){" "}
+              {isLastItem ? "" : "+"}
             </Typography>
           </Grid>
         );
@@ -363,7 +422,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const getPriceWithCustomisations = (cartItem) => {
     let basePrice = cartItem.item.product.price.value;
     let price = 0;
-    cartItem?.item?.customisations?.map((c) => (price += c.item_details.price.value));
+    cartItem?.item?.customisations?.map(
+      (c) => (price += c.item_details.price.value)
+    );
 
     return basePrice + price;
   };
@@ -446,8 +507,14 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
 
       return (
         <Grid container alignItems="center" className={classes.tagContainer}>
-          <div className={classes.square} style={{ borderColor: getTagColor() }}>
-            <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+          <div
+            className={classes.square}
+            style={{ borderColor: getTagColor() }}
+          >
+            <div
+              className={classes.circle}
+              style={{ backgroundColor: getTagColor() }}
+            ></div>
           </div>
         </Grid>
       );
@@ -460,7 +527,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     return cartItems?.map((cartItem, idx) => {
       return (
         <Grid key={cartItem._id}>
-          <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
+          <Grid
+            container
+            key={cartItem?.item?.id}
+            style={{ alignItems: "flex-start" }}
+          >
             <Grid item xs={4.3}>
               <Grid container>
                 <div className={classes.moreImages}>
@@ -469,20 +540,31 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                       className={classes.moreImage}
                       alt="product-image"
                       src={cartItem?.item?.product?.descriptor?.symbol}
-                      onClick={() => history.push(`/application/products?productId=${cartItem.item.id}`)}
+                      onClick={() =>
+                        history.push(
+                          `/application/products?productId=${cartItem.item.id}`
+                        )
+                      }
                     />
                     {renderVegNonVegTag(cartItem)}
                   </div>
                 </div>
                 <Grid sx={{ maxWidth: "200px" }}>
-                  <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{ width: 200, fontWeight: 600 }}
+                  >
                     {cartItem?.item?.product?.descriptor?.name}
                   </Typography>
                   {getCustomizations(cartItem)}
                   {cartItem.item.hasCustomisations && (
                     <Grid
                       container
-                      sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
+                      sx={{
+                        marginTop: "4px",
+                        width: "max-content",
+                        cursor: "pointer",
+                      }}
                       alignItems="center"
                       onClick={() => {
                         setCustomizationState(cartItem.item.customisationState);
@@ -491,7 +573,14 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                         setOpenDrawer(true);
                       }}
                     >
-                      <EditOutlinedIcon size="small" sx={{ color: "#196AAB", fontSize: 16, marginRight: "5px" }} />
+                      <EditOutlinedIcon
+                        size="small"
+                        sx={{
+                          color: "#196AAB",
+                          fontSize: 16,
+                          marginRight: "5px",
+                        }}
+                      />
                       <Typography variant="subtitle1" color="#196AAB">
                         Customise
                       </Typography>
@@ -505,7 +594,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                         src={cartItem?.item?.provider?.descriptor?.symbol}
                       />
                     </div>
-                    <Typography variant="subtitle1" color="#686868" sx={{ fontWeight: 500 }}>
+                    <Typography
+                      variant="subtitle1"
+                      color="#686868"
+                      sx={{ fontWeight: 500 }}
+                    >
                       {cartItem?.item?.provider?.descriptor?.name}
                     </Typography>
                   </Grid>
@@ -522,30 +615,45 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             </Grid>
             <Grid item xs={1.2}>
               <div className={classes.qtyContainer}>
-                <Typography variant="body1" sx={{ marginRight: "12px", fontWeight: 600 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ marginRight: "12px", fontWeight: 600 }}
+                >
                   {cartItem?.item?.quantity?.count}
                 </Typography>
                 <KeyboardArrowUpIcon
                   className={classes.qtyArrowUp}
-                  onClick={() => updateCartItem(cartItem.item.id, true, cartItem._id)}
+                  onClick={() =>
+                    updateCartItem(cartItem.item.id, true, cartItem._id)
+                  }
                 />
                 <KeyboardArrowDownIcon
                   className={classes.qtyArrowDown}
-                  onClick={() => updateCartItem(cartItem.item.id, false, cartItem._id)}
+                  onClick={() =>
+                    updateCartItem(cartItem.item.id, false, cartItem._id)
+                  }
                 />
               </div>
             </Grid>
             <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
                 {cartItem.item.hasCustomisations
-                  ? `₹ ${parseInt(getPriceWithCustomisations(cartItem)) * parseInt(cartItem?.item?.quantity?.count)}`
+                  ? `₹ ${
+                      parseInt(getPriceWithCustomisations(cartItem)) *
+                      parseInt(cartItem?.item?.quantity?.count)
+                    }`
                   : `₹ ${parseInt(cartItem?.item?.product?.subtotal)}`}
               </Typography>
             </Grid>
             <Grid item xs={4}>
               {renderSpecialInstructions(cartItem.item, cartItem._id)}
 
-              <Grid container sx={{ margin: "16px 0" }} alignItems="center" justifyContent="flex-end">
+              <Grid
+                container
+                sx={{ margin: "16px 0" }}
+                alignItems="center"
+                justifyContent="flex-end"
+              >
                 <Button
                   variant="text"
                   startIcon={<DeleteOutlineIcon size="small" />}
@@ -557,35 +665,53 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               </Grid>
             </Grid>
           </Grid>
-          {cartItem.item.quantity.count > cartItem.item.product.quantity.available.count && (
+          {cartItem.item.quantity.count >
+            cartItem.item.product.quantity.available.count && (
             <Grid>
               <div className={classes.infoBox}>
                 <Typography className={classes.infoText}>
-                  Only {cartItem.item.product.quantity.available.count} available instead of{" "}
-                  {cartItem.item.quantity.count}. Update the quantity or switch to another provider.
+                  Only {cartItem.item.product.quantity.available.count}{" "}
+                  available instead of {cartItem.item.quantity.count}. Update
+                  the quantity or switch to another provider.
                 </Typography>
               </div>
             </Grid>
           )}
           {idx === cartItems.length - 1 && haveDistinctProviders && (
             <Grid>
-              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
-                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
-                  You are ordering from different store. Please check your order again.
+              <div
+                className={classes.infoBox}
+                style={{ background: "#FAE1E1", width: "98.5%" }}
+              >
+                <Typography
+                  className={classes.infoText}
+                  style={{ color: "#D83232", textAlign: "center" }}
+                >
+                  You are ordering from different store. Please check your order
+                  again.
                 </Typography>
               </div>
             </Grid>
           )}
           {idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
             <Grid>
-              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
-                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
-                  You are ordering from different category. Please check your order again.
+              <div
+                className={classes.infoBox}
+                style={{ background: "#FAE1E1", width: "98.5%" }}
+              >
+                <Typography
+                  className={classes.infoText}
+                  style={{ color: "#D83232", textAlign: "center" }}
+                >
+                  You are ordering from different category. Please check your
+                  order again.
                 </Typography>
               </div>
             </Grid>
           )}
-          <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />
+          <Divider
+            sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }}
+          />
         </Grid>
       );
     });
@@ -595,7 +721,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     return cartItems?.map((cartItem, idx) => {
       return (
         <Grid key={cartItem._id}>
-          <Grid container key={cartItem?.item?.id} style={{ alignItems: "flex-start" }}>
+          <Grid
+            container
+            key={cartItem?.item?.id}
+            style={{ alignItems: "flex-start" }}
+          >
             <Grid item xs={5.5}>
               <Grid container>
                 <div className={classes.moreImages}>
@@ -604,20 +734,31 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                       className={classes.moreImage}
                       alt="product-image"
                       src={cartItem?.item?.product?.descriptor?.symbol}
-                      onClick={() => history.push(`/application/products?productId=${cartItem.item.id}`)}
+                      onClick={() =>
+                        history.push(
+                          `/application/products?productId=${cartItem.item.id}`
+                        )
+                      }
                     />
                     {renderVegNonVegTag(cartItem)}
                   </div>
                 </div>
                 <Grid sx={{ maxWidth: "200px" }}>
-                  <Typography variant="body1" sx={{ width: 200, fontWeight: 600 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{ width: 200, fontWeight: 600 }}
+                  >
                     {cartItem?.item?.product?.descriptor?.name}
                   </Typography>
                   {getCustomizations(cartItem)}
                   {cartItem.item.hasCustomisations && (
                     <Grid
                       container
-                      sx={{ marginTop: "4px", width: "max-content", cursor: "pointer" }}
+                      sx={{
+                        marginTop: "4px",
+                        width: "max-content",
+                        cursor: "pointer",
+                      }}
                       alignItems="center"
                       onClick={() => {
                         setCustomizationState(cartItem.item.customisationState);
@@ -626,7 +767,14 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                         setOpenDrawer(true);
                       }}
                     >
-                      <EditOutlinedIcon size="small" sx={{ color: "#196AAB", fontSize: 16, marginRight: "5px" }} />
+                      <EditOutlinedIcon
+                        size="small"
+                        sx={{
+                          color: "#196AAB",
+                          fontSize: 16,
+                          marginRight: "5px",
+                        }}
+                      />
                       <Typography variant="subtitle1" color="#196AAB">
                         Customise
                       </Typography>
@@ -640,7 +788,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                         src={cartItem?.item?.provider?.descriptor?.symbol}
                       />
                     </div>
-                    <Typography variant="subtitle1" color="#686868" sx={{ fontWeight: 500 }}>
+                    <Typography
+                      variant="subtitle1"
+                      color="#686868"
+                      sx={{ fontWeight: 500 }}
+                    >
                       {cartItem?.item?.provider?.descriptor?.name}
                     </Typography>
                   </Grid>
@@ -657,23 +809,33 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             </Grid>
             <Grid item xs={1.5}>
               <div className={classes.qtyContainer}>
-                <Typography variant="body1" sx={{ marginRight: "12px", fontWeight: 600 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ marginRight: "12px", fontWeight: 600 }}
+                >
                   {cartItem?.item?.quantity?.count}
                 </Typography>
                 <KeyboardArrowUpIcon
                   className={classes.qtyArrowUp}
-                  onClick={() => updateCartItem(cartItem.item.id, true, cartItem._id)}
+                  onClick={() =>
+                    updateCartItem(cartItem.item.id, true, cartItem._id)
+                  }
                 />
                 <KeyboardArrowDownIcon
                   className={classes.qtyArrowDown}
-                  onClick={() => updateCartItem(cartItem.item.id, false, cartItem._id)}
+                  onClick={() =>
+                    updateCartItem(cartItem.item.id, false, cartItem._id)
+                  }
                 />
               </div>
             </Grid>
             <Grid item xs={1.4}>
               <Typography variant="body" sx={{ fontWeight: 600 }}>
                 {cartItem.item.hasCustomisations
-                  ? `₹ ${parseInt(getPriceWithCustomisations(cartItem)) * parseInt(cartItem?.item?.quantity?.count)}`
+                  ? `₹ ${
+                      parseInt(getPriceWithCustomisations(cartItem)) *
+                      parseInt(cartItem?.item?.quantity?.count)
+                    }`
                   : `₹ ${parseInt(cartItem?.item?.product?.subtotal)}`}
               </Typography>
             </Grid>
@@ -691,35 +853,55 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               </div>
             </Grid>
           </Grid>
-          {cartItem.item.quantity.count > cartItem.item.product.quantity.available.count && (
+          {cartItem.item.quantity.count >
+            cartItem.item.product.quantity.available.count && (
             <Grid>
               <div className={classes.infoBox}>
                 <Typography className={classes.infoText}>
-                  Only {cartItem.item.product.quantity.available.count} available instead of{" "}
-                  {cartItem.item.quantity.count}. Update the quantity or switch to another provider.
+                  Only {cartItem.item.product.quantity.available.count}{" "}
+                  available instead of {cartItem.item.quantity.count}. Update
+                  the quantity or switch to another provider.
                 </Typography>
               </div>
             </Grid>
           )}
           {idx === cartItems.length - 1 && haveDistinctProviders && (
             <Grid>
-              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
-                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
-                  You are ordering from different store. Please check your order again.
+              <div
+                className={classes.infoBox}
+                style={{ background: "#FAE1E1", width: "98.5%" }}
+              >
+                <Typography
+                  className={classes.infoText}
+                  style={{ color: "#D83232", textAlign: "center" }}
+                >
+                  You are ordering from different store. Please check your order
+                  again.
                 </Typography>
               </div>
             </Grid>
           )}
           {idx === cartItems.length - 1 && isProductCategoryIsDifferent && (
             <Grid>
-              <div className={classes.infoBox} style={{ background: "#FAE1E1", width: "98.5%" }}>
-                <Typography className={classes.infoText} style={{ color: "#D83232", textAlign: "center" }}>
-                  You are ordering from different category. Please check your order again.
+              <div
+                className={classes.infoBox}
+                style={{ background: "#FAE1E1", width: "98.5%" }}
+              >
+                <Typography
+                  className={classes.infoText}
+                  style={{ color: "#D83232", textAlign: "center" }}
+                >
+                  You are ordering from different category. Please check your
+                  order again.
                 </Typography>
               </div>
             </Grid>
           )}
-          {cartItems.length > 1 && <Divider sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }} />}
+          {cartItems.length > 1 && (
+            <Divider
+              sx={{ borderColor: "#616161", margin: "20px 0", width: "98.5%" }}
+            />
+          )}
         </Grid>
       );
     });
@@ -732,7 +914,11 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
           Summary
         </Typography>
         <Divider sx={{ borderColor: "#616161", margin: "20px 0" }} />
-        <Grid container justifyContent="space-between" sx={{ marginBottom: "14px" }}>
+        <Grid
+          container
+          justifyContent="space-between"
+          sx={{ marginBottom: "14px" }}
+        >
           <Typography variant="subtitle1" className={classes.summaryLabel}>
             Cart Subtotal
           </Typography>
@@ -744,7 +930,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
           disabled={
-            isProductAvailableQuantityIsZero || isProductCategoryIsDifferent || haveDistinctProviders || checkoutLoading
+            isProductAvailableQuantityIsZero ||
+            isProductCategoryIsDifferent ||
+            haveDistinctProviders ||
+            checkoutLoading
           }
           onClick={() => {
             if (cartItems.length > 0) {
@@ -775,20 +964,20 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   };
 
   const getQuote = async (items, searchContextData = null) => {
-    const ttansactionId = uuidv4();
-    AddCookie("transaction_id", ttansactionId);
+    const ttansactionId = localStorage.getItem("transaction_id");
     responseRef.current = [];
     if (deliveryAddress) {
       console.log("select req:", deliveryAddress.location.address.lat);
       try {
         setCheckoutLoading(true);
-        const search_context = searchContextData || JSON.parse(getValueFromCookie("search_context"));
+        const search_context =
+          searchContextData || JSON.parse(getValueFromCookie("search_context"));
         let domain = "";
         let contextCity = "";
         const updatedItems = items.map((item) => {
           const newItem = Object.assign({}, item);
           domain = newItem.domain;
-          contextCity = newItem.contextCity
+          contextCity = newItem.contextCity;
           delete newItem.context;
           delete newItem.contextCity;
           return newItem;
@@ -798,6 +987,8 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             transaction_id: ttansactionId,
             domain: domain,
             city: contextCity || deliveryAddress.location.address.city,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
             state: deliveryAddress.location.address.state,
           },
           message: {
@@ -818,9 +1009,13 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             ],
           },
         };
-        const data = await cancellablePromise(postCall("/clientApis/v2/select", [selectPayload]));
+        const data = await cancellablePromise(
+          postCall("/clientApis/v2/select", [selectPayload])
+        );
         //Error handling workflow eg, NACK
-        const isNACK = data.find((item) => item.error && item?.message?.ack?.status === "NACK");
+        const isNACK = data.find(
+          (item) => item.error && item?.message?.ack?.status === "NACK"
+        );
         if (isNACK) {
           setCheckoutLoading(false);
           dispatch({
@@ -908,7 +1103,8 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
           });
           history.replace("/application/products");
           return;
-        } else { }
+        } else {
+        }
         let c = cartItems.map((item) => {
           return item.item;
         });
@@ -919,7 +1115,8 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             payload: {
               id: Math.floor(Math.random() * 100),
               type: toast_types.error,
-              message: "Cannot fetch details for some product those products will be ignored!",
+              message:
+                "Cannot fetch details for some product those products will be ignored!",
             },
           });
           setErrorMessageTimeOut("Cannot fetch details for this product");
@@ -942,23 +1139,36 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const onGetQuote = async (message_id) => {
     try {
       setCheckoutLoading(true);
-      const data = await cancellablePromise(getCall(`/clientApis/v2/on_select?messageIds=${message_id}`));
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_select?messageIds=${message_id}`)
+      );
       responseRef.current = [...responseRef.current, data[0]];
 
       setEventData((eventData) => [...eventData, data[0]]);
 
       // onUpdateProduct(data[0].message.quote.items, data[0].message.quote.fulfillments);
       data[0].message.quote.items.forEach((item) => {
-        const findItemIndexFromCart = updatedCartItems.current.findIndex((prod) => prod.item.product.id === item.id);
+        const findItemIndexFromCart = updatedCartItems.current.findIndex(
+          (prod) => prod.item.product.id === item.id
+        );
         if (findItemIndexFromCart > -1) {
-          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillment_id = item.fulfillment_id;
-          updatedCartItems.current[findItemIndexFromCart].item.product.fulfillments =
-            data[0].message.quote.fulfillments;
+          updatedCartItems.current[
+            findItemIndexFromCart
+          ].item.product.fulfillment_id = item.fulfillment_id;
+          updatedCartItems.current[
+            findItemIndexFromCart
+          ].item.product.fulfillments = data[0].message.quote.fulfillments;
         }
       });
 
-      localStorage.setItem("cartItems", JSON.stringify(updatedCartItems.current));
-      localStorage.setItem("updatedCartItems", JSON.stringify(responseRef.current));
+      localStorage.setItem(
+        "cartItems",
+        JSON.stringify(updatedCartItems.current)
+      );
+      localStorage.setItem(
+        "updatedCartItems",
+        JSON.stringify(responseRef.current)
+      );
       history.push(`/application/checkout`);
     } catch (err) {
       setCheckoutLoading(false);
@@ -998,7 +1208,13 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                 <Grid container className={classes.cartContainer}>
                   <Grid item xs={8}>
                     {renderTableHeads()}
-                    <div style={{ minHeight: "80vh", alignItems: "flex-start", justifyContent: "flex-start" }}>
+                    <div
+                      style={{
+                        minHeight: "80vh",
+                        alignItems: "flex-start",
+                        justifyContent: "flex-start",
+                      }}
+                    >
                       {renderProducts()}
                     </div>
                   </Grid>
@@ -1010,7 +1226,12 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               ) : (
                 <div>
                   {renderTableHeadForCheckoutPage()}
-                  <div style={{ alignItems: "flex-start", justifyContent: "flex-start" }}>
+                  <div
+                    style={{
+                      alignItems: "flex-start",
+                      justifyContent: "flex-start",
+                    }}
+                  >
                     {renderProductsForCheckoutPage()}
                   </div>
                 </div>

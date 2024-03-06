@@ -1,8 +1,18 @@
-import React, { Fragment, useContext, useEffect, useRef, useState, useCallback } from "react";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { buttonTypes } from "../../../shared/button/utils";
 import styles from "../../../../styles/cart/cartView.module.scss";
 import Button from "../../../shared/button/button";
-import { checkout_steps, get_current_step } from "../../../../constants/checkout-steps";
+import {
+  checkout_steps,
+  get_current_step,
+} from "../../../../constants/checkout-steps";
 import { ONDC_COLORS } from "../../../shared/colors";
 import Checkmark from "../../../shared/svg/checkmark";
 import { AddressContext } from "../../../../context/addressContext";
@@ -87,7 +97,9 @@ export default function OrderConfirmationCard(props) {
 
   // function to get the current active step
   function isCurrentStep() {
-    if (currentActiveStep.current_active_step_id === checkout_steps.CONFIRM_ORDER) {
+    if (
+      currentActiveStep.current_active_step_id === checkout_steps.CONFIRM_ORDER
+    ) {
       return true;
     }
     return false;
@@ -97,7 +109,9 @@ export default function OrderConfirmationCard(props) {
   function navigatoToCheckout() {
     setInitializeOrderLoading(false);
     updateInitLoading(false);
-    setCurrentActiveStep(get_current_step(checkout_steps.SELECT_PAYMENT_METHOD));
+    setCurrentActiveStep(
+      get_current_step(checkout_steps.SELECT_PAYMENT_METHOD)
+    );
     let checkoutObj = {
       successOrderIds: [],
       productQuotes: [],
@@ -106,7 +120,10 @@ export default function OrderConfirmationCard(props) {
       const { message } = item;
       checkoutObj = {
         productQuotes: [...checkoutObj.productQuotes, message?.order?.quote],
-        successOrderIds: [...checkoutObj.successOrderIds, message?.order?.provider?.id.toString()],
+        successOrderIds: [
+          ...checkoutObj.successOrderIds,
+          message?.order?.provider?.id.toString(),
+        ],
       };
     });
     // AddCookie("checkout_details", JSON.stringify(checkoutObj));
@@ -142,12 +159,17 @@ export default function OrderConfirmationCard(props) {
         // check if all the orders got cancled
         if (responseRef.current.length <= 0) {
           setInitializeOrderLoading(false);
-          dispatchToast(toast_types.error, "Cannot fetch details for this product Please try again!");
+          dispatchToast(
+            toast_types.error,
+            "Cannot fetch details for this product Please try again!"
+          );
           return;
         }
         // tale action to redirect them.
         const requestObject = constructQouteObject(
-          updatedCartItems.filter(({ provider }) => responseReceivedIds.includes(provider.id.toString()))
+          updatedCartItems.filter(({ provider }) =>
+            responseReceivedIds.includes(provider.id.toString())
+          )
         );
         if (requestObject.length !== responseRef.current.length) {
           dispatchToast(toast_types.error, "Some orders are not initialized!");
@@ -182,6 +204,8 @@ export default function OrderConfirmationCard(props) {
                   transaction_id,
                   city: search_context.location.name,
                   state: search_context.location.state,
+                  pincode: JSON.parse(getValueFromCookie("delivery_address"))
+                    ?.location.address.areaCode,
                 },
                 message: {
                   items: item,
@@ -211,7 +235,9 @@ export default function OrderConfirmationCard(props) {
           )
         );
         //Error handling workflow eg, NACK
-        const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+        const isNACK = data.find(
+          (item) => item.error && item.message.ack.status === "NACK"
+        );
         if (isNACK) {
           dispatchToast(toast_types.error, isNACK.error.message);
           setInitializeOrderLoading(false);
@@ -228,7 +254,10 @@ export default function OrderConfirmationCard(props) {
           // store parent order id to cookies
           AddCookie("parent_order_id", data[0]?.context?.parent_order_id);
           // store the map into cookies
-          AddCookie("parent_and_transaction_id_map", JSON.stringify(Array.from(parentTransactionIdMap.entries())));
+          AddCookie(
+            "parent_and_transaction_id_map",
+            JSON.stringify(Array.from(parentTransactionIdMap.entries()))
+          );
           onInit(
             data?.map((txn) => {
               const { context } = txn;
@@ -250,7 +279,9 @@ export default function OrderConfirmationCard(props) {
   const onInitializeOrder = useCallback(async (message_id) => {
     try {
       localStorage.setItem("selectedItems", JSON.stringify(updatedCartItems));
-      const data = await cancellablePromise(getCall(`/clientApis/v2/on_initialize_order?messageIds=${message_id}`));
+      const data = await cancellablePromise(
+        getCall(`/clientApis/v2/on_initialize_order?messageIds=${message_id}`)
+      );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
     } catch (err) {
@@ -265,7 +296,9 @@ export default function OrderConfirmationCard(props) {
     if (eventData.length > 0) {
       // fetch request object length and compare it with the response length
       const requestObject = constructQouteObject(
-        updatedCartItems.filter(({ provider }) => responseReceivedIds.includes(provider.id.toString()))
+        updatedCartItems.filter(({ provider }) =>
+          responseReceivedIds.includes(provider.id.toString())
+        )
       );
       if (requestObject.length === responseRef.current.length) {
         dispatchToast(toast_types.success, "All Your orders are initialised!");
@@ -293,19 +326,22 @@ export default function OrderConfirmationCard(props) {
   return (
     <div className={styles.price_summary_card}>
       <div
-        className={`${isStepCompleted() ? styles.step_completed_card_header : styles.card_header
-          } d-flex align-items-center`}
+        className={`${
+          isStepCompleted()
+            ? styles.step_completed_card_header
+            : styles.card_header
+        } d-flex align-items-center`}
         style={
           isCurrentStep()
             ? {
-              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
-            }
+                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+              }
             : {
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }
+                borderBottomRightRadius: "10px",
+                borderBottomLeftRadius: "10px",
+              }
         }
       >
         <p className={styles.card_header_title}>Update Cart</p>
@@ -320,7 +356,11 @@ export default function OrderConfirmationCard(props) {
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Change"
-              onClick={() => setCurrentActiveStep(get_current_step(checkout_steps.CONFIRM_ORDER))}
+              onClick={() =>
+                setCurrentActiveStep(
+                  get_current_step(checkout_steps.CONFIRM_ORDER)
+                )
+              }
             />
           </div>
         )}
@@ -332,7 +372,10 @@ export default function OrderConfirmationCard(props) {
             <div className="container-fluid">
               <div className="row">
                 {updateCartLoading ? (
-                  <div style={{ height: "150px" }} className="d-flex align-items-center justify-content-center">
+                  <div
+                    style={{ height: "150px" }}
+                    className="d-flex align-items-center justify-content-center"
+                  >
                     <Loading backgroundColor={ONDC_COLORS.ACCENTCOLOR} />
                   </div>
                 ) : (
@@ -349,7 +392,11 @@ export default function OrderConfirmationCard(props) {
                                 updateCartCounter.current += 1;
                               }}
                             >
-                              <CrossIcon width="20" height="20" color={ONDC_COLORS.SECONDARYCOLOR} />
+                              <CrossIcon
+                                width="20"
+                                height="20"
+                                color={ONDC_COLORS.SECONDARYCOLOR}
+                              />
                             </div>
                           )}
                           <ProductCard
@@ -362,9 +409,13 @@ export default function OrderConfirmationCard(props) {
                             location_id={locations ? locations[0] : ""}
                             show_quantity_button={!initializeOrderLoading}
                             bpp_provider_id={provider?.id}
-                            onUpdateCart={() => (updateCartCounter.current += 1)}
+                            onUpdateCart={() =>
+                              (updateCartCounter.current += 1)
+                            }
                           />
-                          {!responseReceivedIds.includes(provider_id.toString()) && (
+                          {!responseReceivedIds.includes(
+                            provider_id.toString()
+                          ) && (
                             <>
                               <ErrorMessage>{responseText}</ErrorMessage>
                               <div className={styles.product_disabled} />
@@ -378,10 +429,14 @@ export default function OrderConfirmationCard(props) {
               </div>
             </div>
           </div>
-          <div className={`${styles.card_footer} d-flex align-items-center justify-content-center`}>
+          <div
+            className={`${styles.card_footer} d-flex align-items-center justify-content-center`}
+          >
             <Button
               isloading={initializeOrderLoading ? 1 : 0}
-              disabled={initializeOrderLoading || updateCartLoading || !toggleInit}
+              disabled={
+                initializeOrderLoading || updateCartLoading || !toggleInit
+              }
               button_type={buttonTypes.primary}
               button_hover_type={buttonTypes.primary_hover}
               button_text="Proceed to pay"
@@ -389,7 +444,9 @@ export default function OrderConfirmationCard(props) {
                 setInitializeOrderLoading(true);
                 updateInitLoading(true);
                 const request_object = constructQouteObject(
-                  updatedCartItems.filter(({ provider }) => responseReceivedIds.includes(provider.id.toString()))
+                  updatedCartItems.filter(({ provider }) =>
+                    responseReceivedIds.includes(provider.id.toString())
+                  )
                 );
                 initializeOrder(request_object);
               }}

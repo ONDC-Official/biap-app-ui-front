@@ -452,7 +452,6 @@ const AddressForm = (props) => {
           name: address.name.trim(),
           address: {
             areaCode: address.areaCode.trim(),
-            building: address.door.trim(),
             city: address.city.trim(),
             country: "IND",
             door: address.door.trim(),
@@ -826,8 +825,8 @@ const MapPicker = (props) => {
         city: location.city,
         state: location.state,
         areaCode: location.pincode,
-        lat: location.lat,
-        lng: location.lng,
+        lat: location.lat.toFixed(6),
+        lng: location.lng.toFixed(6),
       }));
     }
   }, [location]);
