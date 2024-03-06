@@ -41,6 +41,10 @@ import StepFulfillmentContent from "./StepFulfillment/stepFulfillmentContent";
 import StepCartLabel from "./stepCart/stepCartLabel";
 import StepCartContent from "./stepCart/stepCartContent";
 
+import moment from "moment";
+
+import { v4 as uuidv4 } from "uuid";
+
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
@@ -74,12 +78,47 @@ const Checkout = () => {
       localStorage.getItem("updatedCartItems")
     );
     setCartItems(cartItemsData);
+    setSelectedFulfillments({});
     setUpdatedCartItems(updatedCartItemsData);
   };
 
+  function dispatchToast(type, message) {
+    dispatch({
+      type: toast_actions.ADD_TOAST,
+      payload: {
+        id: Math.floor(Math.random() * 100),
+        type,
+        message,
+      },
+    });
+  }
+
   useEffect(() => {
     resetCartItems();
-  }, []);
+    let timeout;
+    const duration = moment.duration(
+      updatedCartItems[0]?.message.quote.quote.ttl
+    );
+
+    if (updatedCartItems[0]?.message.quote.quote.ttl) {
+      console.log(
+        "Request timeout",
+        updatedCartItems[0]?.message.quote.quote.ttl,
+        duration.asMilliseconds()
+      );
+      timeout = setTimeout(() => {
+        history.push("/application/cart");
+        dispatchToast(
+          toast_types.error,
+          "Request Timed out, please try again!"
+        );
+      }, duration.asMilliseconds());
+
+      return () => {
+        clearTimeout(timeout);
+      };
+    }
+  }, [updatedCartItems[0]?.message.quote.quote.ttl]);
 
   useEffect(() => {
     try {
@@ -158,8 +197,8 @@ const Checkout = () => {
               let cartQuantity = findItemFromCartItems
                 ? findItemFromCartItems?.quantity?.count
                 : cartItem
-                  ? cartItem?.quantity?.count
-                  : 0;
+                ? cartItem?.quantity?.count
+                : 0;
               let quantity = break_up_item["@ondc/org/item_quantity"]
                 ? break_up_item["@ondc/org/item_quantity"]["count"]
                 : 0;
@@ -231,7 +270,8 @@ const Checkout = () => {
                 selected_fulfillments[item.id] = item.fulfillment_id;
               });
               setSelectedFulfillments(selected_fulfillments);
-            } else { }
+            } else {
+            }
 
             let selected_fulfillment_ids = Object.values(selected_fulfillments);
 
@@ -512,6 +552,7 @@ const Checkout = () => {
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
@@ -547,9 +588,11 @@ const Checkout = () => {
             cartItemsData={cartItems}
             updatedCartItemsData={updatedCartItems}
             setUpdateCartItemsData={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             setUpdateCartItemsDataOnInitialize={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             handleNext={() => {
@@ -579,6 +622,7 @@ const Checkout = () => {
             updatedCartItemsData={updatedCartItems}
             updateInitLoading={(value) => setInitLoading(value)}
             setUpdateCartItemsDataOnInitialize={(data) => {
+              setSelectedFulfillments({});
               setUpdatedCartItems(data);
             }}
             fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
@@ -616,6 +660,7 @@ const Checkout = () => {
         // removeCookie("checkout_details");
         localStorage.removeItem("checkout_details");
         removeCookie("parent_and_transaction_id_map");
+        localStorage.setItem("transaction_id", uuidv4());
         // removeCookie("LatLongInfo");
         setCartItems([]);
         history.replace("/application/orders");
@@ -730,6 +775,8 @@ const Checkout = () => {
               .parent_order_id,
             transaction_id: parentOrderIDMap.get(item?.provider?.id)
               .transaction_id,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
           },
           message: {
             payment: {
@@ -1165,8 +1212,11 @@ const Checkout = () => {
                 Order Total
               </Typography>
               <Typography variant="body" className={classes.totalValue}>
-                {/*{`₹${getItemsTotal(productsQuote?.providers) + getDeliveryTotalAmount(productsQuote?.providers)}`}*/}
-                {`₹${parseInt(productsQuote?.total_payable).toFixed(2)}`}
+                {`₹${(
+                  parseInt(getItemsTotal(productsQuote?.providers)) +
+                  parseInt(getDeliveryTotalAmount(productsQuote?.providers))
+                ).toFixed(2)}`}
+                {/* {`₹${parseInt(productsQuote?.total_payable).toFixed(2)}`} */}
               </Typography>
             </div>
             <Button

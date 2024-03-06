@@ -15,7 +15,7 @@ import { ReactComponent as MenuIcon } from "../../../../assets/images/menu.svg";
 import MenuItems from "./menuItems";
 import Loading from "../../../shared/loading/loading";
 
-const CustomMenu = ({ brandDetails, outletDetails, brandId }) => {
+const CustomMenu = ({ brandDetails, outletDetails, brandId, isStoreDelivering }) => {
   const classes = useStyles();
   const customMenuRef = useRef([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,6 +120,7 @@ const CustomMenu = ({ brandDetails, outletDetails, brandId }) => {
                 updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
                 setBlockingCallLoading={setBlockingCallLoading}
                 firstMenuItemDetails={firstMenuItemDetails}
+                isStoreDelivering={isStoreDelivering}
               />
 
               {customMenuRef.current.slice(1, customMenuRef.current.length).map((menu, ind) => (
@@ -129,6 +130,7 @@ const CustomMenu = ({ brandDetails, outletDetails, brandId }) => {
                   customMenu={menu}
                   updateItemsOfCustomMenuRef={updateItemsOfCustomMenuRef}
                   setBlockingCallLoading={setBlockingCallLoading}
+                  isStoreDelivering={isStoreDelivering}
                 />
               ))}
             </>
