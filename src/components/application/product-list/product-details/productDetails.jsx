@@ -12,7 +12,16 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { getValueFromCookie } from "../../../../utils/cookies";
 import { Link, useHistory } from "react-router-dom";
 import useCancellablePromise from "../../../../api/cancelRequest";
-import { Accordion, AccordionDetails, AccordionSummary, Button, Card, Divider, Grid, ButtonGroup } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Card,
+  Divider,
+  Grid,
+  ButtonGroup,
+} from "@mui/material";
 import Loading from "../../../shared/loading/loading";
 import { CartContext } from "../../../../context/cartContext";
 import moment from "moment";
@@ -44,6 +53,7 @@ const ProductDetails = ({ productId }) => {
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
+
   const [productAvailability, setProductAvailability] = useState(true);
 
   const checkProductDisability = (data) => {
@@ -61,6 +71,7 @@ const ProductDetails = ({ productId }) => {
       setProductAvailability(false);
     }
   };
+
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
@@ -81,7 +92,9 @@ const ProductDetails = ({ productId }) => {
 
   const getProductDetails = async (productId) => {
     try {
-      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const data = await cancellablePromise(
+        getCall(`/protocol/item-details?id=${productId}`)
+      );
       const { item_details } = data;
       fetchCartItems();
       setProductPayload(data);
@@ -114,7 +127,9 @@ const ProductDetails = ({ productId }) => {
     let group = customization_state[groupId];
     if (!group) return;
 
-    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    let customizations = group.selected.map((s) =>
+      selectedCustomizationIds.push(s.id)
+    );
     group?.childs?.map((child) => {
       getCustomization_(child);
     });
@@ -185,8 +200,14 @@ const ProductDetails = ({ productId }) => {
     return true;
   }
 
-  const checkCustomisationIsAvailableInCart = (customisations, cartItemData) => {
-    const cartItem = Object.assign({}, JSON.parse(JSON.stringify(cartItemData)));
+  const checkCustomisationIsAvailableInCart = (
+    customisations,
+    cartItemData
+  ) => {
+    const cartItem = Object.assign(
+      {},
+      JSON.parse(JSON.stringify(cartItemData))
+    );
     let matchingCustomisation = null;
     if (customisations) {
       const currentIds = customisations.map((item) => item.id);
@@ -201,14 +222,21 @@ const ProductDetails = ({ productId }) => {
   };
 
   useEffect(() => {
-    if (productPayload && productPayload?.id && cartItems && cartItems.length > 0) {
+    if (
+      productPayload &&
+      productPayload?.id &&
+      cartItems &&
+      cartItems.length > 0
+    ) {
       let isItemAvailable = false;
       let findItem = null;
       if (productPayload?.context.domain === "ONDC:RET11") {
         const customisations = getCustomizations() ?? null;
         findItem = customisations
           ? cartItems.find(
+
               (item) => item.item.id === productPayload.id && checkCustomisationIsAvailableInCart(customisations, item)
+
             )
           : cartItems.find((item) => item.item.id === productPayload.id);
       } else {
@@ -235,7 +263,10 @@ const ProductDetails = ({ productId }) => {
     const customisations = getCustomizations() ?? null;
 
     if (customisations) {
-      calculateSubtotal(customization_state["firstGroup"]?.id, customization_state);
+      calculateSubtotal(
+        customization_state["firstGroup"]?.id,
+        customization_state
+      );
       subtotal += customizationPrices;
     }
 
@@ -300,7 +331,9 @@ const ProductDetails = ({ productId }) => {
       }
     } else {
       const currentCount = parseInt(cartItem[0].item.quantity.count);
-      const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
+      const maxCount = parseInt(
+        cartItem[0].item.product.quantity.maximum.count
+      );
 
       if (currentCount < maxCount) {
         if (!customisations) {
@@ -320,7 +353,9 @@ const ProductDetails = ({ productId }) => {
           let matchingCustomisation = null;
 
           for (let i = 0; i < cartItem.length; i++) {
-            let existingIds = cartItem[i].item.customisations.map((item) => item.id);
+            let existingIds = cartItem[i].item.customisations.map(
+              (item) => item.id
+            );
             const areSame = areCustomisationsSame(existingIds, currentIds);
             if (areSame) {
               matchingCustomisation = cartItem[i];
@@ -328,7 +363,11 @@ const ProductDetails = ({ productId }) => {
           }
 
           if (matchingCustomisation) {
-            await updateCartItem(cartItems, isIncrement, matchingCustomisation._id);
+            await updateCartItem(
+              cartItems,
+              isIncrement,
+              matchingCustomisation._id
+            );
             setAddToCartLoading(false);
             fetchCartItems();
             dispatch({
@@ -376,7 +415,10 @@ const ProductDetails = ({ productId }) => {
     const FnB = "ONDC:RET11";
     const grocery = "ONDC:RET10";
 
-    if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) {
+    if (
+      productPayload?.context?.domain == grocery ||
+      productPayload?.context?.domain == FnB
+    ) {
       const tags = productPayload.item_details.tags;
       let category = "veg";
 
@@ -422,10 +464,20 @@ const ProductDetails = ({ productId }) => {
 
       return (
         <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
-          <div className={classes.square} style={{ borderColor: getTagColor() }}>
-            <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+          <div
+            className={classes.square}
+            style={{ borderColor: getTagColor() }}
+          >
+            <div
+              className={classes.circle}
+              style={{ backgroundColor: getTagColor() }}
+            ></div>
           </div>
-          <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
+          <Typography
+            variant="body"
+            color={getTextColor()}
+            sx={{ fontWeight: "600" }}
+          >
             {map[category]}
           </Typography>
         </Grid>
@@ -458,12 +510,22 @@ const ProductDetails = ({ productId }) => {
     return Object.keys(productPayload?.attributes).map((key) => (
       <Grid container className={classes.keyValueContainer}>
         <Grid xs={3}>
-          <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+          <Typography
+            variant="body1"
+            color="#787A80"
+            sx={{ fontWeight: 600 }}
+            className={classes.key}
+          >
             {key}
           </Typography>
         </Grid>
         <Grid xs={8}>
-          <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+          <Typography
+            variant="body"
+            color="#1D1D1D"
+            sx={{ fontWeight: 600 }}
+            className={classes.value}
+          >
             {productPayload?.attributes[key]}
           </Typography>
         </Grid>
@@ -475,7 +537,9 @@ const ProductDetails = ({ productId }) => {
     let returnWindowValue = 0;
     if (productPayload.item_details?.["@ondc/org/return_window"]) {
       // Create a duration object from the ISO 8601 string
-      const duration = moment.duration(productPayload.item_details?.["@ondc/org/return_window"]);
+      const duration = moment.duration(
+        productPayload.item_details?.["@ondc/org/return_window"]
+      );
 
       // Get the number of hours from the duration object
       const hours = duration.humanize();
@@ -483,18 +547,42 @@ const ProductDetails = ({ productId }) => {
     }
 
     const data = {
+      "Short Description":
+        productPayload.item_details?.["descriptor"]?.["short_desc"],
+      "Long Description":
+        productPayload.item_details?.["descriptor"]?.["long_desc"],
+      Code: productPayload.item_details?.["descriptor"]?.["code"],
       "Available on COD":
-        productPayload.item_details?.["@ondc/org/available_on_cod"]?.toString() === "true" ? "Yes" : "No",
-      Cancellable: productPayload.item_details?.["@ondc/org/cancellable"]?.toString() === "true" ? "Yes" : "No",
+        productPayload.item_details?.[
+          "@ondc/org/available_on_cod"
+        ]?.toString() === "true"
+          ? "Yes"
+          : "No",
+      Cancellable:
+        productPayload.item_details?.["@ondc/org/cancellable"]?.toString() ===
+        "true"
+          ? "Yes"
+          : "No",
       "Return window value": returnWindowValue,
-      Returnable: productPayload.item_details?.["@ondc/org/returnable"]?.toString() === "true" ? "Yes" : "No",
-      "Customer care": productPayload.item_details?.["@ondc/org/contact_details_consumer_care"],
+      Returnable:
+        productPayload.item_details?.["@ondc/org/returnable"]?.toString() ===
+        "true"
+          ? "Yes"
+          : "No",
+      "Customer care":
+        productPayload.item_details?.[
+          "@ondc/org/contact_details_consumer_care"
+        ],
       "Manufacturer name":
-        productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.["manufacturer_or_packer_name"],
+        productPayload.item_details?.[
+          "@ondc/org/statutory_reqs_packaged_commodities"
+        ]?.["manufacturer_or_packer_name"],
       "Manufacturer address":
+
         productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.[
           "manufacturer_or_packer_address"
         ],
+
     };
 
     return Object.keys(data).map((key) => {
@@ -503,12 +591,22 @@ const ProductDetails = ({ productId }) => {
         return (
           <Grid container className={classes.keyValueContainer} key={key}>
             <Grid xs={3}>
-              <Typography variant="body1" color="#787A80" sx={{ fontWeight: 600 }} className={classes.key}>
+              <Typography
+                variant="body1"
+                color="#787A80"
+                sx={{ fontWeight: 600 }}
+                className={classes.key}
+              >
                 {key}
               </Typography>
             </Grid>
             <Grid xs={8}>
-              <Typography variant="body" color="#1D1D1D" sx={{ fontWeight: 600 }} className={classes.value}>
+              <Typography
+                variant="body"
+                color="#1D1D1D"
+                sx={{ fontWeight: 600 }}
+                className={classes.value}
+              >
                 {value}
               </Typography>
             </Grid>
@@ -533,10 +631,16 @@ const ProductDetails = ({ productId }) => {
     productDetails?.price?.tags &&
     productDetails?.price?.tags.length > 0
   ) {
+
     const findRangePriceTag = productDetails?.price?.tags.find((item) => item.code === "range");
+
     if (findRangePriceTag) {
-      const findLowerPriceObj = findRangePriceTag.list.find((item) => item.code === "lower");
-      const findUpperPriceObj = findRangePriceTag.list.find((item) => item.code === "upper");
+      const findLowerPriceObj = findRangePriceTag.list.find(
+        (item) => item.code === "lower"
+      );
+      const findUpperPriceObj = findRangePriceTag.list.find(
+        (item) => item.code === "upper"
+      );
       rangePriceTag = {
         maxPrice: findUpperPriceObj.value,
         minPrice: findLowerPriceObj.value,
@@ -553,6 +657,7 @@ const ProductDetails = ({ productId }) => {
     return images;
   };
 
+
   return (
     <>
       {productPayload == null ? (
@@ -563,13 +668,20 @@ const ProductDetails = ({ productId }) => {
         <div>
           <div className={classes.breadCrumbs} onClick={() => {}}>
             <Breadcrumbs aria-label="breadcrumb">
-              <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
+              <MuiLink
+                component={Link}
+                underline="hover"
+                color="inherit"
+                to="/application/products"
+              >
                 Home
               </MuiLink>
               {/* <MuiLink component={Link} underline="hover" color="inherit" to={""}>
                 {productPayload?.item_details?.category_id}
               </MuiLink> */}
-              <Typography color="text.primary">{productDetails?.descriptor?.name}</Typography>
+              <Typography color="text.primary">
+                {productDetails?.descriptor?.name}
+              </Typography>
             </Breadcrumbs>
           </div>
 
@@ -583,7 +695,9 @@ const ProductDetails = ({ productId }) => {
                   return (
                     <div
                       style={{
+
                         borderColor: item === activeImage ? "#008ECC" : "lightgrey",
+
                       }}
                       className={classes.moreImages}
                       onClick={() => handleImageClick(item)}
@@ -600,18 +714,26 @@ const ProductDetails = ({ productId }) => {
               <Card className={classes.productCard}>
                 {renderVegNonVegTag()}
                 {renderStockStatus()}
-                <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
+                <Typography
+                  variant="h4"
+                  color="black"
+                  sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}
+                >
                   {productDetails?.descriptor?.name}
                 </Typography>
                 {rangePriceTag ? (
                   <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+
                     <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
+
                       {`₹${rangePriceTag?.minPrice} - ₹${rangePriceTag?.maxPrice}`}
                     </Typography>
                   </Grid>
                 ) : (
                   <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
+
                     <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
+
                       ₹{productDetails?.price?.value}
                     </Typography>
                     <Typography
@@ -624,7 +746,9 @@ const ProductDetails = ({ productId }) => {
                         textDecoration: "line-through",
                       }}
                     >
+
                       ₹{parseInt(productDetails?.price?.maximum_value).toFixed(0)}
+
                     </Typography>
                   </Grid>
                 )}
@@ -700,7 +824,11 @@ const ProductDetails = ({ productId }) => {
                 </>
 
                 {!parseInt(productDetails?.quantity?.available?.count) >= 1 && (
-                  <Grid container justifyContent="center" className={classes.outOfStock}>
+                  <Grid
+                    container
+                    justifyContent="center"
+                    className={classes.outOfStock}
+                  >
                     <Typography variant="body" color="#D83232">
                       Item is out of Stock
                     </Typography>
@@ -737,11 +865,14 @@ const ProductDetails = ({ productId }) => {
                           borderRadius: "18px",
                         }}
                         disabled={
+
                           !parseInt(productDetails?.quantity?.available?.count) >= 1 ||
+
                           itemOutOfStock ||
                           addToCartLoading
                         }
                       >
+
                         <Button onClick={() => addToCart(false, true)} sx={{ fontSize: "24px !important" }}>
                           +
                         </Button>
@@ -760,6 +891,7 @@ const ProductDetails = ({ productId }) => {
                         >
                           -
                         </Button>
+
                       </ButtonGroup>
                     ) : (
                       <Button
@@ -771,10 +903,12 @@ const ProductDetails = ({ productId }) => {
                         }}
                         onClick={() => addToCart(false, true)}
                         disabled={
+
                           !parseInt(productDetails?.quantity?.available?.count) >= 1 ||
                           itemOutOfStock ||
                           addToCartLoading ||
                           !productAvailability
+
                         }
                       >
                         {addToCartLoading ? <Loading /> : "Add to cart"}
@@ -785,9 +919,11 @@ const ProductDetails = ({ productId }) => {
                     variant="outlined"
                     sx={{ flex: 1, textTransform: "none" }}
                     disabled={
+
                       !parseInt(productDetails?.quantity?.available?.count) >= 1 ||
                       itemOutOfStock ||
                       !productAvailability
+
                     }
                     onClick={() => addToCart(true)}
                   >
@@ -804,7 +940,11 @@ const ProductDetails = ({ productId }) => {
                   expandIcon={<ExpandMoreIcon />}
                   sx={{ borderBottom: "1px solid #0000001F", padding: 0 }}
                 >
-                  <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 600 }}>
+                  <Typography
+                    variant="h4"
+                    color="black"
+                    sx={{ fontFamily: "inter", fontWeight: 600 }}
+                  >
                     Product Details
                   </Typography>
                   <Divider />
