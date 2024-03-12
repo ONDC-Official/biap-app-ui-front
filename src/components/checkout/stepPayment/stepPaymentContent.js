@@ -32,6 +32,9 @@ const StepPaymentContent = ({
   responseReceivedIds,
   selectedFulfillments,
   fulfillments,
+  amount,
+  setPaymentKey,
+  setPaymentParams,
 }) => {
   const classes = useStyles();
 
@@ -80,7 +83,32 @@ const StepPaymentContent = ({
     }
   }, [cartItems]);
 
-  const handleSuccess = () => {
+  const getKeys = async () => {
+    const url = "/clientApis/v2/razorpay/razorPay/keys";
+    try {
+      const res = await cancellablePromise(getCall(url));
+      setPaymentKey(res.keyId);
+      return res.keyId;
+    } catch (error) {
+      console.log("keys error: ", error.response);
+    }
+  };
+
+  const createPayment = async () => {
+    const url = `/clientApis/v2/razorpay/${transaction_id}`;
+    const data = {
+      amount,
+    };
+    try {
+      const res = await cancellablePromise(postCall(url, data));
+      setPaymentParams(res.data);
+      return res.data;
+    } catch (error) {
+      console.log("create payment error: ", error.response);
+    }
+  };
+
+  const handleSuccess = async () => {
     setInitializeOrderLoading(false);
     updateInitLoading(false);
     let checkoutObj = {
@@ -97,7 +125,10 @@ const StepPaymentContent = ({
     // AddCookie("checkout_details", JSON.stringify(checkoutObj));
     localStorage.setItem("checkout_details", JSON.stringify(checkoutObj));
     // handleNext();
+    await getKeys();
+    await createPayment();
   };
+
   const onInitializeOrder = async (message_id) => {
     setInitializeOrderLoading(true);
     try {
@@ -313,13 +344,11 @@ const StepPaymentContent = ({
           className={`${classes.paymentCard} ${
             activePaymentMethod === payment_methods.RAZORPAY ? classes.activeCard : ""
           } ${initializeOrderLoading ? classes.nonClickable : ""}`}
-          onClick={() => {
-            console.log("open razor pay");
-            setActivePaymentMethod(payment_methods.RAZORPAY);
-            // if (!initializeOrderLoading && activePaymentMethod !== payment_methods.JUSPAY) {
-            //   setActivePaymentMethod(payment_methods.JUSPAY);
-            //   handleInitializaOrder();
-            // }
+          onClick={async () => {
+            if (!initializeOrderLoading && activePaymentMethod !== payment_methods.RAZORPAY) {
+              setActivePaymentMethod(payment_methods.RAZORPAY);
+              handleInitializaOrder();
+            }
           }}
         >
           {/*<img className={classes.paymentImage} src={prepaid} alt="Prepaid"/>*/}
@@ -329,7 +358,6 @@ const StepPaymentContent = ({
         <Typography className={classes.paymentTypo} variant="body" component="div">
           Prepaid
         </Typography>
-        {activePaymentMethod === payment_methods.RAZORPAY && <Razorpay />}
       </Grid>
     </Grid>
   );

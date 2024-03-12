@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 
-const Razorpay = () => {
+const Razorpay = (props) => {
+  const { paymentKey, paymentParams } = props;
+  console.log("props: ", props);
+  console.log("key: ", paymentKey);
+  console.log("payment params: ", paymentParams);
   useEffect(() => {
     const loadRazorpayScript = () => {
       const script = document.createElement("script");
@@ -15,13 +19,13 @@ const Razorpay = () => {
 
     const initializeRazorpay = () => {
       const options = {
-        key: "rzp_test_gA9rut0yNp9bjA",
-        amount: "50000",
+        key: `${paymentKey}`,
+        amount: `${paymentParams.orderDetail.amount_due}`,
         currency: "INR",
         name: "ONDC",
         description: "Test Transaction",
         image: "https://example.com/your_logo",
-        order_id: "order_Nj2IeHwOpzNQ1L",
+        order_id: `${paymentParams.orderDetail.id}`,
         handler: function (response) {
           console.log("payment success response: ", response);
           //  alert(response.razorpay_payment_id);
