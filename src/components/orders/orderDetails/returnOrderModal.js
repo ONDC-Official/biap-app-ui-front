@@ -187,7 +187,7 @@ export default function ReturnOrderModal({
               ([customizationId, customization]) => ({
                 id: customizationId,
                 quantity: {
-                  count: customization.quantity.count,
+                  count: customization.quantity,
                 },
                 tags: {
                   parent_item_id: item.parent_item_id,
@@ -554,6 +554,8 @@ export default function ReturnOrderModal({
                                   image_error: "",
                                 }));
                                 if (!isProductSelected(product?.id)) {
+                                  product.quantity.count =
+                                    quantity?.[idx]?.count;
                                   setSelectedIds([product]);
                                 }
                               }}
