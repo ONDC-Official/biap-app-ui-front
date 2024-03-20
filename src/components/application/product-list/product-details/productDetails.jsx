@@ -53,7 +53,6 @@ const ProductDetails = ({ productId }) => {
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
-
   const [productAvailability, setProductAvailability] = useState(true);
 
   const checkProductDisability = (data) => {
@@ -71,7 +70,6 @@ const ProductDetails = ({ productId }) => {
       setProductAvailability(false);
     }
   };
-
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
@@ -144,6 +142,7 @@ const ProductDetails = ({ productId }) => {
     const firstGroupId = customization_state["firstGroup"]?.id;
 
     if (!firstGroupId) return;
+    selectedCustomizationIds = [];
     getCustomization_(firstGroupId);
 
     for (const cId of selectedCustomizationIds) {
@@ -232,11 +231,12 @@ const ProductDetails = ({ productId }) => {
       let findItem = null;
       if (productPayload?.context.domain === "ONDC:RET11") {
         const customisations = getCustomizations() ?? null;
+
         findItem = customisations
           ? cartItems.find(
-
-              (item) => item.item.id === productPayload.id && checkCustomisationIsAvailableInCart(customisations, item)
-
+              (item) =>
+                item.item.id === productPayload.id &&
+                checkCustomisationIsAvailableInCart(customisations, item)
             )
           : cartItems.find((item) => item.item.id === productPayload.id);
       } else {
@@ -578,11 +578,9 @@ const ProductDetails = ({ productId }) => {
           "@ondc/org/statutory_reqs_packaged_commodities"
         ]?.["manufacturer_or_packer_name"],
       "Manufacturer address":
-
-        productPayload.item_details?.["@ondc/org/statutory_reqs_packaged_commodities"]?.[
-          "manufacturer_or_packer_address"
-        ],
-
+        productPayload.item_details?.[
+          "@ondc/org/statutory_reqs_packaged_commodities"
+        ]?.["manufacturer_or_packer_address"],
     };
 
     return Object.keys(data).map((key) => {
@@ -631,8 +629,9 @@ const ProductDetails = ({ productId }) => {
     productDetails?.price?.tags &&
     productDetails?.price?.tags.length > 0
   ) {
-
-    const findRangePriceTag = productDetails?.price?.tags.find((item) => item.code === "range");
+    const findRangePriceTag = productDetails?.price?.tags.find(
+      (item) => item.code === "range"
+    );
 
     if (findRangePriceTag) {
       const findLowerPriceObj = findRangePriceTag.list.find(
@@ -650,13 +649,21 @@ const ProductDetails = ({ productId }) => {
   }
 
   const productImages = () => {
-    let images = (productDetails?.descriptor?.images && [...productDetails?.descriptor?.images]) || [];
-    let back_image_tag = productDetails?.tags?.find((tag) => tag.code === "image");
-    let back_image = back_image_tag && back_image_tag?.list?.find((list_item) => list_item.code === "url")?.value;
+    let images =
+      (productDetails?.descriptor?.images && [
+        ...productDetails?.descriptor?.images,
+      ]) ||
+      [];
+    let back_image_tag = productDetails?.tags?.find(
+      (tag) => tag.code === "image"
+    );
+    let back_image =
+      back_image_tag &&
+      back_image_tag?.list?.find((list_item) => list_item.code === "url")
+        ?.value;
     images.push(back_image);
     return images;
   };
-
 
   return (
     <>
@@ -695,9 +702,8 @@ const ProductDetails = ({ productId }) => {
                   return (
                     <div
                       style={{
-
-                        borderColor: item === activeImage ? "#008ECC" : "lightgrey",
-
+                        borderColor:
+                          item === activeImage ? "#008ECC" : "lightgrey",
                       }}
                       className={classes.moreImages}
                       onClick={() => handleImageClick(item)}
@@ -723,17 +729,21 @@ const ProductDetails = ({ productId }) => {
                 </Typography>
                 {rangePriceTag ? (
                   <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
-
-                    <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
-
+                    <Typography
+                      variant="h4"
+                      color="black"
+                      sx={{ fontFamily: "inter", fontWeight: 700 }}
+                    >
                       {`₹${rangePriceTag?.minPrice} - ₹${rangePriceTag?.maxPrice}`}
                     </Typography>
                   </Grid>
                 ) : (
                   <Grid container alignItems="center" sx={{ marginBottom: 1 }}>
-
-                    <Typography variant="h4" color="black" sx={{ fontFamily: "inter", fontWeight: 700 }}>
-
+                    <Typography
+                      variant="h4"
+                      color="black"
+                      sx={{ fontFamily: "inter", fontWeight: 700 }}
+                    >
                       ₹{productDetails?.price?.value}
                     </Typography>
                     <Typography
@@ -746,9 +756,10 @@ const ProductDetails = ({ productId }) => {
                         textDecoration: "line-through",
                       }}
                     >
-
-                      ₹{parseInt(productDetails?.price?.maximum_value).toFixed(0)}
-
+                      ₹
+                      {parseInt(productDetails?.price?.maximum_value).toFixed(
+                        0
+                      )}
                     </Typography>
                   </Grid>
                 )}
@@ -836,7 +847,11 @@ const ProductDetails = ({ productId }) => {
                 )}
 
                 {!productAvailability && (
-                  <Grid container justifyContent="center" className={classes.outOfStock}>
+                  <Grid
+                    container
+                    justifyContent="center"
+                    className={classes.outOfStock}
+                  >
                     <Typography variant="body" color="#D83232">
                       Item unvailable at the moment
                     </Typography>
@@ -865,19 +880,28 @@ const ProductDetails = ({ productId }) => {
                           borderRadius: "18px",
                         }}
                         disabled={
-
-                          !parseInt(productDetails?.quantity?.available?.count) >= 1 ||
-
+                          !parseInt(
+                            productDetails?.quantity?.available?.count
+                          ) >= 1 ||
                           itemOutOfStock ||
                           addToCartLoading
                         }
                       >
-
-                        <Button onClick={() => addToCart(false, true)} sx={{ fontSize: "24px !important" }}>
+                        <Button
+                          onClick={() => addToCart(false, true)}
+                          sx={{ fontSize: "24px !important" }}
+                        >
                           +
                         </Button>
-                        <Button variant={"outlined"} sx={{ fontSize: "20px !important" }}>
-                          {addToCartLoading ? <Loading /> : itemAvailableInCart.item.quantity.count}
+                        <Button
+                          variant={"outlined"}
+                          sx={{ fontSize: "20px !important" }}
+                        >
+                          {addToCartLoading ? (
+                            <Loading />
+                          ) : (
+                            itemAvailableInCart.item.quantity.count
+                          )}
                         </Button>
                         <Button
                           onClick={() => {
@@ -891,7 +915,6 @@ const ProductDetails = ({ productId }) => {
                         >
                           -
                         </Button>
-
                       </ButtonGroup>
                     ) : (
                       <Button
@@ -903,12 +926,12 @@ const ProductDetails = ({ productId }) => {
                         }}
                         onClick={() => addToCart(false, true)}
                         disabled={
-
-                          !parseInt(productDetails?.quantity?.available?.count) >= 1 ||
+                          !parseInt(
+                            productDetails?.quantity?.available?.count
+                          ) >= 1 ||
                           itemOutOfStock ||
                           addToCartLoading ||
                           !productAvailability
-
                         }
                       >
                         {addToCartLoading ? <Loading /> : "Add to cart"}
@@ -919,11 +942,10 @@ const ProductDetails = ({ productId }) => {
                     variant="outlined"
                     sx={{ flex: 1, textTransform: "none" }}
                     disabled={
-
-                      !parseInt(productDetails?.quantity?.available?.count) >= 1 ||
+                      !parseInt(productDetails?.quantity?.available?.count) >=
+                        1 ||
                       itemOutOfStock ||
                       !productAvailability
-
                     }
                     onClick={() => addToCart(true)}
                   >
