@@ -69,6 +69,8 @@ const Checkout = () => {
   const [paymentParams, setPaymentParams] = useState({});
 
   const [displayRazorPay, setDisplayRazorPay] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [paymentResponse, setPaymentResponse] = useState(null);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
@@ -427,6 +429,30 @@ const Checkout = () => {
     }
   }, [updatedCartItems, selectedFulfillments]);
 
+  useEffect(() => {
+    if (paymentStatus) {
+      if (paymentStatus === "success") {
+        setConfirmOrderLoading(true);
+        let c = cartItems.map((item) => {
+          return item.item;
+        });
+        const { successOrderIds } = JSON.parse(localStorage.getItem("checkout_details") || "{}");
+        const request_object = constructQouteObject(
+          c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
+        );
+        verifyPayment(request_object[0], payment_methods.RAZORPAY);
+      } else if (paymentStatus === "fail") {
+        setConfirmOrderLoading(false);
+
+        if (paymentResponse?.error?.description) {
+          dispatchError(paymentResponse.error.description);
+        } else {
+          dispatchError("Something went wrong, please try again!");
+        }
+      }
+    }
+  }, [paymentStatus]);
+
   const showQuoteError = () => {
     let msg = "";
     if (quoteItemInProcessing) {
@@ -710,6 +736,7 @@ const Checkout = () => {
       ];
     });
   }
+
   const getItemProviderId = (item) => {
     const providers = getValueFromCookie("providerIds").split(",");
     let provider = {};
@@ -722,6 +749,7 @@ const Checkout = () => {
     }
     return provider;
   };
+
   const confirmOrder = async (items, method) => {
     responseRef.current = [];
     const parentOrderIDMap = new Map(JSON.parse(getValueFromCookie("parent_and_transaction_id_map")));
@@ -779,6 +807,78 @@ const Checkout = () => {
         );
       }
     } catch (err) {
+      dispatchError(err?.response?.data?.error?.message);
+      setConfirmOrderLoading(false);
+    }
+    // eslint-disable-next-line
+  };
+
+  const verifyPayment = async (items, method) => {
+    responseRef.current = [];
+    const parentOrderIDMap = new Map(JSON.parse(getValueFromCookie("parent_and_transaction_id_map")));
+    const { productQuotes: productQuotesForCheckout } = JSON.parse(
+      // getValueFromCookie("checkout_details") || "{}"
+      localStorage.getItem("checkout_details") || "{}"
+    );
+    try {
+      const search_context = JSON.parse(getValueFromCookie("search_context"));
+      const item = items[0];
+      const queryParams = [
+        {
+          context: {
+            domain: item.domain,
+            city: item.contextCity,
+            state: search_context.location.state,
+            parent_order_id: parentOrderIDMap.get(item?.provider?.id).parent_order_id,
+            transaction_id: parentOrderIDMap.get(item?.provider?.id).transaction_id,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))?.location.address.areaCode,
+          },
+          message: {
+            payment: {
+              ...updatedCartItems[0].message.quote.payment,
+              paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
+              type: method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+              transaction_id: parentOrderIDMap.get(item?.provider?.id).transaction_id,
+              paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
+            },
+            quote: {
+              ...productQuotesForCheckout[0],
+              price: {
+                currency: productQuotesForCheckout[0].price.currency,
+                value: String(productQuotesForCheckout[0].price.value),
+              },
+            },
+            providers: getItemProviderId(item),
+          },
+        },
+      ];
+
+      const payloadData = {
+        razorPayRequest: paymentResponse,
+        confirmRequest: queryParams,
+      };
+
+      console.log("Verify api payload: ", payloadData);
+
+      const data = await cancellablePromise(postCall("clientApis/v2/razorpay/verify/process", payloadData));
+      // Error handling workflow eg, NACK
+      // const isNACK = data.find(
+      //   (item) => item.error && item.message.ack.status === "NACK"
+      // );
+      const isNACK = data.find((item) => item.error && item.code !== "");
+      if (isNACK) {
+        dispatchError(isNACK.error.message);
+        setConfirmOrderLoading(false);
+      } else {
+        onConfirm(
+          data?.map((txn) => {
+            const { context } = txn;
+            return context?.message_id;
+          })
+        );
+      }
+    } catch (err) {
+      console.log(err);
       dispatchError(err?.response?.data?.error?.message);
       setConfirmOrderLoading(false);
     }
@@ -1088,34 +1188,20 @@ const Checkout = () => {
                 activeStep !== 4
               }
               onClick={() => {
-                setDisplayRazorPay(true);
+                const { productQuotes, successOrderIds } = JSON.parse(localStorage.getItem("checkout_details") || "{}");
+                setConfirmOrderLoading(true);
+                let c = cartItems.map((item) => {
+                  return item.item;
+                });
+
                 if (activePaymentMethod) {
                   if (activePaymentMethod === payment_methods.RAZORPAY) {
-                    // wait till payment gets verified
                     setDisplayRazorPay(true);
                   } else {
-                    const { productQuotes, successOrderIds } = JSON.parse(
-                      // getValueFromCookie("checkout_details") || "{}"
-                      localStorage.getItem("checkout_details") || "{}"
+                    const request_object = constructQouteObject(
+                      c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
                     );
-                    setConfirmOrderLoading(true);
-                    let c = cartItems.map((item) => {
-                      return item.item;
-                    });
-                    if (activePaymentMethod === payment_methods.JUSPAY) {
-                      // setTogglePaymentGateway(true);
-                      // setLoadingSdkForPayment(true);
-                      // initiateSDK();
-                      const request_object = constructQouteObject(
-                        c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
-                      );
-                      confirmOrder(request_object[0], payment_methods.JUSPAY);
-                    } else {
-                      const request_object = constructQouteObject(
-                        c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
-                      );
-                      confirmOrder(request_object[0], payment_methods.COD);
-                    }
+                    confirmOrder(request_object[0], payment_methods.COD);
                   }
                 } else {
                   dispatchError("Please select payment.");
@@ -1172,7 +1258,14 @@ const Checkout = () => {
           </Grid>
           {renderQuote()}
         </Grid>
-        {displayRazorPay && <Razorpay paymentKey={paymentKey} paymentParams={paymentParams} />}
+        {displayRazorPay && (
+          <Razorpay
+            paymentKey={paymentKey}
+            paymentParams={paymentParams}
+            setPaymentStatus={setPaymentStatus}
+            setPaymentResponse={setPaymentResponse}
+          />
+        )}
       </div>
     </>
   );

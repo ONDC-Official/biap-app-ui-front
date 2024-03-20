@@ -1,10 +1,8 @@
 import React, { useEffect } from "react";
 
 const Razorpay = (props) => {
-  const { paymentKey, paymentParams } = props;
-  console.log("props: ", props);
-  console.log("key: ", paymentKey);
-  console.log("payment params: ", paymentParams);
+  const { paymentKey, paymentParams, setPaymentStatus, setPaymentResponse } = props;
+
   useEffect(() => {
     const loadRazorpayScript = () => {
       const script = document.createElement("script");
@@ -28,9 +26,8 @@ const Razorpay = (props) => {
         order_id: `${paymentParams.orderDetail.id}`,
         handler: function (response) {
           console.log("payment success response: ", response);
-          //  alert(response.razorpay_payment_id);
-          //  alert(response.razorpay_order_id);
-          //  alert(response.razorpay_signature);
+          setPaymentResponse(response);
+          setPaymentStatus("success");
         },
         prefill: {
           name: "Gaurav Kumar",
@@ -48,13 +45,9 @@ const Razorpay = (props) => {
       const rzp = new window.Razorpay(options);
 
       rzp.on("payment.failed", function (response) {
-        alert(response.error.code);
-        alert(response.error.description);
-        alert(response.error.source);
-        alert(response.error.step);
-        alert(response.error.reason);
-        alert(response.error.metadata.order_id);
-        alert(response.error.metadata.payment_id);
+        console.log("payment failure response: ", response);
+        setPaymentResponse(response);
+        setPaymentStatus("fail");
       });
 
       rzp.open();
