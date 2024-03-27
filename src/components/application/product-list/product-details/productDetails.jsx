@@ -51,10 +51,25 @@ const ProductDetails = ({ productId }) => {
 
   const [customizationPrices, setCustomizationPrices] = useState(0);
   const [itemOutOfStock, setItemOutOfStock] = useState(false);
-
   const [addToCartLoading, setAddToCartLoading] = useState(false);
 
-  useEffect(() => {}, []);
+  const [productAvailability, setProductAvailability] = useState(true);
+
+  const checkProductDisability = (data) => {
+    const itemTags = data.item_details?.time?.label;
+    const providerTags = data.provider_details?.time?.label;
+    const locationTags = data.location_details?.time?.label;
+
+    const isItemEnabled = itemTags === "enable";
+    const isProviderEnabled = providerTags === "enable";
+    const isLocationEnabled = locationTags === "enable";
+
+    if (isItemEnabled || isProviderEnabled || isLocationEnabled) {
+      setProductAvailability(true);
+    } else {
+      setProductAvailability(false);
+    }
+  };
 
   const handleImageClick = (imageUrl) => {
     setActiveImage(imageUrl);
@@ -81,6 +96,8 @@ const ProductDetails = ({ productId }) => {
       const { item_details } = data;
       fetchCartItems();
       setProductPayload(data);
+
+      checkProductDisability(data);
       setProductDetails(item_details);
       setActiveImage(item_details?.descriptor?.symbol);
     } catch (error) {
@@ -125,6 +142,7 @@ const ProductDetails = ({ productId }) => {
     const firstGroupId = customization_state["firstGroup"]?.id;
 
     if (!firstGroupId) return;
+    selectedCustomizationIds = [];
     getCustomization_(firstGroupId);
 
     for (const cId of selectedCustomizationIds) {
@@ -213,6 +231,7 @@ const ProductDetails = ({ productId }) => {
       let findItem = null;
       if (productPayload?.context.domain === "ONDC:RET11") {
         const customisations = getCustomizations() ?? null;
+
         findItem = customisations
           ? cartItems.find(
               (item) =>
@@ -613,6 +632,7 @@ const ProductDetails = ({ productId }) => {
     const findRangePriceTag = productDetails?.price?.tags.find(
       (item) => item.code === "range"
     );
+
     if (findRangePriceTag) {
       const findLowerPriceObj = findRangePriceTag.list.find(
         (item) => item.code === "lower"
@@ -627,6 +647,23 @@ const ProductDetails = ({ productId }) => {
     }
   } else {
   }
+
+  const productImages = () => {
+    let images =
+      (productDetails?.descriptor?.images && [
+        ...productDetails?.descriptor?.images,
+      ]) ||
+      [];
+    let back_image_tag = productDetails?.tags?.find(
+      (tag) => tag.code === "image"
+    );
+    let back_image =
+      back_image_tag &&
+      back_image_tag?.list?.find((list_item) => list_item.code === "url")
+        ?.value;
+    images.push(back_image);
+    return images;
+  };
 
   return (
     <>
@@ -661,7 +698,7 @@ const ProductDetails = ({ productId }) => {
                 <img className={classes.productImg} src={activeImage} />
               </div>
               <div className={classes.moreImagesContainer}>
-                {productDetails?.descriptor?.images?.map((item, idx) => {
+                {productImages().map((item, idx) => {
                   return (
                     <div
                       style={{
@@ -809,6 +846,18 @@ const ProductDetails = ({ productId }) => {
                   </Grid>
                 )}
 
+                {!productAvailability && (
+                  <Grid
+                    container
+                    justifyContent="center"
+                    className={classes.outOfStock}
+                  >
+                    <Typography variant="body" color="#D83232">
+                      Item unvailable at the moment
+                    </Typography>
+                  </Grid>
+                )}
+
                 <CustomizationRenderer
                   productPayload={productPayload}
                   customization_state={customization_state}
@@ -881,7 +930,8 @@ const ProductDetails = ({ productId }) => {
                             productDetails?.quantity?.available?.count
                           ) >= 1 ||
                           itemOutOfStock ||
-                          addToCartLoading
+                          addToCartLoading ||
+                          !productAvailability
                         }
                       >
                         {addToCartLoading ? <Loading /> : "Add to cart"}
@@ -893,7 +943,9 @@ const ProductDetails = ({ productId }) => {
                     sx={{ flex: 1, textTransform: "none" }}
                     disabled={
                       !parseInt(productDetails?.quantity?.available?.count) >=
-                        1 || itemOutOfStock
+                        1 ||
+                      itemOutOfStock ||
+                      !productAvailability
                     }
                     onClick={() => addToCart(true)}
                   >

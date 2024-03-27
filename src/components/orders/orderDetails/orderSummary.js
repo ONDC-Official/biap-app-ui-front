@@ -78,10 +78,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     tags?.forEach((tag) => {
       if (tag.code === "type") {
         tag.list.forEach((listOption) => {
-          if (
-            listOption.code === "type" &&
-            listOption.value == "customization"
-          ) {
+          if (listOption.code === "type" && listOption.value == "customization") {
             isCustomization = true;
             return true;
           }
@@ -100,9 +97,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           const breakup = orderDetails.updatedQuote.breakup;
           const all_items = breakup?.map((break_up_item) => {
             const items = orderDetails.items;
-            const itemIndex = items.findIndex(
-              (one) => one.id === break_up_item["@ondc/org/item_id"]
-            );
+            const itemIndex = items.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
             const item = itemIndex > -1 ? items[itemIndex] : null;
             let itemQuantity = item ? item?.quantity?.count : 0;
             let quantity = break_up_item["@ondc/org/item_quantity"]
@@ -120,10 +115,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                 }
               }
             } else if (quantity !== itemQuantity) {
-              textClass =
-                break_up_item["@ondc/org/title_type"] === "item"
-                  ? "text-amber"
-                  : "";
+              textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
               quantityMessage = `Quantity: ${quantity}/${itemQuantity}`;
               if (item) {
                 item.quantity.count = quantity;
@@ -175,17 +167,12 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               } else {
               }
               if (item?.cancellation_status) {
-                addition_item_data.cancellation_status =
-                  item?.cancellation_status;
+                addition_item_data.cancellation_status = item?.cancellation_status;
               } else {
               }
               items[key] = { ...prev_item_data, ...addition_item_data };
             }
-            if (
-              item.title_type === "tax" &&
-              !item.isCustomization &&
-              item.id !== selected_fulfillment_id
-            ) {
+            if (item.title_type === "tax" && !item.isCustomization && item.id !== selected_fulfillment_id) {
               let key = item.parent_item_id || item.id;
               items[key] = items[key] || {};
               items[key]["tax"] = {
@@ -226,8 +213,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             if (item.title_type === "tax" && item.isCustomization) {
               let key = item.parent_item_id;
               items[key]["customizations"] = items[key]["customizations"] || {};
-              items[key]["customizations"][item.id] =
-                items[key]["customizations"][item.id] || {};
+              items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
               items[key]["customizations"][item.id]["tax"] = {
                 title: item.title,
                 value: item.price,
@@ -236,8 +222,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             if (item.title_type === "discount" && item.isCustomization) {
               let key = item.parent_item_id;
               items[key]["customizations"] = items[key]["customizations"] || {};
-              items[key]["customizations"][item.id] =
-                items[key]["customizations"][item.id] || {};
+              items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
               items[key]["customizations"][item.id]["discount"] = {
                 title: item.title,
                 value: item.price,
@@ -256,10 +241,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                 value: item.price,
               };
             }
-            if (
-              (item.title_type === "tax_f" || item.title_type === "tax") &&
-              item.id === selected_fulfillment_id
-            ) {
+            if ((item.title_type === "tax_f" || item.title_type === "tax") && item.id === selected_fulfillment_id) {
               delivery["tax"] = {
                 title: item.title,
                 value: item.price,
@@ -295,14 +277,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         }
         if (orderDetails.items && orderDetails.items.length > 0) {
           const filterCancelledItems = orderDetails.items.filter(
-            (item) =>
-              item.cancellation_status &&
-              item.cancellation_status === "Cancelled"
+            (item) => item.cancellation_status && item.cancellation_status === "Cancelled"
           );
           const filterReturnItems = orderDetails.items.filter(
-            (item) =>
-              item.cancellation_status &&
-              item.cancellation_status !== "Cancelled"
+            (item) => item.cancellation_status && item.cancellation_status !== "Cancelled"
           );
           setCancelledItems(filterCancelledItems);
           setReturnItems(filterReturnItems);
@@ -328,7 +306,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     }
   }, [productsList]);
 
-
   useEffect(() => {
     if (orderDetails) {
       getTrackIssueDetails();
@@ -343,12 +320,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         getCall(`/issueApis/v1/issue?transactionId=${orderDetails?.transactionId}`)
       );
 
-
       const { issueExistance, issue } = data;
       if (issueExistance) {
         setIssueLoading(false);
         setIsIssueRaised(true);
-        setOrderIssueId(issue.issueId)
+        setOrderIssueId(issue.issueId);
       } else {
         setIssueLoading(false);
       }
@@ -366,9 +342,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     return orderDetails?.items
       ?.map(({ id }, index) => {
         let findQuote = orderDetails.updatedQuote?.breakup.find(
-          (item) =>
-            item["@ondc/org/item_id"] === id &&
-            item["@ondc/org/title_type"] === "item"
+          (item) => item["@ondc/org/item_id"] === id && item["@ondc/org/title_type"] === "item"
         );
         if (findQuote) {
           if (findQuote?.item?.tags) {
@@ -385,11 +359,9 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               return {
                 id,
                 name: findQuote?.title ?? "NA",
-                cancellation_status:
-                  orderDetails.items?.[index]?.cancellation_status ?? "",
+                cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
                 return_status: orderDetails.items?.[index]?.return_status ?? "",
-                fulfillment_status:
-                  orderDetails.items?.[index]?.fulfillment_status ?? "",
+                fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
                 customizations: customizations ?? null,
                 ...orderDetails.items?.[index]?.product,
                 parent_item_id: parentId,
@@ -401,11 +373,9 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             return {
               id,
               name: findQuote?.title ?? "NA",
-              cancellation_status:
-                orderDetails.items?.[index]?.cancellation_status ?? "",
+              cancellation_status: orderDetails.items?.[index]?.cancellation_status ?? "",
               return_status: orderDetails.items?.[index]?.return_status ?? "",
-              fulfillment_status:
-                orderDetails.items?.[index]?.fulfillment_status ?? "",
+              fulfillment_status: orderDetails.items?.[index]?.fulfillment_status ?? "",
               customizations: null,
               ...orderDetails.items?.[index]?.product,
               parent_item_id: parentId,
@@ -437,8 +407,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     if (quoteItemInProcessing) {
       msg = `Looks like Quote mapping for item: ${quoteItemInProcessing} is invalid! Please check!`;
     } else {
-      msg =
-        "Seems like issue with quote processing! Please confirm first if quote is valid!";
+      msg = "Seems like issue with quote processing! Please confirm first if quote is valid!";
     }
     dispatchError(msg);
   };
@@ -454,17 +423,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   const getItemsWithCustomizations = () => {
     const breakup = orderDetails?.updatedQuote?.breakup;
     let returnBreakup = [];
-    const filterItems = breakup.filter(
-      (item) => item["@ondc/org/title_type"] === "item"
-    );
-    const filterCustomizations = breakup.filter(
-      (item) => item["@ondc/org/title_type"] === "customization"
-    );
+    const filterItems = breakup.filter((item) => item["@ondc/org/title_type"] === "item");
+    const filterCustomizations = breakup.filter((item) => item["@ondc/org/title_type"] === "customization");
     filterItems.forEach((item) => {
       const itemId = item["@ondc/org/item_id"];
-      const filterCustomizationItems = filterCustomizations.filter(
-        (cust) => cust.item.parent_item_id === itemId
-      );
+      const filterCustomizationItems = filterCustomizations.filter((cust) => cust.item.parent_item_id === itemId);
       returnBreakup.push(item);
       if (filterCustomizationItems.length > 0) {
         filterCustomizationItems.forEach((custItem) => {
@@ -482,14 +445,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           .filter((quote) => quote?.title !== "")
           .map((quote, qIndex) => (
             <div key={`quote-${qIndex}`}>
-              <div
-                className={classes.summaryQuoteItemContainer}
-                key={`quote-${qIndex}-title`}
-              >
-                <Typography
-                  variant="body1"
-                  className={`${classes.summaryItemLabel} ${quote.textClass}`}
-                >
+              <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-title`}>
+                <Typography variant="body1" className={`${classes.summaryItemLabel} ${quote.textClass}`}>
                   {quote?.title}
                   {quote?.fulfillment_status && (
                     <Chip
@@ -499,14 +456,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                       label={quote?.fulfillment_status}
                     />
                   )}
-                  <p className={`${styles.ordered_from} ${quote.textClass}`}>
-                    {quote.quantityMessage}
-                  </p>
+                  <p className={`${styles.ordered_from} ${quote.textClass}`}>{quote.quantityMessage}</p>
                 </Typography>
               </div>
-              <div
-                className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom12}`}
-              >
+              <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom12}`}>
                 {quote.cancellation_status ? (
                   <Chip
                     size="small"
@@ -527,17 +480,13 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                       size="small"
                       // variant="outlined"
                       className={classes.statusChip}
-                      label={
-                        quote?.isReturnable ? "returnable" : "non returnable"
-                      }
+                      label={quote?.isReturnable ? "returnable" : "non returnable"}
                     />
                     <Chip
                       size="small"
                       // variant="outlined"
                       className={classes.statusChip}
-                      label={
-                        quote?.isCancellable ? "cancelable" : "non cancelable"
-                      }
+                      label={quote?.isCancellable ? "cancelable" : "non cancelable"}
                     />
                   </>
                 )}
@@ -545,35 +494,24 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               {renderItemDetails(quote)}
               {quote?.customizations && (
                 <div key={`quote-${qIndex}-customizations`}>
-                  <div
-                    className={classes.summaryQuoteItemContainer}
-                    key={`quote-${qIndex}-customizations`}
-                  >
-                    <Typography
-                      variant="body1"
-                      className={classes.summaryItemPriceLabel}
-                    >
+                  <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-customizations`}>
+                    <Typography variant="body1" className={classes.summaryItemPriceLabel}>
                       Customizations
                     </Typography>
                   </div>
-                  {Object.values(quote?.customizations).map(
-                    (customization, cIndex) => (
-                      <div>
-                        <div
-                          className={classes.summaryQuoteItemContainer}
-                          key={`quote-${qIndex}-customizations-${cIndex}`}
-                        >
-                          <Typography
-                            variant="body1"
-                            className={classes.summaryCustomizationLabel}
-                          >
-                            {customization.title}
-                          </Typography>
-                        </div>
-                        {renderItemDetails(customization, cIndex, true)}
+                  {Object.values(quote?.customizations).map((customization, cIndex) => (
+                    <div>
+                      <div
+                        className={classes.summaryQuoteItemContainer}
+                        key={`quote-${qIndex}-customizations-${cIndex}`}
+                      >
+                        <Typography variant="body1" className={classes.summaryCustomizationLabel}>
+                          {customization.title}
+                        </Typography>
                       </div>
-                    )
-                  )}
+                      {renderItemDetails(customization, cIndex, true)}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -591,26 +529,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           </Typography>
         </div>
         {cancelledItems.map((item, itemIndex) => (
-          <div
-            className={`${classes.summaryQuoteItemContainer} displayEllipsis`}
-            key={`quote-${itemIndex}-price`}
-          >
-            <Tooltip
-              title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
-            >
-              <Typography
-                variant="body1"
-                className={classes.summaryItemPriceLabel}
-              >
+          <div className={`${classes.summaryQuoteItemContainer} displayEllipsis`} key={`quote-${itemIndex}-price`}>
+            <Tooltip title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}>
+              <Typography variant="body1" className={classes.summaryItemPriceLabel}>
                 {`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
               </Typography>
             </Tooltip>
             {item?.cancellation_status && (
-              <Chip
-                size="small"
-                className={classes.statusChip}
-                label={item?.cancellation_status}
-              />
+              <Chip size="small" className={classes.statusChip} label={item?.cancellation_status} />
             )}
           </div>
         ))}
@@ -627,26 +553,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           </Typography>
         </div>
         {returnItems.map((item, itemIndex) => (
-          <div
-            className={`${classes.summaryQuoteItemContainer} displayEllipsis`}
-            key={`quote-${itemIndex}-price`}
-          >
-            <Tooltip
-              title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
-            >
-              <Typography
-                variant="body1"
-                className={classes.summaryItemPriceLabel}
-              >
+          <div className={`${classes.summaryQuoteItemContainer} displayEllipsis`} key={`quote-${itemIndex}-price`}>
+            <Tooltip title={`${item?.product?.descriptor?.name} * ${item.quantity.count}`}>
+              <Typography variant="body1" className={classes.summaryItemPriceLabel}>
                 {`${item?.product?.descriptor?.name} * ${item.quantity.count}`}
               </Typography>
             </Tooltip>
             {item?.cancellation_status && (
-              <Chip
-                size="small"
-                className={classes.statusChip}
-                label={item?.cancellation_status}
-              />
+              <Chip size="small" className={classes.statusChip} label={item?.cancellation_status} />
             )}
           </div>
         ))}
@@ -657,77 +571,45 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     return (
       <div>
-        <div
-          className={classes.summaryQuoteItemContainer}
-          key={`quote-${qIndex}-price`}
-        >
+        <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-price`}>
           <Typography
             variant="body1"
-            className={
-              isCustomization
-                ? classes.summaryCustomizationPriceLabel
-                : classes.summaryItemPriceLabel
-            }
+            className={isCustomization ? classes.summaryCustomizationPriceLabel : classes.summaryItemPriceLabel}
           >
             {quote?.price?.title}
           </Typography>
           <Typography
             variant="body1"
-            className={
-              isCustomization
-                ? classes.summaryCustomizationPriceValue
-                : classes.summaryItemPriceValue
-            }
+            className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
           >
             {`₹${parseInt(quote?.price?.value).toFixed(2)}`}
           </Typography>
         </div>
         {quote?.tax && (
-          <div
-            className={classes.summaryQuoteItemContainer}
-            key={`quote-${qIndex}-tax`}
-          >
+          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-tax`}>
             <Typography
               variant="body1"
-              className={
-                isCustomization
-                  ? classes.summaryCustomizationTaxLabel
-                  : classes.summaryItemTaxLabel
-              }
+              className={isCustomization ? classes.summaryCustomizationTaxLabel : classes.summaryItemTaxLabel}
             >
               {quote?.tax.title}
             </Typography>
             <Typography
               variant="body1"
-              className={
-                isCustomization
-                  ? classes.summaryCustomizationPriceValue
-                  : classes.summaryItemPriceValue
-              }
+              className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
             >
               {`₹${parseInt(quote?.tax.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
         {quote?.discount && (
-          <div
-            className={classes.summaryQuoteItemContainer}
-            key={`quote-${qIndex}-discount`}
-          >
+          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-discount`}>
             <Typography
               variant="body1"
-              className={
-                isCustomization
-                  ? classes.summaryCustomizationDiscountLabel
-                  : classes.summaryItemDiscountLabel
-              }
+              className={isCustomization ? classes.summaryCustomizationDiscountLabel : classes.summaryItemDiscountLabel}
             >
               {quote?.discount.title}
             </Typography>
-            <Typography
-              variant="body1"
-              className={classes.summaryItemPriceValue}
-            >
+            <Typography variant="body1" className={classes.summaryItemPriceValue}>
               {`₹${parseInt(quote?.discount.value).toFixed(2)}`}
             </Typography>
           </div>
@@ -739,9 +621,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   const getItemsTotal = () => {
     let finalTotal = 0;
     if (itemQuotes) {
-      const items = Object.values(itemQuotes).filter(
-        (quote) => quote?.title !== ""
-      );
+      const items = Object.values(itemQuotes).filter((quote) => quote?.title !== "");
       items.forEach((item) => {
         finalTotal = finalTotal + parseFloat(item.price.value);
         if (item?.tax) {
@@ -763,10 +643,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
 
   const renderDeliveryLine = (quote, key) => {
     return (
-      <div
-        className={classes.summaryDeliveryItemContainer}
-        key={`d-quote-${key}-price`}
-      >
+      <div className={classes.summaryDeliveryItemContainer} key={`d-quote-${key}-price`}>
         <Typography variant="body1" className={classes.summaryDeliveryLabel}>
           {quote?.title}
         </Typography>
@@ -818,18 +695,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             {itemQuotes ? renderItems() : ""}
 
             {cancelledItems.length > 0 ||
-              (returnItems.length > 0 && (
-                <Box component={"div"} className={classes.divider} />
-              ))}
+              (returnItems.length > 0 && <Box component={"div"} className={classes.divider} />)}
 
             {cancelledItems.length > 0 ? renderCancelledItems() : ""}
 
             {returnItems.length > 0 ? renderReturnItems() : ""}
 
             {cancelledItems.length > 0 ||
-              (returnItems.length > 0 && (
-                <Box component={"div"} className={classes.divider} />
-              ))}
+              (returnItems.length > 0 && <Box component={"div"} className={classes.divider} />)}
 
             <div className={classes.summarySubtotalContainer}>
               <Typography variant="body2" className={classes.subTotalLabel}>
@@ -861,8 +734,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${parseInt(orderDetails?.updatedQuote?.price?.value).toFixed(2) || 0
-                }`}
+              {`₹${parseInt(orderDetails?.updatedQuote?.price?.value).toFixed(2) || 0}`}
             </Typography>
           </div>
         </div>
@@ -876,13 +748,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   // on status
   async function getUpdatedStatus(message_id) {
     try {
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`)
-      );
-      statusEventSourceResponseRef.current = [
-        ...statusEventSourceResponseRef.current,
-        data[0],
-      ];
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_order_status?messageIds=${message_id}`));
+      statusEventSourceResponseRef.current = [...statusEventSourceResponseRef.current, data[0]];
       const { message, error = {} } = data[0];
       if (error?.message) {
         dispatchToast("Cannot get status for this product", toast_types.error);
@@ -934,10 +801,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     const timer = setTimeout(() => {
       es.close();
       if (statusEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
         setStatusLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -1036,10 +900,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     const timer = setTimeout(() => {
       es.close();
       if (trackEventSourceResponseRef.current.length <= 0) {
-        dispatchToast(
-          "Cannot proceed with you request now! Please try again",
-          toast_types.error
-        );
+        dispatchToast("Cannot proceed with you request now! Please try again", toast_types.error);
         setTrackOrderLoading(false);
       }
     }, SSE_TIMEOUT);
@@ -1056,34 +917,21 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
   // on track order
   async function getTrackOrderDetails(message_id) {
     try {
-      const data = await cancellablePromise(
-        getCall(`/clientApis/v2/on_track?messageIds=${message_id}`)
-      );
+      const data = await cancellablePromise(getCall(`/clientApis/v2/on_track?messageIds=${message_id}`));
       setTrackOrderLoading(false);
-      trackEventSourceResponseRef.current = [
-        ...trackEventSourceResponseRef.current,
-        data[0],
-      ];
+      trackEventSourceResponseRef.current = [...trackEventSourceResponseRef.current, data[0]];
       const { message } = data[0];
       if (message.tracking.status === "active" && message.tracking.url === "") {
         onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
-        dispatchToast(
-          "Tracking information is not provided by the provider.",
-          toast_types.error
-        );
+        dispatchToast("Tracking information is not provided by the provider.", toast_types.error);
         return;
       } else if (message?.tracking?.url === "") {
         onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
-        dispatchToast(
-          "Tracking information not available for this product",
-          toast_types.error
-        );
+        dispatchToast("Tracking information not available for this product", toast_types.error);
         return;
-      } else if (
-        message.tracking.status === "active" && message?.tracking?.url
-      ) {
+      } else if (message.tracking.status === "active" && message?.tracking?.url) {
         console.log("message?.tracking?.url=====>", message?.tracking?.url);
         setTrackOrderLoading(false);
         trackOrderRef.current.href = message?.tracking?.url;
@@ -1095,10 +943,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
       } else {
         onUpdateTrakingDetails(null);
         setTrackOrderLoading(false);
-        dispatchToast(
-          "Tracking information is not provided by the provider.",
-          toast_types.error
-        );
+        dispatchToast("Tracking information is not provided by the provider.", toast_types.error);
         return;
       }
     } catch (err) {
@@ -1134,7 +979,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           <TableHead>
             <TableRow>
               <TableCell align="center">
-                <b>Item ID</b>
+                <b>Item Name</b>
               </TableCell>
               <TableCell align="center">
                 <b>Type</b>
@@ -1148,17 +993,18 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             </TableRow>
           </TableHead>
           <TableBody>
-            {returnOrCancelledItems.map((row, idx) => (
-              <TableRow
-                key={row.idx}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell align="center">{row.id}</TableCell>
-                <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">{row.quantity}</TableCell>
-                <TableCell align="center">{row.status}</TableCell>
-              </TableRow>
-            ))}
+            {returnOrCancelledItems.map((row, idx) => {
+              if (row.quantity === "undefined" || row.quantity === undefined) return;
+              const itemName = orderDetails.items.find((oi) => oi.id === row.id).product.descriptor.name;
+              return (
+                <TableRow key={row.idx} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                  <TableCell align="center">{itemName ? itemName : "-"}</TableCell>
+                  <TableCell align="center">{row.type}</TableCell>
+                  <TableCell align="center">{row.quantity}</TableCell>
+                  <TableCell align="center">{row.status}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -1170,37 +1016,28 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
       <Card className={classes.orderSummaryCard}>
         <Typography variant="h5" className={classes.orderNumberTypo}>
           {`Order Number: `}
-          <span className={classes.orderNumberTypoBold}>
-            {orderDetails?.id}
-          </span>
+          <span className={classes.orderNumberTypoBold}>{orderDetails?.id}</span>
           <Chip
             className={classes.statusChip}
             color={
-              orderDetails?.state === "Confirmed" ||
-                orderDetails?.state === "Created"
+              orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"
                 ? "primary"
                 : orderDetails?.state === "Delivered"
-                  ? "success"
-                  : orderDetails?.state === "Cancelled"
-                    ? "error"
-                    : "primary"
+                ? "success"
+                : orderDetails?.state === "Cancelled"
+                ? "error"
+                : "primary"
             }
             label={orderDetails?.state}
           />
         </Typography>
         <Typography variant="body1" className={classes.orderOnTypo}>
-          {`Ordered On: ${moment(orderDetails?.createdAt).format(
-            "DD/MM/yy"
-          )} at ${moment(orderDetails?.createdAt).format("hh:mma")}`}{" "}
-          | Payment:{" "}
-          {orderDetails?.payment?.type === "ON-FULFILLMENT"
-            ? "Cash on delivery"
-            : "Prepaid"}
+          {`Ordered On: ${moment(orderDetails?.createdAt).format("DD/MM/yy")} at ${moment(
+            orderDetails?.createdAt
+          ).format("hh:mma")}`}{" "}
+          | Payment: {orderDetails?.payment?.type === "ON-FULFILLMENT" ? "Cash on delivery" : "Prepaid"}
         </Typography>
-        <Box
-          component={"div"}
-          className={`${classes.orderSummaryDivider} ${classes.marginBottom0}`}
-        />
+        <Box component={"div"} className={`${classes.orderSummaryDivider} ${classes.marginBottom0}`} />
         {/*<OrderTimeline />*/}
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
@@ -1212,39 +1049,24 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                   fullWidth
                   variant="outlined"
                   className={classes.helpButton}
-                  disabled={
-                    trackOrderLoading ||
-                    statusLoading ||
-                    issueLoading
-                  }
+                  disabled={trackOrderLoading || statusLoading || issueLoading}
                   onClick={() => history.push(`/application/complaints/`)}
                 >
-                  {issueLoading ? (
-                    <Loading />
-                  ) : (
-                    "Track Issue"
-                  )}
+                  {issueLoading ? <Loading /> : "Track Issue"}
                 </Button>
               ) : (
                 <Button
                   fullWidth
                   variant="outlined"
                   className={classes.helpButton}
-                  disabled={
-                    trackOrderLoading ||
-                    statusLoading ||
-                    issueLoading
-                  }
+                  disabled={trackOrderLoading || statusLoading || issueLoading}
                   onClick={() => setToggleIssueModal(true)}
                 >
-                  {issueLoading ? (
-                    <Loading />
-                  ) : (
-                    "Raise Issue"
-                  )}
+                  {issueLoading ? <Loading /> : "Raise Issue"}
                 </Button>
               )}
-            </>)}
+            </>
+          )}
           <Button
             fullWidth
             variant="outlined"
@@ -1262,19 +1084,18 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           >
             Track
           </Button>
-          {(orderDetails?.state === "Accepted" ||
-            orderDetails?.state === "Created") && (
-              <Button
-                fullWidth
-                variant="contained"
-                color="error"
-                className={classes.cancelOrderButton}
-                onClick={() => setToggleCancelOrderModal(true)}
-                disabled={allNonCancellable || statusLoading || trackOrderLoading}
-              >
-                Cancel Order
-              </Button>
-            )}
+          {(orderDetails?.state === "Accepted" || orderDetails?.state === "Created") && (
+            <Button
+              fullWidth
+              variant="contained"
+              color="error"
+              className={classes.cancelOrderButton}
+              onClick={() => setToggleCancelOrderModal(true)}
+              disabled={allNonCancellable || statusLoading || trackOrderLoading}
+            >
+              Cancel Order
+            </Button>
+          )}
           {orderDetails?.state === "Completed" && (
             <>
               <Button
@@ -1302,24 +1123,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               ?.filter(
                 (item) =>
                   !item.hasOwnProperty("cancellation_status") ||
-                  (item.hasOwnProperty("cancellation_status") &&
-                    item.cancellation_status == "") ||
+                  (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
                   !item.hasOwnProperty("return_status") ||
-                  (item.hasOwnProperty("return_status") &&
-                    item.return_status == "")
+                  (item.hasOwnProperty("return_status") && item.return_status == "")
               )
               .map(({ quantity }) => quantity)}
-            partailsReturnProductList={generateProductsList(
-              orderDetails,
-              itemQuotes
-            ).filter((item) => {
+            partailsReturnProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
               if (
                 !item.hasOwnProperty("cancellation_status") ||
-                (item.hasOwnProperty("cancellation_status") &&
-                  item.cancellation_status == "") ||
+                (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
                 !item.hasOwnProperty("return_status") ||
-                (item.hasOwnProperty("return_status") &&
-                  item.return_status == "")
+                (item.hasOwnProperty("return_status") && item.return_status == "")
               ) {
                 return item;
               }
@@ -1345,41 +1159,31 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               ?.filter(
                 (item) =>
                   !item.hasOwnProperty("cancellation_status") ||
-                  (item.hasOwnProperty("cancellation_status") &&
-                    item.cancellation_status == "") ||
+                  (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
                   !item.hasOwnProperty("return_status") ||
-                  (item.hasOwnProperty("return_status") &&
-                    item.return_status == "")
+                  (item.hasOwnProperty("return_status") && item.return_status == "")
               )
               .map(({ quantity }) => quantity)}
-            partailsCancelProductList={generateProductsList(
-              orderDetails,
-              itemQuotes
-            ).filter((item) => {
+            partailsCancelProductList={generateProductsList(orderDetails, itemQuotes).filter((item) => {
               if (orderDetails.domain === "ONDC:RET11") {
                 return (
                   orderDetails.state === "Created" &&
                   item["@ondc/org/cancellable"] == true &&
                   item.fulfillment_status == "Pending" &&
                   (!item.hasOwnProperty("cancellation_status") ||
-                    (item.hasOwnProperty("cancellation_status") &&
-                      item.cancellation_status == "") ||
+                    (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
                     !item.hasOwnProperty("return_status") ||
-                    (item.hasOwnProperty("return_status") &&
-                      item.return_status == ""))
+                    (item.hasOwnProperty("return_status") && item.return_status == ""))
                 );
               } else {
                 return (
-                  (orderDetails.state === "Accepted" ||
-                    orderDetails.state === "Created") &&
+                  (orderDetails.state === "Accepted" || orderDetails.state === "Created") &&
                   item["@ondc/org/cancellable"] == true &&
                   item.fulfillment_status == "Pending" &&
                   (!item.hasOwnProperty("cancellation_status") ||
-                    (item.hasOwnProperty("cancellation_status") &&
-                      item.cancellation_status == "") ||
+                    (item.hasOwnProperty("cancellation_status") && item.cancellation_status == "") ||
                     !item.hasOwnProperty("return_status") ||
-                    (item.hasOwnProperty("return_status") &&
-                      item.return_status == ""))
+                    (item.hasOwnProperty("return_status") && item.return_status == ""))
                 );
               }
             })}
@@ -1409,10 +1213,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               });
             }}
             quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-            partailsIssueProductList={generateProductsList(
-              orderDetails,
-              itemQuotes
-            )}
+            partailsIssueProductList={generateProductsList(orderDetails, itemQuotes)}
             order_status={orderDetails.state}
             billing_address={orderDetails?.billing}
             transaction_id={orderDetails.transactionId}
@@ -1423,10 +1224,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             domain={orderDetails.domain}
           />
         )}
-        <a
-          ref={trackOrderRef}
-          style={{ visibility: "hidden", display: "none" }}
-        >
+        <a ref={trackOrderRef} style={{ visibility: "hidden", display: "none" }}>
           navigate
         </a>
       </Card>

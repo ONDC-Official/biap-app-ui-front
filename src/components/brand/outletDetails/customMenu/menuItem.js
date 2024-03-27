@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useStyles from "./style";
 
 import Card from "@mui/material/Card";
@@ -30,16 +30,38 @@ const MenuItem = (props) => {
     bpp_provider_id,
     bpp_provider_descriptor,
     show_quantity_button = true,
-    onUpdateCart = () => { },
+    onUpdateCart = () => {},
     handleAddToCart,
     setCustomizationModal,
     getProductDetails,
     productLoading,
+    isStoreDelivering,
   } = props;
   const { descriptor, isVeg } = product;
 
   const { name: product_name, images, short_desc: product_description, symbol } = descriptor;
   const history = useHistory();
+  const [isProductAvailable, setIsProductAvailable] = useState(true);
+
+  const checkProductDisability = (data) => {
+    const itemTags = data.item_details?.time?.label;
+    const providerTags = data.provider_details?.time?.label;
+    const locationTags = data.location_details?.time?.label;
+
+    const isItemEnabled = itemTags === "enable";
+    const isProviderEnabled = providerTags === "enable";
+    const isLocationEnabled = locationTags === "enable";
+
+    if (isItemEnabled || isProviderEnabled || isLocationEnabled) {
+      setIsProductAvailable(true);
+    } else {
+      setIsProductAvailable(false);
+    }
+  };
+
+  useEffect(() => {
+    checkProductDisability(productPayload);
+  }, [productPayload]);
 
   const renderVegNonvegIcon = (isVeg) => {
     const tags = product.tags;
@@ -63,16 +85,36 @@ const MenuItem = (props) => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={12} md={9.5} lg={9.5} xl={9.5}>
-        <Typography variant="h6" className={classes.itemNameTypo}>
+        <Typography
+          variant="h6"
+          className={classes.itemNameTypo}
+          style={{ color: isStoreDelivering ? "black" : "lightgrey" }}
+        >
           {product_name}
         </Typography>
-        <Typography variant="h5" className={classes.itemPriceTypo}>
-          {`₹${Number.isInteger(Number(price?.value)) ? Number(price?.value).toFixed(2) : Number(price?.value).toFixed(2)
-            }`}
+        <Typography
+          variant="h5"
+          className={classes.itemPriceTypo}
+          style={{ color: isStoreDelivering ? "black" : "lightgrey" }}
+        >
+          {`₹${
+            Number.isInteger(Number(price?.value)) ? Number(price?.value).toFixed(2) : Number(price?.value).toFixed(2)
+          }`}
         </Typography>
-        <Typography variant="body1" className={classes.itemDescriptionTypo}>
+        <Typography
+          variant="h5"
+          className={classes.itemDescriptionTypo}
+          style={{ color: isStoreDelivering ? "black" : "lightgrey" }}
+        >
           {product_description}
         </Typography>
+        {!isProductAvailable && (
+          <Grid container justifyContent="start">
+            <Typography variant="body" color="#D83232">
+              Item is unavailable at the moment
+            </Typography>
+          </Grid>
+        )}
       </Grid>
       <Grid item xs={12} sm={12} md={2.5} lg={2.5} xl={2.5}>
         <Card className={classes.itemCard}>
@@ -102,7 +144,7 @@ const MenuItem = (props) => {
                 });
               }
             }}
-            disabled={productLoading}
+            disabled={productLoading || !isStoreDelivering || !isProductAvailable}
           >
             {productLoading === productId ? <Loading height="8px" width="8px" /> : "Add to cart"}
           </Button>
@@ -117,6 +159,7 @@ const MenuItem = (props) => {
                 getProductDetails(productId);
                 setCustomizationModal(true);
               }}
+              disabled={!isStoreDelivering || !isProductAvailable}
             >
               Customise
             </Button>
