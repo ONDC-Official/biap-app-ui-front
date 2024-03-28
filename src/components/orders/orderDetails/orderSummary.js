@@ -96,7 +96,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           let uuid = 0;
           const breakup = orderDetails.updatedQuote.breakup;
           const all_items = breakup?.map((break_up_item) => {
-            const items = orderDetails.items;
+            const items = Object.assign([], JSON.parse(JSON.stringify(orderDetails.items)));
             const itemIndex = items.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
             const item = itemIndex > -1 ? items[itemIndex] : null;
             let itemQuantity = item ? item?.quantity?.count : 0;
@@ -1023,10 +1023,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               orderDetails?.state === "Confirmed" || orderDetails?.state === "Created"
                 ? "primary"
                 : orderDetails?.state === "Delivered"
-                ? "success"
-                : orderDetails?.state === "Cancelled"
-                ? "error"
-                : "primary"
+                  ? "success"
+                  : orderDetails?.state === "Cancelled"
+                    ? "error"
+                    : "primary"
             }
             label={orderDetails?.state}
           />
@@ -1045,30 +1045,30 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           {(orderDetails?.state === "Accepted" ||
             orderDetails?.state === "In-progress" ||
             orderDetails?.state === "Completed") && (
-            <>
-              {isIssueRaised ? (
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  className={classes.helpButton}
-                  disabled={trackOrderLoading || statusLoading || issueLoading}
-                  onClick={() => history.push(`/application/complaints/`)}
-                >
-                  {issueLoading ? <Loading /> : "Track Issue"}
-                </Button>
-              ) : (
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  className={classes.helpButton}
-                  disabled={trackOrderLoading || statusLoading || issueLoading}
-                  onClick={() => setToggleIssueModal(true)}
-                >
-                  {issueLoading ? <Loading /> : "Raise Issue"}
-                </Button>
-              )}
-            </>
-          )}
+              <>
+                {isIssueRaised ? (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    className={classes.helpButton}
+                    disabled={trackOrderLoading || statusLoading || issueLoading}
+                    onClick={() => history.push(`/application/complaints/`)}
+                  >
+                    {issueLoading ? <Loading /> : "Track Issue"}
+                  </Button>
+                ) : (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    className={classes.helpButton}
+                    disabled={trackOrderLoading || statusLoading || issueLoading}
+                    onClick={() => setToggleIssueModal(true)}
+                  >
+                    {issueLoading ? <Loading /> : "Raise Issue"}
+                  </Button>
+                )}
+              </>
+            )}
           <Button
             fullWidth
             variant="outlined"
