@@ -1042,33 +1042,31 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
-          {(orderDetails?.state === "Accepted" ||
-            orderDetails?.state === "In-progress" ||
-            orderDetails?.state === "Completed") && (
-              <>
-                {isIssueRaised ? (
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    className={classes.helpButton}
-                    disabled={trackOrderLoading || statusLoading || issueLoading}
-                    onClick={() => history.push(`/application/complaints/`)}
-                  >
-                    {issueLoading ? <Loading /> : "Track Issue"}
-                  </Button>
-                ) : (
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    className={classes.helpButton}
-                    disabled={trackOrderLoading || statusLoading || issueLoading}
-                    onClick={() => setToggleIssueModal(true)}
-                  >
-                    {issueLoading ? <Loading /> : "Raise Issue"}
-                  </Button>
-                )}
-              </>
-            )}
+          { (orderDetails?.state === "Created",orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
+            <>
+              {isIssueRaised ? (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  className={classes.helpButton}
+                  disabled={trackOrderLoading || statusLoading || issueLoading}
+                  onClick={() => history.push(`/application/complaints/`)}
+                >
+                  {issueLoading ? <Loading /> : "Track Issue"}
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  className={classes.helpButton}
+                  disabled={trackOrderLoading || statusLoading || issueLoading}
+                  onClick={() => setToggleIssueModal(true)}
+                >
+                  {issueLoading ? <Loading /> : "Raise Issue"}
+                </Button>
+              )}
+            </>
+          )}
           <Button
             fullWidth
             variant="outlined"
