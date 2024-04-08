@@ -1191,7 +1191,6 @@ const Checkout = () => {
                 activeStep !== 4
               }
               onClick={() => {
-                console.log(billingAddress);
                 const { productQuotes, successOrderIds } = JSON.parse(localStorage.getItem("checkout_details") || "{}");
                 setConfirmOrderLoading(true);
                 let c = cartItems.map((item) => {

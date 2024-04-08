@@ -5,6 +5,18 @@ const Razorpay = (props) => {
   const { paymentKey, paymentParams, setPaymentStatus, setPaymentResponse, providerName } = props;
   const { billingAddress } = useContext(AddressContext);
 
+  const addressFields = [
+    billingAddress.address.door,
+    billingAddress.address.building,
+    billingAddress.address.street,
+    billingAddress.address.areaCode,
+    billingAddress.address.city,
+    billingAddress.address.state,
+    billingAddress.address.country,
+  ];
+
+  const commaSeparatedAddress = addressFields.filter((field) => field !== undefined && field !== null).join(", ");
+
   useEffect(() => {
     const loadRazorpayScript = () => {
       const script = document.createElement("script");
@@ -37,7 +49,7 @@ const Razorpay = (props) => {
           contact: `${billingAddress.phone}`,
         },
         notes: {
-          address: "Razorpay Corporate Office",
+          address: commaSeparatedAddress,
         },
         theme: {
           color: "#3399cc",
