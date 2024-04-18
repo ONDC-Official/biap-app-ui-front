@@ -227,7 +227,9 @@ const Checkout = () => {
                 title: break_up_item?.title,
                 title_type: break_up_item["@ondc/org/title_type"],
                 isCustomization: isItemCustomization(break_up_item?.item?.tags),
-                isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
+                isFulfillment: isItemFulfillment(break_up_item),
+                isDelivery:
+                  break_up_item["@ondc/org/title_type"] === "delivery",
                 parent_item_id: break_up_item?.item?.parent_item_id,
                 price: Number(break_up_item.price?.value)?.toFixed(2),
                 cartQuantity,
@@ -278,6 +280,7 @@ const Checkout = () => {
               if (
                 item.title_type === "tax" &&
                 !item.isCustomization &&
+                !item.isFulfillment &&
                 !selected_fulfillment_ids.includes(item.id)
                 // item.id !== selected_fulfillments
               ) {
@@ -478,6 +481,20 @@ const Checkout = () => {
       }
     });
     return isCustomization;
+  };
+
+  const isItemFulfillment = (breakup_item) => {
+    let isFulfillment = false;
+    breakup_item.item?.tags?.forEach((tag) => {
+      if (tag.code === "quote") {
+        tag.list?.forEach((list_item) => {
+          if (list_item.code == "type" && list_item.value == "fulfillment") {
+            isFulfillment = true;
+          }
+        });
+      }
+    });
+    return isFulfillment;
   };
 
   const getSelectedFulfillment = () => {
