@@ -1,7 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
+import { AddressContext } from "../../../context/addressContext";
 
 const Razorpay = (props) => {
-  const { paymentKey, paymentParams, setPaymentStatus, setPaymentResponse } = props;
+  const { paymentKey, paymentParams, setPaymentStatus, setPaymentResponse, providerName } = props;
+  const { billingAddress } = useContext(AddressContext);
+
+  const addressFields = [
+    billingAddress.address.door,
+    billingAddress.address.building,
+    billingAddress.address.street,
+    billingAddress.address.areaCode,
+    billingAddress.address.city,
+    billingAddress.address.state,
+    billingAddress.address.country,
+  ];
+
+  const commaSeparatedAddress = addressFields.filter((field) => field !== undefined && field !== null).join(", ");
 
   useEffect(() => {
     const loadRazorpayScript = () => {
@@ -21,8 +35,8 @@ const Razorpay = (props) => {
         amount: `${paymentParams.orderDetail.amount_due}`,
         currency: "INR",
         name: "ONDC",
-        description: "Test Transaction",
-        image: "https://example.com/your_logo",
+        description: `${providerName}`,
+        image: `https://ondc.org/assets/theme/images/ondc_registered_logo.svg?v=e4051cae62`,
         order_id: `${paymentParams.orderDetail.id}`,
         handler: function (response) {
           console.log("payment success response: ", response);
@@ -30,12 +44,12 @@ const Razorpay = (props) => {
           setPaymentStatus("success");
         },
         prefill: {
-          name: "Gaurav Kumar",
-          email: "gaurav.kumar@example.com",
-          contact: "9000090000",
+          name: `${billingAddress.name}`,
+          email: `${billingAddress.email}`,
+          contact: `${billingAddress.phone}`,
         },
         notes: {
-          address: "Razorpay Corporate Office",
+          address: commaSeparatedAddress,
         },
         theme: {
           color: "#3399cc",
