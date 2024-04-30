@@ -291,7 +291,11 @@ const Checkout = () => {
                   value: item.price,
                 };
               }
-              if (item.title_type === "discount" && !item.isCustomization) {
+              if (
+                item.title_type === "discount" &&
+                !item.isCustomization &&
+                !item.isFulfillment
+              ) {
                 let key = item.parent_item_id || item.id;
                 items[key] = items[key] || {};
                 items[key]["discount"] = {
@@ -303,7 +307,8 @@ const Checkout = () => {
               //for customizations
               if (item.title_type === "item" && item.isCustomization) {
                 let key = item.parent_item_id;
-                items[key]["customizations"] = items[key]["customizations"] || {};
+                items[key]["customizations"] =
+                  items[key]["customizations"] || {};
                 let existing_data = items[key]["customizations"][item.id] || {};
                 let customisation_details = {
                   title: item.title,
@@ -323,8 +328,10 @@ const Checkout = () => {
               }
               if (item.title_type === "tax" && item.isCustomization) {
                 let key = item.parent_item_id;
-                items[key]["customizations"] = items[key]["customizations"] || {};
-                items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
+                items[key]["customizations"] =
+                  items[key]["customizations"] || {};
+                items[key]["customizations"][item.id] =
+                  items[key]["customizations"][item.id] || {};
                 items[key]["customizations"][item.id]["tax"] = {
                   title: item.title,
                   value: item.price,
@@ -332,8 +339,10 @@ const Checkout = () => {
               }
               if (item.title_type === "discount" && item.isCustomization) {
                 let key = item.parent_item_id;
-                items[key]["customizations"] = items[key]["customizations"] || {};
-                items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
+                items[key]["customizations"] =
+                  items[key]["customizations"] || {};
+                items[key]["customizations"][item.id] =
+                  items[key]["customizations"][item.id] || {};
                 items[key]["customizations"][item.id]["discount"] = {
                   title: item.title,
                   value: item.price,
@@ -351,9 +360,9 @@ const Checkout = () => {
                 };
               }
               if (
-                item.title_type === "discount_f" &&
-                selected_fulfillment_ids.includes(item.id)
-                // item.id === selected_fulfillments
+                (item.title_type === "discount_f" ||
+                  item.title_type === "discount") &&
+                item.isFulfillment
               ) {
                 delivery["discount"] = {
                   title: item.title,
