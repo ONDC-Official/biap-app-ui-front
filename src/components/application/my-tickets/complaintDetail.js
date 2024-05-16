@@ -77,8 +77,9 @@ const ComplaintDetail = () => {
     }
 
     useEffect(() => {
-        mergeRespondantArrays(issue_actions)
+        // mergeRespondantArrays(issue_actions)
         fetchOnIssueDataThroughEvents()
+        getIssue(transaction_id)
     }, [])
 
 

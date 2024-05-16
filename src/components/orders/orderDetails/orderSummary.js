@@ -1358,9 +1358,7 @@ const OrderSummary = ({
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
-          {(orderDetails?.state === "Accepted" ||
-            orderDetails?.state === "In-progress" ||
-            orderDetails?.state === "Completed") && (
+          { (orderDetails?.state === "Created" || orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
             <>
               {isIssueRaised ? (
                 <Button
