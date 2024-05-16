@@ -187,7 +187,7 @@ export default function ReturnOrderModal({
               ([customizationId, customization]) => ({
                 id: customizationId,
                 quantity: {
-                  count: customization.quantity,
+                  count: item.quantity.count,
                 },
                 tags: {
                   parent_item_id: item.parent_item_id,

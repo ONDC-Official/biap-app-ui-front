@@ -39,11 +39,13 @@ import moment from "moment";
 
 import { v4 as uuidv4 } from "uuid";
 import Razorpay from "../common/Razorpay/Razorpay";
+import { AddressContext } from "../../context/addressContext";
 
 const Checkout = () => {
   const classes = useStyles();
   const history = useHistory();
 
+  const { billingAddress } = useContext(AddressContext);
   const steps = ["Cart", "Customer", "Fulfillment", "Add Address", "Payment"];
   const [activeStep, setActiveStep] = useState(0);
   const [cartItems, setCartItems] = useState([]);
@@ -225,7 +227,9 @@ const Checkout = () => {
                 title: break_up_item?.title,
                 title_type: break_up_item["@ondc/org/title_type"],
                 isCustomization: isItemCustomization(break_up_item?.item?.tags),
-                isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
+                isFulfillment: isItemFulfillment(break_up_item),
+                isDelivery:
+                  break_up_item["@ondc/org/title_type"] === "delivery",
                 parent_item_id: break_up_item?.item?.parent_item_id,
                 price: Number(break_up_item.price?.value)?.toFixed(2),
                 cartQuantity,
@@ -276,6 +280,7 @@ const Checkout = () => {
               if (
                 item.title_type === "tax" &&
                 !item.isCustomization &&
+                !item.isFulfillment &&
                 !selected_fulfillment_ids.includes(item.id)
                 // item.id !== selected_fulfillments
               ) {
@@ -478,6 +483,20 @@ const Checkout = () => {
     return isCustomization;
   };
 
+  const isItemFulfillment = (breakup_item) => {
+    let isFulfillment = false;
+    breakup_item.item?.tags?.forEach((tag) => {
+      if (tag.code === "quote") {
+        tag.list?.forEach((list_item) => {
+          if (list_item.code == "type" && list_item.value == "fulfillment") {
+            isFulfillment = true;
+          }
+        });
+      }
+    });
+    return isFulfillment;
+  };
+
   const getSelectedFulfillment = () => {
     if (selectedFulfillments) {
       return updatedCartItems[0]?.message?.quote?.fulfillments.find(
@@ -622,8 +641,8 @@ const Checkout = () => {
             }}
             fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
             amount={(
-              parseInt(getItemsTotal(productsQuote?.providers)) +
-              parseInt(getDeliveryTotalAmount(productsQuote?.providers))
+              parseFloat(getItemsTotal(productsQuote?.providers)) +
+              parseFloat(getDeliveryTotalAmount(productsQuote?.providers))
             ).toFixed(2)}
             setPaymentKey={setPaymentKey}
             setPaymentParams={setPaymentParams}
@@ -892,7 +911,7 @@ const Checkout = () => {
           {quote?.title}
         </Typography>
         <Typography variant="body1" className={classes.summaryItemPriceValue}>
-          {`₹${parseInt(quote?.value).toFixed(2)}`}
+          {`₹${parseFloat(quote?.value).toFixed(2)}`}
         </Typography>
       </div>
     );
@@ -947,6 +966,7 @@ const Checkout = () => {
   };
 
   const renderItemDetails = (quote, qIndex, isCustomization) => {
+    //  console.log("Price", quote?.price?.value, "tax", quote?.tax.value);
     return (
       <div>
         <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-price`}>
@@ -960,7 +980,7 @@ const Checkout = () => {
             variant="body1"
             className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
           >
-            {`₹${parseInt(quote?.price?.value).toFixed(2)}`}
+            {`₹${parseFloat(quote?.price?.value).toFixed(2)}`}
           </Typography>
         </div>
         {quote?.tax && (
@@ -975,7 +995,7 @@ const Checkout = () => {
               variant="body1"
               className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
             >
-              {`₹${parseInt(quote?.tax.value).toFixed(2)}`}
+              {`₹${parseFloat(quote?.tax.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
@@ -988,7 +1008,7 @@ const Checkout = () => {
               {quote?.discount.title}
             </Typography>
             <Typography variant="body1" className={classes.summaryItemPriceValue}>
-              {`₹${parseInt(quote?.discount.value).toFixed(2)}`}
+              {`₹${parseFloat(quote?.discount.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
@@ -1170,10 +1190,10 @@ const Checkout = () => {
               </Typography>
               <Typography variant="body" className={classes.totalValue}>
                 {`₹${(
-                  parseInt(getItemsTotal(productsQuote?.providers)) +
-                  parseInt(getDeliveryTotalAmount(productsQuote?.providers))
+                  parseFloat(getItemsTotal(productsQuote?.providers)) +
+                  parseFloat(getDeliveryTotalAmount(productsQuote?.providers))
                 ).toFixed(2)}`}
-                {/* {`₹${parseInt(productsQuote?.total_payable).toFixed(2)}`} */}
+                {/* {`₹${parseFloat(productsQuote?.total_payable).toFixed(2)}`} */}
               </Typography>
             </div>
             <Button
@@ -1193,7 +1213,6 @@ const Checkout = () => {
                 let c = cartItems.map((item) => {
                   return item.item;
                 });
-
                 if (activePaymentMethod) {
                   if (activePaymentMethod === payment_methods.RAZORPAY) {
                     setDisplayRazorPay(true);
@@ -1260,6 +1279,7 @@ const Checkout = () => {
         </Grid>
         {displayRazorPay && (
           <Razorpay
+            providerName={cartItems[0]?.item?.provider?.descriptor?.name || ""}
             paymentKey={paymentKey}
             paymentParams={paymentParams}
             setPaymentStatus={setPaymentStatus}
