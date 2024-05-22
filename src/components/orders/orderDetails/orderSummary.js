@@ -29,7 +29,11 @@ import Paper from "@mui/material/Paper";
 import IssueOrderModal from "./issueOrderModal";
 import { useHistory } from "react-router-dom";
 
-const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) => {
+const OrderSummary = ({
+  orderDetails,
+  onUpdateOrder,
+  onUpdateTrakingDetails,
+}) => {
   const classes = useStyles();
   const history = useHistory();
 
@@ -99,7 +103,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           let uuid = 0;
           const breakup = orderDetails.updatedQuote.breakup;
           const all_items = breakup?.map((break_up_item) => {
-            const items = orderDetails.items;
+            const items = Object.assign(
+              [],
+              JSON.parse(JSON.stringify(orderDetails.items))
+            );
             const itemIndex = items.findIndex(
               (one) => one.id === break_up_item["@ondc/org/item_id"]
             );
@@ -159,6 +166,127 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           all_items.forEach((item) => {
             setQuoteItemInProcessing(item.id);
             // for type item
+            // if (item.title_type === "item" && !item.isCustomization) {
+            //   let key = item.parent_item_id || item.id;
+            //   let price = {
+            //     title: item.quantity + " * Base Price",
+            //     value: item.price,
+            //   };
+            //   let prev_item_data = items[key];
+            //   let addition_item_data = { title: item.title, price: price };
+            //   addition_item_data.isCancellable = item.isCancellable;
+            //   addition_item_data.isReturnable = item.isReturnable;
+            //   addition_item_data.fulfillment_status = item?.fulfillment_status;
+            //   if (item?.return_status) {
+            //     addition_item_data.return_status = item?.return_status;
+            //   } else {
+            //   }
+            //   if (item?.cancellation_status) {
+            //     addition_item_data.cancellation_status = item?.cancellation_status;
+            //   } else {
+            //   }
+            //   items[key] = { ...prev_item_data, ...addition_item_data };
+            // }
+            // if (item.title_type === "tax" && !item.isCustomization && item.id !== selected_fulfillment_id) {
+            //   let key = item.parent_item_id || item.id;
+            //   items[key] = items[key] || {};
+            //   items[key]["tax"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // if (item.title_type === "discount" && !item.isCustomization) {
+            //   let key = item.parent_item_id || item.id;
+            //   items[key] = items[key] || {};
+            //   items[key]["discount"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+
+            // //for customizations
+            // if (item.title_type === "item" && item.isCustomization) {
+            //   let key = item.parent_item_id;
+            //   items[key]["customizations"] = items[key]["customizations"] || {};
+            //   let existing_data = items[key]["customizations"][item.id] || {};
+            //   let customisation_details = {
+            //     title: item.title,
+            //     price: {
+            //       title: item.quantity + " * Base Price",
+            //       value: item.price,
+            //     },
+            //     quantityMessage: item.quantityMessage,
+            //     textClass: item.textClass,
+            //     quantity: item.quantity,
+            //     cartQuantity: item.cartQuantity,
+            //   };
+            //   items[key]["customizations"][item.id] = {
+            //     ...existing_data,
+            //     ...customisation_details,
+            //   };
+            // }
+            // if (item.title_type === "tax" && item.isCustomization) {
+            //   let key = item.parent_item_id;
+            //   items[key]["customizations"] = items[key]["customizations"] || {};
+            //   items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
+            //   items[key]["customizations"][item.id]["tax"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // if (item.title_type === "discount" && item.isCustomization) {
+            //   let key = item.parent_item_id;
+            //   items[key]["customizations"] = items[key]["customizations"] || {};
+            //   items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
+            //   items[key]["customizations"][item.id]["discount"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // //for delivery
+            // if (item.title_type === "delivery") {
+            //   delivery["delivery"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // if (item.title_type === "discount_f") {
+            //   delivery["discount"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // if ((item.title_type === "tax_f" || item.title_type === "tax") && item.id === selected_fulfillment_id) {
+            //   delivery["tax"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // if (item.title_type === "packing") {
+            //   delivery["packing"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+            // if (item.title_type === "discount") {
+            //   if (item.isCustomization) {
+            //     let id = item.parent_item_id;
+            //   } else {
+            //     let id = item.id;
+            //     items[id]["discount"] = {
+            //       title: item.title,
+            //       value: item.price,
+            //     };
+            //   }
+            // }
+            // if (item.title_type === "misc") {
+            //   delivery["misc"] = {
+            //     title: item.title,
+            //     value: item.price,
+            //   };
+            // }
+
+            // for type item
             if (item.title_type === "item" && !item.isCustomization) {
               let key = item.parent_item_id || item.id;
               let price = {
@@ -167,24 +295,14 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               };
               let prev_item_data = items[key];
               let addition_item_data = { title: item.title, price: price };
-              addition_item_data.isCancellable = item.isCancellable;
-              addition_item_data.isReturnable = item.isReturnable;
-              addition_item_data.fulfillment_status = item?.fulfillment_status;
-              if (item?.return_status) {
-                addition_item_data.return_status = item?.return_status;
-              } else {
-              }
-              if (item?.cancellation_status) {
-                addition_item_data.cancellation_status =
-                  item?.cancellation_status;
-              } else {
-              }
               items[key] = { ...prev_item_data, ...addition_item_data };
             }
             if (
               item.title_type === "tax" &&
               !item.isCustomization &&
+              !item.isFulfillment &&
               item.id !== selected_fulfillment_id
+              // item.id !== selected_fulfillments
             ) {
               let key = item.parent_item_id || item.id;
               items[key] = items[key] || {};
@@ -193,7 +311,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                 value: item.price,
               };
             }
-            if (item.title_type === "discount" && !item.isCustomization) {
+            if (
+              item.title_type === "discount" &&
+              !item.isCustomization &&
+              !item.isFulfillment
+            ) {
               let key = item.parent_item_id || item.id;
               items[key] = items[key] || {};
               items[key]["discount"] = {
@@ -244,13 +366,21 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               };
             }
             //for delivery
-            if (item.title_type === "delivery") {
+            if (
+              item.title_type === "delivery" &&
+              item.id === selected_fulfillment_id
+              // item.id === selected_fulfillments
+            ) {
               delivery["delivery"] = {
                 title: item.title,
                 value: item.price,
               };
             }
-            if (item.title_type === "discount_f") {
+            if (
+              (item.title_type === "discount_f" ||
+                item.title_type === "discount") &&
+              item.isFulfillment
+            ) {
               delivery["discount"] = {
                 title: item.title,
                 value: item.price,
@@ -259,13 +389,18 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             if (
               (item.title_type === "tax_f" || item.title_type === "tax") &&
               item.id === selected_fulfillment_id
+              // item.id === selected_fulfillments
             ) {
               delivery["tax"] = {
                 title: item.title,
                 value: item.price,
               };
             }
-            if (item.title_type === "packing") {
+            if (
+              item.title_type === "packing" &&
+              item.id === selected_fulfillment_id
+              // item.id === selected_fulfillments
+            ) {
               delivery["packing"] = {
                 title: item.title,
                 value: item.price,
@@ -282,7 +417,11 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
                 };
               }
             }
-            if (item.title_type === "misc") {
+            if (
+              item.title_type === "misc" &&
+              item.id === selected_fulfillment_id
+              // item.id === selected_fulfillments
+            ) {
               delivery["misc"] = {
                 title: item.title,
                 value: item.price,
@@ -328,7 +467,6 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     }
   }, [productsList]);
 
-
   useEffect(() => {
     if (orderDetails) {
       getTrackIssueDetails();
@@ -340,15 +478,16 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
     try {
       setIssueLoading(true);
       const data = await cancellablePromise(
-        getCall(`/issueApis/v1/issue?transactionId=${orderDetails?.transactionId}`)
+        getCall(
+          `/issueApis/v1/issue?transactionId=${orderDetails?.transactionId}`
+        )
       );
-
 
       const { issueExistance, issue } = data;
       if (issueExistance) {
         setIssueLoading(false);
         setIsIssueRaised(true);
-        setOrderIssueId(issue.issueId)
+        setOrderIssueId(issue.issueId);
       } else {
         setIssueLoading(false);
       }
@@ -861,8 +1000,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
               Order Total
             </Typography>
             <Typography variant="h5" className={classes.totalValue}>
-              {`₹${parseInt(orderDetails?.updatedQuote?.price?.value).toFixed(2) || 0
-                }`}
+              {`₹${
+                parseInt(orderDetails?.updatedQuote?.price?.value).toFixed(2) ||
+                0
+              }`}
             </Typography>
           </div>
         </div>
@@ -1082,7 +1223,8 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         );
         return;
       } else if (
-        message.tracking.status === "active" && message?.tracking?.url
+        message.tracking.status === "active" &&
+        message?.tracking?.url
       ) {
         console.log("message?.tracking?.url=====>", message?.tracking?.url);
         setTrackOrderLoading(false);
@@ -1090,7 +1232,10 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         trackOrderRef.current.target = "_blank";
         trackOrderRef.current.click();
         onUpdateTrakingDetails(null);
-      } else if (message.tracking.status === "active" && message?.tracking?.location?.gps) {
+      } else if (
+        message.tracking.status === "active" &&
+        message?.tracking?.location?.gps
+      ) {
         onUpdateTrakingDetails(message?.tracking);
       } else {
         onUpdateTrakingDetails(null);
@@ -1134,7 +1279,7 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           <TableHead>
             <TableRow>
               <TableCell align="center">
-                <b>Item ID</b>
+                <b>Item Name</b>
               </TableCell>
               <TableCell align="center">
                 <b>Type</b>
@@ -1148,17 +1293,25 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             </TableRow>
           </TableHead>
           <TableBody>
-            {returnOrCancelledItems.map((row, idx) => (
-              <TableRow
-                key={row.idx}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell align="center">{row.id}</TableCell>
-                <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">{row.quantity}</TableCell>
-                <TableCell align="center">{row.status}</TableCell>
-              </TableRow>
-            ))}
+            {returnOrCancelledItems.map((row, idx) => {
+              if (row.quantity === "undefined" || row.quantity === undefined)
+                return;
+              const itemName = orderDetails.items.find((oi) => oi.id === row.id)
+                .product.descriptor.name;
+              return (
+                <TableRow
+                  key={row.idx}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell align="center">
+                    {itemName ? itemName : "-"}
+                  </TableCell>
+                  <TableCell align="center">{row.type}</TableCell>
+                  <TableCell align="center">{row.quantity}</TableCell>
+                  <TableCell align="center">{row.status}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -1177,13 +1330,13 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
             className={classes.statusChip}
             color={
               orderDetails?.state === "Confirmed" ||
-                orderDetails?.state === "Created"
+              orderDetails?.state === "Created"
                 ? "primary"
                 : orderDetails?.state === "Delivered"
-                  ? "success"
-                  : orderDetails?.state === "Cancelled"
-                    ? "error"
-                    : "primary"
+                ? "success"
+                : orderDetails?.state === "Cancelled"
+                ? "error"
+                : "primary"
             }
             label={orderDetails?.state}
           />
@@ -1205,46 +1358,31 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
-          { (orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
+          { (orderDetails?.state === "Created" || orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
             <>
               {isIssueRaised ? (
                 <Button
                   fullWidth
                   variant="outlined"
                   className={classes.helpButton}
-                  disabled={
-                    trackOrderLoading ||
-                    statusLoading ||
-                    issueLoading
-                  }
+                  disabled={trackOrderLoading || statusLoading || issueLoading}
                   onClick={() => history.push(`/application/complaints/`)}
                 >
-                  {issueLoading ? (
-                    <Loading />
-                  ) : (
-                    "Track Issue"
-                  )}
+                  {issueLoading ? <Loading /> : "Track Issue"}
                 </Button>
               ) : (
                 <Button
                   fullWidth
                   variant="outlined"
                   className={classes.helpButton}
-                  disabled={
-                    trackOrderLoading ||
-                    statusLoading ||
-                    issueLoading
-                  }
+                  disabled={trackOrderLoading || statusLoading || issueLoading}
                   onClick={() => setToggleIssueModal(true)}
                 >
-                  {issueLoading ? (
-                    <Loading />
-                  ) : (
-                    "Raise Issue"
-                  )}
+                  {issueLoading ? <Loading /> : "Raise Issue"}
                 </Button>
               )}
-            </>)}
+            </>
+          )}
           <Button
             fullWidth
             variant="outlined"
@@ -1264,17 +1402,17 @@ const OrderSummary = ({ orderDetails, onUpdateOrder, onUpdateTrakingDetails }) =
           </Button>
           {(orderDetails?.state === "Accepted" ||
             orderDetails?.state === "Created") && (
-              <Button
-                fullWidth
-                variant="contained"
-                color="error"
-                className={classes.cancelOrderButton}
-                onClick={() => setToggleCancelOrderModal(true)}
-                disabled={allNonCancellable || statusLoading || trackOrderLoading}
-              >
-                Cancel Order
-              </Button>
-            )}
+            <Button
+              fullWidth
+              variant="contained"
+              color="error"
+              className={classes.cancelOrderButton}
+              onClick={() => setToggleCancelOrderModal(true)}
+              disabled={allNonCancellable || statusLoading || trackOrderLoading}
+            >
+              Cancel Order
+            </Button>
+          )}
           {orderDetails?.state === "Completed" && (
             <>
               <Button

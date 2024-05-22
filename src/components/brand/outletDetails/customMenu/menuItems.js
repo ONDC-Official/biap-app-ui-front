@@ -38,7 +38,13 @@ import { toast_actions, toast_types } from "../../../shared/toast/utils/toast";
 import { updateCartItem } from "../../../application/cart/utils/updateCartItem";
 
 const MenuItems = (props) => {
-  const { customMenu, updateItemsOfCustomMenuRef, firstMenuItemId, firstMenuItemDetails = null } = props;
+  const {
+    customMenu,
+    updateItemsOfCustomMenuRef,
+    firstMenuItemId,
+    firstMenuItemDetails = null,
+    isStoreDelivering,
+  } = props;
   const classes = useStyles();
   const history = useHistory();
   const { brandId, outletId } = useParams();
@@ -75,10 +81,13 @@ const MenuItems = (props) => {
       let resData = Object.assign([], JSON.parse(JSON.stringify(data.data)));
 
       resData = resData.map((item) => {
-        const findVegNonVegTag = item.item_details.tags.find((tag) => tag.code === "veg_nonveg");
+        const findVegNonVegTag = item.item_details.tags.find(
+          (tag) => tag.code === "veg_nonveg"
+        );
         if (findVegNonVegTag) {
           item.item_details.isVeg =
-            findVegNonVegTag.list[0].value === "yes" || findVegNonVegTag.list[0].value === "Yes";
+            findVegNonVegTag.list[0].value === "yes" ||
+            findVegNonVegTag.list[0].value === "Yes";
         } else {
         }
         return item;
@@ -108,7 +117,9 @@ const MenuItems = (props) => {
   const getProductDetails = async (productId) => {
     try {
       setProductLoading(productId);
-      const data = await cancellablePromise(getCall(`/protocol/item-details?id=${productId}`));
+      const data = await cancellablePromise(
+        getCall(`/protocol/item-details?id=${productId}`)
+      );
       setProductPayload(data);
       return data;
     } catch (error) {
@@ -137,7 +148,9 @@ const MenuItems = (props) => {
     let group = customization_state[groupId];
     if (!group) return;
 
-    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    let customizations = group.selected.map((s) =>
+      selectedCustomizationIds.push(s.id)
+    );
     group?.childs?.map((child) => {
       getCustomization_(child, customization_state);
     });
@@ -180,15 +193,25 @@ const MenuItems = (props) => {
     let customisations = null;
 
     if (hasCustomisations) {
-      groups = await formatCustomizationGroups(productPayload.customisation_groups);
+      groups = await formatCustomizationGroups(
+        productPayload.customisation_groups
+      );
       cus = await formatCustomizations(productPayload.customisation_items);
-      newState = await initializeCustomizationState(groups, cus, customization_state);
+      newState = await initializeCustomizationState(
+        groups,
+        cus,
+        customization_state
+      );
       customizationState = isDefault ? newState : customization_state;
-      customisations = await getCustomizations(productPayload, customizationState);
+      customisations = await getCustomizations(
+        productPayload,
+        customizationState
+      );
     }
 
     calculateSubtotal(customizationState["firstGroup"]?.id, customizationState);
-    const subtotal = productPayload?.item_details?.price?.value + customizationPrices;
+    const subtotal =
+      productPayload?.item_details?.price?.value + customizationPrices;
 
     const payload = {
       id: productPayload.id,
@@ -246,7 +269,9 @@ const MenuItems = (props) => {
       });
     } else {
       const currentCount = parseInt(cartItem[0].item.quantity.count);
-      const maxCount = parseInt(cartItem[0].item.product.quantity.maximum.count);
+      const maxCount = parseInt(
+        cartItem[0].item.product.quantity.maximum.count
+      );
 
       if (currentCount < maxCount) {
         if (!customisations) {
@@ -268,7 +293,9 @@ const MenuItems = (props) => {
           let matchingCustomisation = null;
 
           for (let i = 0; i < cartItem.length; i++) {
-            let existingIds = cartItem[i].item.customisations.map((item) => item.id);
+            let existingIds = cartItem[i].item.customisations.map(
+              (item) => item.id
+            );
             const areSame = areCustomisationsSame(existingIds, currentIds);
             if (areSame) {
               matchingCustomisation = cartItem[i];
@@ -322,23 +349,39 @@ const MenuItems = (props) => {
   useEffect(() => {
     if (customization_state && customization_state["firstGroup"]) {
       setCustomizationPrices(0);
-      calculateSubtotal(customization_state["firstGroup"]?.id, customization_state);
+      calculateSubtotal(
+        customization_state["firstGroup"]?.id,
+        customization_state
+      );
     }
   }, [customization_state]);
 
   if (firstMenuItemDetails) {
     let rangePriceTag = null;
-    if (productPayload && productPayload?.item_details && productPayload?.item_details?.price && productPayload?.item_details?.price?.tags && productPayload?.item_details?.price?.tags.length > 0) {
-      const findRangePriceTag = productPayload?.item_details?.price?.tags.find((item) => item.code === "range");
+    if (
+      productPayload &&
+      productPayload?.item_details &&
+      productPayload?.item_details?.price &&
+      productPayload?.item_details?.price?.tags &&
+      productPayload?.item_details?.price?.tags.length > 0
+    ) {
+      const findRangePriceTag = productPayload?.item_details?.price?.tags.find(
+        (item) => item.code === "range"
+      );
       if (findRangePriceTag) {
-        const findLowerPriceObj = findRangePriceTag.list.find((item) => item.code === "lower");
-        const findUpperPriceObj = findRangePriceTag.list.find((item) => item.code === "upper");
+        const findLowerPriceObj = findRangePriceTag.list.find(
+          (item) => item.code === "lower"
+        );
+        const findUpperPriceObj = findRangePriceTag.list.find(
+          (item) => item.code === "upper"
+        );
         rangePriceTag = {
           maxPrice: findUpperPriceObj.value,
-          minPrice: findLowerPriceObj.value
+          minPrice: findLowerPriceObj.value,
         };
       }
-    } else { }
+    } else {
+    }
     return (
       <Accordion defaultExpanded={true}>
         <AccordionSummary
@@ -346,34 +389,51 @@ const MenuItems = (props) => {
           aria-controls="panel1a-content"
           id="panel1a-header"
         >
-          <Typography variant="h5">{`${customMenu?.descriptor?.name} (${menuItems?.length || 0})`}</Typography>
+          <Typography variant="h5">{`${customMenu?.descriptor?.name} (${
+            menuItems?.length || 0
+          })`}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <>
             {firstMenuItemDetails.length > 0 ? (
               <Grid container spacing={3}>
                 {firstMenuItemDetails.map((item, itemInd) => (
-                  <Grid item xs={12} sm={12} md={12} lg={12} xl={12} key={`menu-item-ind-${itemInd}`}>
+                  <Grid
+                    item
+                    xs={12}
+                    sm={12}
+                    md={12}
+                    lg={12}
+                    xl={12}
+                    key={`menu-item-ind-${itemInd}`}
+                  >
                     <MenuItem
                       productPayload={item}
                       setProductPayload={setProductPayload}
                       product={item?.item_details}
                       productId={item.id}
                       price={item?.item_details?.price}
-                      bpp_provider_descriptor={item?.provider_details?.descriptor}
+                      bpp_provider_descriptor={
+                        item?.provider_details?.descriptor
+                      }
                       bpp_id={item?.bpp_details?.bpp_id}
-                      location_id={item?.location_details ? item.location_details?.id : ""}
+                      location_id={
+                        item?.location_details ? item.location_details?.id : ""
+                      }
                       bpp_provider_id={item?.provider_details?.id}
                       handleAddToCart={addToCart}
                       setCustomizationModal={setCustomizationModal}
                       getProductDetails={getProductDetails}
                       productLoading={productLoading}
+                      isStoreDelivering={isStoreDelivering}
                     />
                   </Grid>
                 ))}
               </Grid>
             ) : (
-              <Typography variant="body1">There is not items available in this menu</Typography>
+              <Typography variant="body1">
+                There is not items available in this menu
+              </Typography>
             )}
           </>
 
@@ -392,12 +452,24 @@ const MenuItems = (props) => {
               <>
                 <Typography variant="body" color="black" component="div">
                   {productPayload?.item_details?.descriptor?.name}
-                  <span style={{ float: 'right' }}>
-                    {
-                      rangePriceTag
-                        ? `₹${rangePriceTag?.minPrice} - ₹${rangePriceTag?.maxPrice}`
-                        : `₹${productPayload?.item_details?.price ? Number.isInteger(Number(productPayload?.item_details?.price?.value)) ? Number(productPayload?.item_details?.price?.value).toFixed(2) : Number(productPayload?.item_details?.price?.value).toFixed(2) : "0"}`
-                    }
+                  <span style={{ float: "right" }}>
+                    {rangePriceTag
+                      ? `₹${rangePriceTag?.minPrice} - ₹${rangePriceTag?.maxPrice}`
+                      : `₹${
+                          productPayload?.item_details?.price
+                            ? Number.isInteger(
+                                Number(
+                                  productPayload?.item_details?.price?.value
+                                )
+                              )
+                              ? Number(
+                                  productPayload?.item_details?.price?.value
+                                ).toFixed(2)
+                              : Number(
+                                  productPayload?.item_details?.price?.value
+                                ).toFixed(2)
+                            : "0"
+                        }`}
                   </span>
                 </Typography>
                 <CustomizationRenderer
@@ -408,7 +480,13 @@ const MenuItems = (props) => {
                 />
 
                 <Grid container sx={{ marginTop: 4 }}>
-                  <Grid container alignItems="center" justifyContent="space-around" xs={3} className={classes.qty}>
+                  <Grid
+                    container
+                    alignItems="center"
+                    justifyContent="space-around"
+                    xs={3}
+                    className={classes.qty}
+                  >
                     <RemoveIcon
                       fontSize="small"
                       className={classes.qtyIcon}
@@ -419,7 +497,11 @@ const MenuItems = (props) => {
                     <Typography variant="body1" color="#196AAB">
                       {itemQty}
                     </Typography>
-                    <AddIcon fontSize="small" className={classes.qtyIcon} onClick={() => setItemQty(itemQty + 1)} />
+                    <AddIcon
+                      fontSize="small"
+                      className={classes.qtyIcon}
+                      onClick={() => setItemQty(itemQty + 1)}
+                    />
                   </Grid>
                   <Button
                     disabled={itemOutOfStock}
@@ -427,7 +509,10 @@ const MenuItems = (props) => {
                     sx={{ flex: 1 }}
                     onClick={() => addToCart(productPayload)}
                   >
-                    Add Item Total- ₹{(productPayload?.item_details?.price.value + customizationPrices) * itemQty}{" "}
+                    Add Item Total- ₹
+                    {(productPayload?.item_details?.price.value +
+                      customizationPrices) *
+                      itemQty}{" "}
                   </Button>
                 </Grid>
               </>
@@ -445,7 +530,9 @@ const MenuItems = (props) => {
         aria-controls="panel1a-content"
         id="panel1a-header"
       >
-        <Typography variant="h5">{`${customMenu?.descriptor?.name} (${menuItems?.length || 0})`}</Typography>
+        <Typography variant="h5">{`${customMenu?.descriptor?.name} (${
+          menuItems?.length || 0
+        })`}</Typography>
       </AccordionSummary>
       <AccordionDetails>
         {isLoading ? (
@@ -456,28 +543,47 @@ const MenuItems = (props) => {
           <>
             {menuItems.length > 0 ? (
               <Grid container spacing={3}>
-                {menuItems.map((item, itemInd) => (
-                  <Grid item xs={12} sm={12} md={12} lg={12} xl={12} key={`menu-item-ind-${itemInd}`}>
-                    <MenuItem
-                      productPayload={item}
-                      setProductPayload={setProductPayload}
-                      product={item?.item_details}
-                      productId={item.id}
-                      price={item?.item_details?.price}
-                      bpp_provider_descriptor={item?.provider_details?.descriptor}
-                      bpp_id={item?.bpp_details?.bpp_id}
-                      location_id={item?.location_details ? item.location_details?.id : ""}
-                      bpp_provider_id={item?.provider_details?.id}
-                      handleAddToCart={addToCart}
-                      setCustomizationModal={setCustomizationModal}
-                      getProductDetails={getProductDetails}
-                      productLoading={productLoading}
-                    />
-                  </Grid>
-                ))}
+                {menuItems.map((item, itemInd) => {
+                  return (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={12}
+                      md={12}
+                      lg={12}
+                      xl={12}
+                      key={`menu-item-ind-${itemInd}`}
+                    >
+                      <MenuItem
+                        productPayload={item}
+                        setProductPayload={setProductPayload}
+                        product={item?.item_details}
+                        productId={item.id}
+                        price={item?.item_details?.price}
+                        bpp_provider_descriptor={
+                          item?.provider_details?.descriptor
+                        }
+                        bpp_id={item?.bpp_details?.bpp_id}
+                        location_id={
+                          item?.location_details
+                            ? item.location_details?.id
+                            : ""
+                        }
+                        bpp_provider_id={item?.provider_details?.id}
+                        handleAddToCart={addToCart}
+                        setCustomizationModal={setCustomizationModal}
+                        getProductDetails={getProductDetails}
+                        productLoading={productLoading}
+                        isStoreDelivering={isStoreDelivering}
+                      />
+                    </Grid>
+                  );
+                })}
               </Grid>
             ) : (
-              <Typography variant="body1">There is not items available in this menu</Typography>
+              <Typography variant="body1">
+                There is not items available in this menu
+              </Typography>
             )}
           </>
         )}
@@ -497,8 +603,20 @@ const MenuItems = (props) => {
             <>
               <Typography variant="body" color="black" component="div">
                 {productPayload?.item_details?.descriptor?.name}
-                <span style={{ float: 'right' }}>
-                  {`₹${productPayload?.item_details?.price ? Number.isInteger(Number(productPayload?.item_details?.price?.value)) ? Number(productPayload?.item_details?.price?.value).toFixed(2) : Number(productPayload?.item_details?.price?.value).toFixed(2) : "0"}`}
+                <span style={{ float: "right" }}>
+                  {`₹${
+                    productPayload?.item_details?.price
+                      ? Number.isInteger(
+                          Number(productPayload?.item_details?.price?.value)
+                        )
+                        ? Number(
+                            productPayload?.item_details?.price?.value
+                          ).toFixed(2)
+                        : Number(
+                            productPayload?.item_details?.price?.value
+                          ).toFixed(2)
+                      : "0"
+                  }`}
                 </span>
               </Typography>
 
@@ -510,7 +628,13 @@ const MenuItems = (props) => {
               />
 
               <Grid container sx={{ marginTop: 4 }}>
-                <Grid container alignItems="center" justifyContent="space-around" xs={3} className={classes.qty}>
+                <Grid
+                  container
+                  alignItems="center"
+                  justifyContent="space-around"
+                  xs={3}
+                  className={classes.qty}
+                >
                   <RemoveIcon
                     fontSize="small"
                     className={classes.qtyIcon}
@@ -521,7 +645,11 @@ const MenuItems = (props) => {
                   <Typography variant="body1" color="#196AAB">
                     {itemQty}
                   </Typography>
-                  <AddIcon fontSize="small" className={classes.qtyIcon} onClick={() => setItemQty(itemQty + 1)} />
+                  <AddIcon
+                    fontSize="small"
+                    className={classes.qtyIcon}
+                    onClick={() => setItemQty(itemQty + 1)}
+                  />
                 </Grid>
                 <Button
                   disabled={itemOutOfStock}
@@ -529,7 +657,10 @@ const MenuItems = (props) => {
                   sx={{ flex: 1 }}
                   onClick={() => addToCart(productPayload)}
                 >
-                  Add Item Total- ₹{(productPayload?.item_details?.price.value + customizationPrices) * itemQty}{" "}
+                  Add Item Total- ₹
+                  {(productPayload?.item_details?.price.value +
+                    customizationPrices) *
+                    itemQty}{" "}
                 </Button>
               </Grid>
             </>

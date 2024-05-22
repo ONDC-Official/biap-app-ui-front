@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import {Redirect} from 'react-router-dom'
+import { Redirect } from "react-router-dom";
 import {
   getAuth,
   signInWithPopup,
@@ -18,6 +18,7 @@ import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { getErrorMessage } from "../../../api/utils/mapFirebaseError";
 import { AddCookie } from "../../../utils/cookies";
 import { ToastContext } from "../../../context/toastContext";
+import { v4 as uuidv4 } from "uuid";
 
 import Google_Logo from "../../../assets/images/google.png";
 import { isLoggedIn } from "../../../utils/validateToken";
@@ -116,6 +117,7 @@ export default function Login() {
       .finally(() => setSignInUsingGoogleLoading(false));
   }
   function handleRedirect(user) {
+    localStorage.setItem("transaction_id", uuidv4());
     const { displayName, email, photoURL, accessToken, uid } = user;
     AddCookie("token", accessToken);
     AddCookie(
@@ -190,7 +192,16 @@ export default function Login() {
             }
             button_type={buttonTypes.primary}
             button_hover_type={buttonTypes.primary_hover}
-            button_text={<><img src={Google_Logo} alt="logo" style={{ height: "20px", marginRight: "10px" }} />Login with google</>}
+            button_text={
+              <>
+                <img
+                  src={Google_Logo}
+                  alt="logo"
+                  style={{ height: "20px", marginRight: "10px" }}
+                />
+                Login with google
+              </>
+            }
             onClick={handleLoginWithGoogle}
           />
         </div>
@@ -206,11 +217,14 @@ export default function Login() {
     </div>
   );
 
-  if(isLoggedIn()){
+  if (isLoggedIn()) {
     return <Redirect to={{ pathname: "/application" }} />;
-  }else{
+  } else {
     return (
-        <AuthActionCard action_form={loginForm} navigation_link={navigation_link} />
+      <AuthActionCard
+        action_form={loginForm}
+        navigation_link={navigation_link}
+      />
     );
   }
 }
