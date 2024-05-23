@@ -521,6 +521,7 @@ export default function IssueOrderModal({
               Select Issue Subcategory
             </p>
             <Dropdown
+              id="dropdownOne"
               header={
                 <div
                   className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
@@ -541,7 +542,7 @@ export default function IssueOrderModal({
                   </div>
                 </div>
               }
-              body_classes="dropdown-menu-right"
+              body_classes="dropdown-menu-end dropdown-menu-lg-start"
               style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
               click={(reasonValue) => {
                 const type = AllCategory.find(
