@@ -105,8 +105,9 @@ export default function Navbar() {
           </div>
           <div className="px-2">
             <Dropdown
+              id="dropdownOne"
               header={avatar}
-              body_classes="dropdown-menu-right"
+              body_classes="dropdown-menu-end dropdown-menu-lg-start"
               click={(value) => {
                 if (value === dropdown_links.PRODUCTS) {
                   return history.push("/application/");
