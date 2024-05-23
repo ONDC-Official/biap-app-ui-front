@@ -589,7 +589,7 @@ export default function IssueOrderModal({
 
           <div className="px-2">
             {
-              (order_status === "Accepted" || order_status === "In-progress") && (
+              (order_status === "Created" || order_status === "Accepted" || order_status === "In-progress") && (
                 <Input
                   label_name="Select Issue Subcategory"
                   disabled
