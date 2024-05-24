@@ -33,6 +33,7 @@ export default function ProductSort({ onUpdateSortType, sortType }) {
   ];
   return (
     <Dropdown
+      id="dropdownOne"
       header={
         <div
           className={`${styles.category_drodpwon_wrapper} d-flex align-items-center`}
@@ -47,7 +48,7 @@ export default function ProductSort({ onUpdateSortType, sortType }) {
           </div>
         </div>
       }
-      body_classes="dropdown-menu-right"
+      body_classes="dropdown-menu-end dropdown-menu-lg-start"
       style={{ width: "100%", minWidth: "200px" }}
       click={(sort_type) => {
         const type = SORT_OPTIONS.find(

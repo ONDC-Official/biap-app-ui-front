@@ -423,7 +423,7 @@ export default function CancelOrderModal(props) {
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup_card} style={{ width: "700px" }}>
+      <div className={styles.popup_card} style={{ width: "700px", overflow: 'inherit' }}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <p className={styles.card_header_title}>Cancel Order</p>
           <div className="ms-auto">
@@ -534,9 +534,8 @@ export default function CancelOrderModal(props) {
                               <div>
                                 <div className={productCartStyles.quantity_count_wrapper}>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                    className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(orderQty[idx]?.count - 1, idx, product?.id);
@@ -554,11 +553,10 @@ export default function CancelOrderModal(props) {
                                     </p>
                                   </div>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count < quantity[idx]?.count
-                                        ? productCartStyles.add_svg_wrapper
-                                        : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                    className={`${orderQty[idx]?.count < quantity[idx]?.count
+                                      ? productCartStyles.add_svg_wrapper
+                                      : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
@@ -589,6 +587,7 @@ export default function CancelOrderModal(props) {
             <div className="px-2">
               <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
               <Dropdown
+                id="dropdownOne"
                 header={
                   <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
                     <div className="px-2">
@@ -603,8 +602,8 @@ export default function CancelOrderModal(props) {
                     </div>
                   </div>
                 }
-                body_classes="dropdown-menu-right"
-                style={{ width: "100%", maxHeight: "250px", overflow: "auto", margin: "180px 0" }}
+                body_classes="dropdown-menu-end dropdown-menu-lg-start"
+                style={{ width: "100%", maxHeight: "250px", overflow: "auto", margin: "10px 0" }}
                 click={(reasonValue) => {
                   const REASONS = reasons;
                   const type = REASONS.find(({ value }) => value.toLowerCase() === reasonValue.toLowerCase());
@@ -626,6 +625,7 @@ export default function CancelOrderModal(props) {
             <div className="px-2">
               <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
               <Dropdown
+                id="dropdownTwo"
                 header={
                   <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
                     <div className="px-2">
@@ -640,7 +640,7 @@ export default function CancelOrderModal(props) {
                     </div>
                   </div>
                 }
-                body_classes="dropdown-menu-right"
+                body_classes="dropdown-menu-end dropdown-menu-lg-start"
                 style={{ width: "100%", maxHeight: "250px", overflow: "auto" }}
                 click={(reasonValue) => {
                   const REASONS = reasons;

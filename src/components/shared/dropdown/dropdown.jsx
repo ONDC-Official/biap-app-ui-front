@@ -4,7 +4,7 @@ import Styles from "./dropdown.module.scss";
 function Dropdown({ id, header, body, body_classes, options, click, show_icons = false, style = {} }) {
   return (
     <div className="dropdown">
-      <div id={id} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <div id={id} data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
         {header}
       </div>
       <div
