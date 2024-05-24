@@ -439,6 +439,7 @@ export default function ReturnOrderModal({
                   Select your Reason
                 </p>
                 <Dropdown
+                  id="dropdownOne"
                   header={
                     <div
                       className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
@@ -459,7 +460,7 @@ export default function ReturnOrderModal({
                       </div>
                     </div>
                   }
-                  body_classes="dropdown-menu-right"
+                  body_classes="dropdown-menu-end dropdown-menu-lg-start"
                   style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
                   click={(reasonValue) => {
                     const REASONS = reasons;
