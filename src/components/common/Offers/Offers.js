@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import useStyles from "./styles";
 import OfferCard from "./OfferCard";
 import { Grid, IconButton, Typography } from "@mui/material";
@@ -229,11 +228,17 @@ const _offers = [
   },
 ];
 
-const Offers = () => {
+const Offers = ({ offersList }) => {
   const ref = useRef(null);
   const classes = useStyles();
 
-  const [offers, setOffers] = useState(_offers);
+  const [offers, setOffers] = useState([]);
+
+  useEffect(() => {
+    if (offersList && offersList.length > 0) {
+      setOffers(offersList);
+    }
+  }, [offersList]);
 
   const scroll = (scrollOffset) => {
     ref.current.scrollLeft += scrollOffset;
@@ -275,9 +280,9 @@ const Offers = () => {
             return (
               <OfferCard
                 title={offer.provider_descriptor.name}
-                offerText={offer.offerText}
+                offerText={offer.local_id}
                 link={offer.link}
-                brandImage={offer.provider_descriptor.symbol}
+                brandImage={offer.provider_descriptor.images[0]}
               />
             );
           })}

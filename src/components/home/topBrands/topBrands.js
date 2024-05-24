@@ -8,6 +8,7 @@ import Tooltip from "@mui/material/Tooltip";
 
 import { useHistory } from "react-router-dom";
 import { getAllBrandsRequest } from "../../../api/brand.api";
+import { getAllOffersRequest } from "../../../api/offer.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import no_image_found from "../../../assets/images/no_image_found.png";
 import { ToastContext } from "../../../context/toastContext";
@@ -47,6 +48,7 @@ const TopBrands = () => {
   const classes = useStyles();
   const [activeBrandIndex, setActiveBrandIndex] = useState(1);
   const [brands, setBrands] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
@@ -83,15 +85,40 @@ const TopBrands = () => {
     }
   };
 
+  const getAllOffers = async () => {
+    setIsLoading(true);
+    try {
+      const lat = "12.992906760898983";
+      const lng = "77.76323574850733";
+      const data = await cancellablePromise(getAllOffersRequest("", lat, lng));
+      console.log("getAllOffers data==========>", data);
+      setOffers(data);
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     getAllBrands();
+    getAllOffers();
   }, []);
 
   const rowsPerPage = parseInt(screenWidth / 120) - 7;
   const totalPageCount = Math.ceil(brands.length / rowsPerPage);
   return (
     <>
-      <Offers />
+      <Offers
+        offersList={offers}
+      />
       <Grid container spacing={3} className={classes.topBrandsContainer}>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <Typography variant="h4">All Providers</Typography>

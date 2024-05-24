@@ -35,11 +35,11 @@ const useStyles = makeStyles({
     minWidth: 150,
   },
   right: {
-    width: 50,
+    width: 100,
     height: 100,
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "end",
     position: "relative",
   },
   offerTitle: {
@@ -54,7 +54,8 @@ const useStyles = makeStyles({
     marginBottom: 10,
   },
   brandImage: {
-    height: 30,
+    height: 80,
+    width: 80,
   },
   leftIcon: {
     position: "absolute",
