@@ -399,7 +399,7 @@ export default function ReturnOrderModal({
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup_card} style={{ width: "700px" }}>
+      <div className={styles.popup_card} style={{ width: "700px", overflow: 'inherit' }}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <Typography variant="h4">Return Order</Typography>
           <div className="ms-auto">
@@ -679,7 +679,7 @@ export default function ReturnOrderModal({
                   width: "100%",
                   maxHeight: "250px",
                   overflow: "auto",
-                  margin: "260px 0",
+                  margin: "10px 0",
                 }}
                 click={(reasonValue) => {
                   const REASONS = reasons;
