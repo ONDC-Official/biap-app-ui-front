@@ -228,7 +228,7 @@ const _offers = [
   },
 ];
 
-const Offers = ({ offersList }) => {
+const Offers = ({ offersList, isDisplayOnStorePage = false }) => {
   const ref = useRef(null);
   const classes = useStyles();
 
@@ -283,6 +283,7 @@ const Offers = ({ offersList }) => {
                 offerText={offer.local_id}
                 link={offer.link}
                 brandImage={offer.provider_descriptor.images[0]}
+                isDisplayOnStorePage={isDisplayOnStorePage}
               />
             );
           })}

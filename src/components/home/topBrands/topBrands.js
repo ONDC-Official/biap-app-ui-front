@@ -91,7 +91,6 @@ const TopBrands = () => {
       const lat = "12.992906760898983";
       const lng = "77.76323574850733";
       const data = await cancellablePromise(getAllOffersRequest("", lat, lng));
-      console.log("getAllOffers data==========>", data);
       setOffers(data);
     } catch (err) {
       dispatch({
@@ -116,9 +115,13 @@ const TopBrands = () => {
   const totalPageCount = Math.ceil(brands.length / rowsPerPage);
   return (
     <>
-      <Offers
-        offersList={offers}
-      />
+      {
+        offers && offers.length > 0 && (
+          <Offers
+            offersList={offers}
+          />
+        )
+      }
       <Grid container spacing={3} className={classes.topBrandsContainer}>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <Typography variant="h4">All Providers</Typography>

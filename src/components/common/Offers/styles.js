@@ -1,4 +1,5 @@
 import { makeStyles } from "@mui/styles";
+import ThemePalette from "../../../utils/Theme/theme.json";
 
 const useStyles = makeStyles({
   offersContainer: {
@@ -60,13 +61,41 @@ const useStyles = makeStyles({
   leftIcon: {
     position: "absolute",
     left: 100,
-    top: 50,
+    top: '30%',
   },
   rightIcon: {
     position: "absolute",
     right: 100,
-    top: 50,
+    top: '30%',
   },
+
+  offerCardContainer: {
+    width: "max-content",
+    height: "max-content",
+    border: "1.5px solid #e8e8e8",
+    borderRadius: 24,
+    display: "flex",
+    alignItems: "center",
+  },
+  offerIconContainer: {
+    backgroundColor: ThemePalette.primaryColorLight,
+    padding: '16px',
+    borderTopLeftRadius: 24,
+    borderBottomLeftRadius: 24,
+  },
+  offerTextContainer: {
+    padding: '16px',
+    flex: 1,
+    '& .offerText': {
+      marginBottom: '0px !important'
+    }
+  },
+  offerCode: {
+    fontSize: 24,
+    fontWeight: "600",
+    margin: 0,
+    textTransform: "capitalize",
+  }
 });
 
 export default useStyles;
