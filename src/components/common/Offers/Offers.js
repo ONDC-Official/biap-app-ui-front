@@ -279,6 +279,7 @@ const Offers = ({ offersList, isDisplayOnStorePage = false }) => {
           {offers.map((offer) => {
             return (
               <OfferCard
+                id={offer.provider}
                 title={offer.provider_descriptor.name}
                 offerText={offer.local_id}
                 link={offer.link}
