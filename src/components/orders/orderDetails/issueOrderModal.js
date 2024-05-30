@@ -230,7 +230,7 @@ export default function IssueOrderModal({
   }
 
   useEffect(() => {
-    if (order_status === "Accepted" || order_status === "In-progress") {
+    if (order_status === "Created" || order_status === "Accepted" || order_status === "In-progress") {
       const type = AllCategory.find(
         ({ enums }) =>
           enums === "FLM02"
