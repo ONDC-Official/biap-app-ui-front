@@ -184,23 +184,23 @@ export default function ReturnOrderModal({
         const customizations = item.customizations;
         const customizationPayload = customizations
           ? Object.entries(customizations).map(
-              ([customizationId, customization]) => ({
-                id: customizationId,
-                quantity: {
-                  count: item.quantity.count,
-                },
-                tags: {
-                  parent_item_id: item.parent_item_id,
-                  update_type: "return",
-                  reason_code: selectedCancelReasonId?.key,
-                  ttl_approval: item?.["@ondc/org/return_window"]
-                    ? item?.["@ondc/org/return_window"]
-                    : "",
-                  ttl_reverseqc: "P3D",
-                  image: imageFiles.join(","),
-                },
-              })
-            )
+            ([customizationId, customization]) => ({
+              id: customizationId,
+              quantity: {
+                count: item.quantity.count,
+              },
+              tags: {
+                parent_item_id: item.parent_item_id,
+                update_type: "return",
+                reason_code: selectedCancelReasonId?.key,
+                ttl_approval: item?.["@ondc/org/return_window"]
+                  ? item?.["@ondc/org/return_window"]
+                  : "",
+                ttl_reverseqc: "P3D",
+                image: imageFiles.join(","),
+              },
+            })
+          )
           : [];
 
         return [
@@ -399,7 +399,7 @@ export default function ReturnOrderModal({
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup_card} style={{ width: "700px" }}>
+      <div className={styles.popup_card} style={{ width: "700px", overflow: 'inherit' }}>
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <Typography variant="h4">Return Order</Typography>
           <div className="ms-auto">
@@ -453,7 +453,7 @@ export default function ReturnOrderModal({
                                   idx ===
                                   Object.keys(product.customizations || {})
                                     .length -
-                                    1;
+                                  1;
                                 return (
                                   <Grid container key={key}>
                                     <Typography
@@ -504,7 +504,7 @@ export default function ReturnOrderModal({
                                   has_error={
                                     inlineError["image_error"][product.id]
                                   }
-                                  //   disabled={baseImage.length === 4}
+                                //   disabled={baseImage.length === 4}
                                 />
                               )}
                               <ErrorMessage>
@@ -571,11 +571,10 @@ export default function ReturnOrderModal({
                                   }
                                 >
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count > 1
-                                        ? productCartStyles.subtract_svg_wrapper
-                                        : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                    className={`${orderQty[idx]?.count > 1
+                                      ? productCartStyles.subtract_svg_wrapper
+                                      : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       if (orderQty[idx]?.count > 1) {
                                         onUpdateQty(
@@ -606,12 +605,11 @@ export default function ReturnOrderModal({
                                     </p>
                                   </div>
                                   <div
-                                    className={`${
-                                      orderQty[idx]?.count <
+                                    className={`${orderQty[idx]?.count <
                                       quantity[idx]?.count
-                                        ? productCartStyles.add_svg_wrapper
-                                        : ""
-                                    } d-flex align-items-center justify-content-center`}
+                                      ? productCartStyles.add_svg_wrapper
+                                      : ""
+                                      } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
@@ -629,14 +627,14 @@ export default function ReturnOrderModal({
                                   >
                                     {orderQty[idx]?.count <
                                       quantity[idx]?.count && (
-                                      <Add
-                                        width="13"
-                                        height="13"
-                                        classes={
-                                          productCartStyles.add_svg_color
-                                        }
-                                      />
-                                    )}
+                                        <Add
+                                          width="13"
+                                          height="13"
+                                          classes={
+                                            productCartStyles.add_svg_color
+                                          }
+                                        />
+                                      )}
                                   </div>
                                 </div>
                               </div>
@@ -659,6 +657,7 @@ export default function ReturnOrderModal({
                 Select reason*
               </Typography>
               <Dropdown
+                id="dropdownOne"
                 header={
                   <div
                     className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}
@@ -675,12 +674,12 @@ export default function ReturnOrderModal({
                     </div>
                   </div>
                 }
-                body_classes="dropdown-menu-right"
+                body_classes="dropdown-menu-end dropdown-menu-lg-start"
                 style={{
                   width: "100%",
                   maxHeight: "250px",
                   overflow: "auto",
-                  margin: "260px 0",
+                  margin: "10px 0",
                 }}
                 click={(reasonValue) => {
                   const REASONS = reasons;
