@@ -294,7 +294,11 @@ const OrderSummary = ({
                 value: item.price,
               };
               let prev_item_data = items[key];
-              let addition_item_data = { title: item.title, price: price };
+              let addition_item_data = {
+                title: item.title,
+                price: price,
+                fulfillment_status: item.fulfillment_status,
+              };
               items[key] = { ...prev_item_data, ...addition_item_data };
             }
             if (
@@ -339,6 +343,7 @@ const OrderSummary = ({
                 textClass: item.textClass,
                 quantity: item.quantity,
                 cartQuantity: item.cartQuantity,
+                fulfillment_status: item.fulfillment_status,
               };
               items[key]["customizations"][item.id] = {
                 ...existing_data,
