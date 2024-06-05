@@ -35,6 +35,7 @@ import { CheckBox, OfflineShareRounded } from "@mui/icons-material";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import { getAllOffersRequest } from "../../../api/offer.api";
 
 export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   let user = {};
@@ -268,6 +269,31 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     }
   };
 
+  const getAllOffers = async () => {
+    // setIsLoading(true);
+    try {
+      const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo"));
+      console.log("LAT", latLongInfo);
+      const lat = latLongInfo.lat;
+      const lng = latLongInfo.lng;
+
+      const data = await cancellablePromise(getAllOffersRequest("", lat, lng));
+      console.log("offers data fetched", data);
+      setOffers(data);
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
+      });
+    } finally {
+      // setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     getCartItems();
   }, [openDrawer]);
@@ -309,7 +335,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     );
   };
 
-  const data = [
+  const offers_data = [
     {
       id: "DISCP60",
       descriptor: {
@@ -539,14 +565,14 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       console.log("meta", meta);
       // y[0]["list"].filter(list => list.code === 'additive')
       meta = meta && meta[0];
-      let additive = meta["list"].filter((list) => list.code === "additive")[0][
-        "value"
-      ];
-      let auto = meta["list"].filter((list) => list.code === "auto")[0][
-        "value"
-      ];
+      let additive =
+        meta &&
+        meta["list"].filter((list) => list.code === "additive")[0]["value"];
+      let auto =
+        meta && meta["list"].filter((list) => list.code === "auto")[0]["value"];
       return {
         id: offer.id,
+        local_id: offer.local_id,
         type: offer.descriptor.code,
         item_ids: offer.item_ids,
         location_ids: offer.location_ids,
@@ -563,9 +589,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     console.log("cartItems.length", cartItems.length);
     if (isValidCart() && cartItems.length > 0) {
       console.log("valid cart");
-      let formatted_offers = format_offers_data(data);
+      let formatted_offers = format_offers_data(offers_data);
       console.log(formatted_offers);
-      setOffers(data);
+      getAllOffers();
+      // setOffers(offers_data);
       // fetch API for offers
     } else {
       console.log("Invalid cart");
@@ -1244,6 +1271,34 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     return ids;
   };
 
+  const offerInSelectFormat = (id) => {
+    return {
+      id: id,
+      tags: [
+        {
+          code: "selection",
+          list: [
+            {
+              code: "apply",
+              value: "yes",
+            },
+          ],
+        },
+      ],
+    };
+  };
+
+  const offersForSelect = () => {
+    if (selectedNonAdditiveOffer) {
+      console.log("selectedNonAdditiveOffer", selectedNonAdditiveOffer);
+      return [offerInSelectFormat(selectedNonAdditiveOffer)];
+    } else {
+      return selectedAdditiveOffers.length > 0
+        ? selectedAdditiveOffers.map((id) => offerInSelectFormat(id))
+        : [];
+    }
+  };
+
   const getQuote = async (items, searchContextData = null) => {
     const ttansactionId = localStorage.getItem("transaction_id");
     responseRef.current = [];
@@ -1276,6 +1331,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             cart: {
               items: updatedItems,
             },
+            offers: offersForSelect(),
             fulfillments: [
               {
                 end: {
@@ -1483,63 +1539,53 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       }
     };
 
+    function isOfferSelected(id) {
+      return selectedNonAdditiveOffer === id;
+    }
+
     return (
       <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
-        <Typography
-          variant="body3"
-          className={classes.tableHead}
-          sx={{ marginLeft: "6px", marginBottom: "10px" }}
-        >
-          Non Additive Offers
-        </Typography>
         <Grid
           container
-          alignItems="center"
-          sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
+          // sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
+          direction={"column"}
         >
-          <RadioGroup
-            aria-labelledby="demo-row-radio-buttons-group-label"
-            name="row-radio-buttons-group"
-            xs={{ mt: 20 }}
-            value={selectedNonAdditiveOffer}
-          >
-            {offers?.map((offer) => {
-              return (
-                <div className={classes.fulfillment} key={offer.id}>
-                  <FormControlLabel
-                    value={offer.id}
-                    control={
-                      <Radio
-                        // style={{ paddingRight: "20px" }}
-                        onClick={handleClick}
-                      />
-                    }
-                    label={offer.id}
-                  />
-                </div>
-              );
-            })}
-          </RadioGroup>
+          {offers?.map((offer) => {
+            return (
+              <div className={classes.fulfillment}>
+                <FormControlLabel
+                  label={offer.local_id}
+                  value={isOfferSelected(offer.id)}
+                  control={
+                    <Checkbox
+                      id={offer.id}
+                      checked={isOfferSelected(offer.id)}
+                      disabled={
+                        !isOfferSelected(offer.id) &&
+                        (selectedNonAdditiveOffer ||
+                          selectedAdditiveOffers.length > 0)
+                      }
+                      onChange={(event) => {
+                        let id = "";
+                        if (selectedNonAdditiveOffer !== offer.id) {
+                          id = offer.id;
+                          setSelectedAdditiveOffers([]);
+                        }
+                        setSelectedNonAdditiveOffer(id);
+                      }}
+                    />
+                  }
+                />
+              </div>
+            );
+          })}
         </Grid>
       </Grid>
     );
   };
 
   const renderAdditiveOffers = (offers, selectedAdditiveOffers) => {
-    const handleClick = (event) => {
-      console.log(event);
-      // if (event.target.value === selectedNonAdditiveOffer) {
-      //   setSelectedNonAdditiveOffer("");
-      // } else {
-      //   setSelectedNonAdditiveOffer(event.target.value);
-      // }
-    };
-
-    console.log("Additive", selectedAdditiveOffers);
-    console.log("non additive", selectedNonAdditiveOffer);
-
     function isOfferSelected(id) {
-      console.log("here.....");
       return (
         selectedAdditiveOffers.filter((offer_id) => offer_id === id).length > 0
       );
@@ -1547,50 +1593,33 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
 
     return (
       <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
-        <Typography
-          variant="body3"
-          className={classes.tableHead}
-          sx={{ marginLeft: "6px", marginBottom: "10px" }}
-        >
-          Additive Offers
-        </Typography>
         <Grid
           container
-          sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
+          // sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
           direction={"column"}
         >
           {offers?.map((offer) => {
             return (
               <div className={classes.fulfillment}>
                 <FormControlLabel
-                  label={offer.id}
+                  label={offer.local_id}
                   value={isOfferSelected(offer.id)}
                   control={
                     <Checkbox
                       id={offer.id}
                       checked={isOfferSelected(offer.id)}
+                      disabled={selectedNonAdditiveOffer}
                       onChange={(event) => {
                         let ids = selectedAdditiveOffers;
-                        console.log("ids", ids);
-                        console.log(
-                          "*? ",
-                          selectedAdditiveOffers.includes(offer.id)
-                        );
-                        console.log(
-                          "event.target.checked",
-                          event.target.checked
-                        );
                         if (
                           ids.includes(offer.id) &&
                           event.target.checked === false
                         ) {
-                          console.log("here...1", ids);
-                          ids = ids.filter((id) => id === offer.id);
+                          ids = ids.filter((id) => id !== offer.id);
                         } else {
-                          console.log("here...2");
                           ids.push(offer.id);
                         }
-                        setSelectedAdditiveOffers(ids);
+                        setSelectedAdditiveOffers([...ids]);
                         setSelectedNonAdditiveOffer("");
                       }}
                     />
@@ -1625,10 +1654,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         >
           Offers
         </Typography>
-        {non_additive_offers.length &&
-          renderNonAdditiveOffers(non_additive_offers)}
-        {additive_offers.length &&
+        {additive_offers.length > 0 &&
           renderAdditiveOffers(additive_offers, selectedAdditiveOffers)}
+        {non_additive_offers.length > 0 &&
+          renderNonAdditiveOffers(non_additive_offers)}
       </>
     );
   };
@@ -1659,13 +1688,19 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                     <div
                       style={{
                         minHeight: "80vh",
-                        alignItems: "flex-start",
-                        justifyContent: "flex-start",
                       }}
                     >
-                      {renderProducts()}
+                      <div
+                        style={{
+                          // minHeight: "50vh",
+                          alignItems: "flex-start",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        {renderProducts()}
+                      </div>
+                      {renderOffers()}
                     </div>
-                    {renderOffers()}
                   </Grid>
 
                   <Grid item xs={4}>
