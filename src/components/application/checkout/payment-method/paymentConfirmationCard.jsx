@@ -244,7 +244,7 @@ export default function PaymentConfirmationCard(props) {
           requestId: parent_order_id,
           payload: processPayload.current,
         },
-        () => { }
+        () => {}
       );
     } catch (err) {
       dispatch({
@@ -334,6 +334,8 @@ export default function PaymentConfirmationCard(props) {
             context: {
               city: search_context.location.name,
               state: search_context.location.state,
+              pincode: JSON.parse(getValueFromCookie("delivery_address"))
+                ?.location.address.areaCode,
               parent_order_id: parentOrderIDMap.get(item[0]?.provider?.id)
                 .parent_order_id,
               transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
@@ -348,7 +350,7 @@ export default function PaymentConfirmationCard(props) {
                     : "ON-ORDER",
                 transaction_id: parentOrderIDMap.get(item[0]?.provider?.id)
                   .transaction_id,
-                paymentGatewayEnabled: false //TODO: we send false for, if we enabled jusPay the we will handle.
+                paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
               },
               quote: {
                 ...productsQuote[index],
@@ -363,7 +365,9 @@ export default function PaymentConfirmationCard(props) {
         )
       );
       //Error handling workflow eg, NACK
-      const isNACK = data.find((item) => item.error && item.message.ack.status === "NACK");
+      const isNACK = data.find(
+        (item) => item.error && item.message.ack.status === "NACK"
+      );
       if (isNACK) {
         dispatchError(isNACK.error.message);
         setConfirmOrderLoading(false);
@@ -481,14 +485,14 @@ export default function PaymentConfirmationCard(props) {
         style={
           isCurrentStep()
             ? {
-              borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
-              borderBottomRightRadius: 0,
-              borderBottomLeftRadius: 0,
-            }
+                borderBottom: `1px solid ${ONDC_COLORS.BACKGROUNDCOLOR}`,
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 0,
+              }
             : {
-              borderBottomRightRadius: "10px",
-              borderBottomLeftRadius: "10px",
-            }
+                borderBottomRightRadius: "10px",
+                borderBottomLeftRadius: "10px",
+              }
         }
       >
         <p className={styles.card_header_title}>

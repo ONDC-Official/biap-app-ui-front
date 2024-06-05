@@ -25,10 +25,11 @@ const useStyles = makeStyles({
     lineHeight: "18px !important",
   },
   itemDescriptionTypo: {
-    color: "#686868 !important",
+    //  color: "#686868 !important",
     marginTop: "12px !important",
     fontWeight: "500 !important",
     lineHeight: "18px !important",
+    fontSize: "14px !important",
   },
   itemCard: {
     display: "flex",

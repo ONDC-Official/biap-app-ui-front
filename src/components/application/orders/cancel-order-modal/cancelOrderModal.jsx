@@ -504,9 +504,8 @@ export default function CancelOrderModal({
                         <div style={{ width: "20%" }}>
                           <div className={productCartStyles.quantity_count_wrapper}>
                             <div
-                              className={`${
-                                orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
-                              } d-flex align-items-center justify-content-center`}
+                              className={`${orderQty[idx]?.count > 1 ? productCartStyles.subtract_svg_wrapper : ""
+                                } d-flex align-items-center justify-content-center`}
                               onClick={() => {
                                 //   setQuantityCount(quantityCount - 1);
                                 //   onReduceQuantity(id);
@@ -529,9 +528,8 @@ export default function CancelOrderModal({
                               </p>
                             </div>
                             <div
-                              className={`${
-                                orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""
-                              } d-flex align-items-center justify-content-center`}
+                              className={`${orderQty[idx]?.count < quantity[idx]?.count ? productCartStyles.add_svg_wrapper : ""
+                                } d-flex align-items-center justify-content-center`}
                               onClick={() => {
                                 //   setQuantityCount((quantityCount) => quantityCount + 1);
                                 //   onAddQuantity(id);
@@ -564,6 +562,7 @@ export default function CancelOrderModal({
             <div className="px-2">
               <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
               <Dropdown
+                id="dropdownOne"
                 header={
                   <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
                     <div className="px-2">
@@ -578,7 +577,7 @@ export default function CancelOrderModal({
                     </div>
                   </div>
                 }
-                body_classes="dropdown-menu-right"
+                body_classes="dropdown-menu-end dropdown-menu-lg-start"
                 style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
                 click={(reasonValue) => {
                   const REASONS = reasons;
@@ -601,6 +600,7 @@ export default function CancelOrderModal({
             <div className="px-2">
               <p className={styles.cancel_dropdown_label_text}>Select your Reason</p>
               <Dropdown
+                id="dropdownTwo"
                 header={
                   <div className={`${styles.cancel_dropdown_wrapper} d-flex align-items-center`}>
                     <div className="px-2">
@@ -615,7 +615,7 @@ export default function CancelOrderModal({
                     </div>
                   </div>
                 }
-                body_classes="dropdown-menu-right"
+                body_classes="dropdown-menu-end dropdown-menu-lg-start"
                 style={{ width: "100% !important", maxHeight: "250px", overflow: "auto" }}
                 click={(reasonValue) => {
                   const REASONS = reasons;

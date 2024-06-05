@@ -40,7 +40,10 @@ const EditCustomizations = (props) => {
     for (const level in customization_state) {
       const selectedOptions = customization_state[level].selected;
       if (selectedOptions.length > 0) {
-        subtotal += selectedOptions.reduce((acc, option) => acc + option.price, 0);
+        subtotal += selectedOptions.reduce(
+          (acc, option) => acc + option.price,
+          0
+        );
       }
     }
     return subtotal;
@@ -52,7 +55,9 @@ const EditCustomizations = (props) => {
     let group = customization_state[groupId];
     if (!group) return;
 
-    let customizations = group.selected.map((s) => selectedCustomizationIds.push(s.id));
+    let customizations = group.selected.map((s) =>
+      selectedCustomizationIds.push(s.id)
+    );
     group?.childs?.map((child) => {
       getCustomization_(child);
     });
@@ -64,6 +69,7 @@ const EditCustomizations = (props) => {
     const levels = Object.keys(customization_state);
     const firstGroupId = customization_state["firstGroup"].id;
 
+    selectedCustomizationIds = [];
     getCustomization_(firstGroupId);
 
     for (const cId of selectedCustomizationIds) {
@@ -85,7 +91,9 @@ const EditCustomizations = (props) => {
   const updateCustomizations = async () => {
     const url = `/clientApis/v2/cart/${user.id}/${currentCartItem._id}`;
     const items = cartItems.concat([]);
-    const itemIndex = items.findIndex((item) => item._id === currentCartItem._id);
+    const itemIndex = items.findIndex(
+      (item) => item._id === currentCartItem._id
+    );
     if (itemIndex !== -1) {
       let updatedCartItem = items[itemIndex];
       const updatedCustomizations = getCustomizations();
@@ -104,7 +112,10 @@ const EditCustomizations = (props) => {
     const FnB = "ONDC:RET11";
     const grocery = "ONDC:RET10";
 
-    if (productPayload?.context?.domain == grocery || productPayload?.context?.domain == FnB) {
+    if (
+      productPayload?.context?.domain == grocery ||
+      productPayload?.context?.domain == FnB
+    ) {
       const tags = productPayload.item_details.tags;
       let category = "veg";
 
@@ -150,10 +161,20 @@ const EditCustomizations = (props) => {
 
       return (
         <Grid container alignItems="center" sx={{ marginBottom: 0.8 }}>
-          <div className={classes.square} style={{ borderColor: getTagColor() }}>
-            <div className={classes.circle} style={{ backgroundColor: getTagColor() }}></div>
+          <div
+            className={classes.square}
+            style={{ borderColor: getTagColor() }}
+          >
+            <div
+              className={classes.circle}
+              style={{ backgroundColor: getTagColor() }}
+            ></div>
           </div>
-          <Typography variant="body" color={getTextColor()} sx={{ fontWeight: "600" }}>
+          <Typography
+            variant="body"
+            color={getTextColor()}
+            sx={{ fontWeight: "600" }}
+          >
             {map[category]}
           </Typography>
         </Grid>
@@ -166,7 +187,12 @@ const EditCustomizations = (props) => {
   return (
     <Grid className={classes.editContainer}>
       <Grid className={classes.editDetails}>
-        <Grid container alignItems="center" justifyContent="space-between" sx={{ marginBottom: "20px" }}>
+        <Grid
+          container
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ marginBottom: "20px" }}
+        >
           <Typography variant="h4">Customise your food</Typography>
           <IconButton
             color="inherit"
@@ -180,10 +206,18 @@ const EditCustomizations = (props) => {
           </IconButton>
         </Grid>
         {renderVegNonVegTag()}
-        <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}>
+        <Typography
+          variant="h4"
+          color="black"
+          sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 600 }}
+        >
           {productPayload?.item_details?.descriptor?.name}
         </Typography>
-        <Typography variant="h4" color="black" sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}>
+        <Typography
+          variant="h4"
+          color="black"
+          sx={{ marginBottom: 1, fontFamily: "inter", fontWeight: 700 }}
+        >
           ₹ {productPayload?.item_details?.price?.value}
         </Typography>
         <Divider sx={{ marginBottom: 1.5 }} />
@@ -202,7 +236,9 @@ const EditCustomizations = (props) => {
           fullWidth
           variant="outlined"
           sx={{ marginRight: 1.4 }}
-          onClick={() => history.push(`/application/products?productId=${productPayload.id}`)}
+          onClick={() =>
+            history.push(`/application/products?productId=${productPayload.id}`)
+          }
           disabled={itemOutOfStock}
         >
           View Details

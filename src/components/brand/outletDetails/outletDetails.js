@@ -22,6 +22,11 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { SearchContext } from "../../../context/searchContext";
 import ModalComponent from "../../common/Modal";
 
+import Offers from "../../common/Offers/Offers";
+import { getAllOffersRequest } from "../../../api/offer.api";
+import { ToastContext } from "../../../context/toastContext";
+import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
+
 const OutletDetails = (props) => {
   const { brandId, outletId } = props;
   const classes = useStyles();
@@ -33,8 +38,12 @@ const OutletDetails = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [callNowModal, setCallNowModal] = useState(false);
 
+  const [isStoreDelivering, setIsStoreDelivering] = useState(true);
+  const [offers, setOffers] = useState([]);
+
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
+  const dispatch = useContext(ToastContext);
 
   const getBrandDetails = async () => {
     setIsLoading(true);
@@ -73,7 +82,33 @@ const OutletDetails = (props) => {
       } else {
       }
       setOutletDetails(data);
+      if (data.time.label === "enable") {
+        setIsStoreDelivering(true);
+      } else {
+        setIsStoreDelivering(false);
+      }
     } catch (err) {
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAllOffers = async (bId, oId) => {
+    setIsLoading(true);
+    try {
+      const lat = "12.992906760898983";
+      const lng = "77.76323574850733";
+      const data = await cancellablePromise(getAllOffersRequest('', lat, lng, bId, oId));
+      setOffers(data);
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +117,7 @@ const OutletDetails = (props) => {
   useEffect(() => {
     if (brandId) {
       getBrandDetails();
+      getAllOffers(brandId, outletId);
     }
   }, [brandId, outletId, deliveryAddressLocation]);
 
@@ -131,14 +167,23 @@ const OutletDetails = (props) => {
                 </Button>
                 <Button
                   className={classes.actionButton}
-                  variant="outlined" color="primary"
+                  variant="outlined"
+                  color="primary"
                   onClick={() => {
-                    setCallNowModal(true)
+                    setCallNowModal(true);
                   }}
                 >
                   Call Now
                 </Button>
               </div>
+
+              {!isStoreDelivering && (
+                <Grid container justifyContent="start" style={{ marginTop: 30, marginBottom: 10 }}>
+                  <Typography variant="body" color="#D83232" style={{ fontSize: 20 }}>
+                    {brandDetails?.descriptor?.name} is not delivering at the moment
+                  </Typography>
+                </Grid>
+              )}
             </div>
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
@@ -156,13 +201,15 @@ const OutletDetails = (props) => {
                 {/*    src={map}*/}
                 {/*    alt={`map-img-${outletDetails?.id}`}*/}
                 {/*/>*/}
-                {
-                  outletDetails?.circle?.gps && (
-                    <ViewOnlyMap
-                      location={outletDetails?.circle?.gps ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)] : null}
-                    />
-                  )
-                }
+                {outletDetails?.circle?.gps && (
+                  <ViewOnlyMap
+                    location={
+                      outletDetails?.circle?.gps
+                        ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)]
+                        : null
+                    }
+                  />
+                )}
               </div>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
                 {`${outletDetails?.address
@@ -185,7 +232,23 @@ const OutletDetails = (props) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
             <Box component={"div"} className={classes.divider} />
-            <CustomMenu brandId={brandId} brandDetails={brandDetails} outletDetails={outletDetails} />
+
+            {
+              offers && offers.length > 0 && (
+                <div className={classes.offers}>
+                  <Offers
+                    offersList={offers}
+                    isDisplayOnStorePage={true}
+                  />
+                </div>
+              )
+            }
+            <CustomMenu
+              brandId={brandId}
+              brandDetails={brandDetails}
+              outletDetails={outletDetails}
+              isStoreDelivering={isStoreDelivering}
+            />
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} xl={4}></Grid>
         </Grid>

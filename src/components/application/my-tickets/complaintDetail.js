@@ -77,8 +77,9 @@ const ComplaintDetail = () => {
     }
 
     useEffect(() => {
-        mergeRespondantArrays(issue_actions)
+        // mergeRespondantArrays(issue_actions)
         fetchOnIssueDataThroughEvents()
+        getIssue(transaction_id)
     }, [])
 
 
@@ -119,6 +120,37 @@ const ComplaintDetail = () => {
             },
         ];
     }
+    const getIssue = async () => {
+        setStatusLoading(true);
+        try {
+          const response = await cancellablePromise(
+            getCall(`/issueApis/v1/issue`, {
+              transactionId: data?.transaction_id,
+            })
+          );
+  
+          if (response?.issue?.issue_actions) {
+            mergeRespondantArrays({
+              respondent_actions:
+                response.issue?.issue_actions?.respondent_actions,
+              complainant_actions:
+                response.issue?.issue_actions?.complainant_actions,
+            });
+          }
+          setStatusLoading(false);
+        } catch (err) {
+          dispatch({
+            type: toast_actions.ADD_TOAST,
+            payload: {
+              id: Math.floor(Math.random() * 100),
+              type: toast_types.error,
+              message: "Something went wrong!",
+            },
+          });
+          setStatusLoading(false);
+        }
+        // eslint-disable-next-line
+      };
 
     // on Issue api
     async function getPartialCancelOrderDetails(message_id, createdDateTime) {

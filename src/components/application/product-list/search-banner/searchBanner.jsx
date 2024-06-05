@@ -490,6 +490,7 @@ export default function SearchBanner({ onSearch, location }) {
                 className={`d-flex align-items-center ${styles.modal_input_wrappper}`}
               >
                 <Dropdown
+                  id="dropdownOne"
                   header={
                     <div
                       className={`${styles.category_drodpwon_wrapper} d-flex align-items-center`}
@@ -506,7 +507,7 @@ export default function SearchBanner({ onSearch, location }) {
                       </div>
                     </div>
                   }
-                  body_classes="dropdown-menu-right"
+                  body_classes="dropdown-menu-end dropdown-menu-lg-start"
                   click={(search_type) => {
                     setSearch((search) => ({
                       ...search,
