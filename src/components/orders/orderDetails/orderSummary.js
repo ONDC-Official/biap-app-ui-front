@@ -28,9 +28,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import IssueOrderModal from "./issueOrderModal";
 import { useHistory } from "react-router-dom";
-import Rating from "@mui/material/Rating";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import RatingsModal from "./ratingsModal";
 
 const OrderSummary = ({
   orderDetails,
@@ -50,7 +47,6 @@ const OrderSummary = ({
 
   const [toggleReturnOrderModal, setToggleReturnOrderModal] = useState(false);
   const [toggleCancelOrderModal, setToggleCancelOrderModal] = useState(false);
-  const [toggleRatingsModal, setToggleRatingsModal] = useState(false);
   const [productsList, setProductsList] = useState([]);
   const [allNonCancellable, setAllNonCancellable] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
@@ -298,11 +294,7 @@ const OrderSummary = ({
                 value: item.price,
               };
               let prev_item_data = items[key];
-              let addition_item_data = {
-                title: item.title,
-                price: price,
-                fulfillment_status: item.fulfillment_status,
-              };
+              let addition_item_data = { title: item.title, price: price };
               items[key] = { ...prev_item_data, ...addition_item_data };
             }
             if (
@@ -347,7 +339,6 @@ const OrderSummary = ({
                 textClass: item.textClass,
                 quantity: item.quantity,
                 cartQuantity: item.cartQuantity,
-                fulfillment_status: item.fulfillment_status,
               };
               items[key]["customizations"][item.id] = {
                 ...existing_data,
@@ -536,7 +527,6 @@ const OrderSummary = ({
                 cancellation_status:
                   orderDetails.items?.[index]?.cancellation_status ?? "",
                 return_status: orderDetails.items?.[index]?.return_status ?? "",
-                fulfillment_id: orderDetails.items?.[index]?.fulfillment_id,
                 fulfillment_status:
                   orderDetails.items?.[index]?.fulfillment_status ?? "",
                 customizations: customizations ?? null,
@@ -1368,10 +1358,7 @@ const OrderSummary = ({
         {/*<Box component={"div"} className={classes.orderSummaryDivider} />*/}
         {renderQuote()}
         <div className={classes.summaryItemActionContainer}>
-          {(orderDetails?.state === "Created" ||
-            orderDetails?.state === "Accepted" ||
-            orderDetails?.state === "In-progress" ||
-            orderDetails?.state === "Completed") && (
+          { (orderDetails?.state === "Created" || orderDetails?.state === "Accepted" || orderDetails?.state === "In-progress" || orderDetails?.state === "Completed") && (
             <>
               {isIssueRaised ? (
                 <Button
@@ -1581,69 +1568,6 @@ const OrderSummary = ({
           navigate
         </a>
       </Card>
-      <Card
-        className={classes.ratingsCard}
-        onClick={() => {
-          setToggleRatingsModal(true);
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div>
-            <Typography variant="body">Rate your order</Typography>
-            <div className={classes.ratingsCardRatings}>
-              <Rating name="read-only" value={5} readOnly />
-            </div>
-          </div>
-          <div style={{ paddingTop: "15px", paddingRight: "10px" }}>
-            <ArrowForwardIosIcon />
-          </div>
-        </div>
-      </Card>
-      {toggleRatingsModal && (
-        <RatingsModal
-          onClose={() => setToggleRatingsModal(false)}
-          onSuccess={() => {
-            setToggleReturnOrderModal(false);
-            onUpdateOrder();
-          }}
-          // quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-          quantity={orderDetails.items
-            ?.filter(
-              (item) =>
-                !item.hasOwnProperty("cancellation_status") ||
-                (item.hasOwnProperty("cancellation_status") &&
-                  item.cancellation_status == "") ||
-                !item.hasOwnProperty("return_status") ||
-                (item.hasOwnProperty("return_status") &&
-                  item.return_status == "")
-            )
-            .map(({ quantity }) => quantity)}
-          productList={generateProductsList(orderDetails, itemQuotes).filter(
-            (item) => {
-              if (
-                !item.hasOwnProperty("cancellation_status") ||
-                (item.hasOwnProperty("cancellation_status") &&
-                  item.cancellation_status == "") ||
-                !item.hasOwnProperty("return_status") ||
-                (item.hasOwnProperty("return_status") &&
-                  item.return_status == "")
-              ) {
-                return item;
-              }
-            }
-          )}
-          order_status={orderDetails.state}
-          bpp_id={orderDetails.bppId}
-          transaction_id={orderDetails.transactionId}
-          order_id={orderDetails.id}
-          domain={orderDetails.domain}
-          bpp_uri={orderDetails.bpp_uri}
-          handleFetchUpdatedStatus={handleFetchUpdatedStatus}
-          onUpdateOrder={onUpdateOrder}
-          provider={orderDetails.provider}
-          fulfillments={orderDetails.fulfillments}
-        />
-      )}
       <br />
       {returnOrCancelledItems.length > 0 && (
         <Card className={classes.orderSummaryCard}>

@@ -22,11 +22,6 @@ import useCancellablePromise from "../../../api/cancelRequest";
 import { SearchContext } from "../../../context/searchContext";
 import ModalComponent from "../../common/Modal";
 
-import Offers from "../../common/Offers/Offers";
-import { getAllOffersRequest } from "../../../api/offer.api";
-import { ToastContext } from "../../../context/toastContext";
-import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
-
 const OutletDetails = (props) => {
   const { brandId, outletId } = props;
   const classes = useStyles();
@@ -39,11 +34,9 @@ const OutletDetails = (props) => {
   const [callNowModal, setCallNowModal] = useState(false);
 
   const [isStoreDelivering, setIsStoreDelivering] = useState(true);
-  const [offers, setOffers] = useState([]);
 
   // HOOKS
   const { cancellablePromise } = useCancellablePromise();
-  const dispatch = useContext(ToastContext);
 
   const getBrandDetails = async () => {
     setIsLoading(true);
@@ -93,31 +86,9 @@ const OutletDetails = (props) => {
     }
   };
 
-  const getAllOffers = async (bId, oId) => {
-    setIsLoading(true);
-    try {
-      const lat = "12.992906760898983";
-      const lng = "77.76323574850733";
-      const data = await cancellablePromise(getAllOffersRequest('', lat, lng, bId, oId));
-      setOffers(data);
-    } catch (err) {
-      dispatch({
-        type: toast_actions.ADD_TOAST,
-        payload: {
-          id: Math.floor(Math.random() * 100),
-          type: toast_types.error,
-          message: err?.response?.data?.error?.message,
-        },
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (brandId) {
       getBrandDetails();
-      getAllOffers(brandId, outletId);
     }
   }, [brandId, outletId, deliveryAddressLocation]);
 
@@ -152,10 +123,11 @@ const OutletDetails = (props) => {
                 {outletDetails?.description}
               </Typography>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${outletDetails?.address
-                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                  : "-"
-                  }`}
+                {`${
+                  outletDetails?.address
+                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                    : "-"
+                }`}
               </Typography>
               <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
                 {outletDetails?.isOpen && <span className={classes.isOpen}>Open now</span>}
@@ -212,10 +184,11 @@ const OutletDetails = (props) => {
                 )}
               </div>
               <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${outletDetails?.address
-                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                  : "-"
-                  }`}
+                {`${
+                  outletDetails?.address
+                    ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
+                    : "-"
+                }`}
               </Typography>
               {/* <Typography
                                 color="primary.main" component="div" variant="body"
@@ -232,17 +205,6 @@ const OutletDetails = (props) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
             <Box component={"div"} className={classes.divider} />
-
-            {
-              offers && offers.length > 0 && (
-                <div className={classes.offers}>
-                  <Offers
-                    offersList={offers}
-                    isDisplayOnStorePage={true}
-                  />
-                </div>
-              )
-            }
             <CustomMenu
               brandId={brandId}
               brandDetails={brandDetails}

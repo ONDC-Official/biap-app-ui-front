@@ -36,7 +36,7 @@ const SingleCategory = ({ data, index }) => {
       <div className={`${classes.categoryItemImageContainer} ${customMenuId === id ? classes.selectedCategory : ""}`}>
         <img
           className={classes.categoryImage}
-          src={images && images.length > 0 && images[0] ? images[0] : no_image_found}
+          src={images.length > 0 ? images[0] : no_image_found}
           alt={`sub-category-img-${index}`}
         />
       </div>
