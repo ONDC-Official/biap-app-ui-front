@@ -29,6 +29,9 @@ import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { SearchContext } from "../../../context/searchContext";
 import Loading from "../../shared/loading/loading";
+import Offers from "../../common/Offers/Offers";
+import { getAllOffersRequest } from "../../../api/offer.api";
+
 const Products = ({ brandDetails, brandId }) => {
   const classes = useStyles();
   const history = useHistory();
@@ -55,6 +58,7 @@ const Products = ({ brandDetails, brandId }) => {
     pageSize: 18,
     searchData: [],
   });
+  const [offers, setOffers] = useState([]);
   const dispatch = useContext(ToastContext);
 
   // HOOKS
@@ -77,7 +81,7 @@ const Products = ({ brandDetails, brandId }) => {
         r[e.code] = e.selectedValues.join();
         return r;
       },
-      {});
+        {});
       paginationData.searchData.pageNumber = paginationData.page;
       paginationData.searchData.limit = paginationData.pageSize;
       if (brandId) {
@@ -180,6 +184,33 @@ const Products = ({ brandDetails, brandId }) => {
     getAllFilters();
   }, []);
 
+  const getAllOffers = async (bId) => {
+    setIsLoading(true);
+    try {
+      const lat = "12.992906760898983";
+      const lng = "77.76323574850733";
+      const data = await cancellablePromise(getAllOffersRequest('', lat, lng, bId));
+      setOffers(data);
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (brandId) {
+      getAllOffers(brandId);
+    }
+  }, [brandId]);
+
   useEffect(() => {
     getAllProducts(brandId, "");
   }, [paginationModel]);
@@ -209,7 +240,7 @@ const Products = ({ brandDetails, brandId }) => {
     try {
       setProductLoading(true);
       const data = await cancellablePromise(
-        getCall(`/protocol/item-details?id=${productId}`)
+        getCall(`/clientApis/v2/item-details?id=${productId}`)
       );
       setProductPayload(data);
       return data;
@@ -320,6 +351,18 @@ const Products = ({ brandDetails, brandId }) => {
             </Button>
           </>
         )}
+      </Grid>
+      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+        {
+          offers && offers.length > 0 && (
+            <div className={classes.offers}>
+              <Offers
+                offersList={offers}
+                isDisplayOnStorePage={true}
+              />
+            </div>
+          )
+        }
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         {paginationModel.searchData &&
