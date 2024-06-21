@@ -22,7 +22,7 @@ export const getAllBrandsRequest = () => {
 export const getBrandDetailsRequest = (brandId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await getCall(`/clientApis/v2/provider-details?id=${brandId}`);
+      const data = await getCall(`/protocol/provider-details?id=${brandId}`);
       //const data = await getCall(`/protocol/providers/${brandId}`);
       return resolve(data);
     } catch (err) {
@@ -98,7 +98,7 @@ export const getAllOutletsFromCategoryAndLocationRequest = (params) => {
     };
     try {
       // const data = await getCall(`/clientApis/v2/locations`);
-      const data = await getCall(`/clientApis/v2/locations`, reqParams);
+      const data = await getCall(`/protocol/locations`, reqParams);
       return resolve(data);
     } catch (err) {
       return reject(err);
@@ -126,7 +126,7 @@ export const getOutletDetailsRequest = (locationId) => {
     try {
       // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
       // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
-      const data = await getCall(`/clientApis/v2/location-details?id=${locationId}`);
+      const data = await getCall(`/protocol/location-details?id=${locationId}`);
       return resolve(data);
     } catch (err) {
       return reject(err);

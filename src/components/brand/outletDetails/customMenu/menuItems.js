@@ -118,7 +118,7 @@ const MenuItems = (props) => {
     try {
       setProductLoading(productId);
       const data = await cancellablePromise(
-        getCall(`/clientApis/v2/item-details?id=${productId}`)
+        getCall(`/protocol/item-details?id=${productId}`)
       );
       setProductPayload(data);
       return data;
