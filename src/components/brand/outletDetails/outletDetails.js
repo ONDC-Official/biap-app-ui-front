@@ -16,8 +16,12 @@ import no_image_found from "../../../assets/images/no_image_found.png";
 import CustomMenu from "./customMenu/customMenu";
 import PlacePickerMap from "../../common/PlacePickerMap/PlacePickerMap";
 import ViewOnlyMap from "../../common/ViewOnlyMap/ViewOnlyMap";
+import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
 
-import { getBrandDetailsRequest, getOutletDetailsRequest } from "../../../api/brand.api";
+import {
+  getBrandDetailsRequest,
+  getOutletDetailsRequest,
+} from "../../../api/brand.api";
 import useCancellablePromise from "../../../api/cancelRequest";
 import { SearchContext } from "../../../context/searchContext";
 import ModalComponent from "../../common/Modal";
@@ -71,10 +75,9 @@ const OutletDetails = (props) => {
         lng: data.circle.gps[1],
       };
       if (data.time.range.start && data.time.range.end) {
-        data.timings = `${moment(data.time.range.start, "hhmm").format("h:mm a")} - ${moment(
-          data.time.range.end,
-          "hhmm"
-        ).format("h:mm a")}`;
+        data.timings = `${moment(data.time.range.start, "hhmm").format(
+          "h:mm a"
+        )} - ${moment(data.time.range.end, "hhmm").format("h:mm a")}`;
         const time = moment(new Date(), "hh:mm");
         const startTime = moment(data.time.range.start, "hh:mm");
         const endTime = moment(data.time.range.end, "hh:mm");
@@ -96,9 +99,16 @@ const OutletDetails = (props) => {
   const getAllOffers = async (bId, oId) => {
     setIsLoading(true);
     try {
-      const lat = "12.992906760898983";
-      const lng = "77.76323574850733";
-      const data = await cancellablePromise(getAllOffersRequest('', lat, lng, bId, oId));
+      // const lat = "12.992906760898983";
+      // const lng = "77.76323574850733";
+
+      const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo"));
+      console.log("LAT", latLongInfo);
+      const lat = latLongInfo.lat;
+      const lng = latLongInfo.lng;
+      const data = await cancellablePromise(
+        getAllOffersRequest("", lat, lng, bId, oId)
+      );
       setOffers(data);
     } catch (err) {
       dispatch({
@@ -126,43 +136,91 @@ const OutletDetails = (props) => {
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <div role="presentation">
           <Breadcrumbs aria-label="breadcrumb">
-            <MuiLink component={Link} underline="hover" color="inherit" to="/application/products">
+            <MuiLink
+              component={Link}
+              underline="hover"
+              color="inherit"
+              to="/application/products"
+            >
               Home
             </MuiLink>
-            <MuiLink component={Link} underline="hover" color="inherit" to={`/application/brand?brandId=${brandId}`}>
+            <MuiLink
+              component={Link}
+              underline="hover"
+              color="inherit"
+              to={`/application/brand?brandId=${brandId}`}
+            >
               {brandDetails?.descriptor?.name}
             </MuiLink>
-            {brandId && <Typography color="text.primary">{`${brandDetails?.descriptor?.name} Details`}</Typography>}
+            {brandId && (
+              <Typography color="text.primary">{`${brandDetails?.descriptor?.name} Details`}</Typography>
+            )}
           </Breadcrumbs>
         </div>
       </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.outletDetailsHeaderContainer}>
+      <Grid
+        item
+        xs={12}
+        sm={12}
+        md={12}
+        lg={12}
+        xl={12}
+        className={classes.outletDetailsHeaderContainer}
+      >
         <Grid container spacing={2}>
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
             <Card className={classes.outletDetailsCard}>
               <img
                 className={classes.outletImage}
-                src={brandDetails?.descriptor?.symbol ? brandDetails?.descriptor?.symbol : no_image_found}
+                src={
+                  brandDetails?.descriptor?.symbol
+                    ? brandDetails?.descriptor?.symbol
+                    : no_image_found
+                }
                 alt={`outlet-img-${outletDetails?.id}`}
               />
             </Card>
             <div className={classes.detailsContainer}>
-              <Typography variant="h2">{brandDetails?.descriptor?.name}</Typography>
-              <Typography component="div" variant="body" className={classes.descriptionTypo}>
+              <Typography variant="h2">
+                {brandDetails?.descriptor?.name}
+              </Typography>
+              <Typography
+                component="div"
+                variant="body"
+                className={classes.descriptionTypo}
+              >
                 {outletDetails?.description}
               </Typography>
-              <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${outletDetails?.address
-                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                  : "-"
-                  }`}
+              <Typography
+                color="error.dark"
+                component="div"
+                variant="body"
+                className={classes.outletNameTypo}
+              >
+                {`${
+                  outletDetails?.address
+                    ? `${outletDetails?.address?.street || "-"}, ${
+                        outletDetails?.address?.city || "-"
+                      }`
+                    : "-"
+                }`}
               </Typography>
-              <Typography component="div" variant="body" className={classes.outletOpeningTimeTypo}>
-                {outletDetails?.isOpen && <span className={classes.isOpen}>Open now</span>}
+              <Typography
+                component="div"
+                variant="body"
+                className={classes.outletOpeningTimeTypo}
+              >
+                {outletDetails?.isOpen && (
+                  <span className={classes.isOpen}>Open now</span>
+                )}
                 {outletDetails?.isOpen ? ` - ` : ""} {outletDetails?.timings}
               </Typography>
               <div className={classes.actionButtonContainer}>
-                <Button className={classes.actionButton} variant="outlined" color="error">
+                <Button
+                  className={classes.actionButton}
+                  variant="outlined"
+                  color="error"
+                >
                   Get Direction
                 </Button>
                 <Button
@@ -178,9 +236,18 @@ const OutletDetails = (props) => {
               </div>
 
               {!isStoreDelivering && (
-                <Grid container justifyContent="start" style={{ marginTop: 30, marginBottom: 10 }}>
-                  <Typography variant="body" color="#D83232" style={{ fontSize: 20 }}>
-                    {brandDetails?.descriptor?.name} is not delivering at the moment
+                <Grid
+                  container
+                  justifyContent="start"
+                  style={{ marginTop: 30, marginBottom: 10 }}
+                >
+                  <Typography
+                    variant="body"
+                    color="#D83232"
+                    style={{ fontSize: 20 }}
+                  >
+                    {brandDetails?.descriptor?.name} is not delivering at the
+                    moment
                   </Typography>
                 </Grid>
               )}
@@ -205,17 +272,28 @@ const OutletDetails = (props) => {
                   <ViewOnlyMap
                     location={
                       outletDetails?.circle?.gps
-                        ? [parseFloat(outletDetails?.circle?.gps?.lat), parseFloat(outletDetails?.circle?.gps?.lng)]
+                        ? [
+                            parseFloat(outletDetails?.circle?.gps?.lat),
+                            parseFloat(outletDetails?.circle?.gps?.lng),
+                          ]
                         : null
                     }
                   />
                 )}
               </div>
-              <Typography color="error.dark" component="div" variant="body" className={classes.outletNameTypo}>
-                {`${outletDetails?.address
-                  ? `${outletDetails?.address?.street || "-"}, ${outletDetails?.address?.city || "-"}`
-                  : "-"
-                  }`}
+              <Typography
+                color="error.dark"
+                component="div"
+                variant="body"
+                className={classes.outletNameTypo}
+              >
+                {`${
+                  outletDetails?.address
+                    ? `${outletDetails?.address?.street || "-"}, ${
+                        outletDetails?.address?.city || "-"
+                      }`
+                    : "-"
+                }`}
               </Typography>
               {/* <Typography
                                 color="primary.main" component="div" variant="body"
@@ -233,16 +311,11 @@ const OutletDetails = (props) => {
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
             <Box component={"div"} className={classes.divider} />
 
-            {
-              offers && offers.length > 0 && (
-                <div className={classes.offers}>
-                  <Offers
-                    offersList={offers}
-                    isDisplayOnStorePage={true}
-                  />
-                </div>
-              )
-            }
+            {offers && offers.length > 0 && (
+              <div className={classes.offers}>
+                <Offers offersList={offers} isDisplayOnStorePage={true} />
+              </div>
+            )}
             <CustomMenu
               brandId={brandId}
               brandDetails={brandDetails}
@@ -260,7 +333,11 @@ const OutletDetails = (props) => {
         }}
         title="Call Now"
       >
-        <Typography component="div" variant="body" className={classes.contactNumbers}>
+        <Typography
+          component="div"
+          variant="body"
+          className={classes.contactNumbers}
+        >
           +91 92729282982, +91 92729282982
         </Typography>
       </ModalComponent>
