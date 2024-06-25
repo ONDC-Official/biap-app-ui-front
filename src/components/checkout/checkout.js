@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useContext,
+} from "react";
 import useStyles from "./style";
 
 import Grid from "@mui/material/Grid";
@@ -79,7 +85,9 @@ const Checkout = () => {
 
   const resetCartItems = () => {
     const cartItemsData = JSON.parse(localStorage.getItem("cartItems"));
-    const updatedCartItemsData = JSON.parse(localStorage.getItem("updatedCartItems"));
+    const updatedCartItemsData = JSON.parse(
+      localStorage.getItem("updatedCartItems")
+    );
     setCartItems(cartItemsData);
     setSelectedFulfillments({});
     setUpdatedCartItems(updatedCartItemsData);
@@ -99,13 +107,22 @@ const Checkout = () => {
   useEffect(() => {
     resetCartItems();
     let timeout;
-    const duration = moment.duration(updatedCartItems[0]?.message.quote.quote.ttl);
+    const duration = moment.duration(
+      updatedCartItems[0]?.message.quote.quote.ttl
+    );
 
     if (updatedCartItems[0]?.message.quote.quote.ttl) {
-      console.log("Request timeout", updatedCartItems[0]?.message.quote.quote.ttl, duration.asMilliseconds());
+      console.log(
+        "Request timeout",
+        updatedCartItems[0]?.message.quote.quote.ttl,
+        duration.asMilliseconds()
+      );
       timeout = setTimeout(() => {
         history.push("/application/cart");
-        dispatchToast(toast_types.error, "Request Timed out, please try again!");
+        dispatchToast(
+          toast_types.error,
+          "Request Timed out, please try again!"
+        );
       }, duration.asMilliseconds());
 
       return () => {
@@ -151,14 +168,20 @@ const Checkout = () => {
             provider.name = provided_by;
             let uuid = 0;
             const all_items = breakup?.map((break_up_item) => {
-              const cartIndex = cartList?.findIndex((one) => one.id === break_up_item["@ondc/org/item_id"]);
+              const cartIndex = cartList?.findIndex(
+                (one) => one.id === break_up_item["@ondc/org/item_id"]
+              );
               const cartItem = cartIndex > -1 ? cartList[cartIndex] : null;
               let findItemFromCartItems = null;
               let isCustimization = false;
               if (break_up_item?.item?.tags) {
-                const findTag = break_up_item?.item?.tags.find((tag) => tag.code === "type");
+                const findTag = break_up_item?.item?.tags.find(
+                  (tag) => tag.code === "type"
+                );
                 if (findTag) {
-                  const findCust = findTag.list.find((listItem) => listItem.value === "customization");
+                  const findCust = findTag.list.find(
+                    (listItem) => listItem.value === "customization"
+                  );
                   if (findCust) {
                     isCustimization = true;
                   } else {
@@ -175,7 +198,9 @@ const Checkout = () => {
                     }
                   });
                 } else {
-                  if (ci?.item?.local_id === break_up_item["@ondc/org/item_id"]) {
+                  if (
+                    ci?.item?.local_id === break_up_item["@ondc/org/item_id"]
+                  ) {
                     findItemFromCartItems = ci?.item;
                   }
                 }
@@ -203,7 +228,10 @@ const Checkout = () => {
                   }
                 }
               } else if (quantity !== cartQuantity) {
-                textClass = break_up_item["@ondc/org/title_type"] === "item" ? "text-amber" : "";
+                textClass =
+                  break_up_item["@ondc/org/title_type"] === "item"
+                    ? "text-amber"
+                    : "";
                 quantityMessage = `Quantity: ${quantity}/${cartQuantity}`;
                 isError = true;
 
@@ -230,6 +258,8 @@ const Checkout = () => {
                 isFulfillment: isItemFulfillment(break_up_item),
                 isDelivery:
                   break_up_item["@ondc/org/title_type"] === "delivery",
+                isOffer: break_up_item["@ondc/org/title_type"] === "offer",
+                offer: getOfferDetails(break_up_item?.item?.tags),
                 parent_item_id: break_up_item?.item?.parent_item_id,
                 price: Number(break_up_item.price?.value)?.toFixed(2),
                 cartQuantity,
@@ -243,8 +273,10 @@ const Checkout = () => {
               };
             });
 
+            console.log("all_items", all_items);
             let items = {};
             let delivery = {};
+            let offers = [];
             let outOfStock = [];
             let errorCode = "";
             let selected_fulfillments = selectedFulfillments;
@@ -410,10 +442,23 @@ const Checkout = () => {
                   value: item.price,
                 };
               }
+
+              // for order level offer
+              if (item.isOffer && item.offer?.type === "order") {
+                let key = item.id;
+                let offer = {
+                  title: item.offer?.name,
+                  value: item.price,
+                };
+                offers.push(offer);
+              }
             });
+
+            console.log("offers", offers);
             setQuoteItemInProcessing(null);
             provider.items = items;
             provider.delivery = delivery;
+            provider.offers = offers;
             provider.outOfStock = outOfStock;
             provider.errorCode = errorCode || "";
             if (errorCode !== "") {
@@ -450,9 +495,13 @@ const Checkout = () => {
         let c = cartItems.map((item) => {
           return item.item;
         });
-        const { successOrderIds } = JSON.parse(localStorage.getItem("checkout_details") || "{}");
+        const { successOrderIds } = JSON.parse(
+          localStorage.getItem("checkout_details") || "{}"
+        );
         const request_object = constructQouteObject(
-          c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
+          c.filter(({ provider }) =>
+            successOrderIds.includes(provider.local_id.toString())
+          )
         );
         verifyPayment(request_object[0], payment_methods.RAZORPAY);
       } else if (paymentStatus === "fail") {
@@ -472,7 +521,8 @@ const Checkout = () => {
     if (quoteItemInProcessing) {
       msg = `Looks like Quote mapping for item: ${quoteItemInProcessing} is invalid! Please check!`;
     } else {
-      msg = "Seems like issue with quote processing! Please confirm first if quote is valid!";
+      msg =
+        "Seems like issue with quote processing! Please confirm first if quote is valid!";
     }
     dispatchError(msg);
   };
@@ -482,7 +532,10 @@ const Checkout = () => {
     tags?.forEach((tag) => {
       if (tag.code === "type") {
         tag.list.forEach((listOption) => {
-          if (listOption.code === "type" && listOption.value == "customization") {
+          if (
+            listOption.code === "type" &&
+            listOption.value == "customization"
+          ) {
             isCustomization = true;
             return true;
           }
@@ -490,6 +543,36 @@ const Checkout = () => {
       }
     });
     return isCustomization;
+  };
+
+  const getOfferDetails = (tags) => {
+    console.log("tags", tags);
+    let offer_type = "";
+    let offer_name = "";
+
+    tags?.forEach((tag) => {
+      if (tag.code === "quote") {
+        tag.list?.forEach((list_item) => {
+          if (list_item.code === "type") {
+            offer_type = list_item.value;
+          }
+        });
+      }
+
+      if (tag.code === "offer") {
+        tag.list?.forEach((list_item) => {
+          if (list_item.code === "id") {
+            offer_name = list_item.value;
+          }
+        });
+      }
+    });
+
+    if (offer_type && offer_name) {
+      return { type: offer_type, name: offer_name };
+    } else {
+      return {};
+    }
   };
 
   const isItemFulfillment = (breakup_item) => {
@@ -674,7 +757,9 @@ const Checkout = () => {
         return item.item;
       });
       const requestObject = constructQouteObject(
-        c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
+        c.filter(({ provider }) =>
+          successOrderIds.includes(provider.local_id.toString())
+        )
       );
       if (responseRef.current.length === requestObject.length) {
         // redirect to order listing page.
@@ -711,7 +796,9 @@ const Checkout = () => {
   // on confirm order Api
   const onConfirmOrder = async (message_id) => {
     try {
-      const data = await cancellablePromise(getCall(`clientApis/v2/on_confirm_order?messageIds=${message_id}`));
+      const data = await cancellablePromise(
+        getCall(`clientApis/v2/on_confirm_order?messageIds=${message_id}`)
+      );
       responseRef.current = [...responseRef.current, data[0]];
       setEventData((eventData) => [...eventData, data[0]]);
       fetchCartItems();
@@ -750,7 +837,9 @@ const Checkout = () => {
         // check if all the orders got cancled
         if (responseRef.current.length <= 0) {
           setConfirmOrderLoading(false);
-          dispatchError("Cannot fetch details for this product Please try again!");
+          dispatchError(
+            "Cannot fetch details for this product Please try again!"
+          );
           return;
         }
       }, SSE_TIMEOUT);
@@ -780,7 +869,9 @@ const Checkout = () => {
 
   const confirmOrder = async (items, method) => {
     responseRef.current = [];
-    const parentOrderIDMap = new Map(JSON.parse(getValueFromCookie("parent_and_transaction_id_map")));
+    const parentOrderIDMap = new Map(
+      JSON.parse(getValueFromCookie("parent_and_transaction_id_map"))
+    );
     const { productQuotes: productQuotesForCheckout } = JSON.parse(
       // getValueFromCookie("checkout_details") || "{}"
       localStorage.getItem("checkout_details") || "{}"
@@ -794,16 +885,21 @@ const Checkout = () => {
             domain: item.domain,
             city: item.contextCity,
             state: search_context.location.state,
-            parent_order_id: parentOrderIDMap.get(item?.provider?.id).parent_order_id,
-            transaction_id: parentOrderIDMap.get(item?.provider?.id).transaction_id,
-            pincode: JSON.parse(getValueFromCookie("delivery_address"))?.location.address.areaCode,
+            parent_order_id: parentOrderIDMap.get(item?.provider?.id)
+              .parent_order_id,
+            transaction_id: parentOrderIDMap.get(item?.provider?.id)
+              .transaction_id,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
           },
           message: {
             payment: {
               ...updatedCartItems[0].message.quote.payment,
               paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
-              type: method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
-              transaction_id: parentOrderIDMap.get(item?.provider?.id).transaction_id,
+              type:
+                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+              transaction_id: parentOrderIDMap.get(item?.provider?.id)
+                .transaction_id,
               paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
             },
             quote: {
@@ -817,7 +913,9 @@ const Checkout = () => {
           },
         },
       ];
-      const data = await cancellablePromise(postCall("clientApis/v2/confirm_order", queryParams));
+      const data = await cancellablePromise(
+        postCall("clientApis/v2/confirm_order", queryParams)
+      );
       //Error handling workflow eg, NACK
       // const isNACK = data.find(
       //   (item) => item.error && item.message.ack.status === "NACK"
@@ -843,7 +941,9 @@ const Checkout = () => {
 
   const verifyPayment = async (items, method) => {
     responseRef.current = [];
-    const parentOrderIDMap = new Map(JSON.parse(getValueFromCookie("parent_and_transaction_id_map")));
+    const parentOrderIDMap = new Map(
+      JSON.parse(getValueFromCookie("parent_and_transaction_id_map"))
+    );
     const { productQuotes: productQuotesForCheckout } = JSON.parse(
       // getValueFromCookie("checkout_details") || "{}"
       localStorage.getItem("checkout_details") || "{}"
@@ -857,16 +957,21 @@ const Checkout = () => {
             domain: item.domain,
             city: item.contextCity,
             state: search_context.location.state,
-            parent_order_id: parentOrderIDMap.get(item?.provider?.id).parent_order_id,
-            transaction_id: parentOrderIDMap.get(item?.provider?.id).transaction_id,
-            pincode: JSON.parse(getValueFromCookie("delivery_address"))?.location.address.areaCode,
+            parent_order_id: parentOrderIDMap.get(item?.provider?.id)
+              .parent_order_id,
+            transaction_id: parentOrderIDMap.get(item?.provider?.id)
+              .transaction_id,
+            pincode: JSON.parse(getValueFromCookie("delivery_address"))
+              ?.location.address.areaCode,
           },
           message: {
             payment: {
               ...updatedCartItems[0].message.quote.payment,
               paid_amount: Number(productQuotesForCheckout[0]?.price?.value),
-              type: method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
-              transaction_id: parentOrderIDMap.get(item?.provider?.id).transaction_id,
+              type:
+                method === payment_methods.COD ? "ON-FULFILLMENT" : "ON-ORDER",
+              transaction_id: parentOrderIDMap.get(item?.provider?.id)
+                .transaction_id,
               paymentGatewayEnabled: false, //TODO: we send false for, if we enabled jusPay the we will handle.
             },
             quote: {
@@ -888,7 +993,9 @@ const Checkout = () => {
 
       console.log("Verify api payload: ", payloadData);
 
-      const data = await cancellablePromise(postCall("clientApis/v2/razorpay/verify/process", payloadData));
+      const data = await cancellablePromise(
+        postCall("clientApis/v2/razorpay/verify/process", payloadData)
+      );
       // Error handling workflow eg, NACK
       // const isNACK = data.find(
       //   (item) => item.error && item.message.ack.status === "NACK"
@@ -915,7 +1022,10 @@ const Checkout = () => {
 
   const renderDeliveryLine = (quote, key) => {
     return (
-      <div className={classes.summaryDeliveryItemContainer} key={`d-quote-${key}-price`}>
+      <div
+        className={classes.summaryDeliveryItemContainer}
+        key={`d-quote-${key}-price`}
+      >
         <Typography variant="body1" className={classes.summaryDeliveryLabel}>
           {quote?.title}
         </Typography>
@@ -934,20 +1044,52 @@ const Checkout = () => {
         {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data.packing && renderDeliveryLine(data.packing, "packing")}
         {data.misc && renderDeliveryLine(data.misc, "misc")}
-        {data && (data.delivery || data.discount || data.tax || data.packing || data.misc) && (
-          <>
-            <div className={classes.summarySubtotalContainer}>
-              <Typography variant="body2" className={classes.subTotalLabel}>
-                Total
-              </Typography>
-              <Typography variant="body2" className={classes.subTotalValue}>
-                {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
-              </Typography>
-            </div>
-            <Box component={"div"} className={classes.orderTotalDivider} />
-          </>
-        )}
+        {data &&
+          (data.delivery ||
+            data.discount ||
+            data.tax ||
+            data.packing ||
+            data.misc) && (
+            <>
+              <div className={classes.summarySubtotalContainer}>
+                <Typography variant="body2" className={classes.subTotalLabel}>
+                  Total
+                </Typography>
+                <Typography variant="body2" className={classes.subTotalValue}>
+                  {`₹${getDeliveryTotalAmount(productsQuote?.providers)}`}
+                </Typography>
+              </div>
+            </>
+          )}
       </div>
+    );
+  };
+
+  const renderOfferLine = (offer, key) => {
+    return (
+      <div
+        className={classes.summaryDeliveryItemContainer}
+        key={`d-offer-${key}-price`}
+      >
+        <Typography variant="body1" className={classes.summaryDeliveryLabel}>
+          {"Offer (" + offer?.title + ")"}
+        </Typography>
+        <Typography variant="body1" className={classes.summaryItemPriceValue}>
+          {`₹${parseFloat(offer?.value).toFixed(2)}`}
+        </Typography>
+      </div>
+    );
+  };
+
+  const renderOffers = (offers) => {
+    let offers_data = offers.map((offer, index) => {
+      return renderOfferLine(offer, index);
+    });
+    return (
+      <>
+        <Box component={"div"} className={classes.divider} />
+        {offers_data}
+      </>
     );
   };
 
@@ -974,49 +1116,92 @@ const Checkout = () => {
     return total.toFixed(2);
   };
 
+  const getOffersTotalAmount = (providers) => {
+    let total = 0;
+    providers.forEach((provider) => {
+      provider.offers.forEach((offer) => {
+        total = total + parseFloat(offer.value);
+      });
+    });
+    console.log("calculated offers total", total);
+    return total.toFixed(2);
+  };
+
   const renderItemDetails = (quote, qIndex, isCustomization) => {
     //  console.log("Price", quote?.price?.value, "tax", quote?.tax.value);
     return (
       <div>
-        <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-price`}>
+        <div
+          className={classes.summaryQuoteItemContainer}
+          key={`quote-${qIndex}-price`}
+        >
           <Typography
             variant="body1"
-            className={isCustomization ? classes.summaryCustomizationPriceLabel : classes.summaryItemPriceLabel}
+            className={
+              isCustomization
+                ? classes.summaryCustomizationPriceLabel
+                : classes.summaryItemPriceLabel
+            }
           >
             {quote?.price?.title}
           </Typography>
           <Typography
             variant="body1"
-            className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
+            className={
+              isCustomization
+                ? classes.summaryCustomizationPriceValue
+                : classes.summaryItemPriceValue
+            }
           >
             {`₹${parseFloat(quote?.price?.value).toFixed(2)}`}
           </Typography>
         </div>
         {quote?.tax && (
-          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-tax`}>
+          <div
+            className={classes.summaryQuoteItemContainer}
+            key={`quote-${qIndex}-tax`}
+          >
             <Typography
               variant="body1"
-              className={isCustomization ? classes.summaryCustomizationTaxLabel : classes.summaryItemTaxLabel}
+              className={
+                isCustomization
+                  ? classes.summaryCustomizationTaxLabel
+                  : classes.summaryItemTaxLabel
+              }
             >
               {quote?.tax.title}
             </Typography>
             <Typography
               variant="body1"
-              className={isCustomization ? classes.summaryCustomizationPriceValue : classes.summaryItemPriceValue}
+              className={
+                isCustomization
+                  ? classes.summaryCustomizationPriceValue
+                  : classes.summaryItemPriceValue
+              }
             >
               {`₹${parseFloat(quote?.tax.value).toFixed(2)}`}
             </Typography>
           </div>
         )}
         {quote?.discount && (
-          <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-discount`}>
+          <div
+            className={classes.summaryQuoteItemContainer}
+            key={`quote-${qIndex}-discount`}
+          >
             <Typography
               variant="body1"
-              className={isCustomization ? classes.summaryCustomizationDiscountLabel : classes.summaryItemDiscountLabel}
+              className={
+                isCustomization
+                  ? classes.summaryCustomizationDiscountLabel
+                  : classes.summaryItemDiscountLabel
+              }
             >
               {quote?.discount.title}
             </Typography>
-            <Typography variant="body1" className={classes.summaryItemPriceValue}>
+            <Typography
+              variant="body1"
+              className={classes.summaryItemPriceValue}
+            >
               {`₹${parseFloat(quote?.discount.value).toFixed(2)}`}
             </Typography>
           </div>
@@ -1029,7 +1214,9 @@ const Checkout = () => {
     let finalTotal = 0;
     if (providers) {
       providers.forEach((provider) => {
-        const items = Object.values(provider.items).filter((quote) => quote?.title !== "");
+        const items = Object.values(provider.items).filter(
+          (quote) => quote?.title !== ""
+        );
         items.forEach((item) => {
           finalTotal = finalTotal + parseFloat(item.price.value);
           if (item?.tax) {
@@ -1057,7 +1244,11 @@ const Checkout = () => {
     //    throw new Error();
     //  }
 
-    if (productsQuote.isError && provider.errorCode === "40002" && provider.error) {
+    if (
+      productsQuote.isError &&
+      provider.errorCode === "40002" &&
+      provider.error
+    ) {
       return (
         <div key={`outof-stockpindex-${pindex}`}>
           {provider.error && provider.errorCode === "40002" ? (
@@ -1071,14 +1262,25 @@ const Checkout = () => {
                 </Typography>
               </div>
               <div>
-                <div className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}>
-                  <Typography variant="body1" className={classes.summaryItemQuantityLabel}>
+                <div
+                  className={`${classes.summaryQuoteItemContainer} ${classes.marginBottom10}`}
+                >
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityLabel}
+                  >
                     Items
                   </Typography>
-                  <Typography variant="body1" className={classes.summaryItemQuantityValue}>
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityValue}
+                  >
                     Cart Quantity
                   </Typography>
-                  <Typography variant="body1" className={classes.summaryItemQuantityValue}>
+                  <Typography
+                    variant="body1"
+                    className={classes.summaryItemQuantityValue}
+                  >
                     Available Quantity
                   </Typography>
                 </div>
@@ -1086,14 +1288,26 @@ const Checkout = () => {
               {provider.outOfStock.map((outOfStockItems, i) => (
                 <div key={`outof-stock-item-index-${i}`}>
                   <div>
-                    <div className={classes.summaryQuoteItemContainer} key={`quote-${i}-price`}>
-                      <Typography variant="body1" className={classes.summaryItemQuantityLabel}>
+                    <div
+                      className={classes.summaryQuoteItemContainer}
+                      key={`quote-${i}-price`}
+                    >
+                      <Typography
+                        variant="body1"
+                        className={classes.summaryItemQuantityLabel}
+                      >
                         {outOfStockItems?.title}
                       </Typography>
-                      <Typography variant="body1" className={classes.summaryItemQuantityValue}>
+                      <Typography
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
+                      >
                         {`${outOfStockItems?.cartQuantity}`}
                       </Typography>
-                      <Typography variant="body1" className={classes.summaryItemQuantityValue}>
+                      <Typography
+                        variant="body1"
+                        className={classes.summaryItemQuantityValue}
+                      >
                         {`${outOfStockItems?.quantity}`}
                       </Typography>
                     </div>
@@ -1119,33 +1333,52 @@ const Checkout = () => {
           .filter((quote) => quote?.title !== "")
           .map((quote, qIndex) => (
             <div key={`quote-${qIndex}`}>
-              <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-title`}>
-                <Typography variant="body1" className={`${classes.summaryItemLabel} ${quote.textClass}`}>
+              <div
+                className={classes.summaryQuoteItemContainer}
+                key={`quote-${qIndex}-title`}
+              >
+                <Typography
+                  variant="body1"
+                  className={`${classes.summaryItemLabel} ${quote.textClass}`}
+                >
                   {quote?.title}
-                  <p className={`${styles.ordered_from} ${quote.textClass}`}>{quote.quantityMessage}</p>
+                  <p className={`${styles.ordered_from} ${quote.textClass}`}>
+                    {quote.quantityMessage}
+                  </p>
                 </Typography>
               </div>
               {renderItemDetails(quote)}
               {quote?.customizations && (
                 <div key={`quote-${qIndex}-customizations`}>
-                  <div className={classes.summaryQuoteItemContainer} key={`quote-${qIndex}-customizations`}>
-                    <Typography variant="body1" className={classes.summaryItemPriceLabel}>
+                  <div
+                    className={classes.summaryQuoteItemContainer}
+                    key={`quote-${qIndex}-customizations`}
+                  >
+                    <Typography
+                      variant="body1"
+                      className={classes.summaryItemPriceLabel}
+                    >
                       Customizations
                     </Typography>
                   </div>
-                  {Object.values(quote?.customizations).map((customization, cIndex) => (
-                    <div>
-                      <div
-                        className={classes.summaryQuoteItemContainer}
-                        key={`quote-${qIndex}-customizations-${cIndex}`}
-                      >
-                        <Typography variant="body1" className={classes.summaryCustomizationLabel}>
-                          {customization.title}
-                        </Typography>
+                  {Object.values(quote?.customizations).map(
+                    (customization, cIndex) => (
+                      <div>
+                        <div
+                          className={classes.summaryQuoteItemContainer}
+                          key={`quote-${qIndex}-customizations-${cIndex}`}
+                        >
+                          <Typography
+                            variant="body1"
+                            className={classes.summaryCustomizationLabel}
+                          >
+                            {customization.title}
+                          </Typography>
+                        </div>
+                        {renderItemDetails(customization, cIndex, true)}
                       </div>
-                      {renderItemDetails(customization, cIndex, true)}
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -1158,11 +1391,18 @@ const Checkout = () => {
         {/*    {`₹${getItemsTotal(Object.values(provider.items).filter((quote) => quote?.title !== ""))}`}*/}
         {/*  </Typography>*/}
         {/*</div>*/}
-        {productsQuote.isError && provider.errorCode !== "" && provider.errorCode !== "40002" && provider.error && (
-          <Typography variant="body1" color="error" className={classes.summaryItemLabel}>
-            {provider.error}
-          </Typography>
-        )}
+        {productsQuote.isError &&
+          provider.errorCode !== "" &&
+          provider.errorCode !== "40002" &&
+          provider.error && (
+            <Typography
+              variant="body1"
+              color="error"
+              className={classes.summaryItemLabel}
+            >
+              {provider.error}
+            </Typography>
+          )}
       </div>
     );
   };
@@ -1174,9 +1414,13 @@ const Checkout = () => {
           <Card className={classes.summaryCard}>
             <Typography variant="h4">Summary</Typography>
             <Box component={"div"} className={classes.divider} />
-            {productsQuote?.providers.map((provider, pindex) => renderOutofStockItems(provider, pindex))}
+            {productsQuote?.providers.map((provider, pindex) =>
+              renderOutofStockItems(provider, pindex)
+            )}
 
-            {productsQuote?.providers.map((provider, pindex) => renderItems(provider, pindex))}
+            {productsQuote?.providers.map((provider, pindex) =>
+              renderItems(provider, pindex)
+            )}
             <div className={classes.summarySubtotalContainer}>
               <Typography variant="body2" className={classes.subTotalLabel}>
                 Total
@@ -1189,18 +1433,33 @@ const Checkout = () => {
             {productsQuote?.providers.map((provider, pindex) => {
               return (
                 <div key={`pindex-${pindex}`}>
-                  <div key={`d-pindex-${pindex}`}>{renderDeliveryCharges(provider.delivery)}</div>
+                  <div key={`d-pindex-${pindex}`}>
+                    {renderDeliveryCharges(provider.delivery)}
+                  </div>
                 </div>
               );
             })}
-            <div className={`${classes.summaryItemContainer} ${classes.marginTop20}`}>
+            {productsQuote?.providers.map((provider, pindex) => {
+              return (
+                <div key={`pindex-${pindex}`}>
+                  <div key={`d-pindex-${pindex}`}>
+                    {renderOffers(provider.offers)}
+                  </div>
+                </div>
+              );
+            })}
+            <Box component={"div"} className={classes.orderTotalDivider} />
+            <div
+              className={`${classes.summaryItemContainer} ${classes.marginTop20}`}
+            >
               <Typography variant="body" className={classes.totalLabel}>
                 Order Total
               </Typography>
               <Typography variant="body" className={classes.totalValue}>
                 {`₹${(
                   parseFloat(getItemsTotal(productsQuote?.providers)) +
-                  parseFloat(getDeliveryTotalAmount(productsQuote?.providers))
+                  parseFloat(getDeliveryTotalAmount(productsQuote?.providers)) +
+                  parseFloat(getOffersTotalAmount(productsQuote?.providers))
                 ).toFixed(2)}`}
                 {/* {`₹${parseFloat(productsQuote?.total_payable).toFixed(2)}`} */}
               </Typography>
@@ -1217,7 +1476,9 @@ const Checkout = () => {
                 activeStep !== 4
               }
               onClick={() => {
-                const { productQuotes, successOrderIds } = JSON.parse(localStorage.getItem("checkout_details") || "{}");
+                const { productQuotes, successOrderIds } = JSON.parse(
+                  localStorage.getItem("checkout_details") || "{}"
+                );
                 setConfirmOrderLoading(true);
                 let c = cartItems.map((item) => {
                   return item.item;
@@ -1227,7 +1488,9 @@ const Checkout = () => {
                     setDisplayRazorPay(true);
                   } else {
                     const request_object = constructQouteObject(
-                      c.filter(({ provider }) => successOrderIds.includes(provider.local_id.toString()))
+                      c.filter(({ provider }) =>
+                        successOrderIds.includes(provider.local_id.toString())
+                      )
                     );
                     confirmOrder(request_object[0], payment_methods.COD);
                   }
@@ -1236,7 +1499,11 @@ const Checkout = () => {
                 }
               }}
             >
-              {confirmOrderLoading || initLoading ? <Loading /> : "Proceed to Buy"}
+              {confirmOrderLoading || initLoading ? (
+                <Loading />
+              ) : (
+                "Proceed to Buy"
+              )}
             </Button>
           </Card>
         </Grid>
@@ -1268,15 +1535,25 @@ const Checkout = () => {
       <div className={classes.bodyContainer}>
         <Grid container spacing={6}>
           <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
-            <Stepper activeStep={activeStep} orientation="vertical" connector={false}>
+            <Stepper
+              activeStep={activeStep}
+              orientation="vertical"
+              connector={false}
+            >
               {steps.map((step, index) => (
                 <Step key={step.label} className={classes.stepRoot}>
-                  <StepLabel className={classes.stepLabel}>{renderStepLabel(step, index)}</StepLabel>
+                  <StepLabel className={classes.stepLabel}>
+                    {renderStepLabel(step, index)}
+                  </StepLabel>
                   <StepContent
                     sx={{
                       padding: index === 0 ? "10px 0px !important" : "14px",
                     }}
-                    className={activeStep === index ? classes.stepContent : classes.stepContentHidden}
+                    className={
+                      activeStep === index
+                        ? classes.stepContent
+                        : classes.stepContentHidden
+                    }
                   >
                     {renderStepContent(step, index)}
                   </StepContent>
