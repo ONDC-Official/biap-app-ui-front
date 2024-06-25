@@ -380,6 +380,19 @@ const Checkout = () => {
                   value: item.price,
                 };
               }
+
+              // for item level offer
+              if (item.isOffer && item.offer?.type === "item") {
+                let key = item.id;
+                items[key] = items[key] || {};
+                let offer = {
+                  title: item.offer?.name,
+                  value: item.price,
+                };
+                const existing_offers = items[key]["offers"] || [];
+                items[key]["offers"] = [...existing_offers, offer];
+              }
+
               //for delivery
               if (
                 item.title_type === "delivery" &&
@@ -441,6 +454,19 @@ const Checkout = () => {
                   title: item.title,
                   value: item.price,
                 };
+              }
+              // for fulfillment level offer
+              if (
+                item.isOffer &&
+                item.offer?.type === "fulfillment" &&
+                selected_fulfillment_ids.includes(item.id)
+              ) {
+                let offer = {
+                  title: item.offer?.name,
+                  value: item.price,
+                };
+                const existing_offers = delivery["offers"] || [];
+                delivery["offers"] = [...existing_offers, offer];
               }
 
               // for order level offer
@@ -732,10 +758,7 @@ const Checkout = () => {
               setUpdatedCartItems(data);
             }}
             fulfillments={updatedCartItems[0]?.message?.quote?.fulfillments}
-            amount={(
-              parseFloat(getItemsTotal(productsQuote?.providers)) +
-              parseFloat(getDeliveryTotalAmount(productsQuote?.providers))
-            ).toFixed(2)}
+            amount={getFinalPrice()}
             setPaymentKey={setPaymentKey}
             setPaymentParams={setPaymentParams}
           />
@@ -1041,9 +1064,11 @@ const Checkout = () => {
       <div>
         {data.delivery && renderDeliveryLine(data.delivery, "delivery")}
         {data.discount && renderDeliveryLine(data.discount, "discount")}
-        {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data.packing && renderDeliveryLine(data.packing, "packing")}
         {data.misc && renderDeliveryLine(data.misc, "misc")}
+        {data.offers &&
+          data.offers.map((offer, key) => renderOfferLine(offer, key))}
+        {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data &&
           (data.delivery ||
             data.discount ||
@@ -1111,6 +1136,11 @@ const Checkout = () => {
       }
       if (data.misc) {
         total = total + parseFloat(data.misc.value);
+      }
+      if (data.offers) {
+        data.offers.map((offer) => {
+          total = total + parseFloat(offer.value);
+        });
       }
     });
     return total.toFixed(2);
@@ -1206,6 +1236,32 @@ const Checkout = () => {
             </Typography>
           </div>
         )}
+        {quote?.offers &&
+          quote.offers.map((offer, key) => {
+            return (
+              <div
+                className={classes.summaryQuoteItemContainer}
+                key={`quote-${key}-offer`}
+              >
+                <Typography
+                  variant="body1"
+                  className={
+                    isCustomization
+                      ? classes.summaryCustomizationTaxLabel
+                      : classes.summaryItemTaxLabel
+                  }
+                >
+                  {offer.title}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemPriceValue}
+                >
+                  {`₹${parseFloat(offer.value).toFixed(2)}`}
+                </Typography>
+              </div>
+            );
+          })}
       </div>
     );
   };
@@ -1231,6 +1287,11 @@ const Checkout = () => {
               if (custItem?.tax) {
                 finalTotal = finalTotal + parseFloat(custItem.tax.value);
               }
+            });
+          }
+          if (item?.offers) {
+            item.offers.map((offer) => {
+              finalTotal = finalTotal + parseFloat(offer.value);
             });
           }
         });
@@ -1407,6 +1468,14 @@ const Checkout = () => {
     );
   };
 
+  const getFinalPrice = () => {
+    return (
+      parseFloat(getItemsTotal(productsQuote?.providers)) +
+      parseFloat(getDeliveryTotalAmount(productsQuote?.providers)) +
+      parseFloat(getOffersTotalAmount(productsQuote?.providers))
+    ).toFixed(2);
+  };
+
   const renderQuote = () => {
     try {
       return (
@@ -1456,11 +1525,7 @@ const Checkout = () => {
                 Order Total
               </Typography>
               <Typography variant="body" className={classes.totalValue}>
-                {`₹${(
-                  parseFloat(getItemsTotal(productsQuote?.providers)) +
-                  parseFloat(getDeliveryTotalAmount(productsQuote?.providers)) +
-                  parseFloat(getOffersTotalAmount(productsQuote?.providers))
-                ).toFixed(2)}`}
+                {`₹${getFinalPrice()}`}
                 {/* {`₹${parseFloat(productsQuote?.total_payable).toFixed(2)}`} */}
               </Typography>
             </div>
