@@ -276,8 +276,12 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       console.log("LAT", latLongInfo);
       const lat = latLongInfo.lat;
       const lng = latLongInfo.lng;
+      const provider_id = cartItems[0].item.provider.id;
+      console.log(cartItems[0].item.provider);
+      const data = await cancellablePromise(
+        getAllOffersRequest("", lat, lng, provider_id)
+      );
 
-      const data = await cancellablePromise(getAllOffersRequest("", lat, lng));
       console.log("offers data fetched", data);
       setOffers(data);
     } catch (err) {
@@ -562,7 +566,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       let meta = offer.tags.filter((tag) => {
         return tag["code"] === "meta";
       });
-      console.log("meta", meta);
+      // console.log("meta", meta);
       // y[0]["list"].filter(list => list.code === 'additive')
       meta = meta && meta[0];
       let additive =
@@ -1634,7 +1638,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   };
 
   const renderOffers = () => {
-    if (offers.length === 0) return <></>;
+    if (offers.length === 0 || haveDistinctProviders) return <></>;
     let formatted_offers = format_offers_data(offers);
     let additive_offers = formatted_offers.filter(
       (offer) => offer.additive === "yes"
