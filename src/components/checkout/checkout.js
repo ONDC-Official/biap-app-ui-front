@@ -1096,7 +1096,7 @@ const Checkout = () => {
         className={classes.summaryDeliveryItemContainer}
         key={`d-offer-${key}-price`}
       >
-        <Typography variant="body1" className={classes.summaryDeliveryLabel}>
+        <Typography variant="body1" className={classes.summaryOfferLabel}>
           {"Offer (" + offer?.title + ")"}
         </Typography>
         <Typography variant="body1" className={classes.summaryItemPriceValue}>
@@ -1245,13 +1245,9 @@ const Checkout = () => {
               >
                 <Typography
                   variant="body1"
-                  className={
-                    isCustomization
-                      ? classes.summaryCustomizationTaxLabel
-                      : classes.summaryItemTaxLabel
-                  }
+                  className={classes.summaryItemOfferLabel}
                 >
-                  {offer.title}
+                  {"Offer (" + offer.title + ")"}
                 </Typography>
                 <Typography
                   variant="body1"
