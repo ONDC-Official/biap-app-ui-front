@@ -81,7 +81,7 @@ const Products = ({ brandDetails, brandId }) => {
         r[e.code] = e.selectedValues.join();
         return r;
       },
-        {});
+      {});
       paginationData.searchData.pageNumber = paginationData.page;
       paginationData.searchData.limit = paginationData.pageSize;
       if (brandId) {
@@ -187,9 +187,15 @@ const Products = ({ brandDetails, brandId }) => {
   const getAllOffers = async (bId) => {
     setIsLoading(true);
     try {
-      const lat = "12.992906760898983";
-      const lng = "77.76323574850733";
-      const data = await cancellablePromise(getAllOffersRequest('', lat, lng, bId));
+      // const lat = "12.992906760898983";
+      // const lng = "77.76323574850733";
+      const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo"));
+      console.log("LAT", latLongInfo);
+      const lat = latLongInfo.lat;
+      const lng = latLongInfo.lng;
+      const data = await cancellablePromise(
+        getAllOffersRequest("", lat, lng, bId)
+      );
       setOffers(data);
     } catch (err) {
       dispatch({
@@ -353,16 +359,11 @@ const Products = ({ brandDetails, brandId }) => {
         )}
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        {
-          offers && offers.length > 0 && (
-            <div className={classes.offers}>
-              <Offers
-                offersList={offers}
-                isDisplayOnStorePage={true}
-              />
-            </div>
-          )
-        }
+        {offers && offers.length > 0 && (
+          <div className={classes.offers}>
+            <Offers offersList={offers} isDisplayOnStorePage={true} />
+          </div>
+        )}
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         {paginationModel.searchData &&
