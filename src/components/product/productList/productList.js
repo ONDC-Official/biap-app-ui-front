@@ -230,7 +230,7 @@ const ProductList = () => {
     try {
       setProductLoading(true);
       const data = await cancellablePromise(
-        getCall(`/protocol/item-details?id=${productId}`)
+        getCall(`/clientApis/v2/item-details?id=${productId}`)
       );
       setProductPayload(data);
       return data;

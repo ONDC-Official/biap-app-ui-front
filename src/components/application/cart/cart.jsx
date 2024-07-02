@@ -10,8 +10,10 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   Button,
   Card,
+  Checkbox,
   Divider,
   Drawer,
+  FormGroup,
   Grid,
   TextField,
   Typography,
@@ -29,6 +31,11 @@ import EditCustomizations from "./EditCustomizations";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import { SearchContext } from "../../../context/searchContext";
+import { CheckBox, OfflineShareRounded } from "@mui/icons-material";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { getAllOffersRequest } from "../../../api/offer.api";
 
 export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   let user = {};
@@ -61,6 +68,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
 
   const [loading, setLoading] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [haveDistinctProviders, setHaveDistinctProviders] = useState(false);
   const [errorMessageTimeOut, setErrorMessageTimeOut] = useState(
     "Fetching details for this product"
@@ -78,6 +86,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   ] = useState(false);
   const [isProductCategoryIsDifferent, setIsProductCategoryIsDifferent] =
     useState(false);
+
+  const [selectedNonAdditiveOffer, setSelectedNonAdditiveOffer] = useState("");
+  const [selectedAdditiveOffers, setSelectedAdditiveOffers] = useState([]);
 
   const getCartSubtotal = () => {
     let subtotal = 0;
@@ -247,7 +258,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     try {
       setProductLoading(true);
       const data = await cancellablePromise(
-        getCall(`/protocol/item-details?id=${productId}`)
+        getCall(`/clientApis/v2/item-details?id=${productId}`)
       );
       setProductPayload(data);
       return data;
@@ -255,6 +266,35 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       console.error("Error fetching product details:", error);
     } finally {
       setProductLoading(false);
+    }
+  };
+
+  const getAllOffers = async () => {
+    // setIsLoading(true);
+    try {
+      const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo"));
+      console.log("LAT", latLongInfo);
+      const lat = latLongInfo.lat;
+      const lng = latLongInfo.lng;
+      const provider_id = cartItems[0].item.provider.id;
+      console.log(cartItems[0].item.provider);
+      const data = await cancellablePromise(
+        getAllOffersRequest("", lat, lng, provider_id)
+      );
+
+      console.log("offers data fetched", data);
+      setOffers(data);
+    } catch (err) {
+      dispatch({
+        type: toast_actions.ADD_TOAST,
+        payload: {
+          id: Math.floor(Math.random() * 100),
+          type: toast_types.error,
+          message: err?.response?.data?.error?.message,
+        },
+      });
+    } finally {
+      // setIsLoading(false);
     }
   };
 
@@ -285,6 +325,283 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     checkAvailableQuantity();
     checkDifferentCategory();
   }, [cartItems.length, deliveryAddressLocation]);
+
+  const isValidCart = () => {
+    // console.log("*", isProductAvailableQuantityIsZero);
+    // console.log("**", isProductCategoryIsDifferent);
+    // console.log("***, ", haveDistinctProviders);
+    // console.log("****", checkoutLoading);
+    return !(
+      isProductAvailableQuantityIsZero ||
+      isProductCategoryIsDifferent ||
+      haveDistinctProviders ||
+      checkoutLoading
+    );
+  };
+
+  const offers_data = [
+    {
+      id: "DISCP60",
+      descriptor: {
+        code: "discount",
+        images: ["https://sellerNP.com/images/offer2-banner.png"],
+      },
+      location_ids: ["L1"],
+      item_ids: ["I1"],
+      time: {
+        label: "valid",
+        range: {
+          start: "2023-06-21T16:00:00.000Z",
+          end: "2023-06-21T23:00:00.000Z",
+        },
+      },
+      tags: [
+        {
+          code: "qualifier",
+          list: [
+            {
+              code: "min_value",
+              value: "159.00",
+            },
+          ],
+        },
+        {
+          code: "benefit",
+          list: [
+            {
+              code: "value_type",
+              value: "percent",
+            },
+            {
+              code: "value",
+              value: "-60.00",
+            },
+            {
+              code: "value_cap",
+              value: "-120.00",
+            },
+          ],
+        },
+        {
+          code: "meta",
+          list: [
+            {
+              code: "additive",
+              value: "yes",
+            },
+            {
+              code: "auto",
+              value: "yes",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "FLAT150",
+      descriptor: {
+        code: "discount",
+        images: ["https://sellerNP.com/images/offer2-banner.png"],
+      },
+      location_ids: ["L1"],
+      item_ids: ["I1"],
+      time: {
+        label: "valid",
+        range: {
+          start: "2023-06-22T16:00:00.000Z",
+          end: "2023-06-22T23:00:00.000Z",
+        },
+      },
+      tags: [
+        {
+          code: "qualifier",
+          list: [
+            {
+              code: "min_value",
+              value: "499.00",
+            },
+          ],
+        },
+        {
+          code: "benefit",
+          list: [
+            {
+              code: "value_type",
+              value: "amount",
+            },
+            {
+              code: "value",
+              value: "-150.00",
+            },
+          ],
+        },
+        {
+          code: "meta",
+          list: [
+            {
+              code: "additive",
+              value: "yes",
+            },
+            {
+              code: "auto",
+              value: "yes",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "BUY2GET3",
+      descriptor: {
+        code: "buyXgetY",
+        images: ["https://sellerNP.com/images/offer1-banner.png"],
+      },
+      location_ids: ["L1"],
+      item_ids: ["I1"],
+      time: {
+        label: "valid",
+        range: {
+          start: "2023-06-23T16:00:00.000Z",
+          end: "2023-06-23T23:00:00.000Z",
+        },
+      },
+      tags: [
+        {
+          code: "qualifier",
+          list: [
+            {
+              code: "item_count",
+              value: "2",
+            },
+          ],
+        },
+        {
+          code: "benefit",
+          list: [
+            {
+              code: "item_count",
+              value: "3",
+            },
+          ],
+        },
+        {
+          code: "meta",
+          list: [
+            {
+              code: "additive",
+              value: "no",
+            },
+            {
+              code: "auto",
+              value: "yes",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "FREEBIE",
+      descriptor: {
+        code: "freebie",
+        images: ["https://sellerNP.com/images/offer3-banner.png"],
+      },
+      location_ids: ["L1"],
+      item_ids: ["I1"],
+      time: {
+        label: "valid",
+        range: {
+          start: "2023-06-24T16:00:00.000Z",
+          end: "2023-06-24T23:00:00.000Z",
+        },
+      },
+      tags: [
+        {
+          code: "qualifier",
+          list: [
+            {
+              code: "min_value",
+              value: "598.00",
+            },
+          ],
+        },
+        {
+          code: "benefit",
+          list: [
+            {
+              code: "item_count",
+              value: "1",
+            },
+            {
+              code: "item_id",
+              value: "sku id for extra item",
+            },
+            {
+              code: "item_value",
+              value: "200.00",
+            },
+          ],
+        },
+        {
+          code: "meta",
+          list: [
+            {
+              code: "additive",
+              value: "no",
+            },
+            {
+              code: "auto",
+              value: "yes",
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const format_offers_data = (offers_data) => {
+    console.log(offers_data);
+    return offers_data.map((offer) => {
+      let qualifier = offer.qualifier;
+      let benefit = offer.benefit;
+      let meta = offer.tags.filter((tag) => {
+        return tag["code"] === "meta";
+      });
+      // console.log("meta", meta);
+      // y[0]["list"].filter(list => list.code === 'additive')
+      meta = meta && meta[0];
+      let additive =
+        meta &&
+        meta["list"].filter((list) => list.code === "additive")[0]["value"];
+      let auto =
+        meta && meta["list"].filter((list) => list.code === "auto")[0]["value"];
+      return {
+        id: offer.id,
+        local_id: offer.local_id,
+        type: offer.descriptor.code,
+        item_ids: offer.item_ids,
+        location_ids: offer.location_ids,
+        qualifier: qualifier,
+        benefit: benefit,
+        additive: additive,
+        auto: auto,
+      };
+    });
+  };
+
+  useEffect(() => {
+    console.log("#", isValidCart());
+    console.log("cartItems.length", cartItems.length);
+    if (isValidCart() && cartItems.length > 0) {
+      console.log("valid cart");
+      let formatted_offers = format_offers_data(offers_data);
+      console.log(formatted_offers);
+      getAllOffers();
+      // setOffers(offers_data);
+      // fetch API for offers
+    } else {
+      console.log("Invalid cart");
+    }
+  }, [isValidCart(), cartItems]);
 
   const emptyCartScreen = () => {
     return (
@@ -929,12 +1246,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         <Button
           variant="contained"
           sx={{ marginTop: 1, marginBottom: 2 }}
-          disabled={
-            isProductAvailableQuantityIsZero ||
-            isProductCategoryIsDifferent ||
-            haveDistinctProviders ||
-            checkoutLoading
-          }
+          disabled={!isValidCart()}
           onClick={() => {
             if (cartItems.length > 0) {
               let c = cartItems.map((item) => {
@@ -961,6 +1273,34 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     const ids = [...new Set(providers)];
     AddCookie("providerIds", ids);
     return ids;
+  };
+
+  const offerInSelectFormat = (id) => {
+    return {
+      id: id,
+      tags: [
+        {
+          code: "selection",
+          list: [
+            {
+              code: "apply",
+              value: "yes",
+            },
+          ],
+        },
+      ],
+    };
+  };
+
+  const offersForSelect = () => {
+    if (selectedNonAdditiveOffer) {
+      console.log("selectedNonAdditiveOffer", selectedNonAdditiveOffer);
+      return [offerInSelectFormat(selectedNonAdditiveOffer)];
+    } else {
+      return selectedAdditiveOffers.length > 0
+        ? selectedAdditiveOffers.map((id) => offerInSelectFormat(id))
+        : [];
+    }
   };
 
   const getQuote = async (items, searchContextData = null) => {
@@ -995,6 +1335,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             cart: {
               items: updatedItems,
             },
+            offers: offersForSelect(),
             fulfillments: [
               {
                 end: {
@@ -1169,6 +1510,13 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         "updatedCartItems",
         JSON.stringify(responseRef.current)
       );
+      localStorage.setItem(
+        "offers",
+        JSON.stringify({
+          additive_offers: selectedAdditiveOffers,
+          non_additive_offer: selectedNonAdditiveOffer,
+        })
+      );
       history.push(`/application/checkout`);
     } catch (err) {
       setCheckoutLoading(false);
@@ -1183,6 +1531,139 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       setGetQuoteLoading(false);
     }
     // eslint-disable-next-line
+  };
+
+  const renderNonAdditiveOffers = (offers) => {
+    const handleClick = (event) => {
+      if (event.target.value === selectedNonAdditiveOffer) {
+        setSelectedNonAdditiveOffer("");
+      } else {
+        setSelectedNonAdditiveOffer(event.target.value);
+        setSelectedAdditiveOffers([]);
+      }
+    };
+
+    function isOfferSelected(id) {
+      return selectedNonAdditiveOffer === id;
+    }
+
+    return (
+      <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
+        <Grid
+          container
+          // sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
+          direction={"column"}
+        >
+          {offers?.map((offer) => {
+            return (
+              <div className={classes.fulfillment}>
+                <FormControlLabel
+                  label={offer.local_id}
+                  value={isOfferSelected(offer.id)}
+                  control={
+                    <Checkbox
+                      id={offer.id}
+                      checked={isOfferSelected(offer.id)}
+                      disabled={
+                        !isOfferSelected(offer.id) &&
+                        (selectedNonAdditiveOffer ||
+                          selectedAdditiveOffers.length > 0)
+                      }
+                      onChange={(event) => {
+                        let id = "";
+                        if (selectedNonAdditiveOffer !== offer.id) {
+                          id = offer.id;
+                          setSelectedAdditiveOffers([]);
+                        }
+                        setSelectedNonAdditiveOffer(id);
+                      }}
+                    />
+                  }
+                />
+              </div>
+            );
+          })}
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderAdditiveOffers = (offers, selectedAdditiveOffers) => {
+    function isOfferSelected(id) {
+      return (
+        selectedAdditiveOffers.filter((offer_id) => offer_id === id).length > 0
+      );
+    }
+
+    return (
+      <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
+        <Grid
+          container
+          // sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
+          direction={"column"}
+        >
+          {offers?.map((offer) => {
+            return (
+              <div className={classes.fulfillment}>
+                <FormControlLabel
+                  label={offer.local_id}
+                  value={isOfferSelected(offer.id)}
+                  control={
+                    <Checkbox
+                      id={offer.id}
+                      checked={isOfferSelected(offer.id)}
+                      disabled={selectedNonAdditiveOffer}
+                      onChange={(event) => {
+                        let ids = selectedAdditiveOffers;
+                        if (
+                          ids.includes(offer.id) &&
+                          event.target.checked === false
+                        ) {
+                          ids = ids.filter((id) => id !== offer.id);
+                        } else {
+                          ids.push(offer.id);
+                        }
+                        setSelectedAdditiveOffers([...ids]);
+                        setSelectedNonAdditiveOffer("");
+                      }}
+                    />
+                  }
+                />
+              </div>
+            );
+          })}
+        </Grid>
+      </Grid>
+    );
+  };
+
+  const renderOffers = () => {
+    if (offers.length === 0 || haveDistinctProviders) return <></>;
+    let formatted_offers = format_offers_data(offers);
+    let additive_offers = formatted_offers.filter(
+      (offer) => offer.additive === "yes"
+    );
+    let non_additive_offers = formatted_offers.filter(
+      (offer) => offer.additive === "no"
+    );
+    console.log("additive_offers", additive_offers);
+    console.log("nonadditive_offers", non_additive_offers);
+
+    return (
+      <>
+        <Typography
+          variant="h5"
+          className={classes.tableHead}
+          sx={{ marginLeft: "6px", marginTop: "50px", marginBottom: "20px" }}
+        >
+          Offers
+        </Typography>
+        {additive_offers.length > 0 &&
+          renderAdditiveOffers(additive_offers, selectedAdditiveOffers)}
+        {non_additive_offers.length > 0 &&
+          renderNonAdditiveOffers(non_additive_offers)}
+      </>
+    );
   };
 
   return (
@@ -1211,11 +1692,18 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                     <div
                       style={{
                         minHeight: "80vh",
-                        alignItems: "flex-start",
-                        justifyContent: "flex-start",
                       }}
                     >
-                      {renderProducts()}
+                      <div
+                        style={{
+                          // minHeight: "50vh",
+                          alignItems: "flex-start",
+                          justifyContent: "flex-start",
+                        }}
+                      >
+                        {renderProducts()}
+                      </div>
+                      {renderOffers()}
                     </div>
                   </Grid>
 

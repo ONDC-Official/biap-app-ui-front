@@ -73,6 +73,12 @@ const useStyles = makeStyles({
     fontSize: "13px !important",
     fontWeight: "600 !important",
   },
+  summaryOfferLabel: {
+    flex: 1,
+    fontSize: "13px !important",
+    fontWeight: "600 !important",
+    color: "blue !important",
+  },
   summaryCustomizationLabel: {
     flex: 1,
     color: "#A2A6B0 !important",
@@ -103,6 +109,13 @@ const useStyles = makeStyles({
   summaryItemTaxLabel: {
     flex: 1,
     color: "red",
+    fontSize: "12px !important",
+    fontWeight: "600 !important",
+    marginLeft: "10px !important",
+  },
+  summaryItemOfferLabel: {
+    flex: 1,
+    color: "blue",
     fontSize: "12px !important",
     fontWeight: "600 !important",
     marginLeft: "10px !important",
@@ -139,13 +152,13 @@ const useStyles = makeStyles({
     fontWeight: "600 !important",
   },
   marginBottom10: {
-    marginBottom: '10px !important'
+    marginBottom: "10px !important",
   },
   marginTop10: {
-    marginTop: '10px !important'
+    marginTop: "10px !important",
   },
   marginTop20: {
-    marginTop: '20px !important'
+    marginTop: "20px !important",
   },
   summaryCustomizationPriceValue: {
     color: "#A2A6B0 !important",
@@ -174,10 +187,10 @@ const useStyles = makeStyles({
     flex: 1,
     fontWeight: "600 !important",
   },
-  summarySubtotalContainer:{
+  summarySubtotalContainer: {
     display: "flex",
     marginBottom: "0px !important",
-    marginTop: '20px !important'
+    marginTop: "20px !important",
   },
   subTotalValue: {
     width: "100px !important",
