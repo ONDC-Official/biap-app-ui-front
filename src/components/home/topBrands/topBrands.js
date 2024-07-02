@@ -23,6 +23,8 @@ import { ReactComponent as NextIcon } from "../../../assets/images/next.svg";
 import Loading from "../../shared/loading/loading";
 import Offers from "../../common/Offers/Offers";
 
+import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
+
 const BrandCard = ({ data, index, onMouseOver }) => {
   const classes = useStyles();
   const history = useHistory();
@@ -37,7 +39,11 @@ const BrandCard = ({ data, index, onMouseOver }) => {
           onMouseOver={onMouseOver}
           onClick={() => history.push(`/application/brand?brandId=${id}`)}
         >
-          <img className={classes.brandImage} src={symbol ? symbol : no_image_found} alt={`brand-${index}`} />
+          <img
+            className={classes.brandImage}
+            src={symbol ? symbol : no_image_found}
+            alt={`brand-${index}`}
+          />
         </Card>
       </Tooltip>
     </>
@@ -88,8 +94,12 @@ const TopBrands = () => {
   const getAllOffers = async () => {
     setIsLoading(true);
     try {
-      const lat = "12.992906760898983";
-      const lng = "77.76323574850733";
+      // const lat = "12.992906760898983";
+      // const lng = "77.76323574850733";
+      const latLongInfo = JSON.parse(getValueFromCookie("LatLongInfo"));
+      console.log("LAT", latLongInfo);
+      const lat = latLongInfo.lat;
+      const lng = latLongInfo.lng;
       const data = await cancellablePromise(getAllOffersRequest("", lat, lng));
       setOffers(data);
     } catch (err) {
@@ -115,25 +125,41 @@ const TopBrands = () => {
   const totalPageCount = Math.ceil(brands.length / rowsPerPage);
   return (
     <>
-      {
-        offers && offers.length > 0 && (
-          <Offers
-            offersList={offers}
-          />
-        )
-      }
+      {offers && offers.length > 0 && <Offers offersList={offers} />}
       <Grid container spacing={3} className={classes.topBrandsContainer}>
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           <Typography variant="h4">All Providers</Typography>
         </Grid>
         {isLoading ? (
-          <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            md={12}
+            lg={12}
+            xl={12}
+            className={classes.brandsContainer}
+          >
             <Loading />
           </Grid>
         ) : (
           <>
-            <Grid item xs={12} sm={12} md={12} lg={12} xl={12} className={classes.brandsContainer}>
-              <div style={{ marginLeft: "auto", marginTop: "auto", marginBottom: "auto" }}>
+            <Grid
+              item
+              xs={12}
+              sm={12}
+              md={12}
+              lg={12}
+              xl={12}
+              className={classes.brandsContainer}
+            >
+              <div
+                style={{
+                  marginLeft: "auto",
+                  marginTop: "auto",
+                  marginBottom: "auto",
+                }}
+              >
                 <IconButton
                   color="inherit"
                   className={classes.actionButton}
@@ -146,18 +172,26 @@ const TopBrands = () => {
                   <PreviousIcon />
                 </IconButton>
               </div>
-              {brands.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((brand, brandIndex) => (
-                <BrandCard
-                  key={`btand-index-${brandIndex}`}
-                  data={brand}
-                  index={brandIndex}
-                  // isActive={brandIndex === activeBrandIndex}
-                  onMouseOver={() => {
-                    setActiveBrandIndex(brandIndex);
-                  }}
-                />
-              ))}
-              <div style={{ marginRight: "auto", marginTop: "auto", marginBottom: "auto" }}>
+              {brands
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((brand, brandIndex) => (
+                  <BrandCard
+                    key={`btand-index-${brandIndex}`}
+                    data={brand}
+                    index={brandIndex}
+                    // isActive={brandIndex === activeBrandIndex}
+                    onMouseOver={() => {
+                      setActiveBrandIndex(brandIndex);
+                    }}
+                  />
+                ))}
+              <div
+                style={{
+                  marginRight: "auto",
+                  marginTop: "auto",
+                  marginBottom: "auto",
+                }}
+              >
                 <IconButton
                   color="inherit"
                   className={classes.actionButton}

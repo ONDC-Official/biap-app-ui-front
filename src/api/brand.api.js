@@ -22,7 +22,9 @@ export const getAllBrandsRequest = () => {
 export const getBrandDetailsRequest = (brandId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await getCall(`/clientApis/v2/provider-details?id=${brandId}`);
+      const data = await getCall(
+        `/clientApis/v2/provider-details?id=${brandId}`
+      );
       //const data = await getCall(`/protocol/providers/${brandId}`);
       return resolve(data);
     } catch (err) {
@@ -39,7 +41,9 @@ export const getBrandCustomMenuRequest = (domain, brandId) => {
   return new Promise(async (resolve, reject) => {
     try {
       // const data = await getCall(`/clientApis/v2/custom-menus?domain=${domain}`);
-      const data = await getCall(`/clientApis/v2/custom-menus?domain=${domain}&provider=${brandId}`);
+      const data = await getCall(
+        `/clientApis/v2/custom-menus?domain=${domain}&provider=${brandId}`
+      );
       return resolve(data);
     } catch (err) {
       return reject(err);
@@ -76,7 +80,10 @@ export const getAllOutletsRequest = (brandId, params) => {
     };
     try {
       // const data = await getCall(`/clientApis/v2/locations?provider=${brandId}`);
-      const data = await getCall(`/clientApis/v2/locations?provider=${brandId}`, reqParams);
+      const data = await getCall(
+        `/clientApis/v2/locations?provider=${brandId}`,
+        reqParams
+      );
       return resolve(data);
     } catch (err) {
       return reject(err);
@@ -95,6 +102,7 @@ export const getAllOutletsFromCategoryAndLocationRequest = (params) => {
       latitude: params.lat,
       longitude: params.lng,
       radius: 100,
+      afterKey: params.afterKey,
     };
     try {
       // const data = await getCall(`/clientApis/v2/locations`);
@@ -126,7 +134,9 @@ export const getOutletDetailsRequest = (locationId) => {
     try {
       // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
       // const data = await getCall(`/clientApis/v2/locations/${locationId}`);
-      const data = await getCall(`/clientApis/v2/location-details?id=${locationId}`);
+      const data = await getCall(
+        `/clientApis/v2/location-details?id=${locationId}`
+      );
       return resolve(data);
     } catch (err) {
       return reject(err);
