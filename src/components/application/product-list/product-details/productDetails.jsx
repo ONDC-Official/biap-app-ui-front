@@ -91,7 +91,7 @@ const ProductDetails = ({ productId }) => {
   const getProductDetails = async (productId) => {
     try {
       const data = await cancellablePromise(
-        getCall(`/protocol/item-details?id=${productId}`)
+        getCall(`/clientApis/v2/item-details?id=${productId}`)
       );
       const { item_details } = data;
       fetchCartItems();
