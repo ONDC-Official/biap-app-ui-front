@@ -8,7 +8,29 @@ import ThemePalette from "../../../utils/Theme/theme.json";
 const OfferCard = (props) => {
   const classes = useStyles();
   const history = useHistory();
-  const { id, title, offerText, link, brandImage, isDisplayOnStorePage } = props;
+  const {
+    id,
+    title,
+    offerText,
+    link,
+    brandImage,
+    isDisplayOnStorePage,
+    isDisplayOnCartPage,
+  } = props;
+
+  if (isDisplayOnCartPage) {
+    return (
+      <div className={`${classes.checkoutOfferCardContainer} `}>
+        <div className={classes.checkoutOfferIconContainer}>
+          <OfferIcon width="30" height="30" fill={ThemePalette.primaryColor} />
+        </div>
+        <div className={classes.checkoutOfferTextContainer}>
+          <p className={classes.checkoutOfferTitle}>{title}</p>
+          <div className={classes.checkoutOfferCode}>Use code {offerText}</div>
+        </div>
+      </div>
+    );
+  }
 
   if (isDisplayOnStorePage) {
     return (
@@ -20,35 +42,36 @@ const OfferCard = (props) => {
           <p className={classes.offerCode}>{offerText}</p>
         </div>
       </div>
-    )
+    );
   } else {
     return (
       <div className={classes.offerCard}>
         <div className={classes.left}>
-          {
-            !isDisplayOnStorePage && (
-              <p className={classes.offerTitle}>{title}</p>
-            )
-          }
+          {!isDisplayOnStorePage && (
+            <p className={classes.offerTitle}>{title}</p>
+          )}
           <p className={classes.offerText}>{offerText}</p>
-          {
-            !isDisplayOnStorePage && (
-              <Button
-                size="small" variant="contained"
-                onClick={() => id ? history.push(`/application/brand?brandId=${id}`) : ""}
-              >
-                Order now
-              </Button>
-            )
-          }
+          {!isDisplayOnStorePage && (
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() =>
+                id ? history.push(`/application/brand?brandId=${id}`) : ""
+              }
+            >
+              Order now
+            </Button>
+          )}
         </div>
-        {
-          !isDisplayOnStorePage && (
-            <div className={classes.right}>
-              <img className={classes.brandImage} src={brandImage} alt="brand-image" />
-            </div>
-          )
-        }
+        {!isDisplayOnStorePage && (
+          <div className={classes.right}>
+            <img
+              className={classes.brandImage}
+              src={brandImage}
+              alt="brand-image"
+            />
+          </div>
+        )}
       </div>
     );
   }

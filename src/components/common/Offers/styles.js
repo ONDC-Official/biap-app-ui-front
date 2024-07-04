@@ -9,6 +9,7 @@ const useStyles = makeStyles({
     position: "relative",
     padding: "0px 11rem",
   },
+
   offersRow: {
     display: "flex",
     gap: "18px",
@@ -61,12 +62,12 @@ const useStyles = makeStyles({
   leftIcon: {
     position: "absolute",
     left: 100,
-    top: '30%',
+    top: "30%",
   },
   rightIcon: {
     position: "absolute",
     right: 100,
-    top: '30%',
+    top: "30%",
   },
 
   offerCardContainer: {
@@ -77,25 +78,68 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
   },
+  checkoutOfferCardContainer: {
+    marginTop: "10px",
+    marginLeft: "10px",
+    width: "300px",
+    height: "max-content",
+    border: "1.5px solid #e8e8e8",
+    borderRadius: 12,
+    display: "flex",
+    alignItems: "center",
+  },
+  checkoutOffer: {
+    width: "250 !important",
+  },
   offerIconContainer: {
     backgroundColor: ThemePalette.primaryColorLight,
-    padding: '16px',
+    padding: "16px",
     borderTopLeftRadius: 24,
     borderBottomLeftRadius: 24,
   },
+  checkoutOfferIconContainer: {
+    backgroundColor: ThemePalette.primaryColorLight,
+    padding: "16px",
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
   offerTextContainer: {
-    padding: '16px',
+    padding: "16px",
     flex: 1,
-    '& .offerText': {
-      marginBottom: '0px !important'
-    }
+    "& .offerText": {
+      marginBottom: "0px !important",
+    },
   },
   offerCode: {
     fontSize: 24,
     fontWeight: "600",
     margin: 0,
     textTransform: "capitalize",
-  }
+  },
+  checkoutOfferCode: {
+    fontSize: 11,
+    // fontWeight: "600",
+    margin: 0,
+    textTransform: "capitalize",
+  },
+  checkoutOfferTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    // fontWeight: "600",
+    margin: 0,
+    textTransform: "uppercase",
+  },
+  checkoutOfferTextContainer: {
+    padding: "8px",
+    flex: 1,
+    "& .offerText": {
+      marginBottom: "0px !important",
+    },
+  },
+  checkoutBrandImage: {
+    height: 80,
+    width: 80,
+  },
 });
 
 export default useStyles;
