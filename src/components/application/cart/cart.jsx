@@ -17,6 +17,7 @@ import {
   Grid,
   TextField,
   Typography,
+  styled,
 } from "@mui/material";
 import { deleteCall, getCall, postCall, putCall } from "../../../api/axios";
 import { AddCookie, getValueFromCookie } from "../../../utils/cookies";
@@ -36,6 +37,7 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { getAllOffersRequest } from "../../../api/offer.api";
+import OfferCard from "../../common/Offers/OfferCard";
 
 export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   let user = {};
@@ -282,7 +284,6 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         getAllOffersRequest("", lat, lng, provider_id)
       );
 
-      console.log("offers data fetched", data);
       setOffers(data);
     } catch (err) {
       dispatch({
@@ -339,7 +340,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     );
   };
 
-  const offers_data = [
+  const offers_dummy_data = [
     {
       id: "DISCP60",
       descriptor: {
@@ -558,15 +559,41 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     },
   ];
 
+  const gen_offer_benefit_label = (benefit) => {
+    let b_type = benefit.list.find((tag) => {
+      return tag["code"] === "value_type";
+    }).value;
+    let b_value = benefit.list.find((tag) => {
+      return tag["code"] === "value";
+    }).value;
+    let str = "";
+    switch (b_type) {
+      case "percent":
+        const cap_value =
+          benefit.list.find((tag) => {
+            return tag["code"] === "value_cap";
+          }).value * -1;
+        str = `Flat ${b_value * -1}% off`;
+        break;
+      case "amount":
+        str = `flat ${b_value * -1} off`;
+        break;
+      default:
+        break;
+    }
+    return str;
+  };
+
   const format_offers_data = (offers_data) => {
-    console.log(offers_data);
     return offers_data.map((offer) => {
       let qualifier = offer.qualifier;
-      let benefit = offer.benefit;
       let meta = offer.tags.filter((tag) => {
         return tag["code"] === "meta";
       });
-      // console.log("meta", meta);
+      let benefit = offer.tags.filter((tag) => {
+        return tag["code"] === "benefit";
+      })[0];
+
       // y[0]["list"].filter(list => list.code === 'additive')
       meta = meta && meta[0];
       let additive =
@@ -576,6 +603,8 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
         meta && meta["list"].filter((list) => list.code === "auto")[0]["value"];
       return {
         id: offer.id,
+        title: gen_offer_benefit_label(benefit),
+        brand_image: offer.provider_descriptor.images[0],
         local_id: offer.local_id,
         type: offer.descriptor.code,
         item_ids: offer.item_ids,
@@ -589,15 +618,9 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   };
 
   useEffect(() => {
-    console.log("#", isValidCart());
-    console.log("cartItems.length", cartItems.length);
     if (isValidCart() && cartItems.length > 0) {
       console.log("valid cart");
-      let formatted_offers = format_offers_data(offers_data);
-      console.log(formatted_offers);
       getAllOffers();
-      // setOffers(offers_data);
-      // fetch API for offers
     } else {
       console.log("Invalid cart");
     }
@@ -1533,6 +1556,23 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     // eslint-disable-next-line
   };
 
+  const CustomCheckbox = styled(Checkbox)(({ theme }) => ({
+    border: "none",
+  }));
+
+  const offerCard = (offer) => {
+    return (
+      <OfferCard
+        id={offer.id}
+        title={offer.title}
+        offerText={offer.local_id}
+        link={offer.link}
+        brandImage={offer.brand_image}
+        isDisplayOnCartPage={true}
+      />
+    );
+  };
+
   const renderNonAdditiveOffers = (offers) => {
     const handleClick = (event) => {
       if (event.target.value === selectedNonAdditiveOffer) {
@@ -1551,17 +1591,17 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
       <Grid container alignItems="center" sx={{ marginBottom: 1.5 }}>
         <Grid
           container
-          // sx={{ marginBottom: 1.5, marginLeft: 1.5 }}
+          sx={{ marginBottom: 1.5, marginLeft: 3 }}
           direction={"column"}
         >
           {offers?.map((offer) => {
             return (
               <div className={classes.fulfillment}>
                 <FormControlLabel
-                  label={offer.local_id}
+                  label={offerCard(offer)}
                   value={isOfferSelected(offer.id)}
                   control={
-                    <Checkbox
+                    <CustomCheckbox
                       id={offer.id}
                       checked={isOfferSelected(offer.id)}
                       disabled={
@@ -1606,10 +1646,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
             return (
               <div className={classes.fulfillment}>
                 <FormControlLabel
-                  label={offer.local_id}
+                  label={offerCard(offer)}
                   value={isOfferSelected(offer.id)}
                   control={
-                    <Checkbox
+                    <CustomCheckbox
                       id={offer.id}
                       checked={isOfferSelected(offer.id)}
                       disabled={selectedNonAdditiveOffer}
@@ -1638,8 +1678,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   };
 
   const renderOffers = () => {
-    if (offers.length === 0 || haveDistinctProviders) return <></>;
-    let formatted_offers = format_offers_data(offers);
+    let formatted_offers = format_offers_data(offers).filter(
+      (offer) => offer.auto === "no"
+    );
+    if (formatted_offers.length === 0 || haveDistinctProviders) return <></>;
     let additive_offers = formatted_offers.filter(
       (offer) => offer.additive === "yes"
     );
