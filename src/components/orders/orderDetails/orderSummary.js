@@ -166,6 +166,10 @@ const OrderSummary = ({
           });
           let items = {};
           let delivery = {};
+          let valid_fulfullment_ids = orderDetails?.items.map(
+            (item) => item.fulfillment_id
+          );
+          console.log("valid_fulfullment_ids", valid_fulfullment_ids);
           let selected_fulfillment_id = orderDetails?.items[0]?.fulfillment_id;
           all_items.forEach((item) => {
             setQuoteItemInProcessing(item.id);
@@ -309,7 +313,8 @@ const OrderSummary = ({
               item.title_type === "tax" &&
               !item.isCustomization &&
               !item.isFulfillment &&
-              item.id !== selected_fulfillment_id
+              !valid_fulfullment_ids.includes(item.id)
+              //item.id !== selected_fulfillment_id
               // item.id !== selected_fulfillments
             ) {
               let key = item.parent_item_id || item.id;
@@ -377,7 +382,8 @@ const OrderSummary = ({
             //for delivery
             if (
               item.title_type === "delivery" &&
-              item.id === selected_fulfillment_id
+              valid_fulfullment_ids.includes(item.id)
+              //item.id === selected_fulfillment_id
               // item.id === selected_fulfillments
             ) {
               delivery["delivery"] = {
@@ -397,7 +403,8 @@ const OrderSummary = ({
             }
             if (
               (item.title_type === "tax_f" || item.title_type === "tax") &&
-              item.id === selected_fulfillment_id
+              valid_fulfullment_ids.includes(item.id)
+              // item.id === selected_fulfillment_id
               // item.id === selected_fulfillments
             ) {
               delivery["tax"] = {
@@ -407,7 +414,8 @@ const OrderSummary = ({
             }
             if (
               item.title_type === "packing" &&
-              item.id === selected_fulfillment_id
+              valid_fulfullment_ids.includes(item.id)
+              // item.id === selected_fulfillment_id
               // item.id === selected_fulfillments
             ) {
               delivery["packing"] = {
@@ -428,7 +436,8 @@ const OrderSummary = ({
             }
             if (
               item.title_type === "misc" &&
-              item.id === selected_fulfillment_id
+              valid_fulfullment_ids.includes(item.id)
+              // item.id === selected_fulfillment_id
               // item.id === selected_fulfillments
             ) {
               delivery["misc"] = {
