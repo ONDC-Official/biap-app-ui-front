@@ -298,6 +298,12 @@ const useStyles = makeStyles({
   proceedToBuy: {
     marginTop: "8px !important",
   },
+  summaryOfferLabel: {
+    flex: 1,
+    fontSize: "13px !important",
+    fontWeight: "600 !important",
+    color: "blue !important",
+  },
 });
 
 export default useStyles;
