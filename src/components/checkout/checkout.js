@@ -227,7 +227,10 @@ const Checkout = () => {
                     cartList.splice(cartIndex, 1);
                   }
                 }
-              } else if (quantity !== cartQuantity) {
+              } else if (
+                !(break_up_item["@ondc/org/title_type"] === "offer") &&
+                quantity !== cartQuantity
+              ) {
                 textClass =
                   break_up_item["@ondc/org/title_type"] === "item"
                     ? "text-amber"
