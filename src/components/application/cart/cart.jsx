@@ -562,10 +562,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
   const gen_offer_benefit_label = (benefit) => {
     let b_type = benefit.list.find((tag) => {
       return tag["code"] === "value_type";
-    }).value;
+    })?.value;
     let b_value = benefit.list.find((tag) => {
       return tag["code"] === "value";
-    }).value;
+    })?.value;
     let str = "";
     switch (b_type) {
       case "percent":
