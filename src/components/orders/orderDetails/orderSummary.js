@@ -45,6 +45,7 @@ const OrderSummary = ({
   const [returnItems, setReturnItems] = useState([]);
   const [returnOrCancelledItems, setReturnOrCancelledItems] = useState([]);
   const [deliveryQuotes, setDeliveryQuotes] = useState(null);
+  const [offerQuotes, setOfferQuotes] = useState([]);
   const dispatch = useContext(ToastContext);
   const [quoteItemInProcessing, setQuoteItemInProcessing] = useState(null);
 
@@ -99,6 +100,36 @@ const OrderSummary = ({
     return isCustomization;
   };
 
+  const getOfferDetails = (tags) => {
+    console.log("tags", tags);
+    let offer_type = "";
+    let offer_name = "";
+
+    tags?.forEach((tag) => {
+      if (tag.code === "quote") {
+        tag.list?.forEach((list_item) => {
+          if (list_item.code === "type") {
+            offer_type = list_item.value;
+          }
+        });
+      }
+
+      if (tag.code === "offer") {
+        tag.list?.forEach((list_item) => {
+          if (list_item.code === "id") {
+            offer_name = list_item.value;
+          }
+        });
+      }
+    });
+
+    if (offer_type && offer_name) {
+      return { type: offer_type, name: offer_name };
+    } else {
+      return {};
+    }
+  };
+
   useEffect(() => {
     try {
       if (orderDetails) {
@@ -149,6 +180,8 @@ const OrderSummary = ({
               title_type: break_up_item["@ondc/org/title_type"],
               isCustomization: isItemCustomization(break_up_item?.item?.tags),
               isDelivery: break_up_item["@ondc/org/title_type"] === "delivery",
+              isOffer: break_up_item["@ondc/org/title_type"] === "offer",
+              offer: getOfferDetails(break_up_item?.item?.tags),
               parent_item_id: break_up_item?.item?.parent_item_id,
               price: Number(break_up_item.price?.value)?.toFixed(2),
               itemQuantity,
@@ -166,6 +199,7 @@ const OrderSummary = ({
           });
           let items = {};
           let delivery = {};
+          let offers = [];
           let valid_fulfullment_ids = orderDetails?.items.map(
             (item) => item.fulfillment_id
           );
@@ -379,6 +413,19 @@ const OrderSummary = ({
                 value: item.price,
               };
             }
+
+            // for item level offer
+            if (item.isOffer && item.offer?.type === "item") {
+              let key = item.id;
+              items[key] = items[key] || {};
+              let offer = {
+                title: item.offer?.name,
+                value: item.price,
+              };
+              const existing_offers = items[key]["offers"] || [];
+              items[key]["offers"] = [...existing_offers, offer];
+            }
+
             //for delivery
             if (
               item.title_type === "delivery" &&
@@ -445,10 +492,35 @@ const OrderSummary = ({
                 value: item.price,
               };
             }
+
+            // for fulfillment level offer
+            if (
+              item.isOffer &&
+              item.offer?.type === "fulfillment" &&
+              valid_fulfullment_ids.includes(item.id)
+            ) {
+              let offer = {
+                title: item.offer?.name,
+                value: item.price,
+              };
+              const existing_offers = delivery["offers"] || [];
+              delivery["offers"] = [...existing_offers, offer];
+            }
+
+            // for order level offer
+            if (item.isOffer && item.offer?.type === "order") {
+              let key = item.id;
+              let offer = {
+                title: item.offer?.name,
+                value: item.price,
+              };
+              offers.push(offer);
+            }
           });
           setQuoteItemInProcessing(null);
           setItemQuotes(items);
           setDeliveryQuotes(delivery);
+          setOfferQuotes(offers);
         }
         if (orderDetails.items && orderDetails.items.length > 0) {
           const filterCancelledItems = orderDetails.items.filter(
@@ -890,6 +962,28 @@ const OrderSummary = ({
             </Typography>
           </div>
         )}
+        {quote?.offers &&
+          quote.offers.map((offer, key) => {
+            return (
+              <div
+                className={classes.summaryQuoteItemContainer}
+                key={`quote-${key}-offer`}
+              >
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemOfferLabel}
+                >
+                  {"Offer (" + offer.title + ")"}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  className={classes.summaryItemPriceValue}
+                >
+                  {`₹${parseFloat(offer.value).toFixed(2)}`}
+                </Typography>
+              </div>
+            );
+          })}
       </div>
     );
   };
@@ -935,6 +1029,22 @@ const OrderSummary = ({
     );
   };
 
+  const renderOfferLine = (offer, key) => {
+    return (
+      <div
+        className={classes.summaryDeliveryItemContainer}
+        key={`d-offer-${key}-price`}
+      >
+        <Typography variant="body1" className={classes.summaryOfferLabel}>
+          {"Offer (" + offer?.title + ")"}
+        </Typography>
+        <Typography variant="body1" className={classes.summaryItemPriceValue}>
+          {`₹${parseFloat(offer?.value).toFixed(2)}`}
+        </Typography>
+      </div>
+    );
+  };
+
   const renderDeliveryCharges = (data) => {
     return (
       <div>
@@ -943,6 +1053,8 @@ const OrderSummary = ({
         {data.tax && renderDeliveryLine(data.tax, "tax")}
         {data.packing && renderDeliveryLine(data.packing, "packing")}
         {data.misc && renderDeliveryLine(data.misc, "misc")}
+        {data.offers &&
+          data.offers.map((offer, key) => renderOfferLine(offer, key))}
       </div>
     );
   };
@@ -966,6 +1078,18 @@ const OrderSummary = ({
       total = total + parseFloat(data.misc.value);
     }
     return parseInt(total).toFixed(2);
+  };
+
+  const renderOffers = (offers) => {
+    let offers_data = offers.map((offer, index) => {
+      return renderOfferLine(offer, index);
+    });
+    return (
+      <>
+        <Box component={"div"} className={classes.divider} />
+        {offers_data}
+      </>
+    );
   };
 
   const renderQuote = () => {
@@ -1012,6 +1136,8 @@ const OrderSummary = ({
               </Typography>
             </div>
           </div>
+
+          <div>{renderOffers(offerQuotes)}</div>
 
           <Box component={"div"} className={classes.orderSummaryDivider} />
           <div className={classes.summaryItemContainer}>

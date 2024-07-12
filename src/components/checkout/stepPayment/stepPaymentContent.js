@@ -20,6 +20,7 @@ import { SSE_TIMEOUT } from "../../../constants/sse-waiting-time";
 import { ToastContext } from "../../../context/toastContext";
 import { toast_actions, toast_types } from "../../shared/toast/utils/toast";
 import Razorpay from "../../common/Razorpay/Razorpay";
+import { getSelectedOffers } from "../util";
 
 const StepPaymentContent = ({
   activePaymentMethod,
@@ -245,6 +246,7 @@ const StepPaymentContent = ({
                 fulfillments: fulfillments.filter((fulfillment) =>
                   Object.values(selectedFulfillments).includes(fulfillment.id)
                 ),
+                offers: getSelectedOffers(),
                 billing_info: {
                   address: removeNullValues(billingAddress?.address),
                   phone: billingAddress?.phone,
