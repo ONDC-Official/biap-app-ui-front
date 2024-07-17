@@ -101,7 +101,6 @@ const OrderSummary = ({
   };
 
   const getOfferDetails = (tags) => {
-    console.log("tags", tags);
     let offer_type = "";
     let offer_name = "";
 
@@ -203,131 +202,9 @@ const OrderSummary = ({
           let valid_fulfullment_ids = orderDetails?.items.map(
             (item) => item.fulfillment_id
           );
-          console.log("valid_fulfullment_ids", valid_fulfullment_ids);
           let selected_fulfillment_id = orderDetails?.items[0]?.fulfillment_id;
           all_items.forEach((item) => {
             setQuoteItemInProcessing(item.id);
-            // for type item
-            // if (item.title_type === "item" && !item.isCustomization) {
-            //   let key = item.parent_item_id || item.id;
-            //   let price = {
-            //     title: item.quantity + " * Base Price",
-            //     value: item.price,
-            //   };
-            //   let prev_item_data = items[key];
-            //   let addition_item_data = { title: item.title, price: price };
-            //   addition_item_data.isCancellable = item.isCancellable;
-            //   addition_item_data.isReturnable = item.isReturnable;
-            //   addition_item_data.fulfillment_status = item?.fulfillment_status;
-            //   if (item?.return_status) {
-            //     addition_item_data.return_status = item?.return_status;
-            //   } else {
-            //   }
-            //   if (item?.cancellation_status) {
-            //     addition_item_data.cancellation_status = item?.cancellation_status;
-            //   } else {
-            //   }
-            //   items[key] = { ...prev_item_data, ...addition_item_data };
-            // }
-            // if (item.title_type === "tax" && !item.isCustomization && item.id !== selected_fulfillment_id) {
-            //   let key = item.parent_item_id || item.id;
-            //   items[key] = items[key] || {};
-            //   items[key]["tax"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // if (item.title_type === "discount" && !item.isCustomization) {
-            //   let key = item.parent_item_id || item.id;
-            //   items[key] = items[key] || {};
-            //   items[key]["discount"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-
-            // //for customizations
-            // if (item.title_type === "item" && item.isCustomization) {
-            //   let key = item.parent_item_id;
-            //   items[key]["customizations"] = items[key]["customizations"] || {};
-            //   let existing_data = items[key]["customizations"][item.id] || {};
-            //   let customisation_details = {
-            //     title: item.title,
-            //     price: {
-            //       title: item.quantity + " * Base Price",
-            //       value: item.price,
-            //     },
-            //     quantityMessage: item.quantityMessage,
-            //     textClass: item.textClass,
-            //     quantity: item.quantity,
-            //     cartQuantity: item.cartQuantity,
-            //   };
-            //   items[key]["customizations"][item.id] = {
-            //     ...existing_data,
-            //     ...customisation_details,
-            //   };
-            // }
-            // if (item.title_type === "tax" && item.isCustomization) {
-            //   let key = item.parent_item_id;
-            //   items[key]["customizations"] = items[key]["customizations"] || {};
-            //   items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
-            //   items[key]["customizations"][item.id]["tax"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // if (item.title_type === "discount" && item.isCustomization) {
-            //   let key = item.parent_item_id;
-            //   items[key]["customizations"] = items[key]["customizations"] || {};
-            //   items[key]["customizations"][item.id] = items[key]["customizations"][item.id] || {};
-            //   items[key]["customizations"][item.id]["discount"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // //for delivery
-            // if (item.title_type === "delivery") {
-            //   delivery["delivery"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // if (item.title_type === "discount_f") {
-            //   delivery["discount"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // if ((item.title_type === "tax_f" || item.title_type === "tax") && item.id === selected_fulfillment_id) {
-            //   delivery["tax"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // if (item.title_type === "packing") {
-            //   delivery["packing"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-            // if (item.title_type === "discount") {
-            //   if (item.isCustomization) {
-            //     let id = item.parent_item_id;
-            //   } else {
-            //     let id = item.id;
-            //     items[id]["discount"] = {
-            //       title: item.title,
-            //       value: item.price,
-            //     };
-            //   }
-            // }
-            // if (item.title_type === "misc") {
-            //   delivery["misc"] = {
-            //     title: item.title,
-            //     value: item.price,
-            //   };
-            // }
-
             // for type item
             if (item.title_type === "item" && !item.isCustomization) {
               let key = item.parent_item_id || item.id;
@@ -338,6 +215,7 @@ const OrderSummary = ({
               let prev_item_data = items[key];
               let addition_item_data = {
                 title: item.title,
+                quantity: item.quantity,
                 price: price,
                 fulfillment_status: item.fulfillment_status,
               };
@@ -608,7 +486,8 @@ const OrderSummary = ({
               const parentId = findQuote?.item?.parent_item_id;
               let customizations = null;
               if (parentId) {
-                customizations = itemQuotes[parentId].customizations;
+                customizations =
+                  itemQuotes && itemQuotes[parentId]?.customizations;
               } else {
               }
               return {
@@ -624,6 +503,9 @@ const OrderSummary = ({
                 ...orderDetails.items?.[index]?.product,
                 parent_item_id: parentId,
                 provider_details: orderDetails.provider,
+                quantityForReturn:
+                  itemQuotes[parentId || findQuote["@ondc/org/item_id"]]
+                    .quantity,
               };
             }
           } else {
@@ -640,6 +522,9 @@ const OrderSummary = ({
               ...orderDetails.items?.[index]?.product,
               parent_item_id: parentId,
               provider_details: orderDetails.provider,
+              quantityForReturn:
+                itemQuotes[parentId || findQuote["@ondc/org/item_id"]]
+                  ?.quantity,
             };
           }
         } else {
@@ -647,7 +532,7 @@ const OrderSummary = ({
         }
         return null;
       })
-      .filter((item) => item !== null);
+      .filter((item) => item !== null && item.quantityForReturn > 0);
   }
 
   // function to dispatch error
@@ -1463,6 +1348,14 @@ const OrderSummary = ({
     );
   };
 
+  const getItemQuantities = () => {
+    let quantities = {};
+    Object.keys(itemQuotes).forEach((key) => {
+      quantities[key] = itemQuotes[key].quantity;
+    });
+    return quantities;
+  };
+
   return (
     <div>
       <Card className={classes.orderSummaryCard}>
@@ -1583,18 +1476,7 @@ const OrderSummary = ({
               setToggleReturnOrderModal(false);
               onUpdateOrder();
             }}
-            // quantity={orderDetails.items?.map(({ quantity }) => quantity)}
-            quantity={orderDetails.items
-              ?.filter(
-                (item) =>
-                  !item.hasOwnProperty("cancellation_status") ||
-                  (item.hasOwnProperty("cancellation_status") &&
-                    item.cancellation_status == "") ||
-                  !item.hasOwnProperty("return_status") ||
-                  (item.hasOwnProperty("return_status") &&
-                    item.return_status == "")
-              )
-              .map(({ quantity }) => quantity)}
+            quantity={getItemQuantities()}
             partailsReturnProductList={generateProductsList(
               orderDetails,
               itemQuotes
