@@ -43,7 +43,7 @@ export default function ReturnOrderModal({
   const [loading, setLoading] = useState(false);
   const [selectedCancelReasonId, setSelectedCancelReasonId] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
-  const [orderQty, setOrderQty] = useState([]);
+  const [orderQty, setOrderQty] = useState({});
   const [reasons, setReasons] = useState([]);
 
   const [selectedImages, setSelectedImages] = useState({});
@@ -166,6 +166,7 @@ export default function ReturnOrderModal({
     const requestObject = Array.from(map.values());
     let payload = await Promise.all(
       selectedIds?.map(async (item) => {
+        console.log("for item id", item.id);
         if (Object.keys(selectedImages).length == 0) {
           setInlineError((error) => ({
             ...error,
@@ -184,23 +185,23 @@ export default function ReturnOrderModal({
         const customizations = item.customizations;
         const customizationPayload = customizations
           ? Object.entries(customizations).map(
-            ([customizationId, customization]) => ({
-              id: customizationId,
-              quantity: {
-                count: item.quantity.count,
-              },
-              tags: {
-                parent_item_id: item.parent_item_id,
-                update_type: "return",
-                reason_code: selectedCancelReasonId?.key,
-                ttl_approval: item?.["@ondc/org/return_window"]
-                  ? item?.["@ondc/org/return_window"]
-                  : "",
-                ttl_reverseqc: "P3D",
-                image: imageFiles.join(","),
-              },
-            })
-          )
+              ([customizationId, customization]) => ({
+                id: customizationId,
+                quantity: {
+                  count: item.quantity.count,
+                },
+                tags: {
+                  parent_item_id: item.parent_item_id,
+                  update_type: "return",
+                  reason_code: selectedCancelReasonId?.key,
+                  ttl_approval: item?.["@ondc/org/return_window"]
+                    ? item?.["@ondc/org/return_window"]
+                    : "",
+                  ttl_reverseqc: "P3D",
+                  image: imageFiles.join(","),
+                },
+              })
+            )
           : [];
 
         return [
@@ -359,6 +360,8 @@ export default function ReturnOrderModal({
     setSelectedIds(data);
   }
 
+  console.log("selectedIds", selectedIds);
+
   useEffect(() => {
     return () => {
       eventTimeOutRef.current.forEach(({ eventSource, timer }) => {
@@ -390,16 +393,19 @@ export default function ReturnOrderModal({
     }
   }, [quantity]);
 
-  const onUpdateQty = (qty, idx, pId) => {
-    let qtyData = Object.assign([], orderQty);
-    qtyData[idx].count = qty;
+  const onUpdateQty = (qty, id, pId) => {
+    let qtyData = Object.assign({}, orderQty);
+    qtyData[id] = qty;
     setOrderQty(qtyData);
     updateQtyForSelectedProduct(pId, qty);
   };
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.popup_card} style={{ width: "700px", overflow: 'inherit' }}>
+      <div
+        className={styles.popup_card}
+        style={{ width: "700px", overflow: "inherit" }}
+      >
         <div className={`${styles.card_header} d-flex align-items-center`}>
           <Typography variant="h4">Return Order</Typography>
           <div className="ms-auto">
@@ -417,6 +423,8 @@ export default function ReturnOrderModal({
             {areProductsToBeReturned() && (
               <div className="px-1 py-2">
                 {partailsReturnProductList?.map((product, idx) => {
+                  let id = product.parent_item_id || product.id;
+                  let qty = quantity[id] || "0";
                   return (
                     <div key={idx} className="d-flex mb-4">
                       <div style={{ width: 100, height: 80 }}>
@@ -443,7 +451,7 @@ export default function ReturnOrderModal({
                           </Typography>
                           <div className="my-1">
                             <Typography variant="subtitle1" color="#686868">
-                              QTY: {quantity?.[idx]?.count ?? "0"} X ₹{" "}
+                              QTY: {qty} X ₹{" "}
                               {Number(product?.price?.value)?.toFixed(2) ||
                                 "Price Not Available"}
                             </Typography>
@@ -453,7 +461,7 @@ export default function ReturnOrderModal({
                                   idx ===
                                   Object.keys(product.customizations || {})
                                     .length -
-                                  1;
+                                    1;
                                 return (
                                   <Grid container key={key}>
                                     <Typography
@@ -504,7 +512,7 @@ export default function ReturnOrderModal({
                                   has_error={
                                     inlineError["image_error"][product.id]
                                   }
-                                //   disabled={baseImage.length === 4}
+                                  //   disabled={baseImage.length === 4}
                                 />
                               )}
                               <ErrorMessage>
@@ -554,8 +562,7 @@ export default function ReturnOrderModal({
                                   image_error: "",
                                 }));
                                 if (!isProductSelected(product?.id)) {
-                                  product.quantity.count =
-                                    quantity?.[idx]?.count;
+                                  product.quantity.count = qty;
                                   setSelectedIds([product]);
                                 }
                               }}
@@ -571,21 +578,22 @@ export default function ReturnOrderModal({
                                   }
                                 >
                                   <div
-                                    className={`${orderQty[idx]?.count > 1
-                                      ? productCartStyles.subtract_svg_wrapper
-                                      : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[id] > 1
+                                        ? productCartStyles.subtract_svg_wrapper
+                                        : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
-                                      if (orderQty[idx]?.count > 1) {
+                                      if (orderQty[id] > 1) {
                                         onUpdateQty(
-                                          orderQty[idx]?.count - 1,
-                                          idx,
+                                          orderQty[id] - 1,
+                                          id,
                                           product?.id
                                         );
                                       }
                                     }}
                                   >
-                                    {orderQty[idx]?.count > 1 && (
+                                    {orderQty[id] > 1 && (
                                       <Subtract
                                         width="13"
                                         classes={
@@ -600,41 +608,37 @@ export default function ReturnOrderModal({
                                         productCartStyles.quantity_count
                                       }
                                     >
-                                      {orderQty[idx]?.count ?? "0"}
+                                      {orderQty[id] ?? "0"}
                                       {/* {quantityCount} */}
                                     </p>
                                   </div>
                                   <div
-                                    className={`${orderQty[idx]?.count <
-                                      quantity[idx]?.count
-                                      ? productCartStyles.add_svg_wrapper
-                                      : ""
-                                      } d-flex align-items-center justify-content-center`}
+                                    className={`${
+                                      orderQty[id] < qty
+                                        ? productCartStyles.add_svg_wrapper
+                                        : ""
+                                    } d-flex align-items-center justify-content-center`}
                                     onClick={() => {
                                       //   setQuantityCount((quantityCount) => quantityCount + 1);
                                       //   onAddQuantity(id);
-                                      if (
-                                        orderQty[idx]?.count <
-                                        quantity[idx]?.count
-                                      ) {
+                                      if (orderQty[id] < qty) {
                                         onUpdateQty(
-                                          orderQty[idx]?.count + 1,
-                                          idx,
+                                          orderQty[id] + 1,
+                                          id,
                                           product?.id
                                         );
                                       }
                                     }}
                                   >
-                                    {orderQty[idx]?.count <
-                                      quantity[idx]?.count && (
-                                        <Add
-                                          width="13"
-                                          height="13"
-                                          classes={
-                                            productCartStyles.add_svg_color
-                                          }
-                                        />
-                                      )}
+                                    {orderQty[id] < quantity[id] && (
+                                      <Add
+                                        width="13"
+                                        height="13"
+                                        classes={
+                                          productCartStyles.add_svg_color
+                                        }
+                                      />
+                                    )}
                                   </div>
                                 </div>
                               </div>
