@@ -11,7 +11,7 @@ body {
 }
 
 code {
-  font-family: 'Inter';
+  font-family: 'Inter', sans-serif;
 }
 
 /* width */
@@ -58,4 +58,16 @@ body {
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   overflow: hidden !important;
+}
+
+.request-logs .MuiDataGrid-row {
+  border-bottom: 1px solid #aaaaaa;
+}
+
+.request-logs .MuiTablePagination-selectLabel {
+  margin-bottom: 0 !important;
+}
+
+.request-logs .MuiTablePagination-displayedRows {
+  margin-bottom: 0 !important;
 }
