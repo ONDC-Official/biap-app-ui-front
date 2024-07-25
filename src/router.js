@@ -17,6 +17,7 @@ import Category from "./components/category/category";
 import SubCategory from "./components/product/product";
 import Products from "./components/products/products";
 import AppLayout from "./components/appLayout";
+import RequestLogs from "./components/requestLogs/RequestLogs";
 
 export default function OndcRoutes() {
   return (
@@ -28,6 +29,7 @@ export default function OndcRoutes() {
         {/*<Route path={"/products"} exact component={() => <AppLayout><Products /></AppLayout>} />*/}
         <Route path={"/"} exact component={() => <Redirect to={"/login"} />} />
         <Route path={"/login"} component={Login} />
+        <Route path={"/request-logs"} component={RequestLogs} />
         <Route path={"/sign-up"} component={SignUp} />
         <Route path={"/application"} component={Application} />
         <Route path={"/testYourCatalogue"} component={TestYourCatalogue} />
