@@ -189,7 +189,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               }
 
               updatedCartItem = updatedCartItem.item;
-
+              console.log("updatedCartItem", updatedCartItem);
               const res = await putCall(url, updatedCartItem);
               setLoading(false);
               getCartItems();
@@ -982,7 +982,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                       parseInt(getPriceWithCustomisations(cartItem)) *
                       parseInt(cartItem?.item?.quantity?.count)
                     }`
-                  : `₹ ${parseInt(cartItem?.item?.product?.subtotal)}`}
+                  : `₹ ${
+                      parseInt(cartItem?.item?.product?.subtotal) *
+                      parseInt(cartItem?.item?.quantity?.count)
+                    }`}
               </Typography>
             </Grid>
             <Grid item xs={4}>
