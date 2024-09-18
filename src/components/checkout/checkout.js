@@ -437,16 +437,12 @@ const Checkout = () => {
                   value: item.price,
                 };
               }
-              if (item.title_type === "discount") {
-                if (item.isCustomization) {
-                  let id = item.parent_item_id;
-                } else {
-                  let id = item.id;
-                  items[id]["discount"] = {
-                    title: item.title,
-                    value: item.price,
-                  };
-                }
+              if (item.title_type === "discount" && !item.isCustomization) {
+                let id = item.parent_item_id || item.id;
+                items[id]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
               }
               if (
                 item.title_type === "misc" &&
