@@ -402,9 +402,11 @@ const Checkout = () => {
                 selected_fulfillment_ids.includes(item.id)
                 // item.id === selected_fulfillments
               ) {
+                const existing_delivery_charge =
+                  parseFloat(delivery["delivery"]?.value) || 0;
                 delivery["delivery"] = {
-                  title: item.title,
-                  value: item.price,
+                  title: "Delivery Charges",
+                  value: existing_delivery_charge + parseFloat(item.price),
                 };
               }
               if (
