@@ -569,10 +569,6 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     let str = "";
     switch (b_type) {
       case "percent":
-        const cap_value =
-          benefit.list.find((tag) => {
-            return tag["code"] === "value_cap";
-          }).value * -1;
         str = `Flat ${b_value * -1}% off`;
         break;
       case "amount":
