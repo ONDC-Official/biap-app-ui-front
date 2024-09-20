@@ -471,12 +471,21 @@ const OrderSummary = ({
 
   function generateProductsList(orderDetails, itemQuotes) {
     return orderDetails?.items
-      ?.map(({ id }, index) => {
-        let findQuote = orderDetails.updatedQuote?.breakup.find(
-          (item) =>
-            item["@ondc/org/item_id"] === id &&
-            item["@ondc/org/title_type"] === "item"
-        );
+      ?.map(({ id, parent_item_id }, index) => {
+        let findQuote = orderDetails.updatedQuote?.breakup.find((item) => {
+          if (item.item?.parent_item_id) {
+            return (
+              item["@ondc/org/item_id"] === id &&
+              item["@ondc/org/title_type"] === "item" &&
+              item.item.parent_item_id === parent_item_id
+            );
+          } else {
+            return (
+              item["@ondc/org/item_id"] === id &&
+              item["@ondc/org/title_type"] === "item"
+            );
+          }
+        });
         if (findQuote) {
           if (findQuote?.item?.tags) {
             const tag = findQuote.item.tags.find((tag) => tag.code === "type");

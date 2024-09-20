@@ -402,9 +402,11 @@ const Checkout = () => {
                 selected_fulfillment_ids.includes(item.id)
                 // item.id === selected_fulfillments
               ) {
+                const existing_delivery_charge =
+                  parseFloat(delivery["delivery"]?.value) || 0;
                 delivery["delivery"] = {
-                  title: item.title,
-                  value: item.price,
+                  title: "Delivery Charges",
+                  value: existing_delivery_charge + parseFloat(item.price),
                 };
               }
               if (
@@ -437,16 +439,12 @@ const Checkout = () => {
                   value: item.price,
                 };
               }
-              if (item.title_type === "discount") {
-                if (item.isCustomization) {
-                  let id = item.parent_item_id;
-                } else {
-                  let id = item.id;
-                  items[id]["discount"] = {
-                    title: item.title,
-                    value: item.price,
-                  };
-                }
+              if (item.title_type === "discount" && !item.isCustomization) {
+                let id = item.parent_item_id || item.id;
+                items[id]["discount"] = {
+                  title: item.title,
+                  value: item.price,
+                };
               }
               if (
                 item.title_type === "misc" &&

@@ -189,7 +189,7 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
               }
 
               updatedCartItem = updatedCartItem.item;
-
+              console.log("updatedCartItem", updatedCartItem);
               const res = await putCall(url, updatedCartItem);
               setLoading(false);
               getCartItems();
@@ -569,10 +569,6 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
     let str = "";
     switch (b_type) {
       case "percent":
-        const cap_value =
-          benefit.list.find((tag) => {
-            return tag["code"] === "value_cap";
-          }).value * -1;
         str = `Flat ${b_value * -1}% off`;
         break;
       case "amount":
@@ -982,7 +978,10 @@ export default function Cart({ showOnlyItems = false, setCheckoutCartItems }) {
                       parseInt(getPriceWithCustomisations(cartItem)) *
                       parseInt(cartItem?.item?.quantity?.count)
                     }`
-                  : `₹ ${parseInt(cartItem?.item?.product?.subtotal)}`}
+                  : `₹ ${
+                      parseInt(cartItem?.item?.product?.subtotal) *
+                      parseInt(cartItem?.item?.quantity?.count)
+                    }`}
               </Typography>
             </Grid>
             <Grid item xs={4}>
