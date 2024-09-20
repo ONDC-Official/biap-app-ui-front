@@ -221,9 +221,8 @@ const VariationsRenderer = (props) => {
     const toFind = option.split(" ")[0];
     const product = productPayload.related_items.find((item) => {
       const value = item.item_details.quantity.unitized.measure.value;
-      if (parseInt(value) === parseInt(toFind)) return item;
+      if (parseFloat(value) === parseFloat(toFind)) return item;
     });
-
     history.push(`/application/products?productId=${product?.id}`);
   };
 
