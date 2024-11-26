@@ -218,6 +218,8 @@ const OrderSummary = ({
                 quantity: item.quantity,
                 price: price,
                 fulfillment_status: item.fulfillment_status,
+                isCancellable: item.isCancellable,
+                isReturnable: item.isReturnable,
               };
               items[key] = { ...prev_item_data, ...addition_item_data };
             }
